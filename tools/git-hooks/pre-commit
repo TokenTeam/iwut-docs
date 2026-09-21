@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#
+# Reject a commit when a generated brief no longer matches its sources.
+#
+# A brief is the implementation agent's design input. If it silently drifts
+# from the authoritative UC/ADR text, the agent implements an outdated design
+# without any visible signal — so the check is a gate, not a warning.
+#
+# Bypass is intentionally possible (git commit --no-verify) but should be
+# treated as an incident, not a habit.
+
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "pre-commit: python3 not found; cannot verify generated briefs" >&2
+  exit 1
+fi
+
+if [ ! -f tools/gen_brief.py ]; then
+  echo "pre-commit: tools/gen_brief.py not found; run this hook from the design docs repository" >&2
+  exit 1
+fi
+
+python3 tools/gen_brief.py --check --all

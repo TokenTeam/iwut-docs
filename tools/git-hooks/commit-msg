@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Enforce the repository commit title format declared in AGENTS.md:
+#
+#     :emoji: type: title
+
+set -euo pipefail
+
+message_file="${1:-}"
+if [ -z "$message_file" ] || [ ! -f "$message_file" ]; then
+  echo "commit-msg: no commit message file supplied" >&2
+  exit 1
+fi
+
+subject="$(head -n 1 "$message_file")"
+
+# Let git's own generated subjects through so merges and rebases keep working.
+case "$subject" in
+  Merge*|Revert*|"fixup!"*|"squash!"*|"amend!"*)
+    exit 0
+    ;;
+esac
+
+pattern='^:[a-z0-9_+-]+: (feat|fix|docs|test|refactor|perf|build|ci|chore|revert): .+$'
+
+if ! printf '%s' "$subject" | grep -Eq "$pattern"; then
+  cat >&2 <<'EOF'
+commit-msg: invalid commit title.
+
+Required format:
+    :emoji: type: title
+
+    type  ∈ feat fix docs test refactor perf build ci chore revert
+    title = English, imperative, no trailing period
+
+Examples:
+    :memo: docs: record acceptance for UC-APP-003
+    :sparkles: feat: add brief generator for work packages
+
+See AGENTS.md.
+EOF
+  exit 1
+fi
