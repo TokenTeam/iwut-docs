@@ -26,6 +26,7 @@ from pathlib import Path
 
 WORKSPACE = Path(__file__).resolve().parents[2]
 DOCS = WORKSPACE / "docs" / "app-center"
+DOCS_REPO = DOCS.parent
 REGISTRY = DOCS / "design-registry.md"
 DEFAULT_SPEC_DIR = WORKSPACE / "docs" / "tools" / "brief-specs"
 
@@ -265,6 +266,17 @@ def sort_brs(ids) -> list[str]:
 
 def short_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+
+
+def display_path(path: Path) -> str:
+    """Show a path relative to the docs repository root, then the workspace."""
+    resolved = path.resolve()
+    for base in (DOCS_REPO.resolve(), WORKSPACE.resolve()):
+        try:
+            return str(resolved.relative_to(base))
+        except ValueError:
+            continue
+    return str(path)
 
 
 def estimate_tokens(text: str) -> int:
@@ -676,11 +688,7 @@ def main() -> int:
             out_path.parent.mkdir(parents=True, exist_ok=True)
             out_path.write_text(brief, encoding="utf-8")
             if not args.quiet:
-                try:
-                    shown = out_path.relative_to(WORKSPACE)
-                except ValueError:
-                    shown = out_path
-                print(f"wrote {shown}", file=sys.stderr)
+                print(f"wrote {display_path(out_path)}", file=sys.stderr)
 
         if not args.quiet:
             report(label, stats, args.max_lines)
@@ -689,11 +697,7 @@ def main() -> int:
         if stale:
             print("brief check FAILED:", file=sys.stderr)
             for path, reason, target in stale:
-                try:
-                    shown = path.relative_to(WORKSPACE)
-                except ValueError:
-                    shown = path
-                print(f"  {reason:>7}: {shown}", file=sys.stderr)
+                print(f"  {reason:>7}: {display_path(path)}", file=sys.stderr)
                 print(f"           regenerate: {regenerate_command(target)}", file=sys.stderr)
             print("", file=sys.stderr)
             print("the brief is the implementation agent's input; a stale brief silently feeds an outdated design.", file=sys.stderr)
