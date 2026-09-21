@@ -36,6 +36,20 @@ DEFAULT_SPEC_DIR = WORKSPACE / "docs" / "tools" / "brief-specs"
 SCRIPT_REL = "tools/gen_brief.py"
 SPECS_REL = "tools/brief-specs"
 
+
+class BriefInputError(Exception):
+    """Raised when a brief cannot be assembled faithfully from its sources.
+
+    A brief that silently omits a selected section would hand the implementation
+    agent an incomplete design while every gate still reports OK: the check gate
+    compares bytes, so it validates consistency, not completeness. Missing or
+    unresolvable design input is therefore a hard failure, not a warning.
+    """
+
+    def __init__(self, problems: list[str]):
+        self.problems = problems
+        super().__init__("; ".join(problems))
+
 # Authorization prose lives here; it is rendered from the BR blocks instead.
 BR_SECTION_TITLE = "业务规则"
 DEFAULT_UC_EXCLUDES = {BR_SECTION_TITLE}
@@ -312,7 +326,7 @@ def compact_number_list(ids: list[str]) -> str:
 # --------------------------------------------------------------------------- render
 
 
-def render_adr_sections(spec_adrs: dict, adrs: dict, add) -> dict[str, list[str]]:
+def render_adr_sections(spec_adrs: dict, adrs: dict, add, problems: list[str]) -> dict[str, list[str]]:
     """Render selected ADR sections and report which paths made it in."""
     included: dict[str, list[str]] = {}
     if not spec_adrs:
@@ -322,7 +336,7 @@ def render_adr_sections(spec_adrs: dict, adrs: dict, add) -> dict[str, list[str]
     for adr_id in sorted(spec_adrs):
         meta = adrs.get(adr_id)
         if meta is None:
-            print(f"warning: unknown ADR: {adr_id}", file=sys.stderr)
+            problems.append(f"spec selects ADR `{adr_id}`, which is not registered in design-registry.md")
             continue
         adr_text = read_doc(meta["path"])
         add(f"### {adr_id}：{meta['title']}（`{meta.get('status', '?')}`）")
@@ -331,7 +345,7 @@ def render_adr_sections(spec_adrs: dict, adrs: dict, add) -> dict[str, list[str]
         for path in spec_adrs[adr_id]:
             body = extract_section(adr_text, path)
             if body is None:
-                print(f"warning: ADR section not found in {meta['path']}: {path}", file=sys.stderr)
+                problems.append(f"ADR section not found: `{adr_id}` → `{path}` in {meta['path']}")
                 continue
             included[adr_id].append(path)
             # Normalise depth: a selected `##` section and a selected `###`
@@ -342,7 +356,7 @@ def render_adr_sections(spec_adrs: dict, adrs: dict, add) -> dict[str, list[str]
     return included
 
 
-def render_baseline(spec: dict, registry: tuple[dict, dict, dict]) -> tuple[str, dict]:
+def render_baseline(spec: dict, registry: tuple[dict, dict, dict], problems: list[str]) -> tuple[str, dict]:
     """Cross-cutting engineering brief: true for every work package, rarely changes."""
     _, _, adrs = registry
     spec_adrs: dict[str, list[str]] = spec.get("adr_sections", {})
@@ -371,7 +385,7 @@ def render_baseline(spec: dict, registry: tuple[dict, dict, dict]) -> tuple[str,
     add("先查 §未纳入本 brief 的源小节；仍不确定，或发现两条权威规则冲突，产出结构化 gap 并路由给设计任务，不要自行发明。")
     add("")
 
-    adr_included = render_adr_sections(spec_adrs, adrs, add)
+    adr_included = render_adr_sections(spec_adrs, adrs, add, problems)
 
     add("## 未纳入本 brief 的源小节")
     add("")
@@ -412,7 +426,7 @@ def render_baseline(spec: dict, registry: tuple[dict, dict, dict]) -> tuple[str,
     return brief, stats
 
 
-def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict]) -> tuple[str, dict]:
+def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: list[str]) -> tuple[str, dict]:
     use_cases, business_rules, adrs = registry
     if uc_id not in use_cases:
         raise SystemExit(f"unknown use case: {uc_id}")
@@ -425,10 +439,18 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict]) -> tuple[s
     if wanted_sections is None:
         wanted_sections = [p for p in section_paths(uc_text) if "/" not in p and p not in DEFAULT_UC_EXCLUDES]
 
+    mentioned = mentioned_brs(uc_text)
+    for br_id in mentioned:
+        if br_id not in business_rules:
+            problems.append(
+                f"{uc_id} references `{br_id}`, which is not registered in design-registry.md "
+                "(typo, or an ID that was never registered)"
+            )
+
     own_brs = sort_brs(br for br, meta in business_rules.items() if meta["path"] == uc_path) \
         if spec.get("include_own_brs", True) else []
     external_brs = sort_brs(
-        br for br in mentioned_brs(uc_text)
+        br for br in mentioned
         if br in business_rules and business_rules[br]["path"] != uc_path
     ) if spec.get("include_external_brs", True) else []
 
@@ -494,7 +516,7 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict]) -> tuple[s
             continue  # rendered from the authority blocks below
         body = extract_section(uc_text, path)
         if body is None:
-            print(f"warning: section not found in {uc_path}: {path}", file=sys.stderr)
+            problems.append(f"UC section not found: `{uc_id}` → `{path}` in {uc_path}")
             continue
         included_uc.append(path)
         add(embed(body, uc_path, 1))
@@ -506,7 +528,9 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict]) -> tuple[s
         for br_id in own_brs:
             block = br_block(uc_text, br_id)
             if block is None:
-                print(f"warning: BR block not found: {br_id}", file=sys.stderr)
+                problems.append(
+                    f"BR block not found: `{br_id}` is registered to {uc_path} but has no `### {br_id}` heading there"
+                )
                 continue
             add(f"<!-- 权威位置: {uc_path}#{br_id.lower()} -->")
             add(embed(block, uc_path, 0))
@@ -526,14 +550,14 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict]) -> tuple[s
             for br_id in sort_brs(ids):
                 block = br_block(source_text, br_id)
                 if block is None:
-                    print(f"warning: external BR not found: {br_id} in {path}", file=sys.stderr)
+                    problems.append(f"external BR block not found: `{br_id}` in {path}")
                     continue
                 external_included[path].append(br_id)
                 add(f"<!-- 权威位置: {path}#{br_id.lower()} -->")
                 add(embed(block, path, 0))
                 add("")
 
-    adr_included = render_adr_sections(spec_adrs, adrs, add)
+    adr_included = render_adr_sections(spec_adrs, adrs, add, problems)
 
     add("## 未纳入本 brief 的源小节")
     add("")
@@ -599,8 +623,21 @@ def default_spec(target: str | None) -> Path:
     return DEFAULT_SPEC_DIR / name
 
 
-def build(target: str | None, spec: dict, registry: tuple[dict, dict, dict]) -> tuple[str, dict]:
-    return render_baseline(spec, registry) if target is None else render(target, spec, registry)
+def build(target: str | None, spec: dict, registry: tuple[dict, dict, dict],
+          spec_path: Path | None = None) -> tuple[str, dict]:
+    """Assemble a brief, failing closed when any selected design input is missing."""
+    problems: list[str] = []
+
+    declared = spec.get("uc")
+    if target is not None and declared is not None and declared != target:
+        where = display_path(spec_path) if spec_path is not None else f"{display_path(default_spec(target))} (default)"
+        problems.append(f"spec declares `uc: {declared}` but is being applied to `{target}` ({where})")
+
+    brief, stats = render_baseline(spec, registry, problems) if target is None \
+        else render(target, spec, registry, problems)
+    if problems:
+        raise BriefInputError(problems)
+    return brief, stats
 
 
 def discover_targets() -> list[str | None]:
@@ -656,6 +693,7 @@ def main() -> int:
 
     registry = load_registry()
     stale: list[tuple[Path, str, str | None]] = []
+    broken: list[tuple[str, list[str]]] = []
 
     for target in targets:
         if args.spec:
@@ -671,9 +709,16 @@ def main() -> int:
         elif args.spec:
             raise SystemExit(f"spec not found: {spec_path}")
 
-        brief, stats = build(target, spec, registry)
         out_path = args.out or default_output(target)
         label = "baseline" if target is None else target
+
+        try:
+            brief, stats = build(target, spec, registry, spec_path)
+        except BriefInputError as error:
+            # Never emit a partial brief: a brief that silently omits a rule is
+            # worse than no brief, because every downstream gate still passes.
+            broken.append((label, error.problems))
+            continue
 
         if args.check:
             if not out_path.exists():
@@ -693,20 +738,31 @@ def main() -> int:
         if not args.quiet:
             report(label, stats, args.max_lines)
 
-    if args.check:
-        if stale:
-            print("brief check FAILED:", file=sys.stderr)
-            for path, reason, target in stale:
-                print(f"  {reason:>7}: {display_path(path)}", file=sys.stderr)
-                print(f"           regenerate: {regenerate_command(target)}", file=sys.stderr)
-            print("", file=sys.stderr)
-            print("the brief is the implementation agent's input; a stale brief silently feeds an outdated design.", file=sys.stderr)
-            return 1
-        if not args.quiet:
-            print(f"brief check OK ({len(targets)} brief(s))", file=sys.stderr)
-        return 0
+    exit_code = 0
 
-    return 0
+    if broken:
+        print("brief generation FAILED — refusing to emit an incomplete design input:", file=sys.stderr)
+        for label, problems in broken:
+            print(f"  [{label}]", file=sys.stderr)
+            for problem in problems:
+                print(f"    - {problem}", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("fix the authoritative document or the brief spec; do not weaken the check.", file=sys.stderr)
+        exit_code = 1
+
+    if args.check and stale:
+        print("brief check FAILED:", file=sys.stderr)
+        for path, reason, target in stale:
+            print(f"  {reason:>7}: {display_path(path)}", file=sys.stderr)
+            print(f"           regenerate: {regenerate_command(target)}", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("the brief is the implementation agent's input; a stale brief silently feeds an outdated design.", file=sys.stderr)
+        exit_code = 1
+
+    if exit_code == 0 and args.check and not args.quiet:
+        print(f"brief check OK ({len(targets)} brief(s))", file=sys.stderr)
+
+    return exit_code
 
 
 if __name__ == "__main__":

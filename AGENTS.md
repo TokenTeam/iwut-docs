@@ -70,6 +70,8 @@ python3 tools/gen_brief.py --check --all
 
 **修改任何被 brief 引用的源文件（UC、ADR）后，必须在同一个 commit 中重新生成对应 brief。** pre-commit hook 会校验这一点，不一致即拒绝提交。
 
+生成是 **fail closed** 的：spec 选中的小节、`BR-*` 或 ADR 章节在源文件中找不到时，生成直接失败并列出全部问题，不会产出残缺 brief。无法解析的设计输入不允许被静默省略。
+
 ## git hooks
 
 hooks 存放在 `tools/git-hooks/` 并纳入版本控制，通过 `core.hooksPath` 生效：
