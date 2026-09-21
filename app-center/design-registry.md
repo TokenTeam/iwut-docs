@@ -8,6 +8,11 @@
 
 ## 下一个可分配编号
 
+<!-- 机器可读的已废弃编号声明；由 tools/registry.py 读取，用于计算 Next ID，不得删除。 -->
+<!-- retired: UC-APP-017 BR-PRF-033 BR-PRF-034 BR-PRF-035 BR-PRF-036 BR-PRF-037 BR-PRF-038 BR-PRF-039 BR-PRF-040 -->
+
+<!-- 下表由 tools/registry.py --write 生成；不要手工编辑。 -->
+
 | 编号空间 | Next ID |
 | --- | --- |
 | Use Case / App Center | `UC-APP-018` |
@@ -22,7 +27,7 @@
 
 Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确认没有未登记的既有定义。
 
-`UC-APP-017` 与 `BR-PRF-033`–`BR-PRF-040` 在进入实现前按产品决定直接删除：ProfileRevision 不提供服务端恢复行为。这些编号不再分配，不构成已登记设计项。
+`UC-APP-017` 与 `BR-PRF-033`–`BR-PRF-040` 在进入实现前按产品决定直接删除：ProfileRevision 不提供服务端恢复行为。这些编号不再分配，不构成已登记设计项；它们登记在上面的 `retired` 声明中，因此不会被重新分配。
 
 ## Use Cases
 
