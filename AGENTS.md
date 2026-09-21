@@ -12,6 +12,7 @@
 | `app-center/*.md`（README、vision、domain-model 等） | 规范与摘要 | 规范性以其中的 `BR-*` / `ADR-*` 引用为准 |
 | `app-center/briefs/*.md` | **生成物**，工作包设计输入 | **非权威**，冲突时以源文件为准 |
 | `tools/gen_brief.py`、`tools/brief-specs/` | brief 生成器与范围 spec | 工程代码 |
+| `tools/registry.py` | 注册表机械列的生成与漂移检查 | 工程代码 |
 | `tools/git-hooks/` | 本仓库的 git hooks | 工程代码 |
 
 同一内容不得有两个权威定义。需要复用规则时引用原 ID 与锚点，不复制正文。
@@ -72,6 +73,24 @@ python3 tools/gen_brief.py --check --all
 
 生成是 **fail closed** 的：spec 选中的小节、`BR-*` 或 ADR 章节在源文件中找不到时，生成直接失败并列出全部问题，不会产出残缺 brief。无法解析的设计输入不允许被静默省略。
 
+## 注册表检查
+
+`app-center/design-registry.md` 是索引，不是第二权威。它的**机械列**（ID / 标题 / 状态 / 权威位置）与「下一个可分配编号」表由 `tools/registry.py` 生成或校验；人类专属列（`BR-*` 的 `类型`、`备注`、`替代项`）仍手工维护，工具不碰。
+
+```bash
+# 校验机械列与源文档一致、ID 空间两个方向都闭合
+python3 tools/registry.py --check
+
+# 只重新生成「下一个可分配编号」表
+python3 tools/registry.py --write
+```
+
+`--check` 覆盖：标题/状态漂移、权威位置链接失效、BR 锚点缺失、重复 ID、源文件里存在但注册表没有的 UC/BR、业务主题与行不匹配、Next ID 表过期。
+
+已废弃、不再分配的编号声明在注册表内的 `<!-- retired: ... -->` 行。**它是 Next ID 计算的输入**：新增已废弃编号时必须改那一行，否则编号可能被重新分配。工具不会自动改写它。
+
+**漂移时修源文档或修注册表行，不要两边同时手改。** `--write` 只处理可推导的 Next ID 表，不会替你消除语义漂移。
+
 ## git hooks
 
 hooks 存放在 `tools/git-hooks/` 并纳入版本控制，通过 `core.hooksPath` 生效：
@@ -82,7 +101,7 @@ git config core.hooksPath tools/git-hooks
 
 | hook | 作用 |
 | --- | --- |
-| `pre-commit` | 运行 `gen_brief.py --check --all`；brief 缺失或过期则拒绝提交 |
+| `pre-commit` | 运行 `gen_brief.py --check --all` 与 `registry.py --check`；brief 过期或注册表漂移则拒绝提交 |
 | `commit-msg` | 校验标题是否符合上面的 `:emoji: type: title` 格式；不符合则拒绝提交 |
 
 新克隆仓库后必须执行一次上面的 `git config`，否则 hooks 不生效。
