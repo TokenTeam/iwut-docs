@@ -1,8 +1,7 @@
 {
   "title": "工程基线（跨能力）",
-  "note": "Cross-cutting architecture decisions that every implementation work package needs. Keep this stable: it is read once per agent/session and then reused, so it should not be duplicated into per-UC briefs.",
+  "note": "Architecture decisions that hold for EVERY implementation work package, with no owning capability. Keep this stable: it is read once per agent/session and then reused, so it must not be duplicated into per-UC briefs. Capability-specific ADRs do not belong here: ADR-001 (Scope Catalog) goes to the scope-touching UC specs, ADR-002 (publication partition) to the publication UCs, ADR-006 (proto/API repo) to transport packages. A quick filter: if the baseline line would be irrelevant to some package, it belongs with that capability instead.",
   "adr_sections": {
-    "ADR-001": ["决定/权威来源", "决定/第一阶段缓存"],
     "ADR-003": ["决定", "Port 所有权", "自动化约束"],
     "ADR-004": ["决定", "Schema 与索引", "测试环境"],
     "ADR-005": ["决定", "隐私与存在性隐藏"]

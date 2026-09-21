@@ -16,8 +16,10 @@
 
 | 文件 | 内容 | 变化频率 |
 | --- | --- | --- |
-| `_engineering-baseline.md` | 横切的架构决定（ADR-001/003/004/005 选定小节）：依赖方向、事务与迁移、错误分类、Scope Catalog 缓存。对**每个**工作包都成立 | 低 |
-| `UC-APP-XXX.md` | 该 UC 的正文小节 + 本 UC 权威 BR + 外部引用 BR | 每个工作包 |
+| `_engineering-baseline.md` | **对每个工作包都成立、无所属能力**的架构决定（ADR-003 依赖方向、ADR-004 事务与迁移、ADR-005 错误分类） | 低 |
+| `UC-APP-XXX.md` | 该 UC 的正文小节 + 本 UC 权威 BR + 外部引用 BR + **该能力专属的** ADR 小节 | 每个工作包 |
+
+**分层规则**：能力专属的 ADR 不进基线，跟着真正需要它的 UC spec 走。ADR-001（Scope Catalog）只对解析 scope 的 UC 成立，所以它在这些 UC 的 spec 里；ADR-002（Publication 分区）、ADR-006（Proto/API 仓库）同理，分别归发布类与 transport 类工作包。判据很简单：**如果某一行对某个工作包毫无意义，它就不属于基线。**
 
 先读一次基线，之后每个工作包只需要读对应的 per-UC brief。
 

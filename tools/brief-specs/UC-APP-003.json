@@ -1,6 +1,6 @@
 {
   "uc": "UC-APP-003",
-  "note": "Scope mirrors the UC-APP-003 work package declaration. API/Proto/HTTP transport is an explicit non-goal, so the API sketch and the legacy-implementation observations are left out; they stay reachable through the omission index. Cross-cutting ADRs live in the engineering baseline brief, not here.",
+  "note": "Scope mirrors the UC-APP-003 work package declaration. API/Proto/HTTP transport is an explicit non-goal, so the API sketch and the legacy-implementation observations are left out; they stay reachable through the omission index. Cross-cutting ADRs (003/004/005) live in the engineering baseline; ADR-001 is capability-specific and ships with the UCs that actually resolve scopes, which is why it is listed here.",
   "uc_sections": [
     "目标与范围",
     "可编辑与不可编辑字段",
@@ -14,5 +14,7 @@
   ],
   "include_own_brs": true,
   "include_external_brs": true,
-  "adr_sections": {}
+  "adr_sections": {
+    "ADR-001": ["决定/权威来源", "决定/第一阶段缓存"]
+  }
 }

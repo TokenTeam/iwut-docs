@@ -10,7 +10,7 @@
 | 项 | 值 |
 | --- | --- |
 | 类型 | 跨能力工程基线（不绑定单个 UC） |
-| ADR | `ADR-001`、`ADR-003`、`ADR-004`、`ADR-005` |
+| ADR | `ADR-003`、`ADR-004`、`ADR-005` |
 | 变化频率 | 低；仅在架构决定变化时重新生成 |
 
 ## 遇到 brief 未覆盖的问题
@@ -18,40 +18,6 @@
 先查 §未纳入本 brief 的源小节；仍不确定，或发现两条权威规则冲突，产出结构化 gap 并路由给设计任务，不要自行发明。
 
 ## 架构决定（仅本次需要的章节）
-
-### ADR-001：Scope Catalog 权威来源与缓存（`PROPOSED`）
-
-#### 权威来源
-
-Auth 是 Scope Catalog 唯一权威来源。Auth 提供可读取完整快照的内部接口：
-
-```text
-ScopeCatalogSnapshot {
-  revision: int64
-  scopes: []ScopeDefinition
-  generatedAt: Instant
-}
-```
-
-revision 必须在 Auth 内单调递增。UC-APP-002 至少需要知道哪些 scope 当前允许被新 ApplicationVersion 申请；完整 ScopeDefinition 在设计 Auth 用例时确定。
-
-ScopeCatalog adapter 在完成校验时一并返回所使用的 snapshot revision。创建和修改草稿可以忽略它；UC-APP-004 将它写入 ApplicationReview，用于说明提交时依据的 Auth 目录版本。
-
-#### 第一阶段缓存
-
-App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
-
-- TTL 由 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL` 使用 Go duration 文本配置，未设置时默认 `5m`；显式值为空、无法解析、为零或负数时进程组装失败，不静默回退。
-- 进程启动或 cache miss 时同步读取 Auth 快照。
-- TTL 内直接使用缓存快照。
-- TTL 到期时同步刷新；使用 singleflight 合并同一时刻的刷新请求。
-- 刷新失败时不使用过期快照创建版本，返回 `ScopeCatalogUnavailable`。
-- Auth revision 发生回退时视为不可用并 fail closed，避免用较旧快照覆盖进程已经观察到的较新事实。
-- 不为此单独引入 Redis。
-
-这是有界缓存，不是 App Center 自己的 Scope Catalog。缓存内容不能被 App Center 管理接口修改。
-
-环境变量只由 config/composition boundary 读取；Cache adapter 通过构造参数接收已经校验的 TTL、Clock 与 snapshot source，不直接读取进程环境。真实 Auth transport 尚未确定时，测试使用 fake source，不得在生产代码中硬编码目录。
 
 ### ADR-003：Go package 与依赖边界（`ACCEPTED`）
 
@@ -212,7 +178,6 @@ Transport adapter 在一个集中映射表中把领域错误转换为：
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -221,7 +186,6 @@ Transport adapter 在一个集中映射表中把领域错误转换为：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `adr/ADR-001-scope-catalog-cache.md` | 112 | `88161ee9c7ee` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 115 | `25e8785cbe02` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `4cb59593e39d` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `084c3d26d483` |

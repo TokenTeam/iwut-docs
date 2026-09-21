@@ -13,7 +13,7 @@
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-VER-010`–`BR-VER-017`（8 条） |
 | 外部引用 BR | `BR-VER-003`–`BR-VER-007`（5 条）（来自 `UC-APP-002`） |
-| ADR | —（未在 spec 中声明） |
+| ADR | `ADR-001` |
 
 ## 遇到 brief 未覆盖的问题
 
@@ -374,12 +374,49 @@ Scope Catalog 的权威来源是 Auth。UC-APP-002 使用 App Center 进程内�
 
 Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRPC 形状。Cache adapter 通过构造参数接收 TTL、Clock 与窄的 Auth snapshot source；只有测试使用 fake/mock，生产代码不得提供硬编码 Scope 目录。真实 Auth transport 在 Auth 接口确定后实现。
 
+## 架构决定（仅本次需要的章节）
+
+### ADR-001：Scope Catalog 权威来源与缓存（`PROPOSED`）
+
+#### 权威来源
+
+Auth 是 Scope Catalog 唯一权威来源。Auth 提供可读取完整快照的内部接口：
+
+```text
+ScopeCatalogSnapshot {
+  revision: int64
+  scopes: []ScopeDefinition
+  generatedAt: Instant
+}
+```
+
+revision 必须在 Auth 内单调递增。UC-APP-002 至少需要知道哪些 scope 当前允许被新 ApplicationVersion 申请；完整 ScopeDefinition 在设计 Auth 用例时确定。
+
+ScopeCatalog adapter 在完成校验时一并返回所使用的 snapshot revision。创建和修改草稿可以忽略它；UC-APP-004 将它写入 ApplicationReview，用于说明提交时依据的 Auth 目录版本。
+
+#### 第一阶段缓存
+
+App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
+
+- TTL 由 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL` 使用 Go duration 文本配置，未设置时默认 `5m`；显式值为空、无法解析、为零或负数时进程组装失败，不静默回退。
+- 进程启动或 cache miss 时同步读取 Auth 快照。
+- TTL 内直接使用缓存快照。
+- TTL 到期时同步刷新；使用 singleflight 合并同一时刻的刷新请求。
+- 刷新失败时不使用过期快照创建版本，返回 `ScopeCatalogUnavailable`。
+- Auth revision 发生回退时视为不可用并 fail closed，避免用较旧快照覆盖进程已经观察到的较新事实。
+- 不为此单独引入 Redis。
+
+这是有界缓存，不是 App Center 自己的 Scope Catalog。缓存内容不能被 App Center 管理接口修改。
+
+环境变量只由 config/composition boundary 读取；Cache adapter 通过构造参数接收已经校验的 TTL、Clock 与 snapshot source，不直接读取进程环境。真实 Auth transport 尚未确定时，测试使用 fake source，不得在生产代码中硬编码目录。
+
 ## 未纳入本 brief 的源小节
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-003`（use-cases/UC-APP-003-update-draft-application-version.md）：旧实现观察、API 草图、后续用例、迁移说明、变更记录
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
+- `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 
 ## 溯源
 
@@ -387,3 +424,4 @@ Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRP
 | --- | --- | --- |
 | `use-cases/UC-APP-003-update-draft-application-version.md` | 369 | `db3d6fac8074` |
 | `use-cases/UC-APP-002-create-application-version.md` | 426 | `ba31f8a63776` |
+| `adr/ADR-001-scope-catalog-cache.md` | 112 | `88161ee9c7ee` |
