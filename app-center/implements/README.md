@@ -40,24 +40,31 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 
 设计完整性用于支持按需定位，不表示每个实现者都要通读全部文档。开始一个工作包时只建立以下工作集：
 
+实现类工作包的默认设计输入是**生成的 brief**，不是 UC/ADR 原文。brief 由 `tools/gen_brief.py` 从权威正文确定性抽取，抽取范围写在 `tools/brief-specs/*.json`。
+
 ### Required
 
 - 代码仓库 `AGENTS.md` 中的当前工作包声明。
-- 目标 UC 的目标、主流程、异常流程、测试与验收，以及当前改动涉及的 `BR-*` 权威小节。
-- 当前改动涉及的实现约定小节与 ADR 精确小节。
+- [`briefs/_engineering-baseline.md`](../briefs/_engineering-baseline.md)：跨能力架构决定，每个 agent 会话读取一次，之后长期复用。
+- [`briefs/UC-APP-XXX.md`](../briefs/UC-APP-XXX.md)：该工作包的 brief，含本 UC 正文小节、本 UC 权威 `BR-*` 正文与外部引用 `BR-*`。
+
+工作包声明必须**指向 brief**，而不是重复列出 UC/BR/ADR 小节标题。目标 UC 尚无 brief 时，先建立或刷新 `tools/brief-specs/UC-APP-XXX.json` 并生成 brief，再开始实现；确定 spec 范围属于设计决策，不是实现者的自由裁量。
+
+brief 是派生制品，不是权威。生成时若某个选中的小节、`BR-*` 或 ADR 章节无法在源文件中找到，生成会 fail closed，而不是产出残缺 brief。
 
 ### Lookup only
 
+- brief 末尾的「未纳入本 brief 的源小节」列出了被省略的小节标题。只有工作包确实需要其中某一节时，才按锚点读取该**单个**小节，不整文件加载。
 - 使用搜索定位 [设计注册表](../design-registry.md) 中的目标 ID；不得把整个注册表作为默认必读材料。
-- 只读取 [领域模型](../domain-model.md) 和 [生命周期模型](../lifecycle-models.md) 中与当前聚合或状态转换直接相关的小节。
-- 相邻 UC 只有被当前工作包精确引用时才读取对应小节，不因编号相邻而自动加载。
+- [领域模型](../domain-model.md)、[生命周期模型](../lifecycle-models.md)、[Capability Map](../capability-map.md)、[愿景](../vision.md)、[术语表](../glossary.md) 等概述文档是**设计任务**的工作集，不是实现类工作包的默认输入。
 
 ### Out of scope by default
 
-- 其他 UC、其他聚合、未来 Transport、未被引用的 ADR，以及 README、愿景、Capability Map 等非规范性摘要。
+- 其他 UC、其他聚合、未来 Transport、未被引用的 ADR。
 - 旧实现；除非工作包明确要求把它作为某条需求的历史证据。
+- 任何 UC/ADR 原文的整文件加载。
 
-如果工作包无法给出精确到小节的 Required 列表，应先收紧工作包，而不是通过通读全部 docs 弥补边界不清。实现过程中只有遇到明确引用、冲突或缺失定义时才扩展工作集，并记录扩展原因。
+brief 未覆盖、或两条权威规则冲突时，不要自行发明：产出结构化 gap（`authority` / `conflict` / `options` / `suggested`），路由给读全量概述文档的设计任务；权威正文更新后重新生成 brief，再继续实现。
 
 ## 权威层次
 
