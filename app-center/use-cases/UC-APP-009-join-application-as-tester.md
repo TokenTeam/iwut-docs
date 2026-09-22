@@ -1,6 +1,6 @@
 # UC-APP-009：通过有效链接加入 Application Tester 列表
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -292,7 +292,16 @@ type ApplicationTesterMembershipRepository interface {
 - UC-APP-010 成功移除时减少 1。
 - 计数不得小于 0，也不得大于本次提交使用的 testerLimit。
 
-具体采用独立 capacity 文档、Application 持久化技术字段还是数据库锁，在实现前结合存储事务能力决定；领域契约不依赖其中一种。
+当前 MongoDB 实现复用 UC-APP-008 的 Application `coordinationRevision` 写栅栏：
+
+1. `ResolveJoinCandidate` 只取得候选 applicationId，不提供最终有效性保证。
+2. `Join` 在事务内先对候选 Application 的 `coordinationRevision` 执行真实递增写入，再重新读取链接并验证归属、ACTIVE 状态和 tokenHash。不得仅依赖事务外或取得栅栏之前的读取结果。
+3. 同一事务内检查已有 ACTIVE Membership，统计该 Application 的 ACTIVE episode；已有成员优先幂等返回，否则在数量小于 100 时插入新 episode，并返回插入后的数量。
+4. activeTesterCount 由事务内的 ACTIVE Membership 统计得到，不另建持久化计数器；Membership 插入本身改变该投影。Application 不增加业务字段。
+5. 与 UC-APP-008 轮换共享同一 Application 写栅栏，使并发写冲突触发事务重试。事务使用 snapshot read concern 与 majority write concern；可重试事务错误重跑完整事务，未知提交结果仅重试提交，遵循 MongoDB driver 事务协议并受请求上下文限制，不把任意持久化失败转换为成功。
+6. `(applicationId, testerAuthId)` 的 ACTIVE partial unique index 作为最终唯一性约束。重复键不能未经重新验证链接和读取已提交 Membership 就当作幂等成功。
+
+后续 UC-APP-010 移除与 UC-APP-011 显式撤销在接入时必须遵守同一写栅栏协议；本工作包不实现这两个用例。真实 MongoDB 并发测试必须证明最后一个名额、同一用户加入和链接轮换竞争的正确性。
 
 ## API 草图
 
@@ -374,9 +383,11 @@ API 与安全测试：
 - 不存在、错误 secret、REVOKED 和 Application 不存在使用统一外部错误。
 - secret 与 tokenHash 不出现在响应、访问日志、trace、指标或错误详情中。
 
-## 实现前需要确认
+## 实现依赖与交付边界
 
-- MongoDB 中 activeTesterCount 与 partial unique Membership 的具体原子实现，以及事务重试边界。
+- UC-APP-008 已交付链接持久化、真实 token/hash、原子轮换与 URL 契约；本用例复用其 Application 写栅栏，具体事务方案见“ACTIVE Tester 计数”。
+- 复用现有可信用户 JWS 校验、UUIDv7、Clock 与 MongoDB 副本集测试基础设施；入口仅投影 authId，不要求 Developer 资格。普通用户身份投影和本用例鉴权错误映射属于当前工作包。
+- 不依赖 UC-APP-007 测试发布、Auth Scope Catalog、UC-APP-010 移除或 UC-APP-011 显式撤销先行实现。
 - 前端扫码解析后的凭证保护与接入验证：从 joinUrl 取得 secret，放入加入请求正文，并按 BR-TST-019 避免进入统计或日志；不要求建设独立落地页。用户登录凭证到后端可信身份的生产链路仍按现有平台契约独立交付。
 
 ## 后续用例
@@ -396,3 +407,5 @@ UC-APP-010 已具体化为 [管理员移除 Application Tester](UC-APP-010-remov
 - 2026-09-16：由 UC-APP-010 确认 Membership 按 episode 移除、REMOVED 为终态且释放容量；移除不撤销加入链接或形成黑名单。
 
 - 2026-09-22：明确由前端扫码后携带用户认证凭证发起加入请求，引用 UC-APP-008 的入口职责；请求正文仍只接受 secret，用户身份从认证上下文取得。
+
+- 2026-09-22：状态改为 ACCEPTED；确认复用 UC-APP-008 Application 写栅栏，在同一事务复查链接、幂等检查、统计 ACTIVE Membership 与插入，固定事务重试及独立前端/Gateway 交付边界。

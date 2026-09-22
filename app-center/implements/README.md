@@ -34,8 +34,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-006](../use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、0006 migration、MongoDB 原子 Repository、资源化 Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、Wire Composition Root、真实 MongoDB 事务/并发集成测试与端到端测试 | — |
 | [UC-APP-007](../use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、Publication/History MongoDB Repository、0008 migration、管理员与 Version/Review 事务写入栅栏、并发与回滚集成测试、复用 Auth Scope Catalog cache 与 DNS-only URL 预检、资源化 Proto、可信身份 HTTP/gRPC Transport、Wire、真实 MongoDB consumer E2E | Auth MongoDB 权威 Scope Catalog、完整双服务验证 |
 | [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、真实 CSPRNG/SHA-256、env 可配置 mock URL、MongoDB 原子轮换与管理员栅栏、0009 migration、并发/回滚/脱敏集成测试、资源化 Proto、可信身份 HTTP/gRPC Transport、no-store、Wire、默认/自定义前缀真实 MongoDB E2E | —（当前 mock 入口后端工作包；前端及 UC-APP-009 独立交付） |
+| [UC-APP-009](../use-cases/UC-APP-009-join-application-as-tester.md) | `ACCEPTED` | `IN_PROGRESS` | 已确认 Application 写栅栏与事务内 ACTIVE 统计方案；brief 已配置，工作包已激活 | Membership Domain/UseCase、MongoDB migration/Repository、普通用户身份入口、API/Wire 与真实并发/E2E 验收；生产 Gateway/客户端独立交付 |
 
-当前激活 UC-APP-008；代码仓库 `AGENTS.md` 和 [UC-APP-008 brief](../briefs/UC-APP-008.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+当前激活 UC-APP-009；代码仓库 `AGENTS.md` 和 [UC-APP-009 brief](../briefs/UC-APP-009.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 

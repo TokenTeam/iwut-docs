@@ -1,0 +1,50 @@
+{
+  "uc": "UC-APP-009",
+  "note": "UC-APP-009 backend delivery: authenticated ordinary user joins Application-level tester membership; canonical secret verification, immutable episodes, idempotency, fixed capacity 100, shared UC008 Application write fence, transactional count and insert, partial unique index, resource API, Wire and real MongoDB concurrency/E2E. No frontend, Gateway/Auth signing, publication, remove or revoke implementation.",
+  "uc_sections": [
+    "目标与范围",
+    "业务边界",
+    "输入与身份",
+    "主流程",
+    "异常流程",
+    "最小领域模型",
+    "用例端口",
+    "数据模型",
+    "API 草图",
+    "测试与验收",
+    "实现依赖与交付边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ],
+    "platform/contracts/tester-join-url-v1.md": [
+      "目的与范围",
+      "URL 格式",
+      "前端解析与请求",
+      "契约测试要求",
+      "配置所有权"
+    ],
+    "platform/contracts/auth-device-session-v1.md": [
+      "Session 载体",
+      "实现配置与验收边界"
+    ]
+  }
+}
