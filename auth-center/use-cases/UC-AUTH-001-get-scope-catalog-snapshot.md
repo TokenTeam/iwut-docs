@@ -1,6 +1,6 @@
 # UC-AUTH-001：获取 Scope Catalog 快照
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -18,7 +18,8 @@
 GetScopeCatalogSnapshotQuery {}
 ```
 
-内部服务身份不由请求 message 字段表达。具体凭证格式仍是 [开放问题](../open-questions.md#内部服务身份)，因此本 UC 在该决定完成前保持 `PROPOSED`。
+内部服务身份不由请求 message 字段表达，统一遵循
+[trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md)。
 
 ## 输出
 
@@ -113,3 +114,4 @@ generatedAt 是该 revision 成为权威版本的 UTC 时间。同一 revision �
 ## 变更记录
 
 - 2026-09-21：建立 Auth Center 第一个纵切片，定义完整 Scope Catalog 快照、单调 revision 和内部读取边界。
+- 2026-09-22：内部服务身份与固定 allowlist 契约闭合，设计进入 `ACCEPTED`。

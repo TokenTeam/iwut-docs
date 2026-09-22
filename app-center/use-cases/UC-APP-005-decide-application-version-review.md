@@ -41,7 +41,7 @@ Reviewer permission 使用 [trusted-identity-v1](../../platform/contracts/truste
 的 `sub` 与 permissions 投影为 ReviewerIdentity。Developer 暂停状态由 Auth Center 的
 [Auth Developer Status v1](../../platform/contracts/auth-developer-status-v1.md) 原生 gRPC
 契约提供；App Center 仍通过最小 port 隔离 consumer adapter，测试可使用 deterministic
-fake。生产跨服务调用还必须闭合内部服务身份与 allowlist。
+fake。生产调用使用 [trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md)。
 
 reviewer 不需要 developerStatus。一个人即使同时具有 Developer 和 Reviewer 身份，本用例仍通过利益冲突规则限制其能审核哪些应用。
 
@@ -69,7 +69,7 @@ ApplicationVersion.updatedBy: reviewer authId
 ApplicationVersion.updatedAt: decidedAt
 ```
 
-若 reviewer 请求批准时发现当前 admin 或 Review.submittedBy 已暂停，同样执行上述 `REJECTED` 迁移，但 `decision.decidedBy` 和 Version.updatedBy 使用注入的固定 System Auth ID，reason 使用稳定系统文本“当前应用管理员或审核提交者已被暂停，待处理审核已由系统自动拒绝。”。System 是 Auth Center 中的固定 User；核心实现通过构造参数注入其 Auth ID，不硬编码尚未确定的真实 ID。
+若 reviewer 请求批准时发现当前 admin 或 Review.submittedBy 已暂停，同样执行上述 `REJECTED` 迁移，但 `decision.decidedBy` 和 Version.updatedBy 使用 Auth Center 按 purpose 解析的 SYSTEM principal Auth ID，reason 使用稳定系统文本“当前应用管理员或审核提交者已被暂停，待处理审核已由系统自动拒绝。”。App Center 在首次需要时通过 [Auth System Principal v1](../../platform/contracts/auth-system-principal-v1.md) 查询并缓存成功结果；依赖失败时保持 PENDING，不使用静态配置或占位 ID。
 
 Version 的运行内容和 ApplicationReview.snapshot 在两种决定中都不改变。
 
@@ -194,6 +194,7 @@ Command 使用动作词 `APPROVE/REJECT`；持久化后的结果状态使用 `AP
 - 批准时 URL 不再满足公网 HTTPS 策略：`ApplicationLaunchUrlNotReviewable`。
 - 批准时 URL 检查依赖不可用：`LaunchUrlInspectionUnavailable`。
 - 批准时开发者暂停状态依赖不可用：`DeveloperStatusUnavailable`；Review 保持 PENDING。
+- 自动拒绝所需 System principal 不可解析：`SystemPrincipalUnavailable`；Review 保持 PENDING，后续请求可重试。
 - 持久化失败：内部失败，Review 和 Version 都不产生部分状态。
 
 路径关系不匹配统一返回 NotFound，不泄露其他应用的审核记录。自动批准检查失败时 Review 保持 PENDING，reviewer 可以稍后重试批准，或根据事实作出带理由的拒绝。
@@ -388,6 +389,10 @@ type LaunchURLSubmissionPolicy interface {
     ) (PreflightPolicyVersion, error)
 }
 
+type SystemPrincipalResolver interface {
+    ResolveReviewAutoRejection(ctx context.Context) (AuthID, error)
+}
+
 type ApplicationReviewDecisionRepository interface {
     LoadDecisionCandidate(
         ctx context.Context,
@@ -406,7 +411,7 @@ type ApplicationReviewDecisionRepository interface {
 }
 ```
 
-`Decide` 必须重新读取并比较 Review 状态、decision、Version 状态/revision/content 以及当前 Application.adminId，不能相信较早加载的 candidate 仍然有效。System Auth ID 是经验证的启动配置/构造参数，不由命令请求指定。
+`Decide` 必须重新读取并比较 Review 状态、decision、Version 状态/revision/content 以及当前 Application.adminId，不能相信较早加载的 candidate 仍然有效。SYSTEM Auth ID 由 `SystemPrincipalResolver` 从 Auth Center 解析并在 adapter 内缓存，不由命令、静态配置或数据库直读指定。
 
 ## 数据模型变化
 
@@ -545,7 +550,8 @@ UseCase 测试：
 - APPROVE 发现当前 admin 或 submittedBy 已暂停时，不调用 ScopeCatalog/LaunchURLSubmissionPolicy，而是使用 System Auth ID 和固定 reason 永久拒绝。
 - 暂停状态依赖不可用时 Review 保持 PENDING。
 - REJECT 不调用 ScopeCatalog 或 LaunchURLSubmissionPolicy。
-- Clock 是 decidedAt 的唯一来源；decidedBy 只能来自可信 reviewer 身份或注入的 System Auth ID。
+- Clock 是 decidedAt 的唯一来源；decidedBy 只能来自可信 reviewer 身份或 Auth 解析的 SYSTEM principal。
+- System principal 查询失败时不写决定；成功结果可进程内缓存，失败不得缓存。
 - 批准外部检查失败时不调用最终 Decide，Review 保持 PENDING。
 
 Repository 集成测试：
@@ -567,9 +573,9 @@ API 测试：
 ## 已确认的实现边界
 
 - `app.version.review` 的线格式已由 trusted-identity-v1 的 `permissions` claim 定义；
-  权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer 暂停
-  查询已由 Auth Developer Status v1 定义，App Center consumer adapter 与内部服务身份
-  仍待闭合。
+  权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer Status、
+  内部服务身份/allowlist 与 System principal resolve 均已有平台契约；App Center 不读取
+  Auth 数据库，也不配置固定 SYSTEM Auth ID。
 - ReviewPolicyProvider 首版由 App Center 本地 adapter 提供正式策略与历史版本；
   当前核心只实现了 port 契约和 fake 验证，生产启用前必须补齐不可变持久化实现。
 - reviewer 访问未知自托管页面的 iframe/隔离浏览环境属于后续前端与安全运行环境，不属于本后端核心工作包，也不在当前注入 rpc-bridge。
@@ -598,3 +604,5 @@ UC-APP-006：将被拒绝的 ApplicationVersion 恢复为 DRAFT
   ConfCenter 不再是 UC-APP-005 的上线依赖，未来提取必须另行评审。
 - 2026-09-22：trusted-identity-v1 兼容增加 `permissions` claim；确定首版
   `app-version-review-v1` 的三个正式检查项及本地不可变策略仓库。
+- 2026-09-22：使用 caller-signed service JWS 调用 Auth；自动拒绝的 SYSTEM principal
+  改为按 purpose 延迟解析并缓存，移除静态 System Auth ID 启动依赖。

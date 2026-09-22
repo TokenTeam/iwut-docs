@@ -2,13 +2,7 @@
 
 状态：`ACTIVE`
 
-## UC-AUTH-001 进入 ACCEPTED 前
-
-### 内部服务身份
-
-App Center 调用 Auth Center 内部 gRPC 时使用哪一种可验证服务身份仍未决定。候选方案必须明确 audience、轮换、调用方 allowlist 和本地验证方式；不能继续沿用未签名 Header，也不能把网络位置本身当作身份。
-
-这个问题不阻塞 Proto 消息和测试 Auth Server，但阻塞真实跨服务部署和 UC-AUTH-001 的 `COMPLETE`。
+## Scope Catalog 后续写侧
 
 ### Catalog 写入与初始装载
 
@@ -30,8 +24,9 @@ Developer 是 USER principal 的可选属性。普通用户的 `developerStatus`
 进入 Developer 生命周期后才取 `PENDING/APPROVED/REJECTED/SUSPENDED`。主体建立与
 Developer 申请不能被合并成同一个隐式动作。
 
-### System principal
+### 普通 USER provision 与 Auth 用户身份签发
 
-UC-APP-005 需要稳定的 System Auth ID 记录自动拒绝。Auth Center 应通过独立的
-provision/bootstrap 决定创建不可登录的 SYSTEM principal，并把其 opaque authId 交给
-App Center 启动配置；本查询不把 SYSTEM 伪装成 Developer。
+SYSTEM principal provision 已由 UC-AUTH-003 闭合，PLATFORM_ADMIN bootstrap 与 Reviewer
+grant/revoke 已由 UC-AUTH-004 决定。其生产入口仍依赖普通 USER 在何时 provision、登录/
+session 如何建立，以及 Auth 如何签发 trusted-identity-v1。这些能力必须独立设计，不能
+用数据库直改或无认证临时 RPC 代替。

@@ -1,6 +1,6 @@
 # Auth Developer Status v1 跨服务契约
 
-状态：`PROPOSED` — 本文件是 Auth Center 提供方与 App Center 等内部消费方共同遵守的
+状态：`ACTIVE` — 本文件是 Auth Center 提供方与 App Center 等内部消费方共同遵守的
 原生 gRPC 契约。
 
 ## 目的与所有权
@@ -55,9 +55,9 @@ enum DeveloperStatus {
 
 ## 调用方身份
 
-调用必须携带可验证的内部服务身份，并通过 Auth Center allowlist。具体凭证线格式仍由
-[Auth Center 开放问题](../../auth-center/open-questions.md#内部服务身份) 跟踪；解决前
-本契约不能进入 `ACTIVE`，测试 server 也不能被当作生产无认证入口。
+调用必须携带 [trusted-service-identity-v1](trusted-service-identity-v1.md) 定义的可验证
+内部服务身份。Auth Center 在验签后按固定 full method → `auth.developer-status.read`
+映射检查 caller 注册表；测试 server 不能被当作生产无认证入口。
 
 ## 错误边界
 

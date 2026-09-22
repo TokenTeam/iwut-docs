@@ -14,7 +14,7 @@
 | 本 UC 权威 BR | `BR-REV-010`–`BR-REV-020`（11 条） |
 | 外部引用 BR | — |
 | ADR | `ADR-001`、`ADR-006` |
-| 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-developer-status-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/trusted-identity-v1.md` |
+| 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-developer-status-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/auth-system-principal-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
 ## 遇到 brief 未覆盖的问题
 
@@ -74,7 +74,7 @@ Reviewer permission 使用 [trusted-identity-v1](../../platform/contracts/truste
 的 `sub` 与 permissions 投影为 ReviewerIdentity。Developer 暂停状态由 Auth Center 的
 [Auth Developer Status v1](../../platform/contracts/auth-developer-status-v1.md) 原生 gRPC
 契约提供；App Center 仍通过最小 port 隔离 consumer adapter，测试可使用 deterministic
-fake。生产跨服务调用还必须闭合内部服务身份与 allowlist。
+fake。生产调用使用 [trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md)。
 
 reviewer 不需要 developerStatus。一个人即使同时具有 Developer 和 Reviewer 身份，本用例仍通过利益冲突规则限制其能审核哪些应用。
 
@@ -102,7 +102,7 @@ ApplicationVersion.updatedBy: reviewer authId
 ApplicationVersion.updatedAt: decidedAt
 ```
 
-若 reviewer 请求批准时发现当前 admin 或 Review.submittedBy 已暂停，同样执行上述 `REJECTED` 迁移，但 `decision.decidedBy` 和 Version.updatedBy 使用注入的固定 System Auth ID，reason 使用稳定系统文本“当前应用管理员或审核提交者已被暂停，待处理审核已由系统自动拒绝。”。System 是 Auth Center 中的固定 User；核心实现通过构造参数注入其 Auth ID，不硬编码尚未确定的真实 ID。
+若 reviewer 请求批准时发现当前 admin 或 Review.submittedBy 已暂停，同样执行上述 `REJECTED` 迁移，但 `decision.decidedBy` 和 Version.updatedBy 使用 Auth Center 按 purpose 解析的 SYSTEM principal Auth ID，reason 使用稳定系统文本“当前应用管理员或审核提交者已被暂停，待处理审核已由系统自动拒绝。”。App Center 在首次需要时通过 [Auth System Principal v1](../../platform/contracts/auth-system-principal-v1.md) 查询并缓存成功结果；依赖失败时保持 PENDING，不使用静态配置或占位 ID。
 
 Version 的运行内容和 ApplicationReview.snapshot 在两种决定中都不改变。
 
@@ -191,6 +191,7 @@ Command 使用动作词 `APPROVE/REJECT`；持久化后的结果状态使用 `AP
 - 批准时 URL 不再满足公网 HTTPS 策略：`ApplicationLaunchUrlNotReviewable`。
 - 批准时 URL 检查依赖不可用：`LaunchUrlInspectionUnavailable`。
 - 批准时开发者暂停状态依赖不可用：`DeveloperStatusUnavailable`；Review 保持 PENDING。
+- 自动拒绝所需 System principal 不可解析：`SystemPrincipalUnavailable`；Review 保持 PENDING，后续请求可重试。
 - 持久化失败：内部失败，Review 和 Version 都不产生部分状态。
 
 路径关系不匹配统一返回 NotFound，不泄露其他应用的审核记录。自动批准检查失败时 Review 保持 PENDING，reviewer 可以稍后重试批准，或根据事实作出带理由的拒绝。
@@ -253,6 +254,10 @@ type LaunchURLSubmissionPolicy interface {
     ) (PreflightPolicyVersion, error)
 }
 
+type SystemPrincipalResolver interface {
+    ResolveReviewAutoRejection(ctx context.Context) (AuthID, error)
+}
+
 type ApplicationReviewDecisionRepository interface {
     LoadDecisionCandidate(
         ctx context.Context,
@@ -271,7 +276,7 @@ type ApplicationReviewDecisionRepository interface {
 }
 ```
 
-`Decide` 必须重新读取并比较 Review 状态、decision、Version 状态/revision/content 以及当前 Application.adminId，不能相信较早加载的 candidate 仍然有效。System Auth ID 是经验证的启动配置/构造参数，不由命令请求指定。
+`Decide` 必须重新读取并比较 Review 状态、decision、Version 状态/revision/content 以及当前 Application.adminId，不能相信较早加载的 candidate 仍然有效。SYSTEM Auth ID 由 `SystemPrincipalResolver` 从 Auth Center 解析并在 adapter 内缓存，不由命令、静态配置或数据库直读指定。
 
 ### 数据模型变化
 
@@ -410,7 +415,8 @@ UseCase 测试：
 - APPROVE 发现当前 admin 或 submittedBy 已暂停时，不调用 ScopeCatalog/LaunchURLSubmissionPolicy，而是使用 System Auth ID 和固定 reason 永久拒绝。
 - 暂停状态依赖不可用时 Review 保持 PENDING。
 - REJECT 不调用 ScopeCatalog 或 LaunchURLSubmissionPolicy。
-- Clock 是 decidedAt 的唯一来源；decidedBy 只能来自可信 reviewer 身份或注入的 System Auth ID。
+- Clock 是 decidedAt 的唯一来源；decidedBy 只能来自可信 reviewer 身份或 Auth 解析的 SYSTEM principal。
+- System principal 查询失败时不写决定；成功结果可进程内缓存，失败不得缓存。
 - 批准外部检查失败时不调用最终 Decide，Review 保持 PENDING。
 
 Repository 集成测试：
@@ -432,9 +438,9 @@ API 测试：
 ### 已确认的实现边界
 
 - `app.version.review` 的线格式已由 trusted-identity-v1 的 `permissions` claim 定义；
-  权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer 暂停
-  查询已由 Auth Developer Status v1 定义，App Center consumer adapter 与内部服务身份
-  仍待闭合。
+  权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer Status、
+  内部服务身份/allowlist 与 System principal resolve 均已有平台契约；App Center 不读取
+  Auth 数据库，也不配置固定 SYSTEM Auth ID。
 - ReviewPolicyProvider 首版由 App Center 本地 adapter 提供正式策略与历史版本；
   当前核心只实现了 port 契约和 fake 验证，生产启用前必须补齐不可变持久化实现。
 - reviewer 访问未知自托管页面的 iframe/隔离浏览环境属于后续前端与安全运行环境，不属于本后端核心工作包，也不在当前注入 rpc-bridge。
@@ -775,9 +781,9 @@ enum DeveloperStatus {
 
 #### 调用方身份
 
-调用必须携带可验证的内部服务身份，并通过 Auth Center allowlist。具体凭证线格式仍由
-[Auth Center 开放问题](../../auth-center/open-questions.md#内部服务身份) 跟踪；解决前
-本契约不能进入 `ACTIVE`，测试 server 也不能被当作生产无认证入口。
+调用必须携带 [trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md) 定义的可验证
+内部服务身份。Auth Center 在验签后按固定 full method → `auth.developer-status.read`
+映射检查 caller 注册表；测试 server 不能被当作生产无认证入口。
 
 #### 错误边界
 
@@ -849,9 +855,9 @@ message ScopeDefinition {
 
 #### 调用方身份
 
-调用必须携带可验证的内部服务身份，Auth Center 必须同时完成认证与 allowlist 授权。凭证的线格式尚未确定，记录在 [Auth Center 开放问题](../../auth-center/open-questions.md#内部服务身份)；该问题解决前，本契约不能进入 `ACTIVE`，真实跨服务 E2E 也不能标记完成。
+调用必须携带 [trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md) 定义的可验证内部服务身份。Auth Center 在验签后按固定 full method → `auth.scope-catalog.read` 映射检查 caller 注册表；认证成功不自动产生读取权限。
 
-测试 Auth Server 可以通过测试专用 interceptor 注入服务身份，但不得由此产生生产默认凭证或跳过生产校验的代码路径。
+测试 Auth Server 可以验证 consumer 行为，但生产等价 E2E 必须由真实 App signer 调用真实 Auth interceptor。
 
 #### 错误边界
 
@@ -875,6 +881,62 @@ Provider 与 Consumer 至少共同验证：
 5. duplicate/empty name、非正 revision、无效 generatedAt 或非稳定排序不能作为成功快照。
 6. `UNAUTHENTICATED`、`PERMISSION_DENIED`、`UNAVAILABLE` 与稳定 reason 映射一致。
 7. App Center E2E 的测试 Auth Server 实现同一生成接口，不维护另一份手写 wire model。
+
+### `platform/contracts/auth-system-principal-v1.md`：Auth System Principal v1 跨服务契约
+
+#### 目的与所有权
+
+Auth Center 拥有不可登录的 SYSTEM principal 及其 opaque Auth ID。消费方只按稳定 purpose 解析 ID，不创建、猜测或通过部署配置复制它。提供方业务语义由 [UC-AUTH-003](../../auth-center/use-cases/UC-AUTH-003-resolve-system-principal.md) 拥有。
+
+#### gRPC 方法
+
+```text
+/auth_center.v1.system_principal.SystemPrincipalDirectory/ResolveSystemPrincipal
+```
+
+```proto
+service SystemPrincipalDirectory {
+  rpc ResolveSystemPrincipal(ResolveSystemPrincipalRequest)
+      returns (ResolveSystemPrincipalResponse);
+}
+
+enum SystemPrincipalPurpose {
+  SYSTEM_PRINCIPAL_PURPOSE_UNSPECIFIED = 0;
+  SYSTEM_PRINCIPAL_PURPOSE_APP_CENTER_REVIEW_AUTO_REJECTION = 1;
+}
+
+message ResolveSystemPrincipalRequest {
+  SystemPrincipalPurpose purpose = 1;
+}
+
+message ResolveSystemPrincipalResponse {
+  string auth_id = 1;
+  SystemPrincipalPurpose purpose = 2;
+}
+```
+
+只提供内部原生 gRPC，不声明 HTTP annotation，不经 Gateway，不提供 gRPC-Web。
+
+#### 调用与缓存语义
+
+- 调用使用 [trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md)，同时要求 `auth.system-principal.resolve` permission 与 caller 的 purpose allowlist。
+- Auth 启动时幂等 provision 已知 purpose；同一 purpose 在同一环境中映射到唯一、稳定、非空 authId。
+- App Center 不以该 ID 作为启动依赖。首次需要自动审核决定时查询；成功结果可缓存到进程结束。
+- 查询失败或返回不匹配 purpose/空 ID 时不得缓存，当前决定 fail closed；后续请求可重试。
+
+#### 错误边界
+
+| 情况 | gRPC code | 稳定 reason |
+| --- | --- | --- |
+| 服务身份缺失/无效 | `UNAUTHENTICATED` | `ERROR_REASON_SERVICE_IDENTITY_REQUIRED` / `ERROR_REASON_INVALID_SERVICE_IDENTITY` |
+| 无 RPC 或 purpose 权限 | `PERMISSION_DENIED` | `ERROR_REASON_SYSTEM_PRINCIPAL_READ_FORBIDDEN` |
+| purpose 未指定/未知 | `INVALID_ARGUMENT` | `ERROR_REASON_INVALID_SYSTEM_PRINCIPAL_PURPOSE` |
+| principal 不存在 | `NOT_FOUND` | `ERROR_REASON_SYSTEM_PRINCIPAL_NOT_FOUND` |
+| 存储暂不可用 | `UNAVAILABLE` | `ERROR_REASON_SYSTEM_PRINCIPAL_UNAVAILABLE` |
+
+#### 契约测试要求
+
+Provider/consumer 必须验证 full method、字段号、purpose 枚举、稳定 ID、身份与 purpose allowlist、失败不缓存，以及 App 自动拒绝最终写入 Auth 返回的 SYSTEM authId。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -930,6 +992,49 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
   都属于**授权失败**，由 UseCase 决定，映射为 HTTP `403` / gRPC
   `PERMISSION_DENIED`，不属于本契约的认证失败。
 
+### `platform/contracts/trusted-service-identity-v1.md`：内部服务身份 JWS v1 契约（trusted-service-identity-v1）
+
+#### 目的与范围
+
+本契约定义服务到服务调用的认证与授权边界。它与面向用户请求的 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md) 是两个独立凭证：前者的主体是调用服务，后者的主体是用户或平台人员，二者不能互换或互相派生权限。
+
+#### 传输与 JOSE
+
+- gRPC metadata：`authorization: Bearer <compact-JWS>`；必须恰好一个值。
+- JOSE header 必须包含 `alg=RS256`、`typ=JWT` 与非空 `kid`。
+- 禁止接受或解析 token 自带的 `jwk`、`x5c`、`x5u` 等密钥来源。
+- RSA key 至少 2048 bit。
+
+#### Claims
+
+| 字段 | 类型 | 约束 |
+| --- | --- | --- |
+| `iss` | string | 预登记 `serviceId` |
+| `sub` | string | 必须与 `iss` 完全相同 |
+| `aud` | string 或 string[] | 必须包含提供方 audience；Auth Center 为 `iwut-auth-center` |
+| `iat` / `nbf` / `exp` | Unix 秒 | 必填；`exp > iat`、`exp > nbf`、TTL 不超过提供方上限 |
+| `jti` | string | 每次签发的非空唯一值 |
+
+token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本地 key lookup，完成签名和全部 claims 校验后，才取得该 `serviceId` 注册记录中的权限。
+
+#### Auth Center 固定授权映射
+
+| gRPC 方法 | 必需 permission |
+| --- | --- |
+| `ScopeCatalog/GetScopeCatalogSnapshot` | `auth.scope-catalog.read` |
+| `DeveloperStatusDirectory/BatchGetDeveloperStatuses` | `auth.developer-status.read` |
+| `SystemPrincipalDirectory/ResolveSystemPrincipal` | `auth.system-principal.resolve` |
+
+未知 RPC 默认拒绝。System principal 查询还必须检查 caller 注册记录中的 purpose allowlist；拥有 resolve permission 不代表可以解析任意 SYSTEM principal。
+
+#### 错误与轮换
+
+- 缺失凭证：`UNAUTHENTICATED / ERROR_REASON_SERVICE_IDENTITY_REQUIRED`。
+- 无效凭证：`UNAUTHENTICATED / ERROR_REASON_INVALID_SERVICE_IDENTITY`。
+- 身份有效但 RPC/purpose 未授权：`PERMISSION_DENIED`，使用目标契约的稳定 forbidden reason。
+- 错误不得泄漏 token、PEM、service registry 或底层 crypto 信息。
+- 轮换时先把新 `kid` 公钥加入 Auth 注册表，再切换 App signer；旧 key 保留至少最大 token TTL 后移除。紧急撤销把 caller 状态设为 `DISABLED` 或移除对应 kid。
+
 ## 未纳入本 brief 的源小节
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
@@ -941,15 +1046,18 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `platform/contracts/auth-developer-status-v1.md`（docs 根级共享文档）：目的与所有权、兼容性
 - `platform/contracts/auth-scope-catalog-v1.md`（docs 根级共享文档）：目的与所有权、兼容性、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：ENV 配置、契约测试要求
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 600 | `e626ba3bb07a` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 608 | `ff0f43b11bd2` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `2595342af7cd` |
-| `platform/contracts/auth-developer-status-v1.md` | 91 | `54d87f381e1f` |
-| `platform/contracts/auth-scope-catalog-v1.md` | 91 | `3f0bbf58c062` |
+| `platform/contracts/auth-developer-status-v1.md` | 91 | `24ff16ab6589` |
+| `platform/contracts/auth-scope-catalog-v1.md` | 91 | `cab448326f29` |
+| `platform/contracts/auth-system-principal-v1.md` | 57 | `5191d48e8707` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |
+| `platform/contracts/trusted-service-identity-v1.md` | 85 | `d725ff1e88cd` |

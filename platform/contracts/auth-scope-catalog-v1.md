@@ -1,6 +1,6 @@
 # Auth Scope Catalog v1 跨服务契约
 
-状态：`PROPOSED` — 本文件是 Auth Center 提供方与 App Center 等内部消费方共同遵守的跨系统契约。
+状态：`ACTIVE` — 本文件是 Auth Center 提供方与 App Center 等内部消费方共同遵守的跨系统契约。
 
 ## 目的与所有权
 
@@ -51,9 +51,9 @@ message ScopeDefinition {
 
 ## 调用方身份
 
-调用必须携带可验证的内部服务身份，Auth Center 必须同时完成认证与 allowlist 授权。凭证的线格式尚未确定，记录在 [Auth Center 开放问题](../../auth-center/open-questions.md#内部服务身份)；该问题解决前，本契约不能进入 `ACTIVE`，真实跨服务 E2E 也不能标记完成。
+调用必须携带 [trusted-service-identity-v1](trusted-service-identity-v1.md) 定义的可验证内部服务身份。Auth Center 在验签后按固定 full method → `auth.scope-catalog.read` 映射检查 caller 注册表；认证成功不自动产生读取权限。
 
-测试 Auth Server 可以通过测试专用 interceptor 注入服务身份，但不得由此产生生产默认凭证或跳过生产校验的代码路径。
+测试 Auth Server 可以验证 consumer 行为，但生产等价 E2E 必须由真实 App signer 调用真实 Auth interceptor。
 
 ## 错误边界
 

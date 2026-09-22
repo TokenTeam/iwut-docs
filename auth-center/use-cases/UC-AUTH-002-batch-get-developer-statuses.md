@@ -1,6 +1,6 @@
 # UC-AUTH-002：批量读取 Developer 状态
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -148,3 +148,4 @@ Developer 状态迁移和审计由后续 Auth UC 定义。
   fail-closed 的 Auth 权威查询。
 - 2026-09-22：确认 Developer 是 USER 的可选属性；普通用户的 `developerStatus` 为 null，
   Developer Status 查询对其返回 NotFound。
+- 2026-09-22：内部服务身份与固定 allowlist 契约闭合，设计进入 `ACCEPTED`。
