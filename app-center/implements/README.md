@@ -34,7 +34,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-006](../use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、0006 migration、MongoDB 原子 Repository、资源化 Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、Wire Composition Root、真实 MongoDB 事务/并发集成测试与端到端测试 | — |
 | [UC-APP-007](../use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、Publication/History MongoDB Repository、0008 migration、管理员与 Version/Review 事务写入栅栏、并发与回滚集成测试、复用 Auth Scope Catalog cache 与 DNS-only URL 预检、资源化 Proto、可信身份 HTTP/gRPC Transport、Wire、真实 MongoDB consumer E2E | Auth MongoDB 权威 Scope Catalog、完整双服务验证 |
 | [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、真实 CSPRNG/SHA-256、env 可配置 mock URL、MongoDB 原子轮换与管理员栅栏、0009 migration、并发/回滚/脱敏集成测试、资源化 Proto、可信身份 HTTP/gRPC Transport、no-store、Wire、默认/自定义前缀真实 MongoDB E2E | —（当前 mock 入口后端工作包；前端及 UC-APP-009 独立交付） |
-| [UC-APP-009](../use-cases/UC-APP-009-join-application-as-tester.md) | `ACCEPTED` | `IN_PROGRESS` | 已确认 Application 写栅栏与事务内 ACTIVE 统计方案；brief 已配置，工作包已激活 | Membership Domain/UseCase、MongoDB migration/Repository、普通用户身份入口、API/Wire 与真实并发/E2E 验收；生产 Gateway/客户端独立交付 |
+| [UC-APP-009](../use-cases/UC-APP-009-join-application-as-tester.md) | `ACCEPTED` | `COMPLETE` | Membership Domain/UseCase、0010 migration、Application 写栅栏与事务内 ACTIVE 统计/插入、普通用户可信身份、API/Wire、并发/回滚/脱敏测试及真实 MongoDB HTTP/gRPC E2E | —（当前后端工作包；生产 Gateway 身份签发与客户端独立交付） |
 
 当前激活 UC-APP-009；代码仓库 `AGENTS.md` 和 [UC-APP-009 brief](../briefs/UC-APP-009.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -151,3 +151,11 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - 本次 COMPLETE 范围是用户明确接受的 mock 入口后端工作包；前端扫码/托管、正式域名、UC-APP-009 加入、UC-APP-011 显式撤销和生产登录链路仍各自交付，不由本 UC 自动实现。
 
 验证：`go test ./...`、`go vet ./...`、`go test -race ./...`、格式化、Wire diff、Proto 生成一致性与完整副本集集成脚本均通过；Mongo 套件 119.818s、cmd E2E 17.403s。服务本地提交 `f39f561`，API 本地提交 `9365b1d`，未 push。
+
+## 2026-09-22 UC-APP-009 交付记录
+
+- 服务提交 `2d19738`、独立 API 提交 `993eb3e`，均为本地提交，未 push。服务/API 工作树已核对干净。
+- 采用与 UC-APP-008 共享的 Application `coordinationRevision` 写栅栏，在同一事务内复查链接、判断 ACTIVE 幂等、统计人数与插入 Membership；上限固定 100，不新增持久化计数器。
+- BR-TST-010–019 均有自动测试覆盖，包括普通用户身份、严格凭证校验、满员幂等、移除历史与重新加入、最后名额竞争、同用户竞争、轮换双向竞争、回滚和敏感数据保护。
+- 实现 agent 报告全量 `go test ./...`、`go vet ./...`、`go test -race ./...`、gofmt、Wire diff、Proto 一致性全部通过。完整副本集脚本最终 exit 0：Mongo 集成 `157.480s`，真实 HTTP/gRPC cmd E2E `23.055s`。文档 30 项测试、15 份 brief freshness、registry 与 diff 检查通过。
+- 部署前需显式执行 `0010_application_tester_membership` migration。COMPLETE 仅指当前后端范围，生产 Gateway 的登录凭证到 JWS 链路和前端接入仍独立交付。
