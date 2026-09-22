@@ -1,6 +1,6 @@
 # UC-APP-010：管理员移除 Application Tester
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -57,7 +57,7 @@ DeveloperIdentity {
 3. Repository 加载移除候选并确认：
    - Application 存在且当前 adminId 是调用者 authId。
    - membershipId 属于路径中的 Application。
-4. 若目标 episode 已是 REMOVED，返回原 Membership、removed=false、当前 activeTesterCount 和当前是否存在 ACTIVE TesterJoinLink；不读取 Clock，不改变任何记录。
+4. 若目标 episode 已是 REMOVED，返回原 Membership、removed=false、当前 activeTesterCount 和当前是否存在 ACTIVE TesterJoinLink；不读取 Clock，不改变 Membership、审计或其他业务记录；允许维护 adapter-only 写栅栏。
 5. 从 Clock 取得 removedAt。
 6. Repository 在同一事务或等价原子边界中重新确认当前 admin、Membership 归属和状态，然后：
    - 把 status 从 ACTIVE 改为 REMOVED。
@@ -276,7 +276,7 @@ Authorization: <authenticated developer identity>
 - developerStatus 非 APPROVED 或不是当前 admin：`403 Forbidden`。
 - Application/Membership 不存在或归属不匹配：`404 Not Found`。
 - applicationId 或 membershipId 格式非法：`400 Bad Request`。
-- Membership 与计数状态不一致：`409 Conflict` 或内部一致性错误，并触发告警。
+- Membership 与计数状态不一致：HTTP `500 Internal Server Error` / gRPC `INTERNAL`，稳定 reason 为 `ERROR_REASON_APPLICATION_TESTER_STATE_INCONSISTENT`；该错误属于内部数据不变量异常，并触发服务端告警，不向客户端暴露底层数据或存储细节。
 
 ## 测试与验收
 
@@ -311,10 +311,16 @@ API 测试：
 - 响应在存在 ACTIVE 加入链接时返回 activeJoinLinkExists=true。
 - API 不接受组合撤销链接参数。
 
-## 实现前需要确认
+## 实现依赖与交付边界
 
-- activeTesterCount 的最终存储方式及事务重试策略，与 UC-APP-009 使用同一实现。
-- Tester 管理查询需要返回哪些字段和分页方式，以便界面在删除前展示 activeJoinLinkExists 警告；查询本身是独立读模型，不改变本用例命令。
+- UC-APP-009 已交付 Membership episode、ACTIVE/REMOVED schema、0010 migration、partial unique index 与事务内人数统计；复用现有可信 DeveloperIdentity、Clock、Proto/Wire 和 MongoDB 副本集设施。
+- activeTesterCount 继续由同一事务内的 ACTIVE Membership 统计得到，不另建持久化计数器；ACTIVE → REMOVED 的提交本身令统计结果减少 1。事务重试协议沿用 [UC-APP-009 ACTIVE Tester 计数](UC-APP-009-join-application-as-tester.md#active-tester-计数)。
+- 复用 UC-APP-008/009 的 Application `coordinationRevision` 写栅栏：先取得栅栏，再校验当前管理员、Membership 归属/状态并读取人数与 ACTIVE 链接存在性；首次移除在同一 snapshot/majority 事务内更新状态和审计，返回更新后的统计结果。
+- `LoadRemovalCandidate` 若直接产生 REMOVED 幂等结果，也在上述栅栏和一致快照中验证当前管理员、读取 count 与 activeJoinLinkExists；该分支不读取 Clock，不改写业务记录。ACTIVE 候选只供预检查，最终 `Remove` 必须重新取得栅栏并复查；并发移除已完成时返回原终态并丢弃预取时间。
+- activeJoinLinkExists 的真假不影响移除资格，也不导致链接写入；共享栅栏只提供串行化及提示快照，不把移除与链接轮换/撤销组合成一个业务命令。
+- `ApplicationTesterStateInconsistent` 固定为内部错误；保留人数范围及 ACTIVE episode 对应正数人数的防御校验。真实存储从同一快照统计时不另造计数漂移；无法通过合法存储构造的矛盾输入在领域/端口异常测试验证，MongoDB 测试验证真实统计、回滚及并发线性化。
+- 当前 schema 已能承载移除，不要求为了 UC 编号新增 migration；如实现发现必须改变 schema，则新增显式 migration，不修改已交付迁移。
+- Tester 管理查询字段/分页、前端警告及生产 Gateway 身份签发链路独立交付，不阻塞本用例命令；当前不实现列表查询、黑名单、主动退出、UC-APP-011 撤销或 UC-APP-012 解析。
 
 ## 后续用例
 
@@ -327,3 +333,5 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 
 - 2026-09-16：建立 UC-APP-010；当前 admin 按 membershipId 幂等移除 ACTIVE Tester、原子释放容量并保留 episode，加入链接只产生重新加入警告，不被组合撤销。
 - 2026-09-16：UC-APP-011 已把显式链接撤销定义为独立 MANUAL 终态，继续保持与 Tester 移除完全分离。
+
+- 2026-09-22：状态改为 ACCEPTED；用户确认一致性异常为 HTTP 500 / gRPC INTERNAL；固定复用 UC008/009 写栅栏及事务内人数统计，明确幂等无 Clock、审计保留和独立读模型交付边界。
