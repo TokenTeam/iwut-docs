@@ -37,7 +37,8 @@
 ## 已确认的相邻边界
 
 - UC-APP-005 的真实 reviewer 身份/permission transport 等待 Auth Center 重新设计；核心实现不猜测 token KV、claim 或 header 形状。
-- UC-APP-005 的正式 VersionReviewPolicy 及历史版本未来由 ConfCenter 提供；核心实现只使用 port 和 deterministic fake。
+- UC-APP-005 的 VersionReviewPolicy 首版由 App Center 本地拥有；仍需发布第一版
+  正式检查项和内容政策，并实现不可变的历史版本 repository。
 - reviewer 打开自托管页面的 iframe/隔离浏览环境属于前端与安全运行环境，不属于 UC-APP-005 后端核心。
 - UC-APP-005 批准时发现当前 admin 或 submittedBy 已暂停，由注入的 System Auth ID 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
 

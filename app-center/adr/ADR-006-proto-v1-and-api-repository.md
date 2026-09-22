@@ -1,6 +1,6 @@
 # ADR-006：Proto v1 与独立 API 仓库协作
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 日期：2026-09-19
 

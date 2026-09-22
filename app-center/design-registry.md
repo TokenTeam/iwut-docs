@@ -33,12 +33,12 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 
 | ID | 标题 | 状态 | 权威位置 | 替代项 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| `UC-APP-001` | 开发者新建应用 | `ACCEPTED` | [UC-APP-001-create-application.md](use-cases/UC-APP-001-create-application.md) | — | Domain、UseCase、MongoDB 持久化与事务集成测试已闭合；实现状态见 `implements/README.md`。 |
+| `UC-APP-001` | 开发者新建应用 | `ACCEPTED` | [UC-APP-001-create-application.md](use-cases/UC-APP-001-create-application.md) | — | Domain、UseCase、MongoDB、Proto、HTTP/gRPC Transport、可信身份、Composition Root 与真实 MongoDB 端到端测试已闭合；实现状态见 `implements/README.md`。 |
 | `UC-APP-002` | 创建应用版本 | `ACCEPTED` | [UC-APP-002-create-application-version.md](use-cases/UC-APP-002-create-application-version.md) | — | Domain、UseCase、MongoDB 持久化、Scope Catalog cache 与事务集成测试已闭合；实现状态见 `implements/README.md`。 |
 | `UC-APP-003` | 更新草稿应用版本 | `ACCEPTED` | [UC-APP-003-update-draft-application-version.md](use-cases/UC-APP-003-update-draft-application-version.md) | — | Domain、UseCase、MongoDB 持久化、显式 migration 与事务并发集成测试已闭合；实现状态见 `implements/README.md`。 |
 | `UC-APP-004` | 提交应用版本审核 | `ACCEPTED` | [UC-APP-004-submit-application-version-review.md](use-cases/UC-APP-004-submit-application-version-review.md) | — | Domain、UseCase、MongoDB 持久化、显式 migration 与事务并发集成测试已闭合；实现状态见 `implements/README.md`。 |
 | `UC-APP-005` | 审核应用版本 | `ACCEPTED` | [UC-APP-005-decide-application-version-review.md](use-cases/UC-APP-005-decide-application-version-review.md) | — | Auth/ConfCenter 与暂停检查使用 ports，核心测试使用 deterministic fakes；实现状态见 `implements/README.md`。 |
-| `UC-APP-006` | 将被拒绝的应用版本恢复为草稿 | `PROPOSED` | [UC-APP-006-restore-rejected-version-to-draft.md](use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | — | — |
+| `UC-APP-006` | 将被拒绝的应用版本恢复为草稿 | `ACCEPTED` | [UC-APP-006-restore-rejected-version-to-draft.md](use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | — | — |
 | `UC-APP-007` | 将已批准应用版本放入测试发布槽位 | `PROPOSED` | [UC-APP-007-place-approved-version-in-test-slot.md](use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | — | — |
 | `UC-APP-008` | 创建或轮换 Tester 加入链接 | `PROPOSED` | [UC-APP-008-create-or-rotate-tester-join-link.md](use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | — | — |
 | `UC-APP-009` | 通过有效链接加入 Application Tester 列表 | `PROPOSED` | [UC-APP-009-join-application-as-tester.md](use-cases/UC-APP-009-join-application-as-tester.md) | — | — |
@@ -236,7 +236,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `ADR-003` | Go package 与依赖边界 | `ACCEPTED` | [ADR-003-go-package-and-dependency-boundaries.md](adr/ADR-003-go-package-and-dependency-boundaries.md) | — | 代码仓库根目录的 architecture test 自动执行核心边界。 |
 | `ADR-004` | MongoDB 事务与 Schema 管理 | `PROPOSED` | [ADR-004-mongodb-transactions-and-schema-management.md](adr/ADR-004-mongodb-transactions-and-schema-management.md) | — | — |
 | `ADR-005` | 领域错误与 Transport 映射 | `PROPOSED` | [ADR-005-domain-errors-and-transport-mapping.md](adr/ADR-005-domain-errors-and-transport-mapping.md) | — | — |
-| `ADR-006` | Proto v1 与独立 API 仓库协作 | `PROPOSED` | [ADR-006-proto-v1-and-api-repository.md](adr/ADR-006-proto-v1-and-api-repository.md) | — | — |
+| `ADR-006` | Proto v1 与独立 API 仓库协作 | `ACCEPTED` | [ADR-006-proto-v1-and-api-repository.md](adr/ADR-006-proto-v1-and-api-repository.md) | — | — |
 
 ## 注册表维护规则
 

@@ -26,7 +26,7 @@ ScopeCatalogSnapshot {
 }
 ```
 
-revision 必须在 Auth 内单调递增。UC-APP-002 至少需要知道哪些 scope 当前允许被新 ApplicationVersion 申请；完整 ScopeDefinition 在设计 Auth 用例时确定。
+revision 必须在 Auth 内单调递增。提供方行为由 [UC-AUTH-001](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) 定义；跨服务 `ScopeDefinition` 首版投影和 gRPC 方法由 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md) 定义。
 
 ScopeCatalog adapter 在完成校验时一并返回所使用的 snapshot revision。创建和修改草稿可以忽略它；UC-APP-004 将它写入 ApplicationReview，用于说明提交时依据的 Auth 目录版本。
 
@@ -44,7 +44,7 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 
 这是有界缓存，不是 App Center 自己的 Scope Catalog。缓存内容不能被 App Center 管理接口修改。
 
-环境变量只由 config/composition boundary 读取；Cache adapter 通过构造参数接收已经校验的 TTL、Clock 与 snapshot source，不直接读取进程环境。真实 Auth transport 尚未确定时，测试使用 fake source，不得在生产代码中硬编码目录。
+环境变量只由 config/composition boundary 读取；Cache adapter 通过构造参数接收已经校验的 TTL、Clock 与 snapshot source，不直接读取进程环境。真实 Auth transport 必须实现共享 gRPC 契约；测试可以使用实现同一生成接口的 Auth Server 或 port fake，不得在生产代码中硬编码目录。
 
 ### 多阶段校验
 

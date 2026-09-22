@@ -221,12 +221,15 @@ type ApplicationRepository interface {
 
 ## API 草图
 
+内部 API 路径（Proto `google.api.http` annotation）固定为：
+
 ```text
-POST /applications
-Authorization: <authenticated identity>
+POST /v1/applications
 ```
 
-请求：
+可信身份通过平台契约 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md) 的 `x-iwut-identity` 载体传递，不在 `Authorization` 中承载业务身份。
+
+请求体只包含业务字段：
 
 ```json
 {
@@ -245,11 +248,13 @@ Authorization: <authenticated identity>
 }
 ```
 
-API 不接受或返回内部技术字段 `nameKey`。API 路径和错误编码尚未形成兼容承诺。
+外部路径 `/app-center/v1/applications` 由平台路由契约 [app-center-api-routing](../../platform/contracts/app-center-api-routing.md) 定义：Gateway 只剥离 `/app-center` 服务前缀，内部仍为 `/v1/applications`；gRPC full method 为 `/app_center.v1.application.Application/CreateApplication`。错误 reason/code 与 [ADR-005](../adr/ADR-005-domain-errors-and-transport-mapping.md) 对齐，不采用旧 envelope。
+
+API 不接受或返回内部技术字段 `nameKey`、`nextVersionSequence`、`nextProfileRevisionSequence`。自 v1 起，内部路径与稳定错误 reason 属于兼容承诺。
 
 ## 测试与验收
 
-领域测试：
+### 领域测试
 
 - name 长度 1 和 50 可用，0 和 51 被拒绝。
 - name 只接受规定的 ASCII 字符。
@@ -257,7 +262,7 @@ API 不接受或返回内部技术字段 `nameKey`。API 路径和错误编码�
 - id、adminId、createdAt 创建后不可由公开行为修改。
 - Application 和 CreateApplicationCommand 都不包含 displayName、description 或 icon。
 
-UseCase 测试：
+### UseCase 测试
 
 - 只有 `APPROVED` 可以创建；`PENDING/REJECTED/SUSPENDED` 均被拒绝。
 - adminId 只能来自 DeveloperIdentity.authId。
@@ -266,7 +271,7 @@ UseCase 测试：
 - 名称冲突和配额耗尽映射为对应业务错误。
 - 任一依赖失败时不返回成功结果。
 
-Repository 集成测试：
+### Repository 集成测试
 
 - 同一 adminId 下大小写等价名称只有一次成功；不同 adminId 可以同名。
 - 初始配额为 10 时前 10 次成功，第 11 次失败。
@@ -276,7 +281,7 @@ Repository 集成测试：
 - Application 插入失败不会消耗配额。
 - document validator 拒绝缺失或非法字段。
 
-API 测试：
+### API 测试
 
 - 请求正文不能覆盖 adminId、createdAt、developerStatus、nameKey、nextVersionSequence 或 nextProfileRevisionSequence。
 - 成功响应包含四个业务字段，不包含 version 或公开资料。
@@ -303,3 +308,4 @@ API 测试：
 - 2026-09-19：确认持久化配额记录为唯一权威来源，初始上限为 10；创建路径只在记录不存在时初始化它，不改写已有 limit。
 - 2026-09-20：初始配额允许通过 `APP_CENTER_INITIAL_APPLICATION_QUOTA` 配置，默认 10；配置只影响首次建档，已有配额仍是唯一权威。
 - 2026-09-20：设计进入 `ACCEPTED`；Domain、UseCase、MongoDB 持久化及事务集成测试达到 `CORE_COMPLETE`，Transport、Composition Root 与端到端验证单独跟踪。
+- 2026-09-21：API transport 工作包固定内部路径为 `POST /v1/applications`，外部 `/app-center/v1/applications` 与前缀剥离由平台路由契约定义；身份改为平台可信身份 JWS，错误 reason 与 ADR-005 对齐。

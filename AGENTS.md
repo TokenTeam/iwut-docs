@@ -1,6 +1,6 @@
 # AGENTS.md — iWUT 设计文档仓库
 
-本仓库保存 iWUT 各 bounded context 的权威设计文档，当前包含 `app-center/`。
+本仓库保存 iWUT 各 bounded context 的权威设计文档，当前包含 `app-center/`、`auth-center/`，以及跨系统的 `platform/` 共享设计契约。
 
 ## 内容分工
 
@@ -10,12 +10,19 @@
 | `app-center/adr/ADR-*.md` | 架构决定 | **权威** |
 | `app-center/query-contracts/` | 读模型语义 | **权威** |
 | `app-center/*.md`（README、vision、domain-model 等） | 规范与摘要 | 规范性以其中的 `BR-*` / `ADR-*` 引用为准 |
+| `auth-center/use-cases/UC-*.md` | Auth UC 正文，内含 `BR-*` 权威定义 | **权威** |
+| `auth-center/design-registry.md` | Auth Center 的 UC / BR 索引 | 索引，不复制规则正文 |
+| `auth-center/implements/` | Auth Center 实现覆盖与工作包状态 | 实现导航，不改变业务语义 |
+| `platform/` | 跨 bounded context 的共享决定与契约（信任、路由、gRPC-Web 等） | **权威**，放置边界见 `platform/README.md`；不登记进 app-center registry |
 | `app-center/briefs/*.md` | **生成物**，工作包设计输入 | **非权威**，冲突时以源文件为准 |
 | `tools/gen_brief.py`、`tools/brief-specs/` | brief 生成器与范围 spec | 工程代码 |
 | `tools/registry.py` | 注册表机械列的生成与漂移检查 | 工程代码 |
+| `tools/tests/` | 生成器自动化测试 | 工程代码 |
 | `tools/git-hooks/` | 本仓库的 git hooks | 工程代码 |
 
 同一内容不得有两个权威定义。需要复用规则时引用原 ID 与锚点，不复制正文。
+
+**平台与能力的边界**：只对一个 bounded context 成立的业务语义留在对应的 `app-center/` 或 `auth-center/`；可执行 Proto 在独立 API 仓库；只有跨系统的信任/路由等契约才放 `platform/`，且不复制已有权威正文。跨系统决定放 `platform/adr/`，稳定的消息、身份与路由格式放 `platform/contracts/`。`platform/` 文档默认不进入 brief，除非某个 spec 在 `shared_sections` 中显式选择。
 
 ## 提交规范（强制）
 
@@ -73,9 +80,20 @@ python3 tools/gen_brief.py --check --all
 
 生成是 **fail closed** 的：spec 选中的小节、`BR-*` 或 ADR 章节在源文件中找不到时，生成直接失败并列出全部问题，不会产出残缺 brief。无法解析的设计输入不允许被静默省略。
 
+**平台共享文档**：per-UC spec 可用 `shared_sections`（键为相对 docs 仓库根的 `platform/…` 路径）显式抽取共享契约章节。共享文档默认不进入工程基线，也不登记进 app-center registry；路径必须留在 docs 仓库内（拒绝绝对路径、`..` 与 symlink 逃逸），缺失文件或章节同样 fail closed。详见 `platform/README.md` 与 `app-center/briefs/README.md`。
+
+自动化测试：
+
+```bash
+python3 tools/tests/test_gen_brief_shared.py
+python3 -m unittest discover -s tools/tests
+```
+
 ## 注册表检查
 
 `app-center/design-registry.md` 是索引，不是第二权威。它的**机械列**（ID / 标题 / 状态 / 权威位置）与「下一个可分配编号」表由 `tools/registry.py` 生成或校验；人类专属列（`BR-*` 的 `类型`、`备注`、`替代项`）仍手工维护，工具不碰。
+
+`auth-center/design-registry.md` 使用独立的 `UC-AUTH-*` / `BR-SCP-*` 编号空间。当前 `tools/registry.py` 仍只机械检查 App Center；修改 Auth UC/BR 时必须人工同步 Auth registry 和 Next ID，不得把 Auth ID 登记到 App Center registry。
 
 ```bash
 # 校验机械列与源文档一致、ID 空间两个方向都闭合

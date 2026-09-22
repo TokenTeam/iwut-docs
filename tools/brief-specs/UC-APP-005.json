@@ -1,0 +1,51 @@
+{
+  "uc": "UC-APP-005",
+  "note": "Scope mirrors the UC-APP-005 dependency-contract and API delivery work package. Domain, UseCase, MongoDB decision persistence, the Auth Developer Status consumer, immutable App Center-local policy repository, URL preflight adapter, System Auth ID configuration, API transport and consumer E2E are implemented. Reviewer permissions use the compatible permissions claim added to trusted-identity-v1. Remaining production-equivalence work is the platform internal-service identity and Auth allowlist, the reviewer grant/revoke lifecycle and SYSTEM principal provisioning, then a production-identity double-service E2E. ADR-001 covers approval-time Scope Catalog revalidation; ADR-006 and the shared routing contract cover the formal Proto/API boundary. Cross-cutting ADRs (003/004/005) remain in the engineering baseline.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者",
+    "决定结果",
+    "输入",
+    "主流程",
+    "异常流程",
+    "最小领域行为",
+    "用例端口",
+    "数据模型变化",
+    "API 草图",
+    "测试与验收",
+    "已确认的实现边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-001": ["决定/权威来源", "决定/第一阶段缓存", "决定/多阶段校验"],
+    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/auth-scope-catalog-v1.md": [
+      "gRPC 方法",
+      "快照语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求"
+    ],
+    "platform/contracts/auth-developer-status-v1.md": [
+      "gRPC 方法",
+      "完整批量语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

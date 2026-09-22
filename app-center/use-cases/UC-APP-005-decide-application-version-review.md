@@ -36,7 +36,12 @@ ReviewerIdentity {
 ```
 
 Auth 拥有平台人员权限。App Center 只消费经过验证的身份上下文，并使用单一权限 `app.version.review`；不继续沿用旧实现含义过宽的 `is_admin` 布尔 claim。
-当前 Auth Center 尚未重新设计，本用例不规定 API token、KV、claim 或网关 header 形状。核心实现只定义最小 port，并在测试中使用 deterministic fake；真实 Auth transport 由后续 Auth Center 契约工作包实现。
+Reviewer permission 使用 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)
+中同版本追加的 `permissions` claim；Reviewer 不要求 `developer_status`，入口只把已验签
+的 `sub` 与 permissions 投影为 ReviewerIdentity。Developer 暂停状态由 Auth Center 的
+[Auth Developer Status v1](../../platform/contracts/auth-developer-status-v1.md) 原生 gRPC
+契约提供；App Center 仍通过最小 port 隔离 consumer adapter，测试可使用 deterministic
+fake。生产跨服务调用还必须闭合内部服务身份与 allowlist。
 
 reviewer 不需要 developerStatus。一个人即使同时具有 Developer 和 Reviewer 身份，本用例仍通过利益冲突规则限制其能审核哪些应用。
 
@@ -99,7 +104,8 @@ Version 的运行内容和 ApplicationReview.snapshot 在两种决定中都不�
 ### UNKNOWN
 
 - `app.version.review` 权限的申请、授予、暂停和撤销流程；属于 Auth/平台治理。
-- 第一版正式审核策略的完整检查项和内容政策文本；归属 ConfCenter，但不阻塞当前核心实现。
+- 检查项对应的详细内容政策文本与 reviewer 操作手册；策略 ID 与首版三个检查项由
+  App Center 的版本化策略仓库拥有，政策文本仍需在启用生产审核前发布。
 - reviewer 是否需要分组、双人批准或按风险等级升级。
 - 已批准 Version 后续被发现有问题时采用 REVOKE、下架还是二者同时执行。
 
@@ -274,7 +280,12 @@ VersionReviewPolicy {
 
 策略版本为 1–50 个 ASCII 字符，只允许 `[A-Za-z0-9._-]`。`RETIRED` 策略可用于解释历史决定，但不能用于新决定。
 
-本用例定义机制，不在领域实体中硬编码学校政策文本。正式策略和历史版本未来由 ConfCenter 提供；当前核心实现只定义 ReviewPolicyProvider，测试使用 deterministic fake，不猜测 ConfCenter 的 transport 或存储形状。在真实 adapter 提供正式且不可变的策略版本前，不能将审核能力标记为生产可用。
+本用例定义机制，不在领域实体中硬编码学校政策文本。首版由 App Center
+拥有并持久化正式策略及历史版本，`ReviewPolicyProvider` 从 App Center 自己的
+不可变版本仓库读取；同一 version 不得被覆盖，历史版本不得删除。未来如果出现
+独立的政策发布团队、审批生命周期或多个 bounded context 共同消费同一政策，再通过
+新的 ADR 与跨服务契约评估提取策略发布能力；当前 UC 不依赖 ConfCenter。在真实
+adapter 提供正式且不可变的策略版本前，不能将审核能力标记为生产可用。
 
 <a id="br-rev-017"></a>
 ### BR-REV-017：批准检查确认
@@ -399,7 +410,7 @@ type ApplicationReviewDecisionRepository interface {
 
 ## 数据模型变化
 
-UC-APP-005 不增加 collection。`application_reviews` 的 `decision` 从 null 一次性写为以下对象：
+审核决定本身不增加 collection；`application_reviews` 的 `decision` 从 null 一次性写为以下对象：
 
 | Key | desc | type | format | unique? | nullable? |
 | --- | --- | --- | --- | --- | --- |
@@ -423,6 +434,22 @@ validator 必须保证：
 - decision 写入后不可修改。
 
 `application_versions` 不增加字段。决定时原子更新 reviewStatus、revision、updatedBy 和 updatedAt。
+
+App Center 另以 `version_review_policies` 保存自己拥有的不可变正式策略。首版 migration
+写入且只写入以下 ACTIVE 策略；已存在同版本但内容不同时 migration 必须失败，运行时
+不提供覆盖或删除接口：
+
+```text
+version: app-version-review-v1
+requiredChecks:
+  - content-policy-reviewed
+  - launch-url-content-reviewed
+  - requested-access-reviewed
+status: ACTIVE
+```
+
+未来修改检查项必须使用新的 policy version；不能原地修改
+`app-version-review-v1`。`version_review_policies.version` 唯一，历史版本保留。
 
 ## API 草图
 
@@ -539,8 +566,12 @@ API 测试：
 
 ## 已确认的实现边界
 
-- Auth 如何签发/撤销 `app.version.review` 及可信上下文的传输形状由 Auth Center 重新设计决定；当前只使用 port 与 deterministic fake。
-- ReviewPolicyProvider 未来由 ConfCenter 提供正式策略与历史版本；当前只实现 port 契约和 fake 验证。
+- `app.version.review` 的线格式已由 trusted-identity-v1 的 `permissions` claim 定义；
+  权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer 暂停
+  查询已由 Auth Developer Status v1 定义，App Center consumer adapter 与内部服务身份
+  仍待闭合。
+- ReviewPolicyProvider 首版由 App Center 本地 adapter 提供正式策略与历史版本；
+  当前核心只实现了 port 契约和 fake 验证，生产启用前必须补齐不可变持久化实现。
 - reviewer 访问未知自托管页面的 iframe/隔离浏览环境属于后续前端与安全运行环境，不属于本后端核心工作包，也不在当前注入 rpc-bridge。
 - 批准时若当前 admin 或 submittedBy 已暂停，使用注入的 System Auth ID 和固定 reason 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
 
@@ -563,3 +594,7 @@ UC-APP-006：将被拒绝的 ApplicationVersion 恢复为 DRAFT
 - 2026-09-15：建立 UC-APP-005；引入专用 reviewer 权限、利益冲突、版本化审核策略、一次性决定和批准时的 scope/URL 复检。
 - 2026-09-15：UC-APP-006 明确拒绝后通过独立行为恢复 DRAFT，不由审核决定或普通编辑隐式迁移。
 - 2026-09-20：确认 Auth/ConfCenter 通过 port 隔离并在核心测试中使用 fake；隔离浏览环境不属于后端核心；admin 或 submittedBy 暂停时由 System 永久自动拒绝。设计进入 `ACCEPTED`。
+- 2026-09-21：首版 VersionReviewPolicy 改由 App Center 本地拥有和持久化；
+  ConfCenter 不再是 UC-APP-005 的上线依赖，未来提取必须另行评审。
+- 2026-09-22：trusted-identity-v1 兼容增加 `permissions` claim；确定首版
+  `app-version-review-v1` 的三个正式检查项及本地不可变策略仓库。

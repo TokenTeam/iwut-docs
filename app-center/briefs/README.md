@@ -51,7 +51,8 @@ python3 tools/gen_brief.py --check --all
 ```json
 {
   "uc_sections": ["目标与范围", "主流程", "..."],
-  "adr_sections": { "ADR-003": ["决定", "Port 所有权"] }
+  "adr_sections": { "ADR-003": ["决定", "Port 所有权"] },
+  "shared_sections": { "platform/contracts/trusted-identity-v1.md": ["JWS Claims"] }
 }
 ```
 
@@ -61,6 +62,27 @@ python3 tools/gen_brief.py --check --all
 - 不写 `uc_sections` 时，默认取该 UC 所有 `##` 小节（`业务规则` 除外，它由 BR 块单独渲染）。
 
 **调整范围时不要动权威正文**，只改 spec；权威正文只因为设计变化而改。
+
+## 平台共享文档（`docs/platform/`）
+
+App Center 的 UC/BR/ADR 仍由 `app-center/` 和 `design-registry.md` 管理。跨 Auth Center、Gateway、App Center 的信任、入口路由、gRPC-Web 等契约放在 `docs/platform/`，由 `docs/platform/README.md` 规定放置边界。
+
+- 平台文档**不登记进 `app-center/design-registry.md`**，也不是 App Center ADR。
+- 平台文档**默认不进入 engineering baseline**（`_engineering-baseline.md`）；只有某个 spec 在 `shared_sections` 里显式选择，才会进入那一份 brief。
+- `shared_sections` 的键是**相对 docs 仓库根**的 POSIX 路径（例如 `platform/contracts/trusted-identity-v1.md`），值是章节路径列表。
+- 选中的平台章节会出现在 brief 正文、未纳入小节索引、溯源表（含 sha256）和源体积统计中；从 `app-center/briefs/` 看相对链接仍然正确。
+
+生成对共享源是 fail closed 的：绝对路径、`..`、经 symlink 逃逸 docs 仓库的路径、缺失文件、非普通 Markdown 文件、缺失章节都会失败并一次列出全部问题，不产出残缺 brief。
+
+## 测试
+
+生成器的自动化测试位于 `tools/tests/test_gen_brief_shared.py`：
+
+```bash
+python3 tools/tests/test_gen_brief_shared.py
+# 或
+python3 -m unittest discover -s tools/tests
+```
 
 ## brief 不覆盖的问题
 

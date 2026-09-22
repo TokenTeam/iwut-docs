@@ -372,7 +372,7 @@ URL 只表示登记的入口。对于自托管网页，App Center 不能因为 U
 
 Scope Catalog 的权威来源是 Auth。UC-APP-002 使用 App Center 进程内的 read-through cache；TTL 由 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL` 配置，使用 Go duration 文本，未设置时默认 `5m`。显式配置为空、无法解析、为零或负数时服务启动失败。缓存过期时同步读取 Auth，读取失败则 fail closed。当前不为这一份低频小目录单独引入 RabbitMQ 或 Redis。详细一致性方案见 [ADR-001](../adr/ADR-001-scope-catalog-cache.md)。
 
-Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRPC 形状。Cache adapter 通过构造参数接收 TTL、Clock 与窄的 Auth snapshot source；只有测试使用 fake/mock，生产代码不得提供硬编码 Scope 目录。真实 Auth transport 在 Auth 接口确定后实现。
+Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRPC 形状。Cache adapter 通过构造参数接收 TTL、Clock 与窄的 Auth snapshot source；只有测试使用 fake/mock，生产代码不得提供硬编码 Scope 目录。真实 Auth transport 实现根级 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)，提供方行为由 [UC-AUTH-001](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) 拥有。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -390,7 +390,7 @@ ScopeCatalogSnapshot {
 }
 ```
 
-revision 必须在 Auth 内单调递增。UC-APP-002 至少需要知道哪些 scope 当前允许被新 ApplicationVersion 申请；完整 ScopeDefinition 在设计 Auth 用例时确定。
+revision 必须在 Auth 内单调递增。提供方行为由 [UC-AUTH-001](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) 定义；跨服务 `ScopeDefinition` 首版投影和 gRPC 方法由 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md) 定义。
 
 ScopeCatalog adapter 在完成校验时一并返回所使用的 snapshot revision。创建和修改草稿可以忽略它；UC-APP-004 将它写入 ApplicationReview，用于说明提交时依据的 Auth 目录版本。
 
@@ -408,7 +408,7 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 
 这是有界缓存，不是 App Center 自己的 Scope Catalog。缓存内容不能被 App Center 管理接口修改。
 
-环境变量只由 config/composition boundary 读取；Cache adapter 通过构造参数接收已经校验的 TTL、Clock 与 snapshot source，不直接读取进程环境。真实 Auth transport 尚未确定时，测试使用 fake source，不得在生产代码中硬编码目录。
+环境变量只由 config/composition boundary 读取；Cache adapter 通过构造参数接收已经校验的 TTL、Clock 与 snapshot source，不直接读取进程环境。真实 Auth transport 必须实现共享 gRPC 契约；测试可以使用实现同一生成接口的 Auth Server 或 port fake，不得在生产代码中硬编码目录。
 
 ## 未纳入本 brief 的源小节
 
@@ -423,5 +423,5 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-003-update-draft-application-version.md` | 369 | `db3d6fac8074` |
-| `use-cases/UC-APP-002-create-application-version.md` | 426 | `ba31f8a63776` |
-| `adr/ADR-001-scope-catalog-cache.md` | 112 | `88161ee9c7ee` |
+| `use-cases/UC-APP-002-create-application-version.md` | 427 | `8e8bb5e13166` |
+| `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |

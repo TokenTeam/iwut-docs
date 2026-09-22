@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a task-scoped design brief from the authoritative App Center docs.
+"""Generate a task-scoped design brief from authoritative design documents.
 
 A brief is a *derived, non-authoritative* artifact: it extracts exactly the
 design text one work package needs, so an implementation agent reads one small
@@ -22,7 +22,7 @@ import json
 import posixpath
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 WORKSPACE = Path(__file__).resolve().parents[2]
 DOCS = WORKSPACE / "docs" / "app-center"
@@ -35,6 +35,13 @@ DEFAULT_SPEC_DIR = WORKSPACE / "docs" / "tools" / "brief-specs"
 # byte-identical no matter where the generator is invoked.
 SCRIPT_REL = "tools/gen_brief.py"
 SPECS_REL = "tools/brief-specs"
+
+# App Center registry paths are relative to `app-center/`; shared platform
+# sources selected by a spec are relative to the docs repository root. Keeping
+# both conventions lets app-center briefs stay byte-identical while still
+# linking out to `platform/…`.
+APP_CENTER_PREFIX = "app-center"
+OUTPUT_REL = "app-center/briefs"
 
 
 class BriefInputError(Exception):
@@ -104,6 +111,64 @@ def load_registry() -> tuple[dict, dict, dict]:
 
 def read_doc(rel_path: str) -> str:
     return (DOCS / rel_path).read_text(encoding="utf-8")
+
+
+def app_center_rel(rel_path: str) -> str:
+    """Docs-root-relative form of an App Center registry path."""
+    return f"{APP_CENTER_PREFIX}/{rel_path}"
+
+
+def resolve_shared_source(rel_path: str) -> tuple[Path | None, str | None]:
+    """Resolve a docs-root-relative shared source, failing closed.
+
+    Returns `(resolved_path, None)` when the path is a canonical, docs-root-
+    relative `platform/…` path to a regular Markdown file, or `(None, problem)`
+    otherwise. Absolute paths and any `..` segment are rejected outright;
+    symlinks are resolved and must still land inside the docs repository, so a
+    link cannot smuggle in a file from outside the tree.
+    """
+    if not isinstance(rel_path, str) or not rel_path:
+        return None, f"shared source path must be a non-empty string: {rel_path!r}"
+    if rel_path != rel_path.strip():
+        return None, f"shared source path has surrounding whitespace: {rel_path!r}"
+    if "\x00" in rel_path:
+        return None, f"shared source path contains a NUL byte: {rel_path!r}"
+    if "\\" in rel_path:
+        return None, f"shared source path must use POSIX separators: {rel_path!r}"
+
+    pure = PurePosixPath(rel_path)
+    if pure.is_absolute():
+        return None, f"shared source path must be relative to the docs repository root: {rel_path!r}"
+    if any(part == ".." for part in pure.parts):
+        return None, f"shared source path may not contain `..`: {rel_path!r}"
+    canonical = pure.as_posix()
+    if rel_path != canonical:
+        return None, f"shared source path must be canonical POSIX form `{canonical}`: {rel_path!r}"
+    if not pure.parts or pure.parts[0] != "platform":
+        return None, f"shared source must be under `platform/`: {rel_path!r}"
+
+    try:
+        root = DOCS_REPO.resolve()
+        candidate = (DOCS_REPO / pure).resolve()
+    except (OSError, RuntimeError) as error:
+        return None, f"cannot resolve shared source path {rel_path!r}: {error}"
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        return None, f"shared source path escapes the docs repository root: {rel_path!r}"
+
+    if not candidate.exists():
+        return None, f"shared source file not found: {rel_path!r}"
+    if not candidate.is_file():
+        return None, f"shared source is not a regular file: {rel_path!r}"
+    if candidate.suffix.lower() != ".md":
+        return None, f"shared source is not a Markdown file: {rel_path!r}"
+    return candidate, None
+
+
+def shared_display(rel_path: str) -> str:
+    """Canonical docs-root-relative display form used in generated briefs."""
+    return PurePosixPath(rel_path).as_posix()
 
 
 # --------------------------------------------------------------------------- markdown
@@ -182,19 +247,28 @@ def demote(text: str, levels: int) -> str:
 
 
 def rewrite_links(text: str, src_rel: str) -> str:
-    """Make relative links resolve from `briefs/` instead of the source directory."""
-    src_dir = posixpath.dirname(src_rel)
-    if not src_dir:
-        return text
+    """Make relative links resolve from `briefs/` instead of the source directory.
+
+    `src_rel` is relative to the docs repository root, e.g.
+    `app-center/adr/ADR-001-…md` or `platform/…md`. A link is resolved against
+    the source file's directory and then re-expressed relative to the brief
+    output directory, so both App Center sources and root-level platform
+    sources land on the correct target.
+    """
+    src_dir = PurePosixPath(src_rel).parent
+    out_dir = PurePosixPath(OUTPUT_REL)
 
     def replace(match: re.Match) -> str:
         target = match.group(1)
         if target.startswith(("#", "/", "http://", "https://", "mailto:")):
             return match.group(0)
         path, separator, anchor = target.partition("#")
-        if not path or path.startswith("../"):
+        if not path:
             return match.group(0)
-        return f"](../{src_dir}/{path}{separator}{anchor})"
+        resolved = posixpath.normpath(posixpath.join(str(src_dir), path))
+        if resolved == ".." or resolved.startswith("../"):
+            return match.group(0)  # points outside the docs tree; leave it alone
+        return f"]({posixpath.relpath(resolved, str(out_dir))}{separator}{anchor})"
 
     return re.sub(r"\]\(([^)]+)\)", replace, text)
 
@@ -207,6 +281,77 @@ def collapse_omitted(paths: list[str]) -> list[str]:
     """Drop `parent/child` entries when `parent` is already listed."""
     present = set(paths)
     return [p for p in paths if "/" not in p or p.split("/")[0] not in present]
+
+
+def first_heading_title(text: str) -> str | None:
+    """Title of the first level-1 heading, used to label a shared source."""
+    for _, level, title in heading_marks(text)[1]:
+        if level == 1:
+            return title
+    return None
+
+
+def collect_shared_sources(spec_shared: object, problems: list[str]) -> list[dict]:
+    """Resolve, validate, and read every spec-selected docs-root shared source.
+
+    Rendering order is stable: file keys are sorted by their canonical
+    docs-root-relative path, and sections keep the order the spec declares.
+    Every problem found is accumulated so one failed generation reports them
+    all; a single unreadable source or missing section still fails the build.
+    """
+    if spec_shared is None:
+        return []
+    if not isinstance(spec_shared, dict):
+        problems.append("`shared_sections` must be an object mapping a docs-root-relative path to a section list")
+        return []
+    if not spec_shared:
+        return []
+
+    records: list[dict] = []
+    valid_items: list[tuple[str, object]] = []
+    for raw_rel, sections in spec_shared.items():
+        if not isinstance(raw_rel, str):
+            problems.append(f"shared source path must be a non-empty string: {raw_rel!r}")
+            continue
+        valid_items.append((raw_rel, sections))
+
+    for raw_rel, sections in sorted(valid_items, key=lambda item: shared_display(item[0])):
+        display = shared_display(raw_rel)
+        if not isinstance(sections, list) or not sections:
+            problems.append(f"`shared_sections[{display!r}]` must be a non-empty list of section paths")
+            continue
+        resolved, problem = resolve_shared_source(raw_rel)
+        if problem is not None:
+            problems.append(problem)
+            continue
+
+        try:
+            text = resolved.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as error:
+            problems.append(f"cannot read shared source `{display}` as UTF-8 Markdown: {error}")
+            continue
+        included: list[str] = []
+        for path in sections:
+            if not isinstance(path, str) or not path or path != path.strip():
+                problems.append(
+                    f"`shared_sections[{display!r}]` contains an invalid section path: {path!r}"
+                )
+                continue
+            if path in included:
+                continue
+            if extract_section(text, path) is None:
+                problems.append(f"shared section not found: `{display}` → `{path}`")
+                continue
+            included.append(path)
+
+        records.append({
+            "rel": display,
+            "path": resolved,
+            "text": text,
+            "included": included,
+            "title": first_heading_title(text),
+        })
+    return records
 
 
 def br_block(text: str, br_id: str) -> str | None:
@@ -351,15 +496,74 @@ def render_adr_sections(spec_adrs: dict, adrs: dict, add, problems: list[str]) -
             # Normalise depth: a selected `##` section and a selected `###`
             # subsection both land at `####` under the ADR heading.
             source_level = len(path.split("/")) + 1
-            add(embed(body, meta["path"], 4 - source_level))
+            add(embed(body, app_center_rel(meta["path"]), 4 - source_level))
             add("")
     return included
+
+
+def render_shared_sections(records: list[dict], add, problems: list[str]) -> dict[str, list[str]]:
+    """Render spec-selected root-level shared sections and report what made it in.
+
+    A shared source is *not* part of the engineering baseline: it only appears
+    when a spec names it in `shared_sections`. Files render in the stable order
+    produced by `collect_shared_sources`.
+    """
+    included: dict[str, list[str]] = {}
+    if not records:
+        return included
+    add("## 平台共享契约（按 spec 显式抽取）")
+    add("")
+    add("> 这些是 `docs/` 根下的跨系统共享设计输入，**不进入工程基线**；只有本 spec 显式选择的章节才被抽取。")
+    add("> 与源文件冲突时，仍以 §溯源 中列出的源文件为准。")
+    add("")
+    for record in records:
+        rel = record["rel"]
+        header = f"### `{rel}`"
+        if record["title"]:
+            header += f"：{record['title']}"
+        add(header)
+        add("")
+        included[rel] = []
+        for path in record["included"]:
+            body = extract_section(record["text"], path)
+            if body is None:  # defensive: collect_shared_sources already verified presence
+                problems.append(f"shared section not found: `{rel}` → `{path}`")
+                continue
+            included[rel].append(path)
+            # Same depth normalisation as ADRs: `##` and `###` both land at `####`.
+            source_level = len(path.split("/")) + 1
+            add(embed(body, rel, 4 - source_level))
+            add("")
+    return included
+
+
+def source_metrics(sources: list[tuple[str, Path]]) -> tuple[list[tuple[str, Path, str]], int, int, int]:
+    """Read each source once and return (rows, lines, bytes, tokens)."""
+    rows: list[tuple[str, Path, str]] = []
+    total_lines = total_bytes = total_tokens = 0
+    for display, actual in sources:
+        text = actual.read_text(encoding="utf-8")
+        rows.append((display, actual, text))
+        total_lines += len(text.splitlines())
+        total_bytes += len(text.encode("utf-8"))
+        total_tokens += estimate_tokens(text)
+    return rows, total_lines, total_bytes, total_tokens
+
+
+def add_unique_source(sources: list[tuple[str, Path]], seen: set[Path], display: str, actual: Path) -> None:
+    resolved = actual.resolve()
+    if resolved in seen:
+        return
+    seen.add(resolved)
+    sources.append((display, actual))
 
 
 def render_baseline(spec: dict, registry: tuple[dict, dict, dict], problems: list[str]) -> tuple[str, dict]:
     """Cross-cutting engineering brief: true for every work package, rarely changes."""
     _, _, adrs = registry
     spec_adrs: dict[str, list[str]] = spec.get("adr_sections", {})
+    spec_shared: object = spec.get("shared_sections", {})
+    shared_records = collect_shared_sources(spec_shared, problems)
     title = spec.get("title", "工程基线")
 
     lines: list[str] = []
@@ -378,6 +582,8 @@ def render_baseline(spec: dict, registry: tuple[dict, dict, dict], problems: lis
     add("| --- | --- |")
     add("| 类型 | 跨能力工程基线（不绑定单个 UC） |")
     add("| ADR | " + "、".join(f"`{a}`" for a in sorted(spec_adrs)) + " |")
+    if shared_records:
+        add("| 平台共享 | " + "、".join(f"`{record['rel']}`" for record in shared_records) + " |")
     add("| 变化频率 | 低；仅在架构决定变化时重新生成 |")
     add("")
     add("## 遇到 brief 未覆盖的问题")
@@ -386,6 +592,7 @@ def render_baseline(spec: dict, registry: tuple[dict, dict, dict], problems: lis
     add("")
 
     adr_included = render_adr_sections(spec_adrs, adrs, add, problems)
+    shared_included = render_shared_sections(shared_records, add, problems)
 
     add("## 未纳入本 brief 的源小节")
     add("")
@@ -400,15 +607,29 @@ def render_baseline(spec: dict, registry: tuple[dict, dict, dict], problems: lis
         )
         if omitted:
             add(f"- `{adr_id}`（{meta['path']}）：" + "、".join(omitted))
+    for record in shared_records:
+        omitted = collapse_omitted(
+            [p for p in section_paths(record["text"]) if p not in shared_included.get(record["rel"], [])]
+        )
+        if omitted:
+            add(f"- `{record['rel']}`（docs 根级共享文档）：" + "、".join(omitted))
     add("")
 
     add("## 溯源")
     add("")
     add("| 文件 | 行数 | sha256 |")
     add("| --- | --- | --- |")
-    source_paths = [adrs[a]["path"] for a in sorted(spec_adrs) if a in adrs]
-    for path in source_paths:
-        add(f"| `{path}` | {len(read_doc(path).splitlines())} | `{short_hash(DOCS / path)}` |")
+    sources: list[tuple[str, Path]] = []
+    seen_sources: set[Path] = set()
+    for adr_id in sorted(spec_adrs):
+        if adr_id in adrs:
+            path = adrs[adr_id]["path"]
+            add_unique_source(sources, seen_sources, path, DOCS / path)
+    for record in shared_records:
+        add_unique_source(sources, seen_sources, record["rel"], record["path"])
+    rows, total_lines, total_bytes, total_tokens = source_metrics(sources)
+    for display, actual, text in rows:
+        add(f"| `{display}` | {len(text.splitlines())} | `{short_hash(actual)}` |")
     add("")
 
     brief = "\n".join(lines).rstrip() + "\n"
@@ -416,10 +637,10 @@ def render_baseline(spec: dict, registry: tuple[dict, dict, dict], problems: lis
         "brief_lines": len(brief.splitlines()),
         "brief_bytes": len(brief.encode("utf-8")),
         "brief_tokens": estimate_tokens(brief),
-        "baseline_lines": sum(len(read_doc(p).splitlines()) for p in source_paths),
-        "baseline_bytes": sum(len(read_doc(p).encode("utf-8")) for p in source_paths),
-        "baseline_tokens": sum(estimate_tokens(read_doc(p)) for p in source_paths),
-        "source_paths": source_paths,
+        "baseline_lines": total_lines,
+        "baseline_bytes": total_bytes,
+        "baseline_tokens": total_tokens,
+        "source_paths": [display for display, _ in sources],
         "own_brs": [],
         "external_brs": [],
     }
@@ -460,6 +681,8 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
     owner_of = {meta["path"]: uid for uid, meta in use_cases.items()}
 
     spec_adrs: dict[str, list[str]] = spec.get("adr_sections", {})
+    spec_shared: object = spec.get("shared_sections", {})
+    shared_records = collect_shared_sources(spec_shared, problems)
 
     lines: list[str] = []
     add = lines.append
@@ -468,7 +691,11 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
     add(f"<!-- python3 {SCRIPT_REL} {uc_id} --spec {SPECS_REL}/{uc_id}.json -->")
     add(f"# Brief — {uc_id}：{uc['title']}")
     add("")
-    add("> **非权威派生制品。** 本文由脚本从 `docs/app-center/` 抽取，只用于给本次工作包提供输入。")
+    if shared_records:
+        add("> **非权威派生制品。** 本文由脚本从 `docs/app-center/` 与 spec 显式选择的 `docs/` 共享文档抽取，只用于给本次工作包提供输入。")
+    else:
+        # Keep legacy briefs byte-identical when no shared source is selected.
+        add("> **非权威派生制品。** 本文由脚本从 `docs/app-center/` 抽取，只用于给本次工作包提供输入。")
     add("> 与源文件冲突时，一律以 §溯源 中列出的源文件为准；不要手工编辑本文，也不要把它当作第二权威。")
     add("")
 
@@ -488,6 +715,8 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
         add("| ADR | " + "、".join(f"`{a}`" for a in sorted(spec_adrs)) + " |")
     else:
         add("| ADR | —（未在 spec 中声明） |")
+    if shared_records:
+        add("| 平台共享 | " + "、".join(f"`{record['rel']}`" for record in shared_records) + " |")
     add("")
 
     add("## 遇到 brief 未覆盖的问题")
@@ -519,7 +748,7 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
             problems.append(f"UC section not found: `{uc_id}` → `{path}` in {uc_path}")
             continue
         included_uc.append(path)
-        add(embed(body, uc_path, 1))
+        add(embed(body, app_center_rel(uc_path), 1))
         add("")
 
     if own_brs:
@@ -533,7 +762,7 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
                 )
                 continue
             add(f"<!-- 权威位置: {uc_path}#{br_id.lower()} -->")
-            add(embed(block, uc_path, 0))
+            add(embed(block, app_center_rel(uc_path), 0))
             add("")
 
     external_included: dict[str, list[str]] = {}
@@ -554,10 +783,11 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
                     continue
                 external_included[path].append(br_id)
                 add(f"<!-- 权威位置: {path}#{br_id.lower()} -->")
-                add(embed(block, path, 0))
+                add(embed(block, app_center_rel(path), 0))
                 add("")
 
     adr_included = render_adr_sections(spec_adrs, adrs, add, problems)
+    shared_included = render_shared_sections(shared_records, add, problems)
 
     add("## 未纳入本 brief 的源小节")
     add("")
@@ -584,18 +814,28 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
         )
         if omitted:
             add(f"- `{adr_id}`（{meta['path']}）：" + "、".join(omitted))
+    for record in shared_records:
+        omitted = collapse_omitted(
+            [p for p in section_paths(record["text"]) if p not in shared_included.get(record["rel"], [])]
+        )
+        if omitted:
+            add(f"- `{record['rel']}`（docs 根级共享文档）：" + "、".join(omitted))
     add("")
 
     add("## 溯源")
     add("")
     add("| 文件 | 行数 | sha256 |")
     add("| --- | --- | --- |")
-    source_paths = [uc_path]
+    sources: list[tuple[str, Path]] = []
+    seen_sources: set[Path] = set()
+    add_unique_source(sources, seen_sources, uc_path, DOCS / uc_path)
     for path in list(external_sources) + [adrs[a]["path"] for a in sorted(spec_adrs) if a in adrs]:
-        if path not in source_paths:
-            source_paths.append(path)
-    for path in source_paths:
-        add(f"| `{path}` | {len(read_doc(path).splitlines())} | `{short_hash(DOCS / path)}` |")
+        add_unique_source(sources, seen_sources, path, DOCS / path)
+    for record in shared_records:
+        add_unique_source(sources, seen_sources, record["rel"], record["path"])
+    rows, total_lines, total_bytes, total_tokens = source_metrics(sources)
+    for display, actual, text in rows:
+        add(f"| `{display}` | {len(text.splitlines())} | `{short_hash(actual)}` |")
     add("")
 
     brief = "\n".join(lines).rstrip() + "\n"
@@ -603,10 +843,10 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
         "brief_lines": len(brief.splitlines()),
         "brief_bytes": len(brief.encode("utf-8")),
         "brief_tokens": estimate_tokens(brief),
-        "baseline_lines": sum(len(read_doc(p).splitlines()) for p in source_paths),
-        "baseline_bytes": sum(len(read_doc(p).encode("utf-8")) for p in source_paths),
-        "baseline_tokens": sum(estimate_tokens(read_doc(p)) for p in source_paths),
-        "source_paths": source_paths,
+        "baseline_lines": total_lines,
+        "baseline_bytes": total_bytes,
+        "baseline_tokens": total_tokens,
+        "source_paths": [display for display, _ in sources],
         "own_brs": own_brs,
         "external_brs": external_brs,
     }

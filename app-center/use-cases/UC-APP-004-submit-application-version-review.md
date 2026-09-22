@@ -215,9 +215,25 @@ ApplicationReview 保存校验所依据的 scopeCatalogRevision。它用于审�
 可提交的 launchUrl 必须：
 
 - 使用 `https`，且不含 userinfo。
-- host 不是 localhost、`.localhost`、`.local` 或内部保留名称。
+- host 不是字面 IPv4/IPv6 地址。域名先按 non-transitional UTS #46 Lookup
+  processing 转为 ASCII A-label；转换失败、空 label、或移除一个表示 DNS root
+  的末尾 `.` 后仍含末尾 `.` 时不可提交。
+- 规范化后的域名不是 IANA Special-Use Domain Names registry
+  `2026-05-22` 快照中的名称或其子域。该快照包含 `localhost`、`.local`、
+  `example`、`invalid`、`test`、`onion`、`alt`、`home.arpa` 及 registry
+  中列出的其它专用名称。
 - DNS 至少解析出一个地址，且所有 A/AAAA 结果都是允许访问的公网地址。
-- 不解析到 private、loopback、link-local、unspecified、multicast、documentation、benchmark、CGNAT 或其他 special-use 地址。
+- 不解析到 IANA IPv4/IPv6 Special-Purpose Address registries `2025-10-09`
+  快照中的任何前缀，也不解析到 private、loopback、link-local、unspecified、
+  multicast、documentation、benchmark、CGNAT 或其它非 global-unicast 地址。
+- IPv6 结果还必须位于 IANA 当前分配为 Global Unicast 的 `2000::/3`；其它
+  IETF reserved IPv6 space 即使通用语言库把它分类为 unicast，也不能视为公网入口。
+
+以上 registry 日期是 `submit-v1` 的冻结输入，不在运行时读取。IANA registry
+变化时，必须显式更新 denylist 与测试，并分配新的 preflightPolicyVersion；不能在
+相同 policy version 下静默改变已记录审核的解释。即使 registry 把某个
+special-purpose 地址标为 globally reachable，本策略仍拒绝它，因为它不是普通公网
+Application 入口地址。
 
 本用例只做地址策略和 DNS 预检，不向目标发送 HTTP 请求，也不跟随重定向。未来若加入自动抓取或扫描，必须在每次连接及每次重定向前重新解析和校验地址，不能把本次预检当作永久 SSRF 保证。
 

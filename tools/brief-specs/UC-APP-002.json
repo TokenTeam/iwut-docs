@@ -1,0 +1,27 @@
+{
+  "uc": "UC-APP-002",
+  "note": "Scope mirrors the UC-APP-002 delivery work package: Domain, UseCase, MongoDB persistence and the Scope Catalog cache are CORE_COMPLETE, so this brief targets the remaining delivery surface (API, Transport, Composition Root) while keeping the authoritative BR blocks that the adapter must not violate. ADR-001 is capability-specific to scope resolution and is selected here; ADR-002 (publication partition) belongs to the publication UCs and is deliberately not selected. Cross-cutting ADRs (003/004/005) live in the engineering baseline. Legacy-implementation observations stay reachable through the omission index.",
+  "uc_sections": [
+    "目标与范围",
+    "输入与身份",
+    "主流程",
+    "异常流程",
+    "API 草图",
+    "测试与验收",
+    "后续接口工作"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-001": ["决定/权威来源", "决定/第一阶段缓存"]
+  },
+  "shared_sections": {
+    "platform/contracts/auth-scope-catalog-v1.md": [
+      "gRPC 方法",
+      "快照语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求"
+    ]
+  }
+}

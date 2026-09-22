@@ -1,6 +1,6 @@
 # UC-APP-006：将被拒绝的应用版本恢复为草稿
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -133,6 +133,13 @@ restoredBy、restoredAt、resultVersionRevision 和最终 reviewStatus 不能由
 - 持久化失败：内部失败，不产生部分恢复。
 
 路径关系不匹配统一返回 NotFound，不泄露其他应用或版本的审核记录。所有失败都保持 Review 和 Version 不变。
+
+多个条件同时不满足时，为保证错误 reason 和契约测试稳定，Repository 按以下优先级
+分类：`NotFound` → `NotAdmin` → `NotLatest` → `AlreadyRestored` →
+`NotRejected` → `RevisionConflict` → `StateInconsistent`。因此对最新且已经恢复的
+Review 重试，即使 Version 已经是 DRAFT 或旧 expectedVersionRevision 已经过期，也返回
+`ApplicationReviewAlreadyRestored`；历史 attempt 始终先返回
+`ApplicationReviewNotLatest`。
 
 ## 业务规则
 
@@ -287,11 +294,14 @@ UC-APP-006 不增加 collection。`application_reviews` 增加一次性、可空
 | `draftRestoration.restoredAt` | 恢复时间 | datetime | UTC / RFC 3339 | no | no when draftRestoration exists |
 | `draftRestoration.resultVersionRevision` | 恢复后的 Version revision | int64 | `>= 1`；等于恢复前 revision + 1 | no | no when draftRestoration exists |
 
-validator 必须保证：
+schema validator 必须保证：
 
 - draftRestoration 为 null，或三个子字段完整存在。
 - 只有 status=`REJECTED` 且 decision.outcome=`REJECTED` 的 Review 可以拥有 draftRestoration。
-- draftRestoration 创建后不可修改。
+
+MongoDB schema validator 不能比较更新前后的 document，因此“一旦创建不可修改”由
+Repository 的 `draftRestoration=null` 条件更新、同一事务中的完整复检以及该 collection
+的单一写入口共同保证；不得提供覆盖或清空 draftRestoration 的通用 Repository 方法。
 
 `application_versions` 不增加字段。本用例更新 reviewStatus、revision、updatedBy 和 updatedAt。
 
@@ -399,3 +409,8 @@ UC-APP-007：将 APPROVED ApplicationVersion 放入 test 发布槽位
 
 - 2026-09-15：建立 UC-APP-006；以最新 rejected review 为恢复对象，新增一次性 draftRestoration 审计，并原子执行 `REJECTED -> DRAFT`。
 - 2026-09-15：后续 UC-APP-007 选择由当前管理员按 rpcApiMajor 设置 test 槽位，审核闭环与发布边界保持分离。
+- 2026-09-21：明确冲突错误分类优先级，并区分 schema 结构校验与 Repository
+  对 draftRestoration 一次性写入的并发保护职责。
+- 2026-09-21：完成设计检查；确认本用例只依赖已有可信 DeveloperIdentity 和 App
+  Center 本地事务边界，不依赖在线 Auth、Scope Catalog、URL 预检或审核策略，设计进入
+  `ACCEPTED`。

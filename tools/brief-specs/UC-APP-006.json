@@ -1,0 +1,34 @@
+{
+  "uc": "UC-APP-006",
+  "note": "Scope covers the complete UC-APP-006 delivery slice: explicit REJECTED-to-DRAFT restoration, immutable restoration audit, MongoDB transaction and migration, resource-oriented Proto/API, trusted developer identity, composition root and real E2E. UC-APP-006 deliberately has no Scope Catalog, URL preflight, review policy or live Auth status dependency. Cross-cutting dependency boundaries, MongoDB transaction/migration rules and error mapping remain in the engineering baseline.",
+  "uc_sections": [
+    "目标与范围",
+    "输入与身份",
+    "主流程",
+    "异常流程",
+    "最小领域行为",
+    "用例端口",
+    "数据模型变化",
+    "API 草图",
+    "测试与验收",
+    "迁移说明"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

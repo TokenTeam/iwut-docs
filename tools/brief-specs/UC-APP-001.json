@@ -1,0 +1,19 @@
+{
+  "uc": "UC-APP-001",
+  "note": "Scope mirrors the UC-APP-001 API Transport work package declaration. Domain, UseCase and MongoDB behavior are already CORE_COMPLETE, so this transport brief deliberately does not repeat their full BR blocks or implementation ports. It keeps the identity input, stable failures, public API and acceptance surface needed by the adapter; omitted core rules remain reachable through the source index. ADR-006 is capability-specific to transport packages and is selected here; ADR-005 is already in the engineering baseline. Cross-system identity and routing formats come from platform/ contracts selected in shared_sections.",
+  "uc_sections": [
+    "输入与身份",
+    "异常流程",
+    "API 草图",
+    "测试与验收/API 测试"
+  ],
+  "include_own_brs": false,
+  "include_external_brs": false,
+  "adr_sections": {
+    "ADR-006": ["决定", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/app-center-api-routing.md": ["路由映射", "gRPC-Web 终止", "契约测试要求"],
+    "platform/contracts/trusted-identity-v1.md": ["传输载体", "JOSE Header", "Claims", "时间与有效期", "校验顺序", "错误边界", "密钥与轮换"]
+  }
+}

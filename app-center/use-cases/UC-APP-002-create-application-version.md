@@ -112,7 +112,7 @@ applicationId、reviewStatus、sequence、versionId、createdBy、createdAt、re
 1. 从可信身份上下文取得 authId 和 developerStatus。
 2. 确认 developerStatus 为 `APPROVED`。
 3. 校验 versionLabel、launchUrl、RPC range、capabilities 和 scopes。
-4. 通过 ScopeCatalog port 确认所有 scope 当前允许被新版本申请；生产组装最终使用 ADR-001 定义的带本地有界缓存 adapter。
+4. 通过 ScopeCatalog port 确认所有 scope 当前允许被新版本申请；生产组装最终使用 ADR-001 定义的带本地有界缓存 adapter，其快照源调用 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)。
 5. 生成 UUIDv7 versionId，并取得 UTC createdAt；初始化 revision 为 1、updatedBy 为 createdBy、updatedAt 为 createdAt。
 6. Repository 在同一个原子操作中：
    - 确认 Application 存在且 adminId 仍等于调用者 authId。
@@ -206,7 +206,7 @@ URL 只表示登记的入口。对于自托管网页，App Center 不能因为 U
 
 Scope Catalog 的权威来源是 Auth。UC-APP-002 使用 App Center 进程内的 read-through cache；TTL 由 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL` 配置，使用 Go duration 文本，未设置时默认 `5m`。显式配置为空、无法解析、为零或负数时服务启动失败。缓存过期时同步读取 Auth，读取失败则 fail closed。当前不为这一份低频小目录单独引入 RabbitMQ 或 Redis。详细一致性方案见 [ADR-001](../adr/ADR-001-scope-catalog-cache.md)。
 
-Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRPC 形状。Cache adapter 通过构造参数接收 TTL、Clock 与窄的 Auth snapshot source；只有测试使用 fake/mock，生产代码不得提供硬编码 Scope 目录。真实 Auth transport 在 Auth 接口确定后实现。
+Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRPC 形状。Cache adapter 通过构造参数接收 TTL、Clock 与窄的 Auth snapshot source；只有测试使用 fake/mock，生产代码不得提供硬编码 Scope 目录。真实 Auth transport 实现根级 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)，提供方行为由 [UC-AUTH-001](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) 拥有。
 
 <a id="br-ver-008"></a>
 ### BR-VER-008：初始生命周期
@@ -407,7 +407,7 @@ API 测试：
 
 ## 后续接口工作
 
-Auth Scope Catalog 快照读取接口及单调递增 revision 的具体 transport 契约仍需在 Auth 设计后确认。这不阻塞当前 Domain/UseCase 核心：核心只依赖返回 `ScopeCatalogRevision` 的 port；进程内 cache adapter 已实现并使用可控 fake source 测试，生产 Auth transport 未就绪时不得用硬编码目录替代。
+Auth Scope Catalog 快照读取已经建立提供方 [UC-AUTH-001](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md)、根级 [v1 共享契约](../../platform/contracts/auth-scope-catalog-v1.md)、可执行 Proto，以及使用临时硬编码目录的真实 Kratos gRPC provider 纵切。当前仍未闭合内部服务身份与 allowlist、MongoDB 权威目录及 App Center consumer 跨服务 E2E；在这些工作完成前，测试可以调用该 provider 验证生成接口，但生产组装不得把硬编码目录当作 Auth 权威来源。
 
 ## 迁移说明
 
@@ -424,3 +424,4 @@ Auth Scope Catalog 快照读取接口及单调递增 revision 的具体 transpor
 - 2026-09-19：确认 capability 由客户端 RPC 契约负责，采用小写 ASCII 点分名称和 `.v<正整数>` 后缀；当前无在线 Capability Catalog。Scope Catalog 核心仅定义 port，Auth transport 与 5 分钟 cache adapter 拆为后续工作包。
 - 2026-09-20：Scope Catalog cache TTL 由 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL` 配置，默认 `5m`；cache adapter 保持独立于真实 Auth transport。
 - 2026-09-20：设计进入 `ACCEPTED`；Domain、UseCase、MongoDB 持久化、Scope Catalog cache 及事务集成测试达到 `CORE_COMPLETE`，真实 Auth transport、API Transport、Composition Root 与端到端验证单独跟踪。
+- 2026-09-21：建立提供方 UC-AUTH-001 与根级 Auth Scope Catalog v1 共享契约；内部服务身份、Proto 与真实 provider 继续单独闭合。

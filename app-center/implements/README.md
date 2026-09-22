@@ -26,11 +26,12 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 | Use Case | 设计状态 | 实现状态 | 已闭合 | 尚未闭合 |
 | --- | --- | --- | --- | --- |
-| [UC-APP-001](../use-cases/UC-APP-001-create-application.md) | `ACCEPTED` | `CORE_COMPLETE` | Domain、UseCase、MongoDB Repository、配置注入、事务与并发集成测试 | API Transport、Composition Root、端到端测试 |
-| [UC-APP-002](../use-cases/UC-APP-002-create-application-version.md) | `ACCEPTED` | `CORE_COMPLETE` | Domain、UseCase、MongoDB Repository、Scope Catalog cache、事务与并发集成测试 | 真实 Auth transport、API Transport、Composition Root、端到端测试 |
-| [UC-APP-003](../use-cases/UC-APP-003-update-draft-application-version.md) | `ACCEPTED` | `CORE_COMPLETE` | Domain、UseCase、MongoDB Repository、显式 migration、事务与管理员转让并发集成测试 | 真实 Auth transport、API Transport、Composition Root、端到端测试 |
-| [UC-APP-004](../use-cases/UC-APP-004-submit-application-version-review.md) | `ACCEPTED` | `CORE_COMPLETE` | Domain、UseCase、MongoDB Repository、ApplicationReview migration、事务与管理员转让并发集成测试 | 真实 Auth transport、真实公网 HTTPS 预检、API Transport、Composition Root、端到端测试 |
-| [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `CORE_COMPLETE` | Domain、UseCase、MongoDB Repository、0005 migration、System 自动拒绝、事务与并发集成测试 | 真实 Auth/ConfCenter/暂停检查/公网 URL adapters、API Transport、Composition Root、端到端测试 |
+| [UC-APP-001](../use-cases/UC-APP-001-create-application.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、MongoDB Repository、配置注入、事务与并发集成测试、Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、本地 Wire Composition Root、真实 MongoDB 端到端测试 | — |
+| [UC-APP-002](../use-cases/UC-APP-002-create-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、Scope Catalog cache、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、真实 MongoDB consumer E2E | 平台内部服务身份与 allowlist、Auth MongoDB 权威目录、带生产身份的完整跨服务 E2E |
+| [UC-APP-003](../use-cases/UC-APP-003-update-draft-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、显式 migration、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、真实 JWS 与 MongoDB consumer E2E | 平台内部服务身份与 allowlist、Auth MongoDB 权威目录、带生产身份的完整跨服务 E2E |
+| [UC-APP-004](../use-cases/UC-APP-004-submit-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、ApplicationReview migration、事务与管理员转让并发集成测试、生成 Auth gRPC client、DNS-only 公网 HTTPS 预检、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、真实 JWS 与 MongoDB consumer E2E | 平台内部服务身份与 allowlist、Auth MongoDB 权威目录、带生产服务身份的完整跨服务 E2E |
+| [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、决定与本地不可变策略 MongoDB Repository、0005/0007 migrations、System 自动拒绝、事务与并发集成测试、trusted-identity-v1 reviewer permissions、Auth Developer Status consumer、资源化 Proto、Kratos HTTP/gRPC Transport、System Auth ID 配置、Wire Composition Root、真实 Reviewer JWS/MongoDB/Kratos/测试 Auth Server E2E | 平台内部服务身份与 allowlist、Auth 的 reviewer 权限签发/撤销生命周期与 SYSTEM principal provision、带生产服务身份的完整双服务 E2E |
+| [UC-APP-006](../use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、0006 migration、MongoDB 原子 Repository、资源化 Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、Wire Composition Root、真实 MongoDB 事务/并发集成测试与端到端测试 | — |
 
 没有在本文中激活下一个实现工作包。具体任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -117,12 +118,10 @@ brief 未覆盖、或两条权威规则冲突时，不要自行发明：产出�
 
 ## 已知的后续交付事项
 
-以下事项不影响 UC-APP-001 至 UC-APP-005 保持 `ACCEPTED / CORE_COMPLETE`，但对应实现完成前不能把它们标记为 `COMPLETE`：
+UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程组装和端到端验证。以下事项不影响 UC-APP-002 至 UC-APP-005 保持各自已登记的设计与实现状态，但对应实现完成前不能把它们标记为 `COMPLETE`：
 
-- Proto 字段编号和 HTTP 路径。
-- Auth 的具体传输协议。
-- ConfCenter 的 VersionReviewPolicy 契约、正式策略与历史版本 adapter。
-- Developer suspension 和 System Auth ID 的真实 Auth adapter/启动配置。
+- 平台内部服务身份与 allowlist。
+- Auth 的 reviewer 权限签发/撤销生命周期，以及 System principal provision。
 - Grey、Stable、Filter 和 Catalog 的后续设计。
 - CI/CD、可观测性和生产部署。
 
