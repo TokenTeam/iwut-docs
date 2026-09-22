@@ -238,14 +238,15 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `nbf` | number（Unix 秒） | 是 | 生效时间 |
 | `exp` | number（Unix 秒） | 是 | 失效时间 |
 | `jti` | string | 是 | 该 token 的唯一标识；非空 |
-| `developer_status` | string | 条件必需 | Developer 用例必需；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED` 之一 |
+| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED` 之一；普通用户省略 |
 | `permissions` | array&lt;string&gt; | 条件必需 | 权限用例必需；元素必须是非空、无首尾 whitespace 的唯一字符串，按精确字符串匹配；未知权限可以透传但不能产生隐式授权 |
 
-`sub` 是身份主体，不是 `uid` 的同义词；当 Auth 的内部用户标识与 `authId` 不同时，以 `authId` 为准。`developer_status` 表达 Auth 权威给出的开发者资格结果，而不是 token 类型。`permissions` 表达 Auth 在签发时授予该主体、且绑定本 token audience 的原子权限集合；App Center 当前只消费精确值 `app.version.review`。
+`sub` 是身份主体，不是 `uid` 的同义词；当 Auth 的内部用户标识与 `authId` 不同时，以 `authId` 为准。`developer_status` 表达 Auth 权威给出的开发者资格结果，而不是 token 类型；字段缺失表示该主体是尚未进入 Developer 生命周期的普通用户，不表示 token 或身份无效。`permissions` 表达 Auth 在签发时授予该主体、且绑定本 token audience 的原子权限集合；App Center 当前只消费精确值 `app.version.review`。
 
 消费方先验签并构造通用可信身份，再由具体入口要求自己的能力字段：
 
-- Developer 入口缺少 `developer_status` 时按身份不满足该入口要求拒绝，不能把缺失解释为任一状态。
+- Developer 入口缺少 `developer_status` 时，可信用户身份仍然有效，但不具备 Developer
+  能力；UseCase 按授权失败拒绝，不能把缺失解释为 `PENDING` 或认证失败。
 - Reviewer 决定入口缺少 `permissions` 或不含 `app.version.review` 时按权限不足拒绝；Reviewer 不需要 `developer_status`。
 - 同一主体可以同时携带两类字段，但任一字段都不能替代另一类字段。
 - 已按旧版 v1 签发、只含合法 `developer_status` 的 Developer token 继续有效；增加 `permissions` 不改变既有字段含义。
@@ -283,7 +284,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - 认证失败返回消费能力自己的稳定 reason；Developer 入口继续使用 `ERROR_REASON_DEVELOPER_IDENTITY_REQUIRED` / `ERROR_REASON_INVALID_DEVELOPER_IDENTITY`，Reviewer 决定入口使用 `ERROR_REASON_REVIEWER_IDENTITY_REQUIRED` / `ERROR_REASON_INVALID_REVIEWER_IDENTITY`。客户端按 reason 区分，不解析 message。
 - 认证失败的 message 不得回显 token、公钥、kid、时钟细节或底层 crypto 错误。内部日志可保留 cause，但不得记录完整 JWS。
 - 认证失败先于业务校验发生；身份未通过时不进入 UseCase，也不产生配额或写入副作用。
-- `developer_status` 本身合法但不是 `APPROVED`，或可信 Reviewer 身份不含目标权限，属于**授权失败**，由 UseCase 决定，映射为 HTTP `403` / gRPC `PERMISSION_DENIED`，不属于本契约的认证失败。
+- `developer_status` 缺失、或存在但不是 `APPROVED`，以及可信 Reviewer 身份不含目标权限，
+  都属于**授权失败**，由 UseCase 决定，映射为 HTTP `403` / gRPC
+  `PERMISSION_DENIED`，不属于本契约的认证失败。
 
 #### 密钥与轮换
 
@@ -310,4 +313,4 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-001-create-application.md` | 311 | `31447bdac209` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `2595342af7cd` |
-| `platform/contracts/trusted-identity-v1.md` | 130 | `d77952c6191c` |
+| `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |

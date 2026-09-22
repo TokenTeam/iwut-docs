@@ -94,7 +94,8 @@ developer_status、测试 fixture 或其它服务数据库不能替代本查询�
 首版只公开 `PENDING/APPROVED/REJECTED/SUSPENDED`。UC-APP-005 只把
 `SUSPENDED` 判断为暂停，但 Auth 返回完整枚举，让消费方不需要用 bool 掩盖未知状态。
 
-System principal 不具有 Developer 状态，不能作为本查询的成功结果。
+普通 USER 可以不是 Developer，此时 `developerStatus = null`；SYSTEM principal 也不具有
+Developer 状态。两者都不能作为本查询的成功结果，且不得被伪装成 `PENDING`。
 
 <a id="br-dev-005"></a>
 ### BR-DEV-005：内部读取边界
@@ -110,7 +111,7 @@ Auth Center 使用 `auth_principals` collection 保存最小主体事实：
 | --- | --- | --- |
 | `authId` | string | 全局唯一；1–200 UTF-8 bytes；opaque |
 | `principalType` | string enum | `USER` 或 `SYSTEM` |
-| `developerStatus` | string enum / null | USER 必须为四种合法状态；SYSTEM 为 null |
+| `developerStatus` | string enum / null | 普通 USER 可以为 null；进入 Developer 生命周期的 USER 必须为四种合法状态；SYSTEM 必须为 null |
 | `createdAt` | datetime | UTC；创建后不可修改 |
 | `updatedAt` | datetime | UTC；状态变化时更新 |
 
@@ -128,7 +129,7 @@ Developer 状态迁移和审计由后续 Auth UC 定义。
 - 输入顺序与输出顺序一致。
 - PENDING、APPROVED、REJECTED、SUSPENDED 均能无损返回。
 - 空、过量、超长和重复 Auth ID 在 Repository 前失败。
-- 任一未知、SYSTEM 或损坏记录使整个请求失败，不返回部分结果。
+- 任一未知、普通非 Developer USER、SYSTEM 或损坏记录使整个请求失败，不返回部分结果。
 - MongoDB 读取失败映射为 `DeveloperStatusUnavailable`。
 - Mongo repository 使用一次批量查询，不进行逐 ID N+1 查询。
 - Provider E2E 使用真实 MongoDB、Kratos gRPC listener 和生成 client。
@@ -145,3 +146,5 @@ Developer 状态迁移和审计由后续 Auth UC 定义。
 
 - 2026-09-21：建立批量 Developer 状态读取，为 UC-APP-005 暂停门禁提供
   fail-closed 的 Auth 权威查询。
+- 2026-09-22：确认 Developer 是 USER 的可选属性；普通用户的 `developerStatus` 为 null，
+  Developer Status 查询对其返回 NotFound。

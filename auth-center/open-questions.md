@@ -26,6 +26,10 @@ UC-AUTH-002 只读取 `auth_principals`。普通用户主体如何创建、Devel
 审批、暂停和恢复，以及相关审计由后续命令 UC 定义；生产不能通过直接修改 MongoDB
 替代这些业务行为。
 
+Developer 是 USER principal 的可选属性。普通用户的 `developerStatus` 为 null；只有申请
+进入 Developer 生命周期后才取 `PENDING/APPROVED/REJECTED/SUSPENDED`。主体建立与
+Developer 申请不能被合并成同一个隐式动作。
+
 ### System principal
 
 UC-APP-005 需要稳定的 System Auth ID 记录自动拒绝。Auth Center 应通过独立的
