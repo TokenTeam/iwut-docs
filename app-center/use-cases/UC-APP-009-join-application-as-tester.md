@@ -26,7 +26,7 @@
 - 选择 test Version、检查 rpcApiVersion/capabilities 或改变发布槽位。
 - 要求 Application 已经存在 test 槽位。
 
-扫码、点击链接和深链跳转只是取得 joinLinkId 与 secret 的入口交互。真正的 Tester 资格只在本用例成功提交 Membership 后成立。
+扫码、点击链接和深链跳转只是取得 joinLinkId 与 secret 的入口交互。前端扫码后使用当前用户的登录认证凭证发起本用例的加入请求；扫码与加入的职责边界见 [UC-APP-008](UC-APP-008-create-or-rotate-tester-join-link.md#前端扫码与加入边界)。真正的 Tester 资格只在本用例成功提交 Membership 后成立。
 
 ## 业务边界
 
@@ -377,7 +377,7 @@ API 与安全测试：
 ## 实现前需要确认
 
 - MongoDB 中 activeTesterCount 与 partial unique Membership 的具体原子实现，以及事务重试边界。
-- joinUrl 的客户端落地页如何从 URL 安全取得 secret，并放入请求正文而不经过第三方统计或日志。
+- 前端扫码解析后的凭证保护与接入验证：从 joinUrl 取得 secret，放入加入请求正文，并按 BR-TST-019 避免进入统计或日志；不要求建设独立落地页。用户登录凭证到后端可信身份的生产链路仍按现有平台契约独立交付。
 
 ## 后续用例
 
@@ -394,3 +394,5 @@ UC-APP-010 已具体化为 [管理员移除 Application Tester](UC-APP-010-remov
 - 2026-09-16：建立 UC-APP-009；任何已认证用户可通过有效链接取得 Application 级 Tester Membership，重复加入幂等，容量原子受限，被移除后可重新加入。
 - 2026-09-16：确认每个 Application 的 ACTIVE Tester 上限固定为 100，当前不引入可调整容量策略。
 - 2026-09-16：由 UC-APP-010 确认 Membership 按 episode 移除、REMOVED 为终态且释放容量；移除不撤销加入链接或形成黑名单。
+
+- 2026-09-22：明确由前端扫码后携带用户认证凭证发起加入请求，引用 UC-APP-008 的入口职责；请求正文仍只接受 secret，用户身份从认证上下文取得。

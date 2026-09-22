@@ -42,6 +42,15 @@ Application
 
 当前版本不设置自动过期时间：链接保持有效，直到管理员轮换或在后续用例中显式撤销。为缩小泄露影响，每个 Application 同时最多只有一个 `ACTIVE` 链接。
 
+## 前端扫码与加入边界
+
+joinUrl 由前端扫码读取和解析，前端取得 joinLinkId 与 secret 后，携带当前用户的登录认证凭证调用 [UC-APP-009](UC-APP-009-join-application-as-tester.md#输入与身份)。App Center 根据该用例验证加入凭证并创建 Membership。
+
+“携带用户信息”指通过认证链路建立可信用户身份；请求正文不接受前端自行指定的 authId 或用户资料作为身份依据。客户端到 Gateway 的登录认证与后端可信身份载体遵循现有 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)，不因扫码另建一套身份协议。
+
+本流程不要求 App Center 提供可直接访问的扫码落地 GET 接口，也不要求先建设独立 Web 落地页。扫码/解析本身不产生 Membership。URL builder 与前端需共享明确的凭证编码格式；部署 base URL 不进入领域模型，凭证保护遵循 BR-TST-004、BR-TST-008。
+
+
 ## 输入与身份
 
 路径参数：
@@ -369,7 +378,7 @@ API 与安全测试：
 ## 实现前需要确认
 
 - MongoDB 部署是否支持旧链接撤销与新链接插入所需的事务；如果不支持，需要能证明等价原子性的存储设计。
-- 正式 tester join base URL/deep-link 归属及所有入口层的凭证脱敏策略。
+- 前端负责扫码解析已确认；URL builder 与前端共同使用的 joinLinkId/secret 编码格式，以及 BR-TST-008 的入口凭证保护仍需在实际接入时确定。base URL/deep-link 的部署值由配置提供，不作为领域实现的前置条件。
 
 Tester 数量上限、重复加入语义和加入时的身份校验见 [UC-APP-009](UC-APP-009-join-application-as-tester.md)：任意已登录用户可自助加入，ACTIVE Membership 重复加入幂等，容量在加入事务中原子检查。
 
@@ -389,3 +398,5 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 - 2026-09-16：建立 UC-APP-008；Tester 资格与加入链接均属于 Application，不绑定 RPC major；采用一个 ACTIVE 链接、哈希存储、显式轮换且不自动创建 Membership。
 - 2026-09-16：由 UC-APP-009 确认任意已登录用户可自助加入、重复加入幂等、容量原子受限，链接创建本身仍不检查或占用名额。
 - 2026-09-16：由 UC-APP-011 增加 REVOKED/MANUAL 终态；显式撤销不创建替代链接，也不改变 ROTATED 轮换语义。
+
+- 2026-09-22：确认前端扫码解析 joinUrl，携带当前用户认证凭证调用 UC-APP-009；不要求 App Center 提供扫码落地页或 GET 加入接口，用户身份仍来自可信认证上下文。
