@@ -25,6 +25,8 @@
 
 ## 与 brief 生成的关系
 
+当前 App 设备认证与 Session 的跨端格式见 [auth-device-session-v1](contracts/auth-device-session-v1.md)，包括公钥、签名输入、学号关联声明、Session 载体、RPC 鉴权表及公开测试向量。Auth 自有业务和存储规则仍由对应 UC 拥有。
+
 平台共享文档默认**不进入 engineering baseline**。只有某个 per-UC spec 在 `shared_sections` 里显式选择时，才会被抽取进那一份 brief：
 
 ```json

@@ -11,13 +11,17 @@
 | `app-center/query-contracts/` | 读模型语义 | **权威** |
 | `app-center/*.md`（README、vision、domain-model 等） | 规范与摘要 | 规范性以其中的 `BR-*` / `ADR-*` 引用为准 |
 | `auth-center/use-cases/UC-*.md` | Auth UC 正文，内含 `BR-*` 权威定义 | **权威** |
+| `auth-center/query-contracts/` | Auth 用户侧读模型语义 | **权威**，引用对应 UC/BR，不重定义业务规则 |
+| `auth-center/client-guides/` | 官方客户端的组合流程与体验建议 | **非权威**，引用 Auth UC/BR，不定义服务端业务规则 |
 | `auth-center/design-registry.md` | Auth Center 的 UC / BR 索引 | 索引，不复制规则正文 |
 | `auth-center/implements/` | Auth Center 实现覆盖与工作包状态 | 实现导航，不改变业务语义 |
 | `platform/` | 跨 bounded context 的共享决定与契约（信任、路由、gRPC-Web 等） | **权威**，放置边界见 `platform/README.md`；不登记进 app-center registry |
 | `app-center/briefs/*.md` | **生成物**，工作包设计输入 | **非权威**，冲突时以源文件为准 |
+| `auth-center/briefs/UC-AUTH-*.md` | **生成物**，Auth 工作包设计输入 | **非权威**，冲突时以源文件为准；README 是维护说明 |
 | `tools/gen_brief.py`、`tools/brief-specs/` | brief 生成器与范围 spec | 工程代码 |
 | `tools/registry.py` | 注册表机械列的生成与漂移检查 | 工程代码 |
 | `tools/tests/` | 生成器自动化测试 | 工程代码 |
+| `tools/auth_protocol_vectors.py` | App 设备认证协议的公开测试向量生成与校验 | 工程代码；测试私钥不得进入生产配置 |
 | `tools/git-hooks/` | 本仓库的 git hooks | 工程代码 |
 
 同一内容不得有两个权威定义。需要复用规则时引用原 ID 与锚点，不复制正文。
@@ -56,7 +60,7 @@
 ^:[a-z0-9_+-]+: (feat|fix|docs|test|refactor|perf|build|ci|chore|revert): .+$
 ```
 
-一个 commit 只承担一个可审查目的。生成物（`app-center/briefs/`）与触发它的源文件放在同一个 commit 中。
+一个 commit 只承担一个可审查目的。生成物（`app-center/briefs/`、`auth-center/briefs/`）与触发它的源文件放在同一个 commit 中。
 
 ## brief 的生成与检查
 
@@ -69,6 +73,9 @@ python3 tools/gen_brief.py --baseline
 # 单个 work package
 python3 tools/gen_brief.py UC-APP-003
 
+# Auth Center 工作包（按前缀选择独立注册表与输出目录）
+python3 tools/gen_brief.py UC-AUTH-005
+
 # 全部 curated brief
 python3 tools/gen_brief.py --all
 
@@ -77,6 +84,8 @@ python3 tools/gen_brief.py --check --all
 ```
 
 **修改任何被 brief 引用的源文件（UC、ADR）后，必须在同一个 commit 中重新生成对应 brief。** pre-commit hook 会校验这一点，不一致即拒绝提交。
+
+`--all` 包含两个 context 的已配置 spec；`--baseline` 仍仅为 App Center 的工程基线。`query_sections` 可显式选择当前 context 的 `query-contracts/` 章节，路径相对 docs 仓库根；它与平台共享文档一样进入来源摘要和漂移检查，不允许跨 context 或通过 symlink 逃出查询目录。
 
 生成是 **fail closed** 的：spec 选中的小节、`BR-*` 或 ADR 章节在源文件中找不到时，生成直接失败并列出全部问题，不会产出残缺 brief。无法解析的设计输入不允许被静默省略。
 
@@ -89,11 +98,16 @@ python3 tools/tests/test_gen_brief_shared.py
 python3 -m unittest discover -s tools/tests
 ```
 
+修改 `platform/contracts/auth-device-session-v1.md` 的编码、算法或向量时，还须运行
+`python3 tools/auth_protocol_vectors.py --check`（需要 Python `cryptography`）。向量位于
+`platform/contracts/test-vectors/auth-device-session-v1.json`；修改向量生成逻辑后用 `--write`
+重新生成，再执行 `--check`。固定私钥仅为公开测试输入，不能作为运行默认值。
+
 ## 注册表检查
 
 `app-center/design-registry.md` 是索引，不是第二权威。它的**机械列**（ID / 标题 / 状态 / 权威位置）与「下一个可分配编号」表由 `tools/registry.py` 生成或校验；人类专属列（`BR-*` 的 `类型`、`备注`、`替代项`）仍手工维护，工具不碰。
 
-`auth-center/design-registry.md` 使用独立的 `UC-AUTH-*` / `BR-SCP-*` 编号空间。当前 `tools/registry.py` 仍只机械检查 App Center；修改 Auth UC/BR 时必须人工同步 Auth registry 和 Next ID，不得把 Auth ID 登记到 App Center registry。
+`auth-center/design-registry.md` 使用独立的 `UC-AUTH-*` 与按能力划分的 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN-*` 编号空间。当前 `tools/registry.py` 仍只机械检查 App Center；修改 Auth UC/BR 时必须人工同步 Auth registry 和 Next ID，不得把 Auth ID 登记到 App Center registry。
 
 ```bash
 # 校验机械列与源文档一致、ID 空间两个方向都闭合
@@ -127,5 +141,6 @@ git config core.hooksPath tools/git-hooks
 ## 不要做
 
 - 不要手工编辑 `app-center/briefs/` 下的文件；改源文件或 `tools/brief-specs/` 后重新生成。
+- 不要手工编辑 `auth-center/briefs/UC-AUTH-*.md`；修改权威源或 spec，再用同一生成器生成。
 - 不要把权威文档复制进代码仓库作为第二权威来源；代码仓库只通过 `AGENTS.md` 引用本仓库。
 - 不要在权威文档里复述其它权威文档已定义的规则；需要引用时链接对应 ID 与锚点。

@@ -1,0 +1,29 @@
+{
+  "uc": "UC-AUTH-006",
+  "note": "Accepted backend delivery: production verifier, Mongo persistence, generated Proto and native gRPC. Client secure storage and Gateway identity issuance are separate deliveries. External BRs and the shared protocol are included as implementation dependencies.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与前置条件",
+    "输入与输出",
+    "主流程",
+    "持久化候选",
+    "异常语义",
+    "测试与验收",
+    "交付依赖与验收边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-device-session-v1.md": [
+      "范围与权威来源",
+      "基础编码",
+      "公钥与签名",
+      "挑战与待签消息",
+      "学号关联声明",
+      "Session 载体",
+      "RPC 鉴权表",
+      "实现配置与验收边界",
+      "测试向量"
+    ]
+  }
+}

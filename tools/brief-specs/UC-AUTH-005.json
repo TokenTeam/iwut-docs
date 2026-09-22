@@ -1,0 +1,32 @@
+{
+  "uc": "UC-AUTH-005",
+  "note": "Accepted user-profile editing slice: typed partial edits, field registry, bounded embedded Mongo profile, concurrency and failure semantics, plus the two supporting queries. Login, public field selection and trusted-identity issuance remain separate delivery dependencies. This full first-delivery brief includes the acceptance cases; it is intentionally broader than a transport-only work package.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与前置条件",
+    "输入",
+    "输出",
+    "主流程",
+    "异常与 transport 映射",
+    "API 与交付依赖",
+    "测试与验收",
+    "非目标"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": false,
+  "query_sections": {
+    "auth-center/query-contracts/user-profile-editing.md": [
+      "身份与范围",
+      "GetOwnProfile",
+      "GetProfileEditingSchema",
+      "页面与冲突恢复",
+      "交付边界"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "错误边界"
+    ]
+  }
+}

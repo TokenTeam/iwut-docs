@@ -8,6 +8,7 @@ sources listed under "溯源" in the generated brief.
 
 Usage (run from the docs repository root):
     python3 tools/gen_brief.py UC-APP-003
+    python3 tools/gen_brief.py UC-AUTH-005
     python3 tools/gen_brief.py --baseline
     python3 tools/gen_brief.py --all
     python3 tools/gen_brief.py --check --all
@@ -36,12 +37,27 @@ DEFAULT_SPEC_DIR = WORKSPACE / "docs" / "tools" / "brief-specs"
 SCRIPT_REL = "tools/gen_brief.py"
 SPECS_REL = "tools/brief-specs"
 
-# App Center registry paths are relative to `app-center/`; shared platform
+# Registry paths are relative to the active bounded context; shared platform
 # sources selected by a spec are relative to the docs repository root. Keeping
 # both conventions lets app-center briefs stay byte-identical while still
 # linking out to `platform/…`.
-APP_CENTER_PREFIX = "app-center"
+CONTEXT_PREFIX = "app-center"
 OUTPUT_REL = "app-center/briefs"
+
+
+def select_context(target: str | None) -> None:
+    """Select one context per CLI target; --baseline remains App Center only."""
+    global DOCS, REGISTRY, CONTEXT_PREFIX, OUTPUT_REL
+    if target is None or re.fullmatch(r"UC-APP-\d+", target):
+        context = "app-center"
+    elif re.fullmatch(r"UC-AUTH-\d+", target):
+        context = "auth-center"
+    else:
+        raise SystemExit(f"unsupported use case id: {target}")
+    CONTEXT_PREFIX = context
+    DOCS = DOCS_REPO / context
+    REGISTRY = DOCS / "design-registry.md"
+    OUTPUT_REL = f"{context}/briefs"
 
 
 class BriefInputError(Exception):
@@ -96,7 +112,7 @@ def load_registry() -> tuple[dict, dict, dict]:
         cells = [cell.strip().replace("`", "") for cell in line.strip().strip("|").split("|")]
         meta = {"title": cells[1], "path": target}
 
-        if rid.startswith("UC-APP-"):
+        if rid.startswith(("UC-APP-", "UC-AUTH-")):
             meta["status"] = cells[2]
             use_cases[rid] = meta
         elif rid.startswith("BR-"):
@@ -113,16 +129,17 @@ def read_doc(rel_path: str) -> str:
     return (DOCS / rel_path).read_text(encoding="utf-8")
 
 
-def app_center_rel(rel_path: str) -> str:
-    """Docs-root-relative form of an App Center registry path."""
-    return f"{APP_CENTER_PREFIX}/{rel_path}"
+def context_rel(rel_path: str) -> str:
+    """Docs-root-relative form of an active-context registry path."""
+    return f"{CONTEXT_PREFIX}/{rel_path}"
 
 
-def resolve_shared_source(rel_path: str) -> tuple[Path | None, str | None]:
+def resolve_shared_source(rel_path: str, *, query: bool = False) -> tuple[Path | None, str | None]:
     """Resolve a docs-root-relative shared source, failing closed.
 
     Returns `(resolved_path, None)` when the path is a canonical, docs-root-
-    relative `platform/…` path to a regular Markdown file, or `(None, problem)`
+    relative `platform/…` path (or the active context's `query-contracts/`
+    when query=True) to a regular Markdown file, or `(None, problem)`
     otherwise. Absolute paths and any `..` segment are rejected outright;
     symlinks are resolved and must still land inside the docs repository, so a
     link cannot smuggle in a file from outside the tree.
@@ -144,8 +161,9 @@ def resolve_shared_source(rel_path: str) -> tuple[Path | None, str | None]:
     canonical = pure.as_posix()
     if rel_path != canonical:
         return None, f"shared source path must be canonical POSIX form `{canonical}`: {rel_path!r}"
-    if not pure.parts or pure.parts[0] != "platform":
-        return None, f"shared source must be under `platform/`: {rel_path!r}"
+    allowed = (CONTEXT_PREFIX, "query-contracts") if query else ("platform",)
+    if pure.parts[:len(allowed)] != allowed:
+        return None, f"shared source must be under `{'/'.join(allowed)}/`: {rel_path!r}"
 
     try:
         root = DOCS_REPO.resolve()
@@ -156,6 +174,12 @@ def resolve_shared_source(rel_path: str) -> tuple[Path | None, str | None]:
         candidate.relative_to(root)
     except ValueError:
         return None, f"shared source path escapes the docs repository root: {rel_path!r}"
+
+    if query:
+        try:
+            candidate.relative_to(root.joinpath(*allowed))
+        except ValueError:
+            return None, f"query source escapes its context's query-contracts directory: {rel_path!r}"
 
     if not candidate.exists():
         return None, f"shared source file not found: {rel_path!r}"
@@ -260,6 +284,10 @@ def rewrite_links(text: str, src_rel: str) -> str:
 
     def replace(match: re.Match) -> str:
         target = match.group(1)
+        if target.startswith("#") and CONTEXT_PREFIX == "auth-center":
+            # A curated brief can omit the destination section, and BR anchors
+            # are stripped when embedding. Resolve to the authoritative source.
+            return f"]({posixpath.relpath(src_rel, str(out_dir))}{target})"
         if target.startswith(("#", "/", "http://", "https://", "mailto:")):
             return match.group(0)
         path, separator, anchor = target.partition("#")
@@ -291,7 +319,7 @@ def first_heading_title(text: str) -> str | None:
     return None
 
 
-def collect_shared_sources(spec_shared: object, problems: list[str]) -> list[dict]:
+def collect_shared_sources(spec_shared: object, problems: list[str], *, query: bool = False) -> list[dict]:
     """Resolve, validate, and read every spec-selected docs-root shared source.
 
     Rendering order is stable: file keys are sorted by their canonical
@@ -299,10 +327,11 @@ def collect_shared_sources(spec_shared: object, problems: list[str]) -> list[dic
     Every problem found is accumulated so one failed generation reports them
     all; a single unreadable source or missing section still fails the build.
     """
+    field = "query_sections" if query else "shared_sections"
     if spec_shared is None:
         return []
     if not isinstance(spec_shared, dict):
-        problems.append("`shared_sections` must be an object mapping a docs-root-relative path to a section list")
+        problems.append(f"`{field}` must be an object mapping a docs-root-relative path to a section list")
         return []
     if not spec_shared:
         return []
@@ -318,9 +347,9 @@ def collect_shared_sources(spec_shared: object, problems: list[str]) -> list[dic
     for raw_rel, sections in sorted(valid_items, key=lambda item: shared_display(item[0])):
         display = shared_display(raw_rel)
         if not isinstance(sections, list) or not sections:
-            problems.append(f"`shared_sections[{display!r}]` must be a non-empty list of section paths")
+            problems.append(f"`{field}[{display!r}]` must be a non-empty list of section paths")
             continue
-        resolved, problem = resolve_shared_source(raw_rel)
+        resolved, problem = resolve_shared_source(raw_rel, query=query)
         if problem is not None:
             problems.append(problem)
             continue
@@ -334,7 +363,7 @@ def collect_shared_sources(spec_shared: object, problems: list[str]) -> list[dic
         for path in sections:
             if not isinstance(path, str) or not path or path != path.strip():
                 problems.append(
-                    f"`shared_sections[{display!r}]` contains an invalid section path: {path!r}"
+                    f"`{field}[{display!r}]` contains an invalid section path: {path!r}"
                 )
                 continue
             if path in included:
@@ -496,12 +525,12 @@ def render_adr_sections(spec_adrs: dict, adrs: dict, add, problems: list[str]) -
             # Normalise depth: a selected `##` section and a selected `###`
             # subsection both land at `####` under the ADR heading.
             source_level = len(path.split("/")) + 1
-            add(embed(body, app_center_rel(meta["path"]), 4 - source_level))
+            add(embed(body, context_rel(meta["path"]), 4 - source_level))
             add("")
     return included
 
 
-def render_shared_sections(records: list[dict], add, problems: list[str]) -> dict[str, list[str]]:
+def render_shared_sections(records: list[dict], add, problems: list[str], *, query: bool = False) -> dict[str, list[str]]:
     """Render spec-selected root-level shared sections and report what made it in.
 
     A shared source is *not* part of the engineering baseline: it only appears
@@ -511,9 +540,12 @@ def render_shared_sections(records: list[dict], add, problems: list[str]) -> dic
     included: dict[str, list[str]] = {}
     if not records:
         return included
-    add("## 平台共享契约（按 spec 显式抽取）")
+    add("## 配套查询契约（按 spec 显式抽取）" if query else "## 平台共享契约（按 spec 显式抽取）")
     add("")
-    add("> 这些是 `docs/` 根下的跨系统共享设计输入，**不进入工程基线**；只有本 spec 显式选择的章节才被抽取。")
+    if query:
+        add("> 这些是当前 bounded context 的查询契约；只有本 spec 显式选择的章节才被抽取。")
+    else:
+        add("> 这些是 `docs/` 根下的跨系统共享设计输入，**不进入工程基线**；只有本 spec 显式选择的章节才被抽取。")
     add("> 与源文件冲突时，仍以 §溯源 中列出的源文件为准。")
     add("")
     for record in records:
@@ -683,6 +715,7 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
     spec_adrs: dict[str, list[str]] = spec.get("adr_sections", {})
     spec_shared: object = spec.get("shared_sections", {})
     shared_records = collect_shared_sources(spec_shared, problems)
+    query_records = collect_shared_sources(spec.get("query_sections"), problems, query=True)
 
     lines: list[str] = []
     add = lines.append
@@ -692,10 +725,10 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
     add(f"# Brief — {uc_id}：{uc['title']}")
     add("")
     if shared_records:
-        add("> **非权威派生制品。** 本文由脚本从 `docs/app-center/` 与 spec 显式选择的 `docs/` 共享文档抽取，只用于给本次工作包提供输入。")
+        add(f"> **非权威派生制品。** 本文由脚本从 `docs/{CONTEXT_PREFIX}/` 与 spec 显式选择的 `docs/` 共享文档抽取，只用于给本次工作包提供输入。")
     else:
         # Keep legacy briefs byte-identical when no shared source is selected.
-        add("> **非权威派生制品。** 本文由脚本从 `docs/app-center/` 抽取，只用于给本次工作包提供输入。")
+        add(f"> **非权威派生制品。** 本文由脚本从 `docs/{CONTEXT_PREFIX}/` 抽取，只用于给本次工作包提供输入。")
     add("> 与源文件冲突时，一律以 §溯源 中列出的源文件为准；不要手工编辑本文，也不要把它当作第二权威。")
     add("")
 
@@ -717,6 +750,8 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
         add("| ADR | —（未在 spec 中声明） |")
     if shared_records:
         add("| 平台共享 | " + "、".join(f"`{record['rel']}`" for record in shared_records) + " |")
+    if query_records:
+        add("| 配套查询 | " + "、".join(f"`{record['rel']}`" for record in query_records) + " |")
     add("")
 
     add("## 遇到 brief 未覆盖的问题")
@@ -748,7 +783,7 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
             problems.append(f"UC section not found: `{uc_id}` → `{path}` in {uc_path}")
             continue
         included_uc.append(path)
-        add(embed(body, app_center_rel(uc_path), 1))
+        add(embed(body, context_rel(uc_path), 1))
         add("")
 
     if own_brs:
@@ -762,7 +797,7 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
                 )
                 continue
             add(f"<!-- 权威位置: {uc_path}#{br_id.lower()} -->")
-            add(embed(block, app_center_rel(uc_path), 0))
+            add(embed(block, context_rel(uc_path), 0))
             add("")
 
     external_included: dict[str, list[str]] = {}
@@ -783,11 +818,12 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
                     continue
                 external_included[path].append(br_id)
                 add(f"<!-- 权威位置: {path}#{br_id.lower()} -->")
-                add(embed(block, app_center_rel(path), 0))
+                add(embed(block, context_rel(path), 0))
                 add("")
 
     adr_included = render_adr_sections(spec_adrs, adrs, add, problems)
     shared_included = render_shared_sections(shared_records, add, problems)
+    query_included = render_shared_sections(query_records, add, problems, query=True)
 
     add("## 未纳入本 brief 的源小节")
     add("")
@@ -820,6 +856,12 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
         )
         if omitted:
             add(f"- `{record['rel']}`（docs 根级共享文档）：" + "、".join(omitted))
+    for record in query_records:
+        omitted = collapse_omitted(
+            [p for p in section_paths(record["text"]) if p not in query_included.get(record["rel"], [])]
+        )
+        if omitted:
+            add(f"- `{record['rel']}`（配套查询契约）：" + "、".join(omitted))
     add("")
 
     add("## 溯源")
@@ -831,7 +873,7 @@ def render(uc_id: str, spec: dict, registry: tuple[dict, dict, dict], problems: 
     add_unique_source(sources, seen_sources, uc_path, DOCS / uc_path)
     for path in list(external_sources) + [adrs[a]["path"] for a in sorted(spec_adrs) if a in adrs]:
         add_unique_source(sources, seen_sources, path, DOCS / path)
-    for record in shared_records:
+    for record in shared_records + query_records:
         add_unique_source(sources, seen_sources, record["rel"], record["path"])
     rows, total_lines, total_bytes, total_tokens = source_metrics(sources)
     for display, actual, text in rows:
@@ -867,6 +909,9 @@ def build(target: str | None, spec: dict, registry: tuple[dict, dict, dict],
           spec_path: Path | None = None) -> tuple[str, dict]:
     """Assemble a brief, failing closed when any selected design input is missing."""
     problems: list[str] = []
+
+    if target is None and "query_sections" in spec:
+        problems.append("`query_sections` belongs to per-UC briefs, not the engineering baseline")
 
     declared = spec.get("uc")
     if target is not None and declared is not None and declared != target:
@@ -904,7 +949,7 @@ def regenerate_command(target: str | None) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("uc", nargs="?", help="use case id, e.g. UC-APP-003 (omit with --baseline or --all)")
+    parser.add_argument("uc", nargs="?", help="use case id, e.g. UC-APP-003 or UC-AUTH-005 (omit with --baseline or --all)")
     parser.add_argument("--baseline", action="store_true", help="target the cross-cutting engineering baseline brief")
     parser.add_argument("--all", action="store_true", help="operate on the baseline and every curated spec")
     parser.add_argument("--check", action="store_true",
@@ -931,11 +976,12 @@ def main() -> int:
             raise SystemExit("a use case id is required unless --baseline or --all is given")
         targets = [args.uc]
 
-    registry = load_registry()
     stale: list[tuple[Path, str, str | None]] = []
     broken: list[tuple[str, list[str]]] = []
 
     for target in targets:
+        select_context(target)
+        registry = load_registry()
         if args.spec:
             spec_path: Path | None = args.spec
         elif args.no_spec:
