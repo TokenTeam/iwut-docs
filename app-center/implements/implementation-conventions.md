@@ -77,7 +77,7 @@ Adapter：
 - 配置加载负责格式、范围与必填关系校验。变量未设置时可以使用文档声明的默认值；变量显式存在但非法时必须阻止进程组装，不得静默回退。
 - 经过校验的标量配置通过构造参数注入消费方，不能把通用配置对象传入 Domain。
 - 改变“初始值”配置只影响之后新建的持久化记录，除非对应 UC 明确授权修改已有业务事实。
-- 当前变量为 `APP_CENTER_INITIAL_APPLICATION_QUOTA`（默认 `10`）和 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL`（默认 `5m`）。新增变量时必须同步更新其所属 UC/ADR 与测试。
+- 当前变量为 `APP_CENTER_INITIAL_APPLICATION_QUOTA`（默认 `10`）和 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL`（默认 `5m`）。Tester 加入 URL 前缀 `APP_CENTER_TESTER_JOIN_URL_PREFIX` 的默认值和校验规则见 [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md#配置与临时入口)。新增变量时必须同步更新其所属 UC/ADR 与测试。
 
 ## 类型与命名
 

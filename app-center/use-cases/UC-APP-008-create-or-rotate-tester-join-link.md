@@ -1,6 +1,6 @@
 # UC-APP-008：创建或轮换 Tester 加入链接
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -48,8 +48,15 @@ joinUrl 由前端扫码读取和解析，前端取得 joinLinkId 与 secret 后�
 
 “携带用户信息”指通过认证链路建立可信用户身份；请求正文不接受前端自行指定的 authId 或用户资料作为身份依据。客户端到 Gateway 的登录认证与后端可信身份载体遵循现有 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)，不因扫码另建一套身份协议。
 
-本流程不要求 App Center 提供可直接访问的扫码落地 GET 接口，也不要求先建设独立 Web 落地页。扫码/解析本身不产生 Membership。URL builder 与前端需共享明确的凭证编码格式；部署 base URL 不进入领域模型，凭证保护遵循 BR-TST-004、BR-TST-008。
+本流程不要求 App Center 提供可直接访问的扫码落地 GET 接口，也不要求先建设独立 Web 落地页。扫码/解析本身不产生 Membership。URL builder 与前端共享 [Tester 加入 URL v1 契约](../../platform/contracts/tester-join-url-v1.md)；部署前缀不进入领域模型，凭证保护遵循 BR-TST-004、BR-TST-008。
 
+## 配置与临时入口
+
+- URL 前缀通过 `APP_CENTER_TESTER_JOIN_URL_PREFIX` 配置；未设置时默认 `https://app.example/tester/join`，作为无需真实页面的 mock 入口。
+- URL 构造与前端解析遵循 [Tester 加入 URL v1 契约](../../platform/contracts/tester-join-url-v1.md#url-格式)，输出必须带齐 joinLinkId 和 secret。仅入口可以是 mock；随机 secret、哈希与存储不使用 mock。
+- 环境变量仅由 config/composition boundary 读取；校验通过的前缀通过构造参数注入 URL builder。显式空值、首尾空白、非绝对 HTTP(S) URL、缺少 host、含 userinfo/query/fragment 或其它 URL 语法错误必须使启动失败，不静默使用默认值。
+- HTTP 前缀允许本地开发入口；当前不检查 DNS、网络可达性或是否部署了页面。前缀变化只影响之后新生成的 joinUrl，不改写已有链接状态或哈希。
+- 本工作包完成标准包含默认 mock 和 env 自定义前缀下的 URL 生成、前端可解析字段及敏感信息边界；真实前端扫码与 UC-APP-009 加入链路独立交付，不阻塞本 UC。
 
 ## 输入与身份
 
@@ -325,7 +332,7 @@ Cache-Control: no-store
     "createdAt": "2026-09-16T12:00:00Z"
   },
   "replacedJoinLinkId": "old-join-link-uuid-or-null",
-  "joinUrl": "https://app.example/tester/join/<opaque-credential>"
+  "joinUrl": "https://app.example/tester/join#joinLinkId=new-join-link-uuid&secret=base64url-encoded-secret"
 }
 ```
 
@@ -374,11 +381,14 @@ API 与安全测试：
 - 响应、访问日志、trace 和错误信息不暴露 tokenHash；除成功响应外不暴露 joinUrl。
 - 旧 joinUrl 在轮换提交后不能再通过未来加入入口取得资格。
 - QR 由客户端根据 joinUrl 生成，服务端不产生或保存图片。
+- 默认 mock URL 和 env 自定义前缀都按共享格式无损携带 joinLinkId/secret；URL 构造不依赖网络，非法显式配置阻止启动。
 
-## 实现前需要确认
+## 实现依赖与交付边界
 
-- MongoDB 部署是否支持旧链接撤销与新链接插入所需的事务；如果不支持，需要能证明等价原子性的存储设计。
-- 前端负责扫码解析已确认；URL builder 与前端共同使用的 joinLinkId/secret 编码格式，以及 BR-TST-008 的入口凭证保护仍需在实际接入时确定。base URL/deep-link 的部署值由配置提供，不作为领域实现的前置条件。
+- 复用既有 Application、可信 DeveloperIdentity、UUIDv7、Clock、Wire 和 MongoDB 事务基础；不依赖 Publication、Membership、Scope Catalog 或新的 Auth 查询。
+- 开发和集成环境使用支持事务的 MongoDB replica set；已验证在唯一部分索引下，同一事务中撤销旧 ACTIVE 链接再插入新 ACTIVE 链接可行。正式实现仍须覆盖全部并发与回滚验收。
+- 最终事务使用既有 Application adapter-only 写入栅栏或等价机制防止管理员转让竞争；不改变 Application 业务字段。
+- URL 的临时入口、环境变量和编码已明确，本工作包可以开始；真实前端接入、生产登录到可信身份链路及 UC-APP-009 不纳入本次实现。
 
 Tester 数量上限、重复加入语义和加入时的身份校验见 [UC-APP-009](UC-APP-009-join-application-as-tester.md)：任意已登录用户可自助加入，ACTIVE Membership 重复加入幂等，容量在加入事务中原子检查。
 
@@ -400,3 +410,5 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 - 2026-09-16：由 UC-APP-011 增加 REVOKED/MANUAL 终态；显式撤销不创建替代链接，也不改变 ROTATED 轮换语义。
 
 - 2026-09-22：确认前端扫码解析 joinUrl，携带当前用户认证凭证调用 UC-APP-009；不要求 App Center 提供扫码落地页或 GET 加入接口，用户身份仍来自可信认证上下文。
+
+- 2026-09-22：接受 UC-APP-008；允许默认 mock URL 入口，以 APP_CENTER_TESTER_JOIN_URL_PREFIX 配置前缀，固定共享 fragment 凭证格式并闭合本次实现依赖。

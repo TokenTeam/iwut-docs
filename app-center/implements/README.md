@@ -33,8 +33,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、决定与本地不可变策略 MongoDB Repository、0005/0007 migrations、System 自动拒绝、事务与并发集成测试、trusted-identity-v1 reviewer permissions、Auth Developer Status consumer、caller-signed service JWS、Auth SYSTEM principal 延迟解析/成功缓存、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、测试 Auth Server E2E、真实 App+Auth 双服务 E2E | Auth 普通 USER provision/身份签发与 reviewer grant/revoke 实现 |
 | [UC-APP-006](../use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、0006 migration、MongoDB 原子 Repository、资源化 Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、Wire Composition Root、真实 MongoDB 事务/并发集成测试与端到端测试 | — |
 | [UC-APP-007](../use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、Publication/History MongoDB Repository、0008 migration、管理员与 Version/Review 事务写入栅栏、并发与回滚集成测试、复用 Auth Scope Catalog cache 与 DNS-only URL 预检、资源化 Proto、可信身份 HTTP/gRPC Transport、Wire、真实 MongoDB consumer E2E | Auth MongoDB 权威 Scope Catalog、完整双服务验证 |
+| [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、真实 CSPRNG/SHA-256、env 可配置 mock URL、MongoDB 原子轮换与管理员栅栏、0009 migration、并发/回滚/脱敏集成测试、资源化 Proto、可信身份 HTTP/gRPC Transport、no-store、Wire、默认/自定义前缀真实 MongoDB E2E | —（当前 mock 入口后端工作包；前端及 UC-APP-009 独立交付） |
 
-当前激活 UC-APP-007；代码仓库 `AGENTS.md` 和 [UC-APP-007 brief](../briefs/UC-APP-007.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+当前激活 UC-APP-008；代码仓库 `AGENTS.md` 和 [UC-APP-008 brief](../briefs/UC-APP-008.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -130,7 +131,7 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 ## 后续工作包依赖检查
 
-- [UC-APP-008 开工检查（2026-09-22）](UC-APP-008-readiness.md)：持久化轮换方案已做真实 MongoDB 验证；已确认前端扫码后发起已认证加入请求，精确 URL 编码待细化，未激活实现。
+- [UC-APP-008 开工检查（2026-09-22）](UC-APP-008-readiness.md)：持久化轮换方案已做真实 MongoDB 验证；用户已接受 mock URL/env 前缀方案，编码契约和 brief 已生成，工作包已激活。
 
 ## 2026-09-22 UC-APP-007 交付记录
 
@@ -138,3 +139,14 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - 最终事务复查当前管理员、完整 APPROVED Review/snapshot、Version revision 和 Publication revision，并用 adapter-only 写入栅栏保护资格来源；不改变 Application/Version 业务字段或业务 revision。
 - 通过 `0008_application_publication` 显式创建 schema/index 和资格来源的技术栅栏字段；服务启动只检查 migration ledger，缺少 0008 时拒绝服务。
 - 代码、API 和设计文档保持本地交付。consumer E2E 使用真实 MongoDB、HTTP/gRPC、可信身份 JWS，以及生成接口的测试 Auth Server；不能据此把 Auth MongoDB 权威目录或完整双服务验证标记为完成。
+
+## 2026-09-22 UC-APP-008 交付记录
+
+- 依据 [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) 交付 Application 级加入链接创建/轮换。真实 CSPRNG 生成 secret，数据库只保存原始 bytes 的 SHA-256；成功响应只返回公开元数据与一次性 joinUrl。
+- URL 采用 [共享 fragment 格式](../../platform/contracts/tester-join-url-v1.md)，默认 mock 入口与 env 自定义前缀均不要求网络可达。配置只在边界读取，显式非法值拒绝启动。
+- `0009_application_tester_join_link` 迁移提供链接/哈希唯一索引、单一 ACTIVE 部分唯一索引与审计 validator；保留 MANUAL 历史形状，当前命令只创建 ACTIVE 或轮换为 ROTATED。
+- 旧链接撤销、新链接插入与当前管理员栅栏在同一事务提交；失败保留旧链接。明文凭证不进入 Repository，驱动唯一键与迁移失败也不能把哈希带入普通错误日志。
+- HTTP/gRPC 成功响应带 no-store；HTTP query 不能覆盖正文中的 expectedActiveJoinLinkId。原始 secret、哈希与完整 URL 不进入失败响应。
+- 本次 COMPLETE 范围是用户明确接受的 mock 入口后端工作包；前端扫码/托管、正式域名、UC-APP-009 加入、UC-APP-011 显式撤销和生产登录链路仍各自交付，不由本 UC 自动实现。
+
+验证：`go test ./...`、`go vet ./...`、`go test -race ./...`、格式化、Wire diff、Proto 生成一致性与完整副本集集成脚本均通过；Mongo 套件 119.818s、cmd E2E 17.403s。服务本地提交 `f39f561`，API 本地提交 `9365b1d`，未 push。

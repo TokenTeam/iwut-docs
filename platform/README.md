@@ -23,6 +23,8 @@
 - 例如，采用“Auth Center 签发短期、指定 audience 的 JWS，Gateway 转发，App Center 本地验签”属于 `platform/adr/`；JWS header/claims、audience、有效期约束和转发载体属于 `platform/contracts/`。App Center 如何把已验证身份用于某个 UC，仍属于 `app-center/`。
 - `platform/` 下的文档是权威设计正文，但**不自动进入任何 brief**。
 
+当前 App Center 与前端扫描器共享的 Tester 凭证 URL 格式见 [Tester 加入 URL v1](contracts/tester-join-url-v1.md)；mock 入口和可配置前缀不改变加入用例的身份与凭证验证要求。
+
 ## 与 brief 生成的关系
 
 当前 App 设备认证与 Session 的跨端格式见 [auth-device-session-v1](contracts/auth-device-session-v1.md)，包括公钥、签名输入、学号关联声明、Session 载体、RPC 鉴权表及公开测试向量。Auth 自有业务和存储规则仍由对应 UC 拥有。
