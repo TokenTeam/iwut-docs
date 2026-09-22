@@ -39,7 +39,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-004` | 提交应用版本审核 | `ACCEPTED` | [UC-APP-004-submit-application-version-review.md](use-cases/UC-APP-004-submit-application-version-review.md) | — | Domain、UseCase、MongoDB 持久化、显式 migration 与事务并发集成测试已闭合；实现状态见 `implements/README.md`。 |
 | `UC-APP-005` | 审核应用版本 | `ACCEPTED` | [UC-APP-005-decide-application-version-review.md](use-cases/UC-APP-005-decide-application-version-review.md) | — | Auth/ConfCenter 与暂停检查使用 ports，核心测试使用 deterministic fakes；实现状态见 `implements/README.md`。 |
 | `UC-APP-006` | 将被拒绝的应用版本恢复为草稿 | `ACCEPTED` | [UC-APP-006-restore-rejected-version-to-draft.md](use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | — | — |
-| `UC-APP-007` | 将已批准应用版本放入测试发布槽位 | `PROPOSED` | [UC-APP-007-place-approved-version-in-test-slot.md](use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | — | — |
+| `UC-APP-007` | 将已批准应用版本放入测试发布槽位 | `ACCEPTED` | [UC-APP-007-place-approved-version-in-test-slot.md](use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | — | Domain、UseCase、MongoDB、Proto、HTTP/gRPC 与 consumer E2E 已交付；外部依赖见 `implements/README.md`。 |
 | `UC-APP-008` | 创建或轮换 Tester 加入链接 | `PROPOSED` | [UC-APP-008-create-or-rotate-tester-join-link.md](use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | — | — |
 | `UC-APP-009` | 通过有效链接加入 Application Tester 列表 | `PROPOSED` | [UC-APP-009-join-application-as-tester.md](use-cases/UC-APP-009-join-application-as-tester.md) | — | — |
 | `UC-APP-010` | 管理员移除 Application Tester | `PROPOSED` | [UC-APP-010-remove-application-tester.md](use-cases/UC-APP-010-remove-application-tester.md) | — | — |

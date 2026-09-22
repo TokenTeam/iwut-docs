@@ -1,0 +1,63 @@
+{
+  "uc": "UC-APP-007",
+  "note": "Complete UC-APP-007 App Center consumer delivery: per-RPC-major test publication, approval snapshot eligibility, scope and DNS URL revalidation, optimistic concurrency, atomic append-only history, explicit migration, Proto/HTTP/gRPC, Wire and real MongoDB E2E. Reuse existing infrastructure through capability-owned ports. Auth authoritative MongoDB Scope Catalog and production-equivalent end-to-end identity remain external delivery obligations; tester and other publication slots are out of scope.",
+  "uc_sections": [
+    "目标与范围",
+    "发布边界",
+    "输入与身份",
+    "主流程",
+    "异常流程",
+    "最小领域模型",
+    "用例端口",
+    "数据模型",
+    "API 草图",
+    "测试与验收",
+    "实现依赖与交付边界",
+    "迁移说明"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-001": [
+      "决定/权威来源",
+      "决定/第一阶段缓存",
+      "决定/多阶段校验"
+    ],
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ],
+    "ADR-002": [
+      "决定",
+      "适用边界"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/auth-scope-catalog-v1.md": [
+      "gRPC 方法",
+      "快照语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求"
+    ],
+    "platform/contracts/trusted-service-identity-v1.md": [
+      "目的与范围",
+      "传输与 JOSE",
+      "Claims",
+      "Auth Center 固定授权映射",
+      "错误与轮换"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # UC-APP-007：将已批准应用版本放入测试发布槽位
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -181,6 +181,8 @@ reviewer 批准 Version 不会替开发者作出发布选择。管理员转让�
 
 testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Review 必须是完整 APPROVED decision，Version 内容必须仍等于 snapshot，且 revision 关系必须一致。
 
+审核状态一致性和 revision 的既有约束分别见 [BR-REV-013](UC-APP-005-decide-application-version-review.md#br-rev-013) 与 [BR-REV-014](UC-APP-005-decide-application-version-review.md#br-rev-014)；受审核快照字段见 [BR-REV-004](UC-APP-004-submit-application-version-review.md#br-rev-004)。
+
 `DRAFT/SUBMITTED/REJECTED/REVOKED` 都不能进入 test 槽位。历史上曾经 APPROVED 但当前已失去资格的 Version 也不能重新设置。
 
 <a id="br-pub-004"></a>
@@ -238,6 +240,8 @@ History 是操作审计，不是 event sourcing 的权威状态；当前 Publica
 ### BR-PUB-008：发布前复检
 
 真实改变 test 槽位前，必须针对 approved Review.snapshot 重新执行 ScopeCatalog 和 LaunchURLSubmissionPolicy 检查，并把所用版本写入 History。
+
+ScopeCatalog 使用 [ADR-001](../adr/ADR-001-scope-catalog-cache.md) 的有界缓存和失败关闭语义；LaunchURLSubmissionPolicy 复用 [BR-REV-007](UC-APP-004-submit-application-version-review.md#br-rev-007) 的公网 HTTPS/DNS 预检，不新增内容抓取。
 
 这仍然不能冻结自托管网页内容。重复设置同一 Version 的 no-op 不代表一次新的发布或复检；若需要主动重新验证已在槽位中的版本，应设计独立检查行为。
 
@@ -501,9 +505,13 @@ API 测试：
 - 请求不能指定 publicationId、historyId、审计、验证版本或结果 revision。
 - 身份、路径、发布资格、RPC 兼容和并发错误映射正确。
 
-## 实现前需要确认
+## 实现依赖与交付边界
 
-- MongoDB 部署是否支持跨 Application、Version、Review、Publication、History 的事务边界。
+- Application、ApplicationVersion 与 ApplicationReview 的前置行为已由 UC-APP-001 至 UC-APP-006 实现；发布从完整 APPROVED decision 和 snapshot 读取资格，不依赖 Tester、公开资料或后续发布能力。
+- 复用现有可信 DeveloperIdentity、Auth Scope Catalog gRPC consumer/有界缓存、DNS-only URL 预检、UUIDv7/Clock 与 Wire；新能力通过自己的 ports 适配，遵守 ADR-003 的能力边界。
+- MongoDB 使用 ADR-004 要求的事务拓扑；现有隔离 replica-set 测试脚本可验证跨 Application、Version、Review、Publication、History 的事务、回滚和并发。最终事务必须以真实写入栅栏或等价机制防止读快照下的管理员转让/审核撤销竞争；不得改变 Application/Version 的业务字段或业务 revision。
+- Auth 的 MongoDB 权威 Scope Catalog 尚未交付，不阻止 App Center consumer 实现及隔离 E2E，但在权威目录和完整双服务验证闭合前，不将本 UC 标为生产依赖全部闭合的 COMPLETE。
+- 新增 Publication/History schema、API 和 consumer adapters 属于本工作包交付内容，不是要求预先实现的依赖。
 
 ## 后续用例
 
@@ -526,3 +534,5 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 - 2026-09-15：建立 UC-APP-007；当前 admin 可把兼容的 APPROVED Version 放入单个 rpcApiMajor 的 test 槽位，并原子追加 PublicationHistory。
 - 2026-09-16：由 UC-APP-008 确认 Tester Membership 属于 Application、admin 不隐式成为 Tester，加入链接不绑定 rpcApiMajor。
 - 2026-09-16：由 UC-APP-012 确认 App Center 使用 exact rpcApiMajor Publication 和 capabilities 为 ACTIVE Tester 返回 TestLaunchDescriptor，不把选择规则下放给客户端。
+
+- 2026-09-22：接受 UC-APP-007；核对现有审核、身份、Scope/URL 与 MongoDB 事务依赖，明确 consumer 实现可开始及 Auth 权威目录的交付边界，并补充复用规则引用。

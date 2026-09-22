@@ -32,8 +32,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-004](../use-cases/UC-APP-004-submit-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、ApplicationReview migration、事务与管理员转让并发集成测试、生成 Auth gRPC client、DNS-only 公网 HTTPS 预检、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 JWS 与 MongoDB consumer E2E | Auth MongoDB 权威目录、完整双服务 E2E |
 | [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、决定与本地不可变策略 MongoDB Repository、0005/0007 migrations、System 自动拒绝、事务与并发集成测试、trusted-identity-v1 reviewer permissions、Auth Developer Status consumer、caller-signed service JWS、Auth SYSTEM principal 延迟解析/成功缓存、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、测试 Auth Server E2E、真实 App+Auth 双服务 E2E | Auth 普通 USER provision/身份签发与 reviewer grant/revoke 实现 |
 | [UC-APP-006](../use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、0006 migration、MongoDB 原子 Repository、资源化 Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、Wire Composition Root、真实 MongoDB 事务/并发集成测试与端到端测试 | — |
+| [UC-APP-007](../use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、Publication/History MongoDB Repository、0008 migration、管理员与 Version/Review 事务写入栅栏、并发与回滚集成测试、复用 Auth Scope Catalog cache 与 DNS-only URL 预检、资源化 Proto、可信身份 HTTP/gRPC Transport、Wire、真实 MongoDB consumer E2E | Auth MongoDB 权威 Scope Catalog、完整双服务验证 |
 
-没有在本文中激活下一个实现工作包。具体任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+当前激活 UC-APP-007；代码仓库 `AGENTS.md` 和 [UC-APP-007 brief](../briefs/UC-APP-007.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -126,3 +127,14 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - CI/CD、可观测性和生产部署。
 
 它们进入对应工作包前必须有明确契约，但不能提前渗入 Application 领域模型。
+
+## 后续工作包依赖检查
+
+- [UC-APP-008 开工检查（2026-09-22）](UC-APP-008-readiness.md)：持久化轮换方案已做真实 MongoDB 验证；正式 join URL/入口契约仍待确定，未激活实现。
+
+## 2026-09-22 UC-APP-007 交付记录
+
+- 按 RPC major 创建或替换 test 指针，并原子追加 History；相同目标与匹配 revision 返回 no-op，不调用 Scope/URL 复检、IDGenerator 或 Clock。
+- 最终事务复查当前管理员、完整 APPROVED Review/snapshot、Version revision 和 Publication revision，并用 adapter-only 写入栅栏保护资格来源；不改变 Application/Version 业务字段或业务 revision。
+- 通过 `0008_application_publication` 显式创建 schema/index 和资格来源的技术栅栏字段；服务启动只检查 migration ledger，缺少 0008 时拒绝服务。
+- 代码、API 和设计文档保持本地交付。consumer E2E 使用真实 MongoDB、HTTP/gRPC、可信身份 JWS，以及生成接口的测试 Auth Server；不能据此把 Auth MongoDB 权威目录或完整双服务验证标记为完成。
