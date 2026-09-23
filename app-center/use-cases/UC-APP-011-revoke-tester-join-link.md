@@ -1,6 +1,6 @@
 # UC-APP-011：管理员显式撤销 Tester 加入链接
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -281,7 +281,7 @@ API 不接受 `createReplacement`、`removeTesters` 或目标状态字段。需�
 - developerStatus 非 APPROVED 或不是当前 admin：`403 Forbidden`。
 - Application/TesterJoinLink 不存在或归属不匹配：`404 Not Found`。
 - applicationId 或 joinLinkId 格式非法：`400 Bad Request`。
-- 链接状态字段不一致：`409 Conflict` 或内部一致性错误，并触发告警。
+- 链接状态字段不一致：HTTP `500 Internal Server Error` / gRPC `INTERNAL`，稳定 reason 为 `ERROR_REASON_APPLICATION_TESTER_JOIN_LINK_STATE_INCONSISTENT`。沿用已确认的内部数据不变量异常分类，触发不含凭证的服务端告警，不暴露底层存储细节。
 
 ## 测试与验收
 
@@ -314,9 +314,15 @@ API 与安全测试：
 - 响应、日志、trace 和错误详情不包含 secret 或 tokenHash。
 - 不存在与归属不匹配使用统一外部错误。
 
-## 实现前需要确认
+## 实现依赖与交付边界
 
-- MongoDB 对同一链接的撤销、轮换与加入事务采用何种冲突重试策略；业务层不能在冲突后自动改变目标 joinLinkId。
+- UC-APP-008 已交付链接、哈希、历史审计、ACTIVE partial unique index，现有 0009 schema 和领域恢复逻辑已支持 MANUAL；当前不要求新增 collection 或 migration。如确需改变存储约束，新增显式迁移，不修改已交付迁移。
+- 复用 UC008/009/010 的 Application `coordinationRevision` 写栅栏。事务内先取得该 Application 的真实写栅栏，再校验当前 admin 和精确目标链接的归属及状态；仅把该 ACTIVE joinLinkId 改为 REVOKED/MANUAL，不读取或改写 Membership 或人数。
+- `LoadRevocationCandidate` 的 REVOKED 幂等快捷结果也必须在上述栅栏与一致快照中校验当前 admin；不读取 Clock，不修改业务记录或原审计，仅允许维护 adapter-only 写栅栏。ACTIVE 候选是预检查，最终 `Revoke` 必须重新取得栅栏并复查；若并发轮换/撤销已完成，则返回原终态并丢弃预取时间。
+- 使用 snapshot read concern 与 majority write concern，沿用 [UC-APP-009 事务重试协议](UC-APP-009-join-application-as-tester.md#active-tester-计数)。事务重试始终针对原 `(applicationId, joinLinkId)`，不得自动跟随替代关系或选择当前其他 ACTIVE 链接。
+- UC-APP-009 已在取得同一写栅栏后最终验证链接，必须通过真实 MongoDB 测试证明撤销/加入和撤销/轮换的双向提交顺序。撤销后现有 Membership 完整保留，UC008 可独立创建新链接。
+- 复用可信 DeveloperIdentity、APPROVED 校验、Clock、Proto/Wire 与真实 MongoDB 副本集设施；前端和生产 Gateway 身份签发链路独立交付。
+- 不依赖测试发布、Auth Scope Catalog、UC-APP-012 解析，也不实现 Tester 移除、黑名单、替代链接生成或通知。
 
 ## 后续用例
 
@@ -328,3 +334,6 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 
 - 2026-09-16：建立 UC-APP-011；当前 admin 可按 joinLinkId 幂等执行 MANUAL 撤销，阻止后续加入但不创建替代链接、不移除 Tester。
 - 2026-09-16：后续解析用例重命名为 UC-APP-012“为 Tester 解析 Application 的 test 启动目标”，明确它是 App Center 查询而非客户端实现。
+
+- 2026-09-23：开工检查确认复用既有 MANUAL schema、Application 写栅栏及事务重试；一致性异常沿用用户已确认的 HTTP 500 / gRPC INTERNAL 分类，明确幂等无 Clock 和独立交付边界。
+- 2026-09-23：UC010 完整回归通过，UC011 依赖与设计检查无阻塞，状态改为 ACCEPTED 并激活后端实现工作包。

@@ -1,0 +1,38 @@
+{
+  "uc": "UC-APP-011",
+  "note": "UC-APP-011 backend delivery: APPROVED current admin explicitly revokes an exact tester join link as MANUAL; idempotency without Clock for a revoked candidate, preserved ROTATED history/replacement and tokenHash, shared Application write fence, revoke/join/rotate/admin-transfer races, safe500/INTERNAL consistency error, resource DELETE API, Wire and real MongoDB E2E. No replacement link, membership reads/writes, counters, blacklist, frontend or Auth/Gateway changes.",
+  "uc_sections": [
+    "目标与范围",
+    "输入与身份",
+    "主流程",
+    "异常流程",
+    "最小领域模型",
+    "用例端口",
+    "数据模型",
+    "API 草图",
+    "测试与验收",
+    "实现依赖与交付边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}
