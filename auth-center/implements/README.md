@@ -59,3 +59,7 @@ UC010 后端实现提交为 `592eca6`，接口命名修正为 `834a801`，对应
 
 HTTP 集成提交：Auth `afe227a`，API `5a6d439`。`make check`、`make test-race`、
 `make test-mongo` 及真实 MongoDB 上的全包 `-race` 均通过；测试容器已清理，提交未 push。
+
+## 性能测量记录
+
+- [UC010 本地性能测量（2026-09-23）](benchmarks/uc010-local-20260923.md)：实现验证记录，包含环境、复现命令和结果，不作为生产容量保证。测试与测量代码保留在 Auth 实现仓库。
