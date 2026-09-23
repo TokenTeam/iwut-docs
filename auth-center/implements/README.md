@@ -15,6 +15,7 @@
 | [UC-AUTH-007](../use-cases/UC-AUTH-007-login.md) | `ACCEPTED` | `CORE_COMPLETE` | 真实设备登录、严格编码、Session 在线检查、固定寿命配置、10 会话精确 LRU、有界限流、事务栅栏、原生 gRPC/生产 Wire/Mongo 并发与故障测试 | Gateway 的 Session-to-JWS 签发与客户端接入；物理清理暂以保留记录处理 |
 | [UC-AUTH-008](../use-cases/UC-AUTH-008-revoke-own-session.md) | `ACCEPTED` | `COMPLETE` | token 定向幂等撤销、专用载体、精确鉴权例外、首次 revokedAt、保守保留记录、真实 Mongo 故障/未知提交测试与生产 gRPC E2E | —（Gateway 与客户端退出编排独立交付） |
 | [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) | `ACCEPTED` | `COMPLETE` | 有效 Session 授权及事务内复核、本人目标隔离、首次撤销记录、公钥归属保留、引用 Session 即时拒绝、并发登录/撤销及生产 gRPC E2E | —（客户端编排独立交付） |
+| [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `PROPOSED` | `NOT_STARTED` | 双重认证、签发线格式、audience 能力投影、Session 一致性及无缓存草案 | Proto、signer、能力快照组合端口、caller audience 配置、原生 gRPC 与 Gateway 联合 E2E |
 
 ## 实现边界
 

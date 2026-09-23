@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | App Center 的业务语义（UC、BR、领域模型、能力内 ADR） | `app-center/` | 仍由 App Center 的正文与 `app-center/design-registry.md` 管理 |
 | Auth Center 的业务语义（UC、BR、目录所有权） | `auth-center/` | 仍由 Auth Center 的正文与 `auth-center/design-registry.md` 管理 |
+| Gateway 的路由策略、认证编排和转发行为 | `gateway/` | UC-GW-001 拥有规则，Gateway registry 独立维护 |
 | 可执行 Proto / API 定义 | 独立 API 仓库 | 本仓库不放可执行契约，只放设计契约 |
 | 跨系统决定（例如身份信任模型、gRPC-Web 终止位置） | `platform/adr/` | 记录为什么选择某种跨系统方案及其后果 |
 | 稳定的身份、消息、路由格式 | `platform/contracts/` | 记录多方必须共同遵守、可做契约测试的格式与语义 |
@@ -55,3 +56,7 @@
 1. 先确认这条规则确实跨系统，且不能在原能力权威文档里定义。
 2. 跨系统选择写入 `platform/adr/`，稳定格式写入 `platform/contracts/`；用 `#` 标题与 `##` / `###` 章节组织，便于 `shared_sections` 选择。
 3. 需要被工作包使用时，在对应 `tools/brief-specs/<UC>.json` 里添加 `shared_sections`，不要复制正文到 `app-center/`。
+
+## Session 签发与 Gateway 草案
+
+[Session 到可信用户身份签发 v1](contracts/auth-session-identity-issuance-v1.md) 为 PROPOSED，定义 Gateway 对 Auth 的内部签发 RPC、双重凭据和 audience 授权。业务规则分别由 [UC-AUTH-010](../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md) 与 [UC-GW-001](../gateway/use-cases/UC-GW-001-authenticate-and-forward.md) 拥有。现有 ACTIVE 契约及 RPC allowlist 不因草案自动启用新入口。

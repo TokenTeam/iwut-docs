@@ -1,0 +1,28 @@
+# Gateway 设计标识符注册表
+
+状态：`ACTIVE`
+
+索引不是规则的第二权威。当前手工维护，`tools/registry.py` 仍只检查 App Center。
+
+## 下一个可分配编号
+
+| 编号空间 | Next ID |
+| --- | --- |
+| Use Case / Gateway | `UC-GW-002` |
+| Business Rule / Gateway Routing | `BR-GWR-006` |
+
+## Use Cases
+
+| ID | 标题 | 状态 | 权威位置 | 备注 |
+| --- | --- | --- | --- | --- |
+| `UC-GW-001` | 按路由认证并转发请求 | `PROPOSED` | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md) | DIRECT/SESSION 编排；OAUTH2 仅预留。 |
+
+## Business Rules
+
+| ID | 标题 | 类型 | 权威位置 |
+| --- | --- | --- | --- |
+| `BR-GWR-001` | 单一路由决定认证与转发 | Routing / Boundary | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-001) |
+| `BR-GWR-002` | Session 认证先于业务转发 | Authentication / Ordering | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-002) |
+| `BR-GWR-003` | 头部清理与凭据最小转发 | Security / Boundary | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-003) |
+| `BR-GWR-004` | 协议与转发责任 | Architecture / Transport | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-004) |
+| `BR-GWR-005` | 有界失败与不重放业务 | Failure / Privacy | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-005) |
