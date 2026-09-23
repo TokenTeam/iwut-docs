@@ -60,3 +60,5 @@
 ## Session 签发与 Gateway
 
 [Session 到可信用户身份签发 v1](contracts/auth-session-identity-issuance-v1.md) 已 ACTIVE，定义 Gateway 对 Auth 的内部签发 RPC、双重凭据和 audience 授权。业务规则分别由 [UC-AUTH-010](../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md) 与 [UC-GW-001](../gateway/use-cases/UC-GW-001-authenticate-and-forward.md) 拥有。UC-AUTH-010 已接受，Gateway 用例仍为 PROPOSED。生产 RPC 须按实现和部署开关显式启用，文档接受不等于已经交付。
+
+Auth HTTP/JSON 的路径、ProtoJSON 与部署边界见 [Auth API 路由](contracts/auth-center-api-routing.md)。
