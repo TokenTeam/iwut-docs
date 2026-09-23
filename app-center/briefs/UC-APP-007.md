@@ -938,6 +938,9 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `ScopeCatalog/GetScopeCatalogSnapshot` | `auth.scope-catalog.read` |
 | `DeveloperStatusDirectory/BatchGetDeveloperStatuses` | `auth.developer-status.read` |
 | `SystemPrincipalDirectory/ResolveSystemPrincipal` | `auth.system-principal.resolve` |
+| `UserIdentityService/IssueUserIdentityFromSession` | `auth.identity.issue` |
+
+签发方法的完整名称、caller `identityAudiences` 扩展与用户 Session 双重认证见 [Session 签发契约](../../platform/contracts/auth-session-identity-issuance-v1.md)；只有方法 permission 不足以请求任意 audience。
 
 未知 RPC 默认拒绝。System principal 查询还必须检查 caller 注册记录中的 purpose allowlist；拥有 resolve permission 不代表可以解析任意 SYSTEM principal。
 
@@ -977,4 +980,4 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `platform/contracts/app-center-api-routing.md` | 67 | `2595342af7cd` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 91 | `cab448326f29` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |
-| `platform/contracts/trusted-service-identity-v1.md` | 85 | `d725ff1e88cd` |
+| `platform/contracts/trusted-service-identity-v1.md` | 88 | `3c091a708b32` |

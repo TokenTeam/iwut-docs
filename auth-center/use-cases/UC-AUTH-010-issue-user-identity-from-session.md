@@ -1,12 +1,12 @@
 # UC-AUTH-010：由 Session 签发可信用户身份
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
 > 已获授权的 Gateway 提交当前请求携带的 Session 和目标服务 audience，Auth 验证当前登录状态，从自己的权威数据取得用户能力，签发一枚供目标服务本地验签的短期 JWS。
 
-本用例补上 UC004/005 和 App Center 用户入口的身份签发依赖。它不创建 Session、延长 Session、决定具体业务权限，也不实现 OAuth2、Redis 缓存或 Gateway 路由。JWS 格式引用 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)，跨服务请求格式见[签发契约草案](../../platform/contracts/auth-session-identity-issuance-v1.md)。
+本用例补上 UC004/005 和 App Center 用户入口的身份签发依赖。它不创建 Session、延长 Session、决定具体业务权限，也不实现 OAuth2、Redis 缓存或 Gateway 路由。JWS 格式引用 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)，跨服务请求格式见[签发契约](../../platform/contracts/auth-session-identity-issuance-v1.md)。
 
 ## 参与者与前置条件
 
@@ -110,7 +110,7 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 
 ## 测试与验收
 
-- 真实 Gateway 服务 signer、Auth 服务身份鉴权、Mongo 与用户 JWS signer、目标服务验签形成真实调用链。
+- Auth 后端验收使用扮演 Gateway 的测试调用方执行真实服务身份 RSA 签名，连接生产 Wire、原生 gRPC、真实 Mongo 和用户 signer，并使用实际目标 verifier 验签；不能用 fake verifier 替代。Gateway/Traefik 的真实转发调用链在 UC-GW-001 联合验收，不阻塞本工作包。
 - Session 与服务身份任一缺失/伪造都拒绝；未授权 audience、SYSTEM/disabled USER、错误 key 和畸形记录拒绝。
 - 普通 USER 无 Developer 状态仍成功；不同 audience 的权限交集正确，客户端无法覆盖 claims。
 - 与 UC008/009、权限/Developer 修改并发时满足 BR-IDN-004；修改提交后开始的新签发不会读取旧能力。
@@ -130,5 +130,7 @@ UC004 的授权命令与 bootstrap、Developer 状态修改、OAuth2 委托权�
 [Redis cache-aside 文档](https://redis.io/docs/latest/develop/use-cases/cache-aside/) 将 TTL 与显式失效作为控制缓存陈旧窗口的机制。本用例不接受通过认证缓存引入新的撤销窗口，暂不引入该组件；这是当前项目选择，而不是 Redis 无法保存 Session。
 
 ## 变更记录
+
+- 2026-09-23：依赖核验通过，接受 Auth 后端工作包；UC006–009 和 service JWS 基础已具备，Gateway 联合验收独立推进；确认首版不使用 Redis。
 
 - 2026-09-23：提出 Session 到可信身份签发用例；服务双重认证、最小 audience 投影、每请求在线确认，首版不引入 Redis。

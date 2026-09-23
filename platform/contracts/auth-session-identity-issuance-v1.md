@@ -1,14 +1,14 @@
 # Session 到可信用户身份签发 v1
 
-状态：`PROPOSED`
+状态：`ACTIVE`
 
 ## 范围与权威来源
 
-本草案定义 Gateway 调用 Auth 的签发 RPC 和秘密转发边界。业务权威为 [UC-AUTH-010](../../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md)，Gateway 编排为 [UC-GW-001](../../gateway/use-cases/UC-GW-001-authenticate-and-forward.md)，输出 JWS 继续使用 [trusted-identity-v1](trusted-identity-v1.md)。本草案不是 OAuth2 Token Exchange 协议，也不自动改变已启用的方法 allowlist。
+本契约定义 Gateway 调用 Auth 的签发 RPC 和秘密转发边界。业务权威为 [UC-AUTH-010](../../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md)，Gateway 编排为 [UC-GW-001](../../gateway/use-cases/UC-GW-001-authenticate-and-forward.md)，输出 JWS 继续使用 [trusted-identity-v1](trusted-identity-v1.md)。本契约不是 OAuth2 Token Exchange 协议，也不自动改变已启用的方法 allowlist。
 
 ## 内部 RPC
 
-拟定独立 API 路径 `auth_center/v1/identity/identity.proto`，package `auth_center.v1.identity`：
+独立 API 路径 `auth_center/v1/identity/identity.proto`，package `auth_center.v1.identity`：
 
 ```text
 /auth_center.v1.identity.UserIdentityService/IssueUserIdentityFromSession
@@ -34,7 +34,7 @@ IssuedUserIdentity {
 
 本工作包在 Auth 的固定 service permission 映射中仅增加上述完整方法，要求 `auth.identity.issue`。具有该 permission 的 caller 注册项增加必需 `identityAudiences`，一个非空、唯一、已知 audience 数组；没有该 permission 的已有 caller 可以省略该字段。未知 audience 或配置非法拒绝启动。兼容已有 caller 不等于默认授予签发能力。
 
-示例是对 `AUTH_CENTER_SERVICE_CALLERS_B64` 解码后对象的一条拟议扩展：
+示例是对 `AUTH_CENTER_SERVICE_CALLERS_B64` 解码后对象的一条扩展：
 
 ```json
 {
@@ -52,7 +52,9 @@ IssuedUserIdentity {
 
 ## 签名与验签配置
 
-拟议新增 signer 配置：`AUTH_USER_IDENTITY_SIGNING_KID`、`AUTH_USER_IDENTITY_PRIVATE_KEY_PEM_B64`、`AUTH_USER_IDENTITY_TTL`（默认 `60s`，1–300 整秒）。issuer 沿用 `AUTH_USER_IDENTITY_ISSUER`；既有 `AUTH_USER_IDENTITY_MAX_TTL` 是 verifier 接受上限，不是 signer 默认 TTL。
+签发入口使用显式开关 `AUTH_IDENTITY_ISSUANCE_ENABLED`（默认 false）。开启要求现有 `AUTH_USER_ENDPOINTS_ENABLED=true`，且下述 signer 配置完整有效；关闭时不注册签发 RPC，不要求私钥，也不影响已有服务和用户接口。不得因为开关开启而放宽原有鉴权。
+
+新增 signer 配置：`AUTH_USER_IDENTITY_SIGNING_KID`、`AUTH_USER_IDENTITY_PRIVATE_KEY_PEM_B64`、`AUTH_USER_IDENTITY_TTL`（默认 `60s`，1–300 整秒）。issuer 沿用 `AUTH_USER_IDENTITY_ISSUER`；既有 `AUTH_USER_IDENTITY_MAX_TTL` 是 verifier 接受上限，不是 signer 默认 TTL。
 
 私钥使用严格标准 Base64 包装的 PKCS#1/PKCS#8 RSA PEM，至少 2048 bit。Auth 自己作为 audience 时必须部署匹配的 verifier 公钥；其他服务先部署新公钥，再切 signer kid，旧验签公钥覆盖旧 token 的有效期、允许时钟偏差和在途请求后才移除。签发 key 只为此用途配置，不复用学生关联加密/查找密钥或服务身份 key。
 

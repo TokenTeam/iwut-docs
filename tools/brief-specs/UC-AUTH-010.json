@@ -1,0 +1,48 @@
+{
+  "uc": "UC-AUTH-010",
+  "note": "Accepted Auth backend work package. USER/Session/revocation and service identity foundations exist. Implement the real signer, transactional identity snapshot, internal RPC, caller audience configuration and production Wire E2E. Gateway/Traefik delivery is separate; no Redis, identity cache, OAuth2 or reviewer-management implementation.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与前置条件",
+    "输入与输出",
+    "主流程",
+    "错误语义",
+    "测试与验收",
+    "交付依赖与非目标"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-session-identity-issuance-v1.md": [
+      "范围与权威来源",
+      "内部 RPC",
+      "服务授权扩展",
+      "签名与验签配置",
+      "请求与凭据流向",
+      "与现有契约的衔接"
+    ],
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "JOSE Header",
+      "Claims",
+      "时间与有效期",
+      "校验顺序",
+      "错误边界",
+      "密钥与轮换",
+      "Gateway 义务"
+    ],
+    "platform/contracts/trusted-service-identity-v1.md": [
+      "目的与范围",
+      "传输与 JOSE",
+      "Claims",
+      "Auth Center 固定授权映射",
+      "ENV 配置",
+      "错误与轮换",
+      "契约测试要求"
+    ],
+    "platform/contracts/auth-device-session-v1.md": [
+      "Session 载体"
+    ]
+  }
+}
