@@ -2,11 +2,13 @@
 
 | 用例 | 设计 | 实现 | 缺口 |
 | --- | --- | --- | --- |
-| [UC-GW-001](../use-cases/UC-GW-001-authenticate-and-forward.md) | `ACCEPTED` | `NOT_STARTED` | 首个工作包已冻结；待交付路由目录/生成器、HTTP ForwardAuth、gRPC 前置代理、固定 Traefik 配置与真实三协议 E2E |
+| [UC-GW-001](../use-cases/UC-GW-001-authenticate-and-forward.md) | `ACCEPTED` | `COMPLETE` | —（当前后端/本地部署工作包；生产公网发布仍为独立部署事项） |
 
 2026-09-23：已建立 `worktrees/iwut-gateway-ddd` 的空白孤儿分支 `gateway/v1`，仅放工程设计入口。没有复制旧配置、启用公开路由或部署服务。OAuth2、Redis 和 Gateway 管理后台不属于当前首版实现。
 
 2026-09-24：UC-GW-001 与 [ADR-GW-001](../adr/ADR-GW-001-runtime-routing-and-protocol-adapters.md) 已接受，Auth UC010 后端为 `CORE_COMPLETE`，首个实现工作包可以启动。设计接受不等于已公开任何路由。
+
+2026-09-24：首个实现工作包已闭合。Gateway 提交 `af82578` 交付固定 API module、严格路由目录/descriptor 校验、确定性 Traefik 生成器、HTTP ForwardAuth、caller-signed Auth client 与 exact unary gRPC proxy；`ca0606b` 使用固定 digest Traefik、真实 Auth production composition/Mongo 和实际验签 backend 验证 HTTP/JSON、原生 gRPC、gRPC-Web 的成功与失败不抵达 upstream；运行说明为 `31816ad`。固定 API revision 为 `ef8957505d9870f9ec51c659a9d62808565aefef`。
 
 ## 首个实现工作包：UC-GW-001 v1
 

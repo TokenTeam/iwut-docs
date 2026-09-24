@@ -15,7 +15,7 @@
 
 | ID | 标题 | 状态 | 权威位置 | 备注 |
 | --- | --- | --- | --- | --- |
-| `UC-GW-001` | 按路由认证并转发请求 | `ACCEPTED` | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md) | DIRECT/SESSION 编排；OAUTH2 仅预留。首个实现工作包见实现状态。 |
+| `UC-GW-001` | 按路由认证并转发请求 | `ACCEPTED` | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md) | DIRECT/SESSION 编排；OAUTH2 仅预留。首个实现工作包已 `COMPLETE`。 |
 
 ## Business Rules
 

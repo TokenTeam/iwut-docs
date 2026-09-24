@@ -115,7 +115,7 @@ HTTP、原生 gRPC 与 gRPC-Web 都须实测失败不会到达业务 upstream，
 
 ## 交付边界
 
-设计已接受，`iwut-gateway-ddd` 孤儿 worktree 可以进入首个实现工作包。旧 Gateway 或旧 auth-forward 的实现仍不构成模板。首个工作包按 [实现状态](../implements/README.md) 和 ADR-GW-001 固定的范围交付 module/API 基线、路由生成与验证、HTTP ForwardAuth、精确 unary gRPC 前置代理、协议错误适配及真实三协议 E2E；不是只提交一份未经运行验证的 YAML。
+设计已接受，`iwut-gateway-ddd` 孤儿 worktree 的首个后端/本地部署工作包已按[实现状态](../implements/README.md)和 ADR-GW-001 闭合 module/API 基线、路由生成与验证、HTTP ForwardAuth、精确 unary gRPC 前置代理、协议错误适配及真实三协议 E2E。旧 Gateway 或旧 auth-forward 的实现仍不构成模板；当前完成状态不表示已执行生产公网发布。
 
 配置通过部署注入，不做管理后台。OAuth2 委托协议另立 UC，公开资源策略可通过明确 DIRECT 路由扩展；不会因本 UC 已有枚举而隐式开放。Auth 原生 RPC 的实现依赖为 UC-AUTH-010，业务接口按各自实现状态启用。
 
@@ -126,6 +126,8 @@ HTTP、原生 gRPC 与 gRPC-Web 都须实测失败不会到达业务 upstream，
 - [RFC 9068](https://www.rfc-editor.org/rfc/rfc9068.html)：OAuth2 access token 的 JWT profile；OAuth2 本身并不强制 token 是 JWT。
 
 ## 变更记录
+
+- 2026-09-24：首个实现工作包通过固定 Traefik、真实 Auth/Mongo 与验签 backend 的 HTTP/JSON、原生 gRPC、gRPC-Web 联合验收；实现状态更新为 `COMPLETE`。
 
 - 2026-09-24：接受首版 DIRECT/SESSION Gateway；固定 Go module、Traefik v3.7.13、严格路由目录、HTTP ForwardAuth 与 gRPC 前置代理边界。
 
