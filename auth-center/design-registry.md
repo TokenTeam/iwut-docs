@@ -17,7 +17,7 @@
 | Business Rule / User Profile | `BR-UPF-012` |
 | Business Rule / User Registration | `BR-REG-009` |
 | Business Rule / Login and Session | `BR-LGN-013` |
-| Business Rule / Email Binding | `BR-EML-009` |
+| Business Rule / Email Binding | `BR-EML-010` |
 
 ## Use Cases
 
@@ -33,7 +33,7 @@
 | `UC-AUTH-008` | 撤销自己的当前 Session | `ACCEPTED` | [UC-AUTH-008-revoke-own-session.md](use-cases/UC-AUTH-008-revoke-own-session.md) | — | 由 token 定向、幂等撤销当前 Session，不改变设备凭据。 [brief](briefs/UC-AUTH-008.md)。 |
 | `UC-AUTH-009` | 撤销自己的设备凭据 | `ACCEPTED` | [UC-AUTH-009-revoke-own-credential.md](use-cases/UC-AUTH-009-revoke-own-credential.md) | — | 有效用户撤销本人凭据，并使引用它的 Session 后续检查失败。 [brief](briefs/UC-AUTH-009.md)。 |
 | `UC-AUTH-010` | 由 Session 签发可信用户身份 | `ACCEPTED` | [UC-AUTH-010-issue-user-identity-from-session.md](use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | — | 受授权服务以有效 Session 换取目标 audience 的短期用户 JWS；不缓存身份结果。 |
-| `UC-AUTH-011` | 设置并激活邮箱 | `PROPOSED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 首次绑定与更换、验证码激活；邮箱登录及 Developer 开通独立交付。 |
+| `UC-AUTH-011` | 设置并激活邮箱 | `PROPOSED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 无 Session 验证后创建账号，有效 Session 绑定/更换；已有账号邮箱登录独立交付。 |
 
 ## Business Rules
 
@@ -148,9 +148,10 @@
 | --- | --- | --- | --- | --- | --- |
 | `BR-EML-001` | 邮箱凭据与资料、身份分离 | Boundary / Identity | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-001) | — | — |
 | `BR-EML-002` | 地址规范化与唯一性 | Validation / Uniqueness | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-002) | — | — |
-| `BR-EML-003` | 绑定授权与验证码隔离 | Authorization / Verification | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-003) | — | — |
+| `BR-EML-003` | 分支授权与验证码隔离 | Authorization / Verification | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-003) | — | — |
 | `BR-EML-004` | 更换与原子激活 | Lifecycle / Atomicity | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-004) | — | — |
 | `BR-EML-005` | 重试与提交结果不确定 | Retry / Consistency | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-005) | — | — |
 | `BR-EML-006` | 投递、限额与秘密保护 | Delivery / Privacy | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-006) | — | — |
 | `BR-EML-007` | 查询与占用披露边界 | Query / Privacy | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-007) | — | — |
 | `BR-EML-008` | 恢复与 Developer 开通边界 | Boundary / Recovery | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-008) | — | — |
+| `BR-EML-009` | 邮箱注册的原子创建 | Registration / Atomicity | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-009) | — | — |

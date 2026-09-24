@@ -20,11 +20,11 @@
 - `UC-AUTH-009`：有效用户撤销属于自己账号的设备凭据，并使相关 Session 在后续检查中失效。
 
 - `UC-AUTH-010`：受授权 Gateway 根据有效 Session 获取目标服务的可信用户 JWS。
-- `UC-AUTH-011`（PROPOSED）：用户设置并验证邮箱，原子激活或更换邮箱凭据。
+- `UC-AUTH-011`（PROPOSED）：无 Session 时通过邮箱验证创建账号；有有效 Session 时绑定或更换邮箱。
 
 用户资料的字段定义和编辑规则已归入 UC-AUTH-005 的 `BR-UPF-*`，读取本人资料和表单 schema
 见[配套查询契约](query-contracts/user-profile-editing.md)。Scope 管理后台、Developer 状态修改命令、
-可信身份签发已由 UC-AUTH-010 接受，Gateway 鉴权转发由 UC-GW-001 提出草案；邮箱设置与激活见 UC-AUTH-011 草案；邮箱登录/恢复、旧设备迁移、第三方应用资料开放和 consent 仍属于后续独立用例。
+可信身份签发已由 UC-AUTH-010 接受，Gateway 鉴权转发由 UC-GW-001 提出草案；邮箱注册、设置与激活见 UC-AUTH-011 草案；已有账号的邮箱登录/恢复、旧设备迁移、第三方应用资料开放和 consent 仍属于后续独立用例。
 
 创建、登录和两项撤销用例已接受，设备签名、关联声明与 Session/RPC 载体统一引用
 [App 设备认证与 Session v1](../platform/contracts/auth-device-session-v1.md)。运行参数及存储原子性由对应 UC 定义。
