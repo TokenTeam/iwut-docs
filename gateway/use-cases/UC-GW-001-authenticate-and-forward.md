@@ -39,12 +39,14 @@ OAuth2 是授权体系，access token 不一定是 JWT。即使采用 JWT，也�
 | Auth UserProfileService/GetOwnProfile | SESSION | audience=`iwut-auth-center` 的 JWS |
 | Auth UserProfileService/GetProfileEditingSchema | SESSION | audience=`iwut-auth-center` 的 JWS |
 | Auth UserProfileService/EditOwnProfile | SESSION | audience=`iwut-auth-center` 的 JWS |
+| Auth ReviewerPermissionService/ManageReviewerPermission | SESSION | audience=`iwut-auth-center` 的 JWS，Auth 校验管理权限 |
+| Auth ReviewerPermissionService/GetReviewerPermission | SESSION | audience=`iwut-auth-center` 的 JWS，Auth 校验管理权限 |
 | App Application/CreateApplication | SESSION | audience=`iwut-app-center` 的 JWS |
 | App ApplicationReview/DecideApplicationVersionReview | SESSION | audience=`iwut-app-center` 的 JWS |
 
 完整 gRPC method 使用各独立 Proto 的生成常量，Auth 身份类型参考 [设备认证契约](../../platform/contracts/auth-device-session-v1.md#rpc-鉴权表)，Auth HTTP 路径引用 [Auth API 路由](../../platform/contracts/auth-center-api-routing.md)，App HTTP 路径引用 [App API 路由](../../platform/contracts/app-center-api-routing.md)。原生 gRPC 不凭 package 前缀批量开放。其它已实现 App 用户接口逐条登记后才开放。
 
-重设密码、邮箱登录和 UC004 Reviewer 管理入口目前尚未交付：前两类将由各自 UC 决定 DIRECT 载体，UC004 采用 SESSION；不得因为例子里提及就创建通配路由或视为可用。Auth 签发 RPC、内部状态查询、provision/管理运维接口均不在终端路由表。
+重设密码和邮箱登录入口目前尚未交付，将由各自 UC 决定 DIRECT 载体。UC004 Reviewer 管理入口随其实现工作包登记上述两条 SESSION 路由；不得因为例子里提及就创建通配路由或视为可用。Auth 签发 RPC、内部状态查询、provision/管理运维接口均不在终端路由表。
 
 ## 主流程
 

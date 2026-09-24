@@ -12,13 +12,15 @@
 
 调用者必须是具有 `auth.reviewer.manage` 权限的 `PLATFORM_ADMIN` 用户。平台管理员统揽跨 bounded context 的人员权限治理，但每个能力仍使用独立原子权限。
 
-首个 PLATFORM_ADMIN 通过显式、一次性的运维命令 provision，例如：
+本用例以 `auth.reviewer.manage` 的显式 grant 表达 PLATFORM_ADMIN 管理能力；主体仍为 USER，不新增 principalType 或通用角色继承。
+
+首个 PLATFORM_ADMIN 通过显式、一次性的运维命令 provision：
 
 ```text
 auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
 ```
 
-该命令要求 USER principal 已存在，幂等写入管理员 grant 与审计记录；它不是 Auth 普通启动路径，不允许仅因为环境变量仍存在就在每次重启时重新授予已撤销权限。后续管理员全部通过受审计的管理用例授予。
+该命令要求 USER principal 已存在，幂等写入管理员 grant 与审计记录；它不是 Auth 普通启动路径，不允许仅因为环境变量仍存在就在每次重启时重新授予已撤销权限。后续管理员全部通过受审计的管理用例授予。bootstrap 在同一事务中保存全局已消费标记：对原目标重跑只报告已执行，不再次写权限或审计；对另一目标重跑拒绝。即使原管理员权限后来被撤销，也不能通过重跑该命令恢复。
 
 ## 输入与主流程
 
@@ -38,6 +40,28 @@ ManageReviewerPermissionCommand {
 5. 返回目标权限状态与新 revision。
 
 重复 GRANT/REVOKE 是冲突，不伪装成成功；客户端在不确定结果时查询当前状态。
+
+## 读取 Reviewer 权限状态
+
+`GetReviewerPermission(subjectAuthId)` 是本用例的配套查询，采用与写接口相同的管理员身份要求。
+返回目标 authId、是否具有 `app.version.review`、当前 permissionRevision，供客户端提交 expectedRevision
+以及在冲突或提交结果未知时重新读取。只返回本能力所需状态，不公开目标的其它权限或学生资料。
+不存在、SYSTEM 或不可登录目标不得被当作普通 USER 返回。
+
+## 实现约定
+
+- Proto package 为 `auth_center.v1.reviewer_permission`，service 为 `ReviewerPermissionService`；
+  方法为 `ManageReviewerPermission`、`GetReviewerPermission`。
+- HTTP 写/读分别为 `PUT` / `GET /v1/users/{subject_auth_id}/reviewer-permission`；Gateway 使用
+  SESSION、audience=`iwut-auth-center`，外部前缀为 `/auth-center`。原生 gRPC 和 gRPC-Web 使用同一精确方法授权。
+- 写命令 `action` 使用 UNSPECIFIED/GRANT/REVOKE 枚举，UNSPECIFIED 拒绝；expectedRevision
+  必填且为正 int64，reason 去除两端空白后为非空 UTF-8 文本且不超过 1024 bytes。
+- 已验签 JWS 必须包含 `auth.reviewer.manage`；写入事务内还须确认 actor 为当前 ACTIVE USER 且仍有该权限。
+  body/path 不得指定或替代 actor。只修改 reviewer grant，保留其它权限。
+- 权限写入、bootstrap 与 [UC010 的签发一致性](UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004)
+  使用相同认证事务协调边界；已确认撤销后不能再签出含该权限的新 token。
+- 权限 revision 耗尽时拒绝变更，不溢出或回绕。审计插入失败导致权限更新一并回滚；提交结果未知返回不可用，不能伪装成功。
+- bootstrap CLI 使用明确的现有 authId 和 Mongo 配置，不启动服务监听，不依赖终端 JWS；审计必须显式区分运维 bootstrap 和已认证用户请求。
 
 ## 业务规则
 
@@ -65,13 +89,29 @@ Auth Center 是平台人员权限的唯一权威。App Center 只消费已签名
 
 - `auth_principals.permissions`：当前有效原子权限集合，元素唯一且稳定排序。
 - `auth_principals.permissionRevision`：正 int64，权限变化时增加。
-- `auth_permission_audit_events`：append-only 事件，包含 eventId、subjectAuthId、actorAuthId、action、permission、reason、beforeRevision、afterRevision、occurredAt。
+- `auth_permission_audit_events`：append-only 事件，包含 eventId、subjectAuthId、actorType、action、permission、reason、before/after、beforeRevision、afterRevision、occurredAt。普通管理请求 actorType=`USER`，actorAuthId 为已认证用户；运维初始化 actorType=`BOOTSTRAP_COMMAND`，不伪造 actorAuthId。
+- `auth_runtime` 的 `platform-admin-bootstrap` 单例：保存 subjectAuthId、eventId、occurredAt，表示全局初始化已消费，不能通过重启或权限撤销清除。
 
 ## API 与实现依赖
 
 管理 API 经 Gateway 使用 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)，不使用内部服务身份。可执行 Proto 与路由必须在实现工作包中单独加入。
 
 完整实现依赖普通 USER principal provision、Auth 用户身份签发与 Gateway 到 Auth 的受保护管理路由；在这些入口闭合前，可以实现 Domain/Mongo 核心，但不能暴露绕过认证的临时管理 RPC 或用数据库直改代替本用例。
+
+## 错误语义
+
+| 场景 | reason | HTTP / gRPC |
+| --- | --- | --- |
+| 身份缺失/无效 | `USER_IDENTITY_REQUIRED` / `INVALID_USER_IDENTITY` | 401 / UNAUTHENTICATED |
+| 无管理权限、actor 非当前 ACTIVE USER | `REVIEWER_MANAGEMENT_FORBIDDEN` | 403 / PERMISSION_DENIED |
+| 目标不存在、SYSTEM 或不可登录 | `REVIEWER_SUBJECT_UNAVAILABLE` | 404 / NOT_FOUND |
+| 命令格式、action、revision 或 reason 非法 | `INVALID_REVIEWER_PERMISSION_INPUT` | 400 / INVALID_ARGUMENT |
+| 重复动作、revision 不匹配 | `REVIEWER_PERMISSION_CONFLICT` | 409 / ABORTED |
+| revision 耗尽 | `PERMISSION_REVISION_EXHAUSTED` | 409 / ABORTED |
+| 存储损坏、数据库失败、提交结果未知 | `REVIEWER_PERMISSION_UNAVAILABLE` | 503 / UNAVAILABLE |
+
+bootstrap 重定向到另一目标时返回 `PLATFORM_ADMIN_BOOTSTRAP_CONSUMED` 并以非零退出码退出。
+首次成功输出 `{"authId":"...","applied":true}`，同目标重跑为 `applied:false`，不代表重新授予权限。
 
 ## 测试与验收
 
@@ -84,3 +124,5 @@ Auth Center 是平台人员权限的唯一权威。App Center 只消费已签名
 ## 变更记录
 
 - 2026-09-22：接受 PLATFORM_ADMIN 统揽人员权限治理、Reviewer 独立显式 grant/revoke 与一次性运维 bootstrap。
+
+- 2026-09-24：启动实现，固定权限状态查询、HTTP/gRPC 绑定、管理员能力表达、全局一次性 bootstrap 与 UC010 事务协调要求。

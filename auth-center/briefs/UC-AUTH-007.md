@@ -433,7 +433,7 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：变更记录
 - `UC-AUTH-006`（use-cases/UC-AUTH-006-create-user.md）：目标与范围、参与者与前置条件、输入与输出、主流程、持久化候选、异常语义、测试与验收、交付依赖与验收边界、变更记录
-- `UC-AUTH-004`（use-cases/UC-AUTH-004-manage-reviewer-permission.md）：目标与范围、参与者与 bootstrap、输入与主流程、数据模型、API 与实现依赖、测试与验收、变更记录
+- `UC-AUTH-004`（use-cases/UC-AUTH-004-manage-reviewer-permission.md）：目标与范围、参与者与 bootstrap、输入与主流程、读取 Reviewer 权限状态、实现约定、数据模型、API 与实现依赖、错误语义、测试与验收、变更记录
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：变更记录
 
 ## 溯源
@@ -442,5 +442,5 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 | --- | --- | --- |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `use-cases/UC-AUTH-006-create-user.md` | 277 | `783f832c5407` |
-| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 86 | `a010340eb02c` |
+| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 128 | `57354143ae4b` |
 | `platform/contracts/auth-device-session-v1.md` | 119 | `524cf6d814b0` |
