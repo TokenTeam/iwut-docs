@@ -61,6 +61,6 @@ UC-AUTH-006 至 009 已 ACCEPTED；设备证明、学号规范化和散列、Ses
 
 - k8s 改造时再评审多实例在线密钥轮换；当前单实例离线方案见 [BR-REG-008](use-cases/UC-AUTH-006-create-user.md#br-reg-008)。
 - Auth 基于有效 Session 签发目标服务身份、Gateway 鉴权 RPC/路由与秘密转发边界，跟踪已接受的 UC-AUTH-010 与 UC-GW-001 草案；首版不引入 Redis 或身份缓存，OAuth2 单独设计。
-- 邮箱绑定/登录/恢复：验证码还是平台密码未决定；需要验证邮箱控制权，不将学生资料中的邮箱视为登录凭据。
+- 邮箱设置与激活见 [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)（PROPOSED）：使用验证码验证邮箱控制权，邮箱凭据与学生资料分离。邮箱登录仍需独立用例决定认证方式、Session 凭据引用及更换后的失效规则；新设备凭据登记也需独立授权。Developer 开通应等待已激活邮箱和可用邮箱登录能力同时具备，不能仅以绑定成功视为可恢复。
 - 旧设备明确授权新增凭据、凭据/Session 列表与命名、撤销其它 Session、账号禁用/重新启用和注销仍需独立用例。当前 token 的 Session 撤销由 [UC-AUTH-008](use-cases/UC-AUTH-008-revoke-own-session.md) 定义，本人 credentialId 的凭据撤销由 [UC-AUTH-009](use-cases/UC-AUTH-009-revoke-own-credential.md) 定义，客户端退出组合见[生命周期建议](client-guides/authentication-lifecycle.md)。
 - 外部应用的专属学生关联标识：披露授权、未关联语义、保留/删除/改绑与配额连续性；当前注册仅建立内部关系，不发布新的对外身份 claim。

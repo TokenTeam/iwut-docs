@@ -7,7 +7,7 @@
 
 ## 当前迭代
 
-当前已有十个接受的用例（UC-AUTH-001 至 010）；设计接受与实现完成分别跟踪：
+当前已有十个接受的用例（UC-AUTH-001 至 010），以及邮箱绑定草案 UC-AUTH-011；设计接受与实现完成分别跟踪：
 
 - `UC-AUTH-001`：授权的内部服务读取 Auth 权威的 Scope Catalog 完整快照。
 - `UC-AUTH-002`：授权的内部服务按 Auth ID 批量读取当前 Developer 状态。
@@ -20,10 +20,11 @@
 - `UC-AUTH-009`：有效用户撤销属于自己账号的设备凭据，并使相关 Session 在后续检查中失效。
 
 - `UC-AUTH-010`：受授权 Gateway 根据有效 Session 获取目标服务的可信用户 JWS。
+- `UC-AUTH-011`（PROPOSED）：用户设置并验证邮箱，原子激活或更换邮箱凭据。
 
 用户资料的字段定义和编辑规则已归入 UC-AUTH-005 的 `BR-UPF-*`，读取本人资料和表单 schema
 见[配套查询契约](query-contracts/user-profile-editing.md)。Scope 管理后台、Developer 状态修改命令、
-可信身份签发已由 UC-AUTH-010 接受，Gateway 鉴权转发由 UC-GW-001 提出草案；邮箱绑定/恢复、旧设备迁移、第三方应用资料开放和 consent 仍属于后续独立用例。
+可信身份签发已由 UC-AUTH-010 接受，Gateway 鉴权转发由 UC-GW-001 提出草案；邮箱设置与激活见 UC-AUTH-011 草案；邮箱登录/恢复、旧设备迁移、第三方应用资料开放和 consent 仍属于后续独立用例。
 
 创建、登录和两项撤销用例已接受，设备签名、关联声明与 Session/RPC 载体统一引用
 [App 设备认证与 Session v1](../platform/contracts/auth-device-session-v1.md)。运行参数及存储原子性由对应 UC 定义。
@@ -48,6 +49,8 @@
   [BR-UPF-010](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-010)。
 
 ## 文档入口
+
+- [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)：设置并激活邮箱草案；不等于邮箱登录已经交付。
 
 - [UC-AUTH-010](use-cases/UC-AUTH-010-issue-user-identity-from-session.md)：Session 到可信身份签发；[生成 brief](briefs/UC-AUTH-010.md)。
 - [Gateway UC-GW-001](../gateway/use-cases/UC-GW-001-authenticate-and-forward.md)：单一路由驱动的认证与转发草案。

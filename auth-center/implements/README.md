@@ -16,6 +16,7 @@
 | [UC-AUTH-008](../use-cases/UC-AUTH-008-revoke-own-session.md) | `ACCEPTED` | `COMPLETE` | token 定向幂等撤销、专用载体、精确鉴权例外、首次 revokedAt、保守保留记录、真实 Mongo 故障/未知提交测试与生产 HTTP/gRPC E2E | —（Gateway 与客户端退出编排独立交付） |
 | [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) | `ACCEPTED` | `COMPLETE` | 有效 Session 授权及事务内复核、本人目标隔离、首次撤销记录、公钥归属保留、引用 Session 即时拒绝、并发登录/撤销及生产 HTTP/gRPC E2E | —（客户端编排独立交付） |
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
+| [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `PROPOSED` | `NOT_STARTED` | 设置并激活邮箱设计草案 | 设计接受、Proto/HTTP/gRPC、绑定与验证操作存储、邮件投递、限额与真实集成验收；邮箱登录另立 UC |
 
 ## 实现边界
 

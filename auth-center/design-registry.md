@@ -8,7 +8,7 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-011` |
+| Use Case / Auth Center | `UC-AUTH-012` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
 | Business Rule / Developer Status | `BR-DEV-006` |
@@ -17,6 +17,7 @@
 | Business Rule / User Profile | `BR-UPF-012` |
 | Business Rule / User Registration | `BR-REG-009` |
 | Business Rule / Login and Session | `BR-LGN-013` |
+| Business Rule / Email Binding | `BR-EML-009` |
 
 ## Use Cases
 
@@ -32,6 +33,7 @@
 | `UC-AUTH-008` | 撤销自己的当前 Session | `ACCEPTED` | [UC-AUTH-008-revoke-own-session.md](use-cases/UC-AUTH-008-revoke-own-session.md) | — | 由 token 定向、幂等撤销当前 Session，不改变设备凭据。 [brief](briefs/UC-AUTH-008.md)。 |
 | `UC-AUTH-009` | 撤销自己的设备凭据 | `ACCEPTED` | [UC-AUTH-009-revoke-own-credential.md](use-cases/UC-AUTH-009-revoke-own-credential.md) | — | 有效用户撤销本人凭据，并使引用它的 Session 后续检查失败。 [brief](briefs/UC-AUTH-009.md)。 |
 | `UC-AUTH-010` | 由 Session 签发可信用户身份 | `ACCEPTED` | [UC-AUTH-010-issue-user-identity-from-session.md](use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | — | 受授权服务以有效 Session 换取目标 audience 的短期用户 JWS；不缓存身份结果。 |
+| `UC-AUTH-011` | 设置并激活邮箱 | `PROPOSED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 首次绑定与更换、验证码激活；邮箱登录及 Developer 开通独立交付。 |
 
 ## Business Rules
 
@@ -121,9 +123,10 @@
 
 ## 维护规则
 
-- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN-NNN`。
+- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML-NNN`。
 - `UPF` 表示 User Profile，覆盖用户资料字段定义与资料编辑；不复用 App Center 的 `PRF` 编号空间。
 - `REG` 表示用户创建及初始关联，`LGN` 表示登录、Session 与设备凭据撤销规则。
+- `EML` 表示邮箱绑定与激活；邮箱认证用例不得复用绑定挑战。
 - BR 状态继承其权威 UC，不单独保存状态。
 - 新增编号时同时更新 Next ID；废弃编号不得重新分配。
 - 同一规则只有一个权威正文；其它 bounded context 通过链接引用。
@@ -138,3 +141,16 @@
 | `BR-IDN-004` | 签发与撤销的一致性 | Consistency / Revocation | [UC-AUTH-010](use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004) | — | — |
 | `BR-IDN-005` | 首版不缓存认证结果 | Architecture / Consistency | [UC-AUTH-010](use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-005) | — | — |
 | `BR-IDN-006` | 失败关闭与秘密边界 | Failure / Privacy | [UC-AUTH-010](use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-006) | — | — |
+
+### Email Binding (`BR-EML`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-EML-001` | 邮箱凭据与资料、身份分离 | Boundary / Identity | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-001) | — | — |
+| `BR-EML-002` | 地址规范化与唯一性 | Validation / Uniqueness | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-002) | — | — |
+| `BR-EML-003` | 绑定授权与验证码隔离 | Authorization / Verification | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-003) | — | — |
+| `BR-EML-004` | 更换与原子激活 | Lifecycle / Atomicity | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-004) | — | — |
+| `BR-EML-005` | 重试与提交结果不确定 | Retry / Consistency | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-005) | — | — |
+| `BR-EML-006` | 投递、限额与秘密保护 | Delivery / Privacy | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-006) | — | — |
+| `BR-EML-007` | 查询与占用披露边界 | Query / Privacy | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-007) | — | — |
+| `BR-EML-008` | 恢复与 Developer 开通边界 | Boundary / Recovery | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-008) | — | — |
