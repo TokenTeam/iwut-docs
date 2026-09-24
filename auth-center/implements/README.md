@@ -9,7 +9,7 @@
 | [UC-AUTH-001](../use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) | `ACCEPTED` | `IN_PROGRESS` | 独立 API Proto 与生成代码、Domain/Port/UseCase、临时硬编码 catalog adapter、Kratos 原生 gRPC transport、goforj/wire Composition Root、service JWS/固定 allowlist、未认证 provider E2E、真实 App+Auth 双服务 E2E | MongoDB 权威目录 |
 | [UC-AUTH-002](../use-cases/UC-AUTH-002-batch-get-developer-statuses.md) | `ACCEPTED` | `COMPLETE` | 权威设计、共享契约、独立 API Proto 与生成代码、Domain/Port/UseCase、MongoDB Repository 与唯一索引、Kratos 原生 gRPC Transport、service JWS/固定 allowlist、真实 MongoDB provider E2E、App Center consumer adapter、真实 App+Auth 双服务 E2E | — |
 | [UC-AUTH-003](../use-cases/UC-AUTH-003-resolve-system-principal.md) | `ACCEPTED` | `COMPLETE` | 独立 API Proto、启动时幂等 Mongo provision、purpose partial unique index、Domain/Port/UseCase、受 service identity 与 purpose allowlist 保护的原生 gRPC、App Center 延迟解析与成功缓存、provider E2E | — |
-| [UC-AUTH-004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) | `ACCEPTED` | `IN_PROGRESS` | 权威生命周期、PLATFORM_ADMIN 与一次性 bootstrap 边界、撤销传播上界 | 管理 Proto/路由、Domain/Mongo/Transport 实现（普通 USER 和内部身份签发已具备） |
+| [UC-AUTH-004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) | `ACCEPTED` | `COMPLETE` | Reviewer 授予/撤销与状态查询、HTTP/gRPC、当前管理员权限复核、权限 revision CAS、原子不可变审计、全局一次性 bootstrap、防复活标记、与 UC010 共用事务栅栏、Gateway SESSION 三协议联调 | —（生产管理员初始化与公网部署由运维执行） |
 | [UC-AUTH-005](../use-cases/UC-AUTH-005-edit-own-user-profile.md) | `ACCEPTED` | `CORE_COMPLETE` | 独立 Proto、配置字段目录、Domain/Port/UseCase、Mongo 内嵌资料 CAS、严格 oneof 解码、可信用户 JWS、HTTP/JSON 与原生 gRPC、生产 Wire 与真实 Mongo E2E；注册初始化空资料 | 生产实际字段清单、既有 USER 数据迁移、Gateway 接入与客户端确认交互 |
 | [UC-AUTH-006](../use-cases/UC-AUTH-006-create-user.md) | `ACCEPTED` | `CORE_COMPLETE` | 真实 P-256 验证、必填关联声明、独立 Proto、原子注册、关联认证加密/HMAC、启动前离线轮换与幂等重跑、全量核验、限额、生产 Wire/Mongo/HTTP/gRPC E2E | 正式事务部署上的维护窗口验收；客户端、Gateway 独立交付 |
 | [UC-AUTH-007](../use-cases/UC-AUTH-007-login.md) | `ACCEPTED` | `CORE_COMPLETE` | 真实设备登录、严格编码、Session 在线检查、固定寿命配置、10 会话精确 LRU、有界限流、事务栅栏、HTTP/gRPC/生产 Wire/Mongo 并发与故障测试 | Gateway 的 Session-to-JWS 编排与客户端接入；物理清理暂以保留记录处理 |
@@ -63,3 +63,19 @@ HTTP 集成提交：Auth `afe227a`，API `5a6d439`。`make check`、`make test-r
 ## 性能测量记录
 
 - [UC010 本地性能测量（2026-09-23）](benchmarks/uc010-local-20260923.md)：实现验证记录，包含环境、复现命令和结果，不作为生产容量保证。测试与测量代码保留在 Auth 实现仓库。
+
+## 2026-09-24 Reviewer 管理
+
+UC004 brief 通过 `tools/gen_brief.py UC-AUTH-004` 生成，保留 `ACCEPTED` 设计状态。
+Auth 实现 `5c5e11b`、独立 API `3912b55`、Gateway 集成 `7ac853a` 均已本地提交。
+
+- 新增配套查询及 GRANT/REVOKE 管理接口，Gateway 以 SESSION 换取 Auth audience JWS；
+  Auth 验签并要求 `auth.reviewer.manage`，事务内复核当前 ACTIVE USER 管理员权限。
+- 权限与审计原子提交，保留其它权限，使用全局认证事务栅栏与 UC010 签发协调。
+  重复动作和 stale revision 冲突；未知提交不返回成功。
+- `auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>` 仅使用 Mongo 配置，
+  不监听端口，不隐式授予 Reviewer。持久化全局标记保证重跑不能恢复后来撤销的管理权限。
+- Auth 的 `make check`、`make test-race`、`make test-mongo` 通过；覆盖真实 Wire/Mongo/JWS、
+  审计失败回滚、提交结果未知、并发 CAS、撤销与签发串行化、bootstrap 防复活。
+- Gateway 的 `make check` 与真实 Traefik/Auth/Mongo 协议验收通过，覆盖 HTTP grant、原生 gRPC revoke、
+  gRPC-Web query、普通用户拒绝及版本冲突。通过真实 CLI 初始化测试管理员，不以数据库直改替代用例。

@@ -67,3 +67,10 @@ git diff --check
 ```
 
 `test-protocol-e2e.sh` 必须启动固定 Traefik、真实 Auth/Mongo、Gateway 和记录调用次数的 verifier backend；禁止用“直接请求 Gateway adapter”替代经过 Traefik 的三协议链路。测试结束必须清理自己的容器、网络和临时密钥。
+
+## 2026-09-24 UC-AUTH-004 路由补充
+
+Gateway `7ac853a` 固定 API `3912b55`，新增 Reviewer 管理与查询两条 SESSION 路由、显式 unary
+代理适配以及重新生成的 Traefik 配置。Auth audience 不等同管理员授权，权限判断由 Auth 完成。
+`make check` 与真实三协议 E2E 通过；测试使用 Auth 的真实 bootstrap CLI，并覆盖管理操作的
+成功、权限不足、重复操作和 revision 冲突。未公开新的内部服务 RPC，未执行生产部署。
