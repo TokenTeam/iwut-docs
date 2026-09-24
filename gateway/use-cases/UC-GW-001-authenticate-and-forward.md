@@ -1,6 +1,6 @@
 # UC-GW-001：按路由认证并转发请求
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -26,7 +26,7 @@ OAuth2 是授权体系，access token 不一定是 JWT。即使采用 JWT，也�
 
 ## 首批路由清单
 
-以下是明确的策略分配，不宣称已生成 Gateway/HTTP 路由。Auth 首版只有原生 gRPC；HTTP 映射另由 API 契约声明，不能凭下表编造登录 URL。
+以下是明确的策略分配，不宣称已生成 Gateway 路由。Auth 用户入口的 HTTP 映射由 API annotation 与 Auth 路由契约声明；内部签发 RPC 仍仅为原生 gRPC，不能凭下表编造 URL 或公开内部方法。
 
 | 目标服务与生成接口 | 策略 | 下游所需凭据 |
 | --- | --- | --- |
@@ -85,9 +85,9 @@ Session 严格使用 [设备认证契约的载体](../../platform/contracts/auth
 <a id="br-gwr-004"></a>
 ### BR-GWR-004：协议与转发责任
 
-Traefik 继续承担 Edge、Router、TLS 和 gRPC-Web 终止；Gateway 认证编排作为薄适配组件调用 Auth，Router 负责最终反向代理。架构采用 Domain/UseCase/Port/Adapter 分离，不增加用户数据库、事件总线或通用策略语言。外部 gRPC-Web 转换后的原生 gRPC 同样必须经过认证策略，不存在转换后直达业务服务的绕路。
+Traefik `v3.7.13` 继续承担 Edge、TLS、HTTP Router 和 gRPC-Web 终止。HTTP/JSON 由 ForwardAuth 完成 SESSION 编排并由 Traefik 最终反向代理；原生 gRPC 与转换后的 gRPC-Web 进入 Gateway 的精确 unary 前置代理，由它产生协议正确的认证错误并调用固定 generated client。ForwardAuth 不用于原生 gRPC，因为认证拒绝会成为普通 HTTP 响应。完整拓扑、Go module、严格路由目录和版本固定见 [ADR-GW-001](../adr/ADR-GW-001-runtime-routing-and-protocol-adapters.md)。架构采用 Domain/UseCase/Port/Adapter 分离，不增加用户数据库、事件总线或通用策略语言。
 
-可用 Traefik ForwardAuth 连接认证组件，但这只是适配方式，不把其默认行为当作业务契约：成功回调必须已有完整 JWS，失败不能返回会让 Router 继续请求的 2xx。由已匹配路由绑定认证组件的 policy/routeId，不采信客户端同名头；Router 与组件配置必须由同一目录生成或用契约测试验证一致。
+HTTP ForwardAuth 只是适配方式，不把其默认行为当作业务契约：成功回调必须已有完整 JWS，失败不能返回会让 Router 继续请求的 2xx。由已匹配路由绑定认证组件的 routeId，不采信客户端同名头；Traefik 与组件配置必须由同一 `config/routes.v1.yaml` 生成并用契约测试验证一致。gRPC 前置代理只注册目录列出的 exact full method，不使用 package/service 通配转发。
 
 HTTP、原生 gRPC 与 gRPC-Web 都须实测失败不会到达业务 upstream，终端能得到相应协议的认证/不可用错误；不能只测一个 HTTP 200 回调便宣称 gRPC 已交付。Auth 的原生 gRPC 不提供 HTTP JSON 转码，Traefik gRPC-Web 转换也不等于 JSON 转码；未声明 HTTP 接口的能力暂不开放 JSON 路由。
 
@@ -115,15 +115,18 @@ HTTP、原生 gRPC 与 gRPC-Web 都须实测失败不会到达业务 upstream，
 
 ## 交付边界
 
-本轮仅设计并建立 `iwut-gateway-ddd` 孤儿 worktree，不将旧 Gateway 或旧 auth-forward 的实现视为模板。首个实现工作包需选定并锁定 Traefik 版本、交付薄认证适配组件和路由生成/验证、协议错误适配及真实 E2E；不是只提交一份未经运行验证的 YAML。
+设计已接受，`iwut-gateway-ddd` 孤儿 worktree 可以进入首个实现工作包。旧 Gateway 或旧 auth-forward 的实现仍不构成模板。首个工作包按 [实现状态](../implements/README.md) 和 ADR-GW-001 固定的范围交付 module/API 基线、路由生成与验证、HTTP ForwardAuth、精确 unary gRPC 前置代理、协议错误适配及真实三协议 E2E；不是只提交一份未经运行验证的 YAML。
 
 配置通过部署注入，不做管理后台。OAuth2 委托协议另立 UC，公开资源策略可通过明确 DIRECT 路由扩展；不会因本 UC 已有枚举而隐式开放。Auth 原生 RPC 的实现依赖为 UC-AUTH-010，业务接口按各自实现状态启用。
 
 ## 参考
 
-- [Traefik ForwardAuth](https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/forwardauth/)：认证回调与 Router 转发的适配机制；具体版本参数须在实现时验证。
+- [Traefik ForwardAuth v3.7](https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/http/middlewares/forwardauth/)：HTTP 认证回调与 Router 转发的适配机制。
+- [ADR-GW-001](../adr/ADR-GW-001-runtime-routing-and-protocol-adapters.md)：固定运行时、路由目录和协议适配结构。
 - [RFC 9068](https://www.rfc-editor.org/rfc/rfc9068.html)：OAuth2 access token 的 JWT profile；OAuth2 本身并不强制 token 是 JWT。
 
 ## 变更记录
+
+- 2026-09-24：接受首版 DIRECT/SESSION Gateway；固定 Go module、Traefik v3.7.13、严格路由目录、HTTP ForwardAuth 与 gRPC 前置代理边界。
 
 - 2026-09-23：提出单一路由驱动的 DIRECT/SESSION 策略，OAuth2 暂不启用；复用 Auth 签发与下游本地验签，不引入 Redis。

@@ -15,7 +15,7 @@
 
 | ID | 标题 | 状态 | 权威位置 | 备注 |
 | --- | --- | --- | --- | --- |
-| `UC-GW-001` | 按路由认证并转发请求 | `PROPOSED` | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md) | DIRECT/SESSION 编排；OAUTH2 仅预留。 |
+| `UC-GW-001` | 按路由认证并转发请求 | `ACCEPTED` | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md) | DIRECT/SESSION 编排；OAUTH2 仅预留。首个实现工作包见实现状态。 |
 
 ## Business Rules
 
@@ -26,3 +26,9 @@
 | `BR-GWR-003` | 头部清理与凭据最小转发 | Security / Boundary | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-003) |
 | `BR-GWR-004` | 协议与转发责任 | Architecture / Transport | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-004) |
 | `BR-GWR-005` | 有界失败与不重放业务 | Failure / Privacy | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md#br-gwr-005) |
+
+## Architecture Decisions
+
+| ID | 标题 | 状态 | 权威位置 |
+| --- | --- | --- | --- |
+| `ADR-GW-001` | Gateway 运行时、路由目录与协议适配 | `ACCEPTED` | [ADR-GW-001](adr/ADR-GW-001-runtime-routing-and-protocol-adapters.md) |
