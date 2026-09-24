@@ -8,15 +8,15 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-012` |
+| Use Case / Auth Center | `UC-AUTH-014` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
-| Business Rule / Developer Status | `BR-DEV-006` |
+| Business Rule / Developer Status | `BR-DEV-011` |
 | Business Rule / System Principal | `BR-SYS-005` |
 | Business Rule / Reviewer Permission | `BR-RVW-005` |
 | Business Rule / User Profile | `BR-UPF-012` |
 | Business Rule / User Registration | `BR-REG-009` |
-| Business Rule / Login and Session | `BR-LGN-013` |
+| Business Rule / Login and Session | `BR-LGN-019` |
 | Business Rule / Email Binding | `BR-EML-010` |
 
 ## Use Cases
@@ -34,6 +34,8 @@
 | `UC-AUTH-009` | 撤销自己的设备凭据 | `ACCEPTED` | [UC-AUTH-009-revoke-own-credential.md](use-cases/UC-AUTH-009-revoke-own-credential.md) | — | 有效用户撤销本人凭据，并使引用它的 Session 后续检查失败。 [brief](briefs/UC-AUTH-009.md)。 |
 | `UC-AUTH-010` | 由 Session 签发可信用户身份 | `ACCEPTED` | [UC-AUTH-010-issue-user-identity-from-session.md](use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | — | 受授权服务以有效 Session 换取目标 audience 的短期用户 JWS；不缓存身份结果。 |
 | `UC-AUTH-011` | 设置并激活邮箱 | `PROPOSED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 无 Session 验证后创建账号，有效 Session 绑定/更换；已有账号邮箱登录独立交付。 |
+| `UC-AUTH-012` | 使用邮箱登录 | `PROPOSED` | [UC-AUTH-012-login-with-email.md](use-cases/UC-AUTH-012-login-with-email.md) | — | 邮箱验证码授权本机设备，回到原账号并建立 Session；不自动注册。 |
+| `UC-AUTH-013` | 申请 Developer | `PROPOSED` | [UC-AUTH-013-apply-for-developer.md](use-cases/UC-AUTH-013-apply-for-developer.md) | — | 当前激活邮箱及可用邮箱登录为前提，自助开通 APPROVED；不增加人工资格审核。 |
 
 ## Business Rules
 
@@ -56,6 +58,11 @@
 | `BR-DEV-003` | 完整结果与 fail closed | Consistency / Failure | [UC-AUTH-002](use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-003) | — | — |
 | `BR-DEV-004` | 状态语义 | Field / Projection | [UC-AUTH-002](use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004) | — | — |
 | `BR-DEV-005` | 内部读取边界 | Authorization / Boundary | [UC-AUTH-002](use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-005) | — | 使用 trusted-service-identity-v1。 |
+| `BR-DEV-006` | 本人显式申请与邮箱前置条件 | Authorization / Recovery | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-006) | — | — |
+| `BR-DEV-007` | 自助开通与受限状态迁移 | Lifecycle / Boundary | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-007) | — | — |
+| `BR-DEV-008` | 资格写入与审计的一致性 | Atomicity / Audit | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-008) | — | — |
+| `BR-DEV-009` | 资格与应用授权的边界 | Authority / Separation | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-009) | — | — |
+| `BR-DEV-010` | 本人资格查询与门禁解释 | Query / Eligibility | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-010) | — | — |
 
 ### System Principal (`BR-SYS`)
 
@@ -120,6 +127,12 @@
 | `BR-LGN-010` | 会话容量与 LRU 淘汰 | Capacity / Lifecycle | [UC-AUTH-007](use-cases/UC-AUTH-007-login.md#br-lgn-010) | — | 每账号 10 个有效会话，按 lastUsedAt 淘汰；与新会话创建原子提交。 |
 | `BR-LGN-011` | 登录触发与客户端边界 | Authentication / Boundary | [UC-AUTH-007](use-cases/UC-AUTH-007-login.md#br-lgn-011) | — | 手动与自动触发使用相同服务端证明、限流和 Session 规则。 |
 | `BR-LGN-012` | 本人设备凭据的授权撤销 | Credential / Revocation | [UC-AUTH-009](use-cases/UC-AUTH-009-revoke-own-credential.md#br-lgn-012) | — | 只允许有效 USER 撤销同一 authId 的凭据；不物理删除或释放公钥归属。 |
+| `BR-LGN-013` | 邮箱登录定位与用途隔离 | Authentication / Identity | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-013) | — | — |
+| `BR-LGN-014` | 邮箱验证码与有界投递 | Verification / Delivery | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-014) | — | — |
+| `BR-LGN-015` | 邮箱授权下的设备凭据登记 | Credential / Authorization | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-015) | — | — |
+| `BR-LGN-016` | 邮箱登录 Session 与邮箱更换边界 | Session / Lifecycle | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-016) | — | — |
+| `BR-LGN-017` | 原子登录与结果恢复 | Atomicity / Retry | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-017) | — | — |
+| `BR-LGN-018` | 邮箱登录隐私与失败关闭 | Privacy / Failure | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-018) | — | — |
 
 ## 维护规则
 

@@ -16,7 +16,9 @@
 | [UC-AUTH-008](../use-cases/UC-AUTH-008-revoke-own-session.md) | `ACCEPTED` | `COMPLETE` | token 定向幂等撤销、专用载体、精确鉴权例外、首次 revokedAt、保守保留记录、真实 Mongo 故障/未知提交测试与生产 HTTP/gRPC E2E | —（Gateway 与客户端退出编排独立交付） |
 | [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) | `ACCEPTED` | `COMPLETE` | 有效 Session 授权及事务内复核、本人目标隔离、首次撤销记录、公钥归属保留、引用 Session 即时拒绝、并发登录/撤销及生产 HTTP/gRPC E2E | —（客户端编排独立交付） |
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
-| [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `PROPOSED` | `NOT_STARTED` | 邮箱注册与已有账号绑定的双分支草案 | 设计接受、邮箱注册签名契约/向量、Proto/HTTP/gRPC、原子注册与绑定、邮件投递及集成验收；已有账号邮箱登录另立 UC |
+| [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `PROPOSED` | `NOT_STARTED` | 邮箱注册与已有账号绑定的双分支草案 | 设计接受、邮箱注册签名契约/向量、Proto/HTTP/gRPC、原子注册与绑定、邮件投递及集成验收；已有账号邮箱登录由 UC012 草案跟踪 |
+| [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `PROPOSED` | `NOT_STARTED` | 邮箱登录、设备授权、Session/邮箱更换边界草案 | UC011、签名格式/向量、Session 新方法兼容、原子登录与邮件投递、客户端/Gateway 验收 |
+| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `PROPOSED` | `NOT_STARTED` | 邮箱门禁、自助开通与本人资格查询草案 | UC011/012 恢复能力、设计接受、Proto/路由、资格与审计原子提交及 App Center 联合验收 |
 
 ## 实现边界
 

@@ -16,9 +16,9 @@ UC-AUTH-001 只读取已经存在的权威目录。目录由部署种子、显�
 
 ### Principal provision 与状态迁移
 
-UC-AUTH-002 只读取 `auth_principals`。普通用户主体如何创建、Developer 资格如何申请、
-审批、暂停和恢复，以及相关审计由后续命令 UC 定义；生产不能通过直接修改 MongoDB
-替代这些业务行为。
+UC-AUTH-002 只读取 `auth_principals`。普通用户由 UC006 创建，邮箱注册见 UC011 草案。
+Developer 申请与开通审计见 [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md) 草案，首版提出满足邮箱前置条件后自助开通；
+人工审批、拒绝后重申、暂停和恢复仍需独立用例。生产不能通过直接修改 MongoDB 替代这些行为。
 
 Developer 是 USER principal 的可选属性。普通用户的 `developerStatus` 为 null；只有申请
 进入 Developer 生命周期后才取 `PENDING/APPROVED/REJECTED/SUSPENDED`。主体建立与
@@ -61,6 +61,6 @@ UC-AUTH-006 至 009 已 ACCEPTED；设备证明、学号规范化和散列、Ses
 
 - k8s 改造时再评审多实例在线密钥轮换；当前单实例离线方案见 [BR-REG-008](use-cases/UC-AUTH-006-create-user.md#br-reg-008)。
 - Auth 基于有效 Session 签发目标服务身份、Gateway 鉴权 RPC/路由与秘密转发边界，跟踪已接受的 UC-AUTH-010 与 UC-GW-001 草案；首版不引入 Redis 或身份缓存，OAuth2 单独设计。
-- 邮箱设置与激活见 [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)（PROPOSED）：无 Session 时验证邮箱并原子注册，有效 Session 时绑定原账号，失效 Session 不降级注册；邮箱凭据与学生资料分离。草案接受前需闭合邮箱注册的签名格式与向量。已有账号邮箱登录仍需独立用例决定认证方式、Session 凭据引用及更换后的失效规则；新设备凭据登记也需独立授权。Developer 开通应等待已激活邮箱和可用邮箱登录能力同时具备，不能仅以绑定成功视为可恢复。
+- 邮箱设置/注册见 [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)，已有账号邮箱登录及本机设备授权见 [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md)，Developer 自助申请见 [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md)，均为 PROPOSED。UC011/012 接受前需闭合独立签名格式、公开向量及精确接口契约；UC012 实现必须扩展全部 Session 消费入口对新认证方法的支持。资格开通等待邮箱恢复链路实际交付，不能仅以文档存在视为可用。
 - 旧设备明确授权新增凭据、凭据/Session 列表与命名、撤销其它 Session、账号禁用/重新启用和注销仍需独立用例。当前 token 的 Session 撤销由 [UC-AUTH-008](use-cases/UC-AUTH-008-revoke-own-session.md) 定义，本人 credentialId 的凭据撤销由 [UC-AUTH-009](use-cases/UC-AUTH-009-revoke-own-credential.md) 定义，客户端退出组合见[生命周期建议](client-guides/authentication-lifecycle.md)。
 - 外部应用的专属学生关联标识：披露授权、未关联语义、保留/删除/改绑与配额连续性；当前注册仅建立内部关系，不发布新的对外身份 claim。

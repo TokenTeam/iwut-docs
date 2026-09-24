@@ -10,7 +10,7 @@
 
 邮箱注册复用已有的设备密钥和必填 associationToken，验证成功后原子创建账号、初始设备凭据、首次 Session 及邮箱绑定，用户立即进入普通登录功能。客户端准备设备密钥不要求额外生物识别，也不等于提前创建平台账号。
 
-不要求学校邮箱，不设置平台密码，不自动修改学生资料，不合并账号，不授予 Developer 资格。**已有账号的邮箱登录、恢复及新增设备凭据仍须独立用例**；本次注册签发首次 Session 不代表邮箱恢复已经交付。
+不要求学校邮箱，不设置平台密码，不自动修改学生资料，不合并账号，不授予 Developer 资格。**已有账号的邮箱登录及邮箱授权下的本机设备登记由 [UC012](UC-AUTH-012-login-with-email.md) 草案定义**；本次注册签发首次 Session 不代表邮箱恢复已经交付。
 
 ## 参与者与前置条件
 
@@ -126,7 +126,7 @@ REGISTER 的设备签名覆盖独立用途、operationId、随机挑战、期限
 
 激活将唯一邮箱归属、账号绑定、revision、操作成功结果和最小审计记录原子提交。旧邮箱在此之前始终有效；新验证码错误、过期、投递失败、冲突或事务回滚均不删除旧绑定。提交后旧地址释放，可被以后验证成功的账号使用；它不再具有原账号的认证资格。
 
-更换不撤销已有设备 Session，不修改设备密钥或 Developer 状态。本 UC 不定义尚未存在的邮箱认证 Session；未来邮箱登录用例必须定义凭据版本引用、待登录挑战在更换后的失效，以及既有邮箱 Session 的处理，再开放该登录入口。
+更换不撤销已有设备 Session，不修改设备密钥或 Developer 状态。邮箱登录操作的 revision 确认及既有设备/Session 的处理见 [UC012 的 BR-LGN-013](UC-AUTH-012-login-with-email.md#br-lgn-013) 和 [BR-LGN-016](UC-AUTH-012-login-with-email.md#br-lgn-016)，完整交付后才能开放邮箱登录。
 
 <a id="br-eml-005"></a>
 ### BR-EML-005：重试与提交结果不确定
@@ -162,9 +162,9 @@ REGISTER 的关联声明快照、加密、清理与冷更新轮换继承 [BR-REG
 <a id="br-eml-008"></a>
 ### BR-EML-008：恢复与 Developer 开通边界
 
-BIND 激活邮箱不签发 Session、不添加设备公钥；REGISTER 只为本次新账号建立初始设备凭据及首次 Session。两者都不自动开放已有账号的邮箱登录，也不为账号加 Developer 标记。未来邮箱登录必须独立验证当前邮箱控制权并回到原 authId；新增设备凭据也要有独立授权与私钥持有证明，不能继承旧设备私钥或由 associationToken 授权。
+BIND 激活邮箱不签发 Session、不添加设备公钥；REGISTER 只为本次新账号建立初始设备凭据及首次 Session。两者都不自动开放已有账号的邮箱登录，也不为账号加 Developer 标记。[UC012](UC-AUTH-012-login-with-email.md) 独立验证当前邮箱控制权并回到原 authId，同时通过验证码授权和私钥证明登记本机设备；不继承旧私钥，也不由 associationToken 授权。
 
-后续 Developer 开通用例应以“已有激活邮箱，且平台已交付可用的邮箱登录能力”为前置条件，不能仅检查资料中存在邮箱或本 UC 的 activeEmail 非空。日常设备凭据登录不因此被禁止。邮箱移除不在本 UC 内；未来若提供移除，应确保 Developer 不失去最后可用的邮箱登录方式，更换则沿用本 UC 的先验证后替换。
+Developer 开通的邮箱前置条件由 [UC013 的 BR-DEV-006](UC-AUTH-013-apply-for-developer.md#br-dev-006) 定义；本用例成功不自动开通资格。邮箱移除不在本 UC 内；未来若提供移除，应确保 Developer 不失去最后可用的邮箱登录方式，更换则沿用本 UC 的先验证后替换。
 
 <a id="br-eml-009"></a>
 ### BR-EML-009：邮箱注册的原子创建
@@ -220,7 +220,7 @@ REGISTER 复用 UC006 的 [主体初始化](UC-AUTH-006-create-user.md#br-reg-00
 - 补齐 EmailBinding 服务 Proto、HTTP annotation 和精确方法鉴权：Begin 允许无 Session 注册或有效 Session 绑定，但拒绝无效 Session；Complete 按持久化模式验证；GetOwnEmailBinding 始终要求有效 Session。Gateway 走 DIRECT，由 Auth 检查原始 Session 载体及证明，不统一套用必需 Session middleware，也不把带错 token 的请求转成匿名。
 - 新增邮箱唯一索引、revision、操作/幂等记录、持久化限额、原子审计与邮件适配器；将邮箱注册操作纳入关联密钥冷更新门禁及清理。生产邮件配置由部署注入，不写入仓库。
 - 后端使用真实 Mongo 事务和可控邮件接收端验收；公网投递、客户端注册页两种选择及结果恢复独立验收，不向真实用户发送自动化测试信。
-- 后续设计已有账号的邮箱登录与新设备凭据登记，闭合恢复能力后再启用 Developer 开通；解绑、旧设备迁移和账号注销分别设计。
+- 邮箱登录及本机设备登记依 UC012 草案交付，Developer 开通依 UC013 草案；三个用例都不因新增引用而自动接受。解绑、旧设备迁移和账号注销分别设计。
 
 ## 变更记录
 
