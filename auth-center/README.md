@@ -7,7 +7,7 @@
 
 ## 当前迭代
 
-当前已有十个接受的用例（UC-AUTH-001 至 010），以及 UC-AUTH-011 至 013 三个草案；设计接受与实现完成分别跟踪：
+当前已有十一个接受的用例（UC-AUTH-001 至 011），以及 UC-AUTH-012/013 两个草案；设计接受与实现完成分别跟踪：
 
 - `UC-AUTH-001`：授权的内部服务读取 Auth 权威的 Scope Catalog 完整快照。
 - `UC-AUTH-002`：授权的内部服务按 Auth ID 批量读取当前 Developer 状态。
@@ -20,14 +20,14 @@
 - `UC-AUTH-009`：有效用户撤销属于自己账号的设备凭据，并使相关 Session 在后续检查中失效。
 
 - `UC-AUTH-010`：受授权 Gateway 根据有效 Session 获取目标服务的可信用户 JWS。
-- `UC-AUTH-011`（PROPOSED）：无 Session 时通过邮箱验证创建账号；有有效 Session 时绑定或更换邮箱。
+- `UC-AUTH-011`（ACCEPTED）：无 Session 时通过邮箱验证创建账号；有有效 Session 时绑定或更换邮箱。
 - `UC-AUTH-012`（PROPOSED）：邮箱验证码登录原账号，登记/复用本机设备凭据并建立 Session。
 - `UC-AUTH-013`（PROPOSED）：具备激活邮箱及可用邮箱登录的普通用户自助申请 Developer。
 
 用户资料的字段定义和编辑规则已归入 UC-AUTH-005 的 `BR-UPF-*`，读取本人资料和表单 schema
 见[配套查询契约](query-contracts/user-profile-editing.md)。可信身份签发由 UC-AUTH-010 定义，
 Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与本机设备恢复、Developer 自助申请
-分别见 UC-AUTH-011/012/013 草案，尚未实现；Scope 管理后台、Developer 暂停/恢复、旧设备迁移、
+分别见已接受的 UC-AUTH-011 和 UC-AUTH-012/013 草案；Scope 管理后台、Developer 暂停/恢复、旧设备迁移、
 第三方应用资料开放和 consent 仍属于后续独立用例。
 
 创建、登录和两项撤销用例已接受，设备签名、关联声明与 Session/RPC 载体统一引用
@@ -57,7 +57,7 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md)：邮箱验证码登录与本机设备授权草案。
 - [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md)：Developer 自助申请与本人资格查询草案。
 
-- [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)：设置并激活邮箱草案；不等于邮箱登录已经交付。
+- [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)：设置并激活邮箱已接受；[实现 brief](briefs/UC-AUTH-011.md)，邮箱登录仍独立交付。
 
 - [UC-AUTH-010](use-cases/UC-AUTH-010-issue-user-identity-from-session.md)：Session 到可信身份签发；[生成 brief](briefs/UC-AUTH-010.md)。
 - [Gateway UC-GW-001](../gateway/use-cases/UC-GW-001-authenticate-and-forward.md)：单一路由驱动的认证与转发草案。

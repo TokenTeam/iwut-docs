@@ -182,6 +182,16 @@ UC004–009 的 HTTP 绑定由 Auth 后端实现。Gateway 的路由与认证编
 | PUT | `/v1/users/{subject_auth_id}/reviewer-permission` | ReviewerPermissionService/ManageReviewerPermission | SESSION | 200 |
 | GET | `/v1/users/{subject_auth_id}/reviewer-permission` | ReviewerPermissionService/GetReviewerPermission | SESSION | 200 |
 
+UC011 追加三个 DIRECT 路由，完整字段及 Session 例外见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md)：
+
+| HTTP method | Auth 服务内部路径 | RPC 方法 | Gateway 策略 | 成功状态 |
+| --- | --- | --- | --- | --- |
+| POST | `/v1/email-bindings` | EmailBindingService/BeginSetEmail | DIRECT | 200 |
+| POST | `/v1/email-bindings/{operation_id}/completion` | EmailBindingService/CompleteSetEmail | DIRECT | 200 |
+| GET | `/v1/users/me/email-binding` | EmailBindingService/GetOwnEmailBinding | DIRECT | 200 |
+
+EmailBindingService package 为 `auth_center.v1.email_binding`；额外受 AUTH_EMAIL_BINDING_ENABLED 开关控制，默认不启用。DIRECT 不得将空/坏 Session 清理成缺失 Session。
+
 ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，管理接口还须由 Auth 校验 `auth.reviewer.manage`；路由 SESSION 身份本身不授予管理权。
 
 AuthenticationService package 为 `auth_center.v1.authentication`；UserProfileService package
@@ -197,7 +207,8 @@ Scope Catalog、Developer 状态查询、SYSTEM principal 查询及 UC010 Sessio
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
 - Reviewer 管理的 `subject_auth_id` 由路径绑定，覆盖消息体中同名值。
-- Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
+- 普通设备注册/登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
+  邮箱 Complete 消息体为 code 和条件必需的 registrationProof，路径 operation_id 同样覆盖体中值。
   凭据撤销的 `credential_id` 仅来自路径。GET/DELETE 不带请求体。
 - 资料编辑保留消息体中的 `expectedRevision` 和显式 ProfileValue oneof，不引入另一套
   原始 KV 或 `If-Match` 协议。具体字段值类型仍按 UC005 校验。
@@ -381,6 +392,6 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 128 | `57354143ae4b` |
-| `platform/contracts/auth-center-api-routing.md` | 69 | `42cd54d3e9bb` |
+| `platform/contracts/auth-center-api-routing.md` | 80 | `31876c5ca9ea` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 79 | `94ff92abf91d` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |

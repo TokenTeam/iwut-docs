@@ -149,7 +149,7 @@ Begin 对未知、已知、禁用邮箱返回相同形状挑战并使用相同�
 
 ## 交付依赖
 
-- 依赖 UC011 激活邮箱及 revision/唯一归属、UC006 凭据存储和 UC007 Session；UC011 与本 UC 当前均为草案，不自动接受或启用。
+- 依赖 UC011 激活邮箱及 revision/唯一归属、UC006 凭据存储和 UC007 Session；UC011 已接受；本 UC 保持 PROPOSED，不因前置用例接受而自动启用。
 - 接受和生成 brief 前，补充 LOGIN_WITH_EMAIL 签名精确编码、公开向量与共享 RPC/HTTP 路由契约；复用既有密码算法但不复用普通 LOGIN 待签字节。
 - 交付新认证方法的 Session 读取/检查/撤销/JWS 签发兼容、邮箱绑定事务栅栏、真实 Mongo 和真实 transport 验收，以及邮件适配器与客户端新设备流程。
 - Gateway 的 Begin/Complete 走 DIRECT 匿名认证入口，仅开放明确方法；不要求已有 Session，也不使用 SESSION-to-JWS 作为前置。

@@ -203,6 +203,8 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
+UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+
 ### `platform/contracts/auth-session-identity-issuance-v1.md`：Session 到可信用户身份签发 v1
 
 #### 范围与权威来源
@@ -500,7 +502,7 @@ Auth Center 必须提供 `AUTH_CENTER_SERVICE_CALLERS_B64`：以下 JSON UTF-8 b
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 136 | `bf30266c7c29` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 151 | `98d2b3e33077` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
-| `platform/contracts/auth-device-session-v1.md` | 119 | `524cf6d814b0` |
+| `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 79 | `94ff92abf91d` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |
 | `platform/contracts/trusted-service-identity-v1.md` | 88 | `3c091a708b32` |

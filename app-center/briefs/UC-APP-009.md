@@ -544,6 +544,8 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
+UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+
 #### 实现配置与验收边界
 
 Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-007](../../auth-center/use-cases/UC-AUTH-007-login.md) 拥有；本契约只固定相互通信所需的格式和认证方法。并行工作包共用同一套端口和持久化约定。
@@ -658,6 +660,6 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-009-join-application-as-tester.md` | 411 | `556bdc015bae` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `2595342af7cd` |
-| `platform/contracts/auth-device-session-v1.md` | 119 | `524cf6d814b0` |
+| `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/tester-join-url-v1.md` | 38 | `0edbb9f4f2d2` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |

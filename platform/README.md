@@ -62,3 +62,5 @@
 [Session 到可信用户身份签发 v1](contracts/auth-session-identity-issuance-v1.md) 已 ACTIVE，定义 Gateway 对 Auth 的内部签发 RPC、双重凭据和 audience 授权。业务规则分别由 [UC-AUTH-010](../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md) 与 [UC-GW-001](../gateway/use-cases/UC-GW-001-authenticate-and-forward.md) 拥有。两项 UC 均已接受；Auth 后端为 CORE_COMPLETE，Gateway 首个后端/本地部署工作包为 COMPLETE，并已通过真实 Auth/Mongo 与三协议联合验收。生产 RPC 仍须按部署开关显式启用；实现完成不等于已执行生产公网发布。
 
 Auth HTTP/JSON 的路径、ProtoJSON 与部署边界见 [Auth API 路由](contracts/auth-center-api-routing.md)。
+
+邮箱注册的独立签名、消息字段与可选 Session 鉴权见 [邮箱设置与注册协议 v1](contracts/auth-email-binding-v1.md)；公开测试向量通过 `tools/auth_email_protocol_vectors.py --check` 校验，旧设备协议保持兼容。

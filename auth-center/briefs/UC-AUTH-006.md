@@ -466,6 +466,8 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
+UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+
 #### RPC 鉴权表
 
 Auth 原生 gRPC 新接口固定为以下 full method；可执行 Proto 在独立 API 仓库。middleware 按精确方法表分派，未知方法默认拒绝，不能把整个 package 标成匿名。
@@ -517,4 +519,4 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 151 | `98d2b3e33077` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 285 | `9e4e092d772e` |
-| `platform/contracts/auth-device-session-v1.md` | 119 | `524cf6d814b0` |
+| `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
