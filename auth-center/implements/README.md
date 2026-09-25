@@ -18,7 +18,7 @@
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
 | [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
-| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `NOT_STARTED` | UC011/012 后端依赖已合入；精确接口、部署就绪门禁与生成 brief | Auth/API 实现、资格与审计原子提交及 App Center 联合验收；Gateway/客户端独立交付 |
+| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `IN_PROGRESS` | UC011/012 后端依赖已合入；精确接口、部署就绪门禁与生成 brief；implement_uc013 已启动 | Auth/API 实现、资格与审计原子提交及 App Center 联合验收；Gateway/客户端独立交付 |
 
 ## 实现边界
 
@@ -142,3 +142,5 @@ Gateway 邮箱路由及客户端/生产配置交付不包含在此次合入和�
 UC012 的 Auth/API worktree 与主实现的提交完全一致且无未保存改动；已先移除独立 API worktree，再删除 `worktrees/iwut-auth-center-uc012`。保留本地分支与提交记录，没有推送。
 
 UC013 后端依赖已由 UC011/012 合入及测试闭合。现已接受自助开通设计，固定两个有效 Session 接口、字段 presence、部署恢复就绪声明及验收边界，并用脚本生成 [brief](../briefs/UC-AUTH-013.md)。实现状态单独跟踪，不把设计接受或后端测试视为公网入口已开放。
+
+`implement_uc013` 已确认开始，在 `worktrees/iwut-auth-center-ddd` 的 `auth-center/v1` 及嵌套独立 API 仓库实现；设计/brief 提交为 `c254d9f`。工作包要求 check、race、真实 Mongo/Wire/HTTP/gRPC 和实际 App Center 联合验收。当前为 IN_PROGRESS，尚无本用例完成或测试通过的声明；父代理不轮询工作日志。
