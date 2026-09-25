@@ -16,8 +16,8 @@
 | [UC-AUTH-008](../use-cases/UC-AUTH-008-revoke-own-session.md) | `ACCEPTED` | `COMPLETE` | token 定向幂等撤销、专用载体、精确鉴权例外、首次 revokedAt、保守保留记录、真实 Mongo 故障/未知提交测试与生产 HTTP/gRPC E2E | —（Gateway 与客户端退出编排独立交付） |
 | [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) | `ACCEPTED` | `COMPLETE` | 有效 Session 授权及事务内复核、本人目标隔离、首次撤销记录、公钥归属保留、引用 Session 即时拒绝、并发登录/撤销及生产 HTTP/gRPC E2E | —（客户端编排独立交付） |
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
-| [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `IN_PROGRESS` | 双分支用例、邮箱注册字节协议、公开向量、RPC/HTTP、鉴权与 SMTP/HMAC 约定；[brief](../briefs/UC-AUTH-011.md) | API/后端原子注册与绑定、投递及真实 Mongo/Wire/SMTP 验收；客户端和 Gateway 独立交付 |
-| [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `IN_PROGRESS` | 邮箱登录协议、公开向量、设备授权、Session 兼容与实现约定；[brief](../briefs/UC-AUTH-012.md) | UC011 稳定后端基线；可先隔离实现 API/协议/领域，集成后再验收 Mongo/SMTP/Wire/HTTP/gRPC |
+| [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
+| [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 仍在 auth-center/uc012，尚未合回 auth-center/v1；Gateway 与客户端独立交付 |
 | [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `PROPOSED` | `NOT_STARTED` | 邮箱门禁、自助开通与本人资格查询草案 | UC011/012 恢复能力、设计接受、Proto/路由、资格与审计原子提交及 App Center 联合验收 |
 
 ## 实现边界
@@ -103,3 +103,19 @@ UC011 的 API 基线为 `39122c2`，后端仍在实现。UC012 完整集成必�
 随后 rebase 并复用邮箱目录、共享额度、SMTP 和认证事务；不能以重复邮箱目录或 fixture 代替依赖。
 两位 subagent 通过消息交接，不在同一 worktree 并发修改。完整 Mongo/Wire/SMTP/HTTP/gRPC 验收待交付，
 未提前标记完成；UC013、客户端与 Gateway 仍独立跟踪。
+
+## 2026-09-25 实现完成核对
+
+此前“实现中/等待 UC011”的记录是当时的进度；当前完成情况以本节和顶部表格为准。
+
+- UC011：Auth `e6711d919e85cdf2b28393eaa4c3e42b20a3776a` 已在 `auth-center/v1`，
+  固定独立 API `39122c2d03aafd151aeb808789cb19fe7e5a87c4`。
+- UC012：已 rebase UC011，代码提交为 `ac8765f`、`9ee4d4b37f5ec198321e8b288ce3d2e0ecf27d24`，
+  固定独立 API `46544d1912e002ceb7d218e326bacc64874caf67`。
+  后续 `58f8a67` 仅补充 README/工作包说明。分支 `auth-center/uc012` 仍独立，未合回主实现分支。
+- 两个 subagent 均报告 `make check`、`make test-race`、完整 `make test-mongo` 通过，
+  另有真实 Mongo/Wire/TLS SMTP 的针对性 race 验收及三套协议向量检查。测试资源已清理，无真实用户邮件。
+- 本次核对确认提交、API 指针、祖先关系、干净工作区及对应测试代码；未重复运行已通过的代码门禁。
+  UC008 对未知认证方法/损坏来源记录失败关闭，保持正常未知/过期/已撤销 token 的幂等撤销。
+- 本页 COMPLETE 仍指 Auth/API 后端工作包。Gateway 尚未加入邮箱路由，客户端、公网与生产邮件配置独立验收。
+  UC013 仍为 PROPOSED/NOT_STARTED；不能将后端实现完成解释为开发者申请已开放。

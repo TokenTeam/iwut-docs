@@ -161,7 +161,7 @@ AUTH_EMAIL_LOGIN_ENABLED 默认 false，独立于 AUTH_EMAIL_BINDING_ENABLED。�
 
 ### 交付依赖
 
-- 依赖 UC011 激活邮箱及 revision/唯一归属、UC006 凭据存储和 UC007 Session；UC011 与本 UC 均已接受；UC011 后端仍在实现，稳定基线合入前本用例存在集成依赖，不能据此宣称可上线。
+- 依赖 UC011 激活邮箱及 revision/唯一归属、UC006 凭据存储和 UC007 Session；UC011 与本 UC 均已接受；后端基线、合入与测试进度见 [实现记录](../implements/README.md)，设计接受不等于生产启用。
 - [邮箱登录协议 v1](../../platform/contracts/auth-email-login-v1.md) 已固定 LOGIN_WITH_EMAIL 编码、字段、RPC/HTTP 和载体；公开向量由 tools/auth_email_login_vectors.py 生成/校验。
 - 交付新认证方法的 Session 读取/检查/撤销/JWS 签发兼容、邮箱绑定事务栅栏、真实 Mongo 和真实 transport 验收，以及邮件适配器与客户端新设备流程。
 - Gateway 的 Begin/Complete 走 DIRECT 匿名认证入口，仅开放明确方法；不要求已有 Session，也不使用 SESSION-to-JWS 作为前置。
@@ -508,7 +508,7 @@ reason/HTTP/gRPC 状态遵守 UC012。超大消息使用 EMAIL_LOGIN_REQUEST_TOO
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-012-login-with-email.md` | 201 | `70fd696af977` |
+| `use-cases/UC-AUTH-012-login-with-email.md` | 201 | `e2692ee1e896` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 277 | `fe77d446d400` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 136 | `bf30266c7c29` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
