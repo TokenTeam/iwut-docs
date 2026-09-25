@@ -6,7 +6,9 @@
 
 ## 已生成工作包
 
-- [UC-AUTH-012](UC-AUTH-012.md)：邮箱登录与设备授权；签名契约已闭合，后端集成等待 UC011 稳定实现。
+- [UC-AUTH-013](UC-AUTH-013.md)：Developer 自助申请、本人资格查询、激活邮箱门禁与原子审计；后端前置 UC 已合入，产品启用仍受恢复就绪声明控制。
+
+- [UC-AUTH-012](UC-AUTH-012.md)：邮箱登录与设备授权；已基于 UC011 完成实现并合入主分支。
 
 - [UC-AUTH-011](UC-AUTH-011.md)：邮箱注册、已有账号绑定/更换、独立签名协议及真实邮件投递；不包含 UC012/013。
 
@@ -29,6 +31,6 @@ python3 tools/gen_brief.py --check --all
 
 脚本按 UC 前缀选择 Auth 或 App 的注册表和输出目录；`--all` 覆盖两者的已配置 spec。`--baseline` 仍只生成 App Center 工程基线，不自动把 App 专属 ADR 变成 Auth 约束。
 
-抽取范围在 `tools/brief-specs/UC-AUTH-005.json` 至 `UC-AUTH-012.json`：`uc_sections` 选择本 UC 章节，`include_own_brs` 选择本 UC 规则，`query_sections` 显式选择当前 context 的 `query-contracts/` 章节，`shared_sections` 选择 `platform/` 章节。查询和平台路径均相对 docs 仓库根，缺失章节、非法路径或来源逃逸会使生成失败。
+抽取范围在 `tools/brief-specs/UC-AUTH-005.json` 至 `UC-AUTH-013.json`：`uc_sections` 选择本 UC 章节，`include_own_brs` 选择本 UC 规则，`query_sections` 显式选择当前 context 的 `query-contracts/` 章节，`shared_sections` 选择 `platform/` 章节。查询和平台路径均相对 docs 仓库根，缺失章节、非法路径或来源逃逸会使生成失败。
 
 查询契约同样进入溯源摘要、未纳入章节索引和漂移检查；修改选中的源文档后重新生成。设计已接受不等于依赖已交付，brief 中的实现依赖仍必须满足。

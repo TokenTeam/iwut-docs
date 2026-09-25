@@ -1,0 +1,12 @@
+{
+  "uc": "UC-AUTH-013",
+  "note": "Accepted developer self-enrollment. UC011/012 are integrated in Auth 58f8a67 and API 46544d1; no unmet backend UC dependency. Implement Auth/API only, preserving the shared Session/email authority and transaction fence. Explicit null-to-APPROVED with atomic activation/audit; no human review, role grants, new identity or production enablement. Gateway/client delivery remains separate and recovery readiness defaults false. Verify actual App Center interoperability without claiming public rollout.",
+  "uc_sections": ["目标与范围", "参与者与前置条件", "输入与输出", "主流程", "错误语义", "测试与验收", "实现约定", "交付依赖"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-developer-application-v1.md": ["范围与兼容性", "RPC 与认证载体", "消息字段", "HTTP 与 Gateway", "交付边界"],
+    "platform/contracts/auth-device-session-v1.md": ["Session 载体"],
+    "platform/contracts/auth-center-api-routing.md": ["JSON 与载体", "部署开关与验收"]
+  }
+}

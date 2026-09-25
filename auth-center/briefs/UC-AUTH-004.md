@@ -201,6 +201,15 @@ UC012 追加独立的邮箱登录 DIRECT 路由，见 [邮箱登录协议](../..
 
 EmailLoginService package 为 `auth_center.v1.email_login`，由 AUTH_EMAIL_LOGIN_ENABLED 独立控制，默认关闭；两个入口拒绝任何已提供的 x-iwut-session。Complete body 为 code 和 proof，路径 operation_id 覆盖体中值。
 
+UC013 追加两个必需有效 Session 的 DIRECT 路由，字段与认证约定见 [Developer 自助申请协议](../../platform/contracts/auth-developer-application-v1.md)：
+
+| HTTP method | Auth 服务内部路径 | RPC 方法 | Gateway 策略 | 成功状态 |
+| --- | --- | --- | --- | --- |
+| POST | `/v1/users/me/developer-application` | DeveloperApplicationService/ApplyForDeveloper | DIRECT | 200 |
+| GET | `/v1/users/me/developer-eligibility` | DeveloperApplicationService/GetOwnDeveloperEligibility | DIRECT | 200 |
+
+DeveloperApplicationService package 为 `auth_center.v1.developer_application`，由默认关闭的 AUTH_DEVELOPER_APPLICATION_ENABLED 控制。Apply body 为 `{}`；GetOwn 无 body；均拒绝 query。DIRECT 保留 Session，不提前交换 Developer JWS。部署恢复就绪声明见 UC013，不由客户端提供。
+
 ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，管理接口还须由 Auth 校验 `auth.reviewer.manage`；路由 SESSION 身份本身不授予管理权。
 
 AuthenticationService package 为 `auth_center.v1.authentication`；UserProfileService package
@@ -208,7 +217,7 @@ AuthenticationService package 为 `auth_center.v1.authentication`；UserProfileS
 撤销或有效 Session 的独立边界。SESSION 路由须经 Gateway 签发 `iwut-auth-center` audience
 的可信用户 JWS；直接调用 Auth 时仅传 Session 不能访问资料接口。
 
-Scope Catalog、Developer 状态查询、SYSTEM principal 查询及 UC010 Session-to-JWS 签发
+Scope Catalog、UC002 内部批量 Developer 状态查询、SYSTEM principal 查询及 UC010 Session-to-JWS 签发
 继续是内部 gRPC API，不增加 HTTP annotation，也不开放终端路由。
 
 #### JSON 与载体
@@ -401,6 +410,6 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 128 | `57354143ae4b` |
-| `platform/contracts/auth-center-api-routing.md` | 89 | `3fa4fb1521e9` |
+| `platform/contracts/auth-center-api-routing.md` | 98 | `2e9488c5ba40` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 79 | `94ff92abf91d` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |

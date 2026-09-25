@@ -513,6 +513,6 @@ reason/HTTP/gRPC 状态遵守 UC012。超大消息使用 EMAIL_LOGIN_REQUEST_TOO
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 136 | `bf30266c7c29` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `use-cases/UC-AUTH-006-create-user.md` | 277 | `783f832c5407` |
-| `platform/contracts/auth-center-api-routing.md` | 89 | `3fa4fb1521e9` |
+| `platform/contracts/auth-center-api-routing.md` | 98 | `2e9488c5ba40` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/auth-email-login-v1.md` | 88 | `ef2417d3b9e4` |

@@ -1,12 +1,12 @@
 # UC-AUTH-013：申请 Developer
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
 > 当前普通 USER 已具备激活邮箱和可用的邮箱登录方式，明确申请 Developer 后，由 Auth 检查前置条件并自助开通资格。
 
-首版草案采用**满足条件直接 APPROVED，不设人工资格审核**。应用创建、资料/版本审核与发布仍由 App Center 各自用例决定；Developer 开通不代表任何应用自动获准发布，也不授予 Reviewer 或管理员权限。
+首版采用**满足条件直接 APPROVED，不设人工资格审核**。应用创建、资料/版本审核与发布仍由 App Center 各自用例决定；Developer 开通不代表任何应用自动获准发布，也不授予 Reviewer 或管理员权限。
 
 本用例包含申请命令及本人资格/申请条件查询，不包含暂停、恢复、拒绝后重申、人工审批、资格注销或条款管理。Developer 是原 USER 的可选资格，不创建另一个身份或新的 authId。
 
@@ -114,8 +114,9 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 
 | 原因 | reason | HTTP / gRPC |
 | --- | --- | --- |
-| 请求携带未知字段或非法载体 | `INVALID_DEVELOPER_APPLICATION_REQUEST` | 400 / INVALID_ARGUMENT |
-| Session 无效或主体不可用 | `SESSION_INVALID` | 401 / UNAUTHENTICATED |
+| 请求携带未知字段、query 参数或非法消息格式 | `INVALID_DEVELOPER_APPLICATION_REQUEST` | 400 / INVALID_ARGUMENT |
+| Session 缺失、重复、编码非法、无效或主体不可用 | `SESSION_INVALID` | 401 / UNAUTHENTICATED |
+| 请求大小超限 | `DEVELOPER_APPLICATION_REQUEST_TOO_LARGE` | 413 / RESOURCE_EXHAUSTED |
 | 首次申请没有当前激活邮箱 | `DEVELOPER_EMAIL_REQUIRED` | 409 / FAILED_PRECONDITION |
 | 首次申请时邮箱登录能力未启用 | `DEVELOPER_EMAIL_LOGIN_UNAVAILABLE` | 503 / UNAVAILABLE |
 | 当前 PENDING | `DEVELOPER_APPLICATION_EXISTS` | 409 / ALREADY_EXISTS |
@@ -133,15 +134,30 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 6. 权限、资料、关联和已有 Session 不被覆盖；UC002 读取 APPROVED，新的 UC010 App audience JWS 携带 APPROVED，Auth audience 投影不变。
 7. 本人查询正确处理 null、全部已有枚举、blockers 和不可用；不能查询他人或以旧查询结果绕过提交校验。
 8. App Center 仍执行自身配额和审核，Developer 不自动获得 Reviewer/管理员权限；已有 APPROVED 的历史数据不通过查询伪造激活记录。
+9. 默认不注册入口；显式启用入口但恢复就绪声明或 UC012 功能关闭时，普通账号收到明确 blocker，已有 APPROVED 可幂等读取。配置非法拒绝启动，未知 RPC 不获得匿名访问。
+10. HTTP 与 gRPC 返回同一 nullable 状态/时间语义；严格拒绝未知字段、query 和替代 Session 载体；全局及每账号限流有界并返回重试时间。
+
+## 实现约定
+
+- 接口及字段 presence 按 [Developer 自助申请协议 v1](../../platform/contracts/auth-developer-application-v1.md)；使用现有 Session 格式，无新签名算法或密钥。
+- `AUTH_DEVELOPER_APPLICATION_ENABLED` 默认 false，与 `AUTH_USER_ENDPOINTS_ENABLED` 一起控制两个用户入口；显式启用前者但关闭后者视为配置错误。关闭时 HTTP/gRPC 均不注册这两个方法，不扩大其它方法权限。
+- `AUTH_EMAIL_RECOVERY_READY` 默认 false，是运维确认 Gateway/客户端邮箱登录与设备恢复入口已交付的部署声明，不接受请求覆盖，也不表示 Auth 自动探测了 UI。首次申请的邮箱登录能力就绪条件为该声明为 true 且现有 `AUTH_EMAIL_LOGIN_ENABLED=true` 的配置已校验并成功组合真实邮件适配器。配置畸形按既有启动校验拒绝；合法关闭只使首次申请不可用，不阻止已开通账号查询/幂等申请。`AUTH_EMAIL_BINDING_ENABLED` 不作为额外条件，邮箱事实取当前权威绑定；既有邮箱登录可独立启用。
+- 复用 [BR-LGN-004](UC-AUTH-007-login.md#br-lgn-004) 在线检查与 [BR-LGN-016](UC-AUTH-012-login-with-email.md#br-lgn-016) 的两类 Session，有效调用更新既有会话使用时间，不延长固定寿命。事务内重新确认，不能只信 middleware 的预检查。
+- 当前邮箱按 [BR-EML-004](UC-AUTH-011-set-and-activate-email.md#br-eml-004) 的绑定记录读取：待验证提案不算激活邮箱；合法缺失返回 EMAIL_REQUIRED，损坏记录返回不可用。全局就绪配置在进程启动时固定，变更通过重启生效；申请不发送邮件、不新建邮箱目录。
+- 开通记录按 authId 唯一，首次时间使用服务端 UTC 毫秒，并与审计、principal 更新同事务提交。记录含可核实的邮箱绑定 revision；状态 null 却已有开通记录、非法 revision/时间或未知枚举均失败关闭。已存在合法 Developer 状态但无开通记录允许作为历史数据读取，activatedAt 为 null；不在此用例回填。
+- 申请结果优先按当前合法 Developer 状态处理；首次申请同时缺少邮箱和恢复能力时，先返回 DEVELOPER_EMAIL_REQUIRED。本人查询收集两个 blocker，遵守 BR-DEV-010 的固定顺序。存储读取/完整性失败不能伪装为业务 blocker。
+- 单机部署使用有界全局和每账号限流；Apply 与查询均受限，参数、有限容量和超出容量行为在实现配置中明确并测试。未认证请求复用有界来源门禁；不因任意 token 创建无限账号桶，不引入 Redis。限流不写开通审计，幂等成功不重复写审计。
+- 后端联合验收使用真实 Auth/Mongo 与实际 App Center verifier/服务入口，证明同一 Session 在开通后签发的 App audience JWS 可进入原有创建流程，且配额/权限约束继续生效；不需要为了本工作包先实现公网 Gateway 或移动客户端。公网三协议路由和 UI 仍独立交付，生产恢复就绪声明保持关闭，直至完成部署验收。
 
 ## 交付依赖
 
-- 产品启用依赖 UC011 已激活邮箱与 UC012 完整登录/设备恢复能力。UC011/012 已接受且实现分别跟踪；本 UC 仍为 PROPOSED，不因前置用例接受而自动进入实现。
+- UC011/012 后端已合入 `auth-center/v1` 的 `58f8a67`（API `46544d1`），且合入后通过 check、race、真实 Mongo/Wire/HTTP/gRPC 验收；后端实现无未满足的前置 UC。产品启用仍要求邮箱恢复链路实际交付，按上述部署声明控制。
 - 后端复用 UC002 的权威状态、UC007/012 的有效 Session 和 UC010 的事务栅栏；新增开通记录/审计及 Apply/GetOwn 两个精确 RPC。
-- 建议 HTTP/gRPC/gRPC-Web 经 Gateway DIRECT 携带原 Session 交给 Auth 在线检查；不得要求 Developer 权限或先交换含 Developer claim 的 JWS。精确路由和 Proto 在接受后按共享契约交付。
+- HTTP/gRPC/gRPC-Web 经 Gateway DIRECT 携带原 Session 交给 Auth 在线检查；不得要求 Developer 权限或先交换含 Developer claim 的 JWS。精确路由和 Proto 字段已由共享契约固定；Auth/API 属于本次工作包，Gateway 转发与客户端交付单独验收。
 - 完成真实 Mongo/HTTP/gRPC 并发与故障验收，及“申请成功后用原 Session 访问 App Center”的联合验收。全局和每账号请求限流有界，参数为部署选择。
 - 人工资格审核、暂停/恢复、拒绝后重新申请、资格注销及历史 Developer 开通记录迁移不在本用例中静默处理。
 
 ## 变更记录
 
+- 2026-09-26：确认 UC011/012 后端依赖已合入并通过测试，接受 UC013；固定 RPC/HTTP、nullable 字段、限流/失败语义及默认关闭的恢复就绪声明，生成实现 brief。
 - 2026-09-24：提出 Developer 自助申请草案，以当前激活邮箱和已启用邮箱登录为门禁，直接 null 到 APPROVED，不增加人工资格审核。

@@ -66,3 +66,5 @@ Auth HTTP/JSON 的路径、ProtoJSON 与部署边界见 [Auth API 路由](contra
 邮箱注册的独立签名、消息字段与可选 Session 鉴权见 [邮箱设置与注册协议 v1](contracts/auth-email-binding-v1.md)；公开测试向量通过 `tools/auth_email_protocol_vectors.py --check` 校验，旧设备协议保持兼容。
 
 邮箱登录与本机设备授权的独立协议见 [邮箱登录 v1](contracts/auth-email-login-v1.md)，向量校验命令为 `tools/auth_email_login_vectors.py --check`；与邮箱注册保持用途隔离。
+
+Developer 自助申请的有效 Session 接口、nullable 状态及 HTTP 路由见 [Developer 自助申请协议 v1](contracts/auth-developer-application-v1.md)；不改变 UC002 内部目录或既有 JWS 格式。
