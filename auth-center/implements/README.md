@@ -17,7 +17,7 @@
 | [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) | `ACCEPTED` | `COMPLETE` | 有效 Session 授权及事务内复核、本人目标隔离、首次撤销记录、公钥归属保留、引用 Session 即时拒绝、并发登录/撤销及生产 HTTP/gRPC E2E | —（客户端编排独立交付） |
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `IN_PROGRESS` | 双分支用例、邮箱注册字节协议、公开向量、RPC/HTTP、鉴权与 SMTP/HMAC 约定；[brief](../briefs/UC-AUTH-011.md) | API/后端原子注册与绑定、投递及真实 Mongo/Wire/SMTP 验收；客户端和 Gateway 独立交付 |
-| [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `NOT_STARTED` | 邮箱登录协议、公开向量、设备授权、Session 兼容与实现约定；[brief](../briefs/UC-AUTH-012.md) | UC011 稳定后端基线；可先隔离实现 API/协议/领域，集成后再验收 Mongo/SMTP/Wire/HTTP/gRPC |
+| [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `IN_PROGRESS` | 邮箱登录协议、公开向量、设备授权、Session 兼容与实现约定；[brief](../briefs/UC-AUTH-012.md) | UC011 稳定后端基线；可先隔离实现 API/协议/领域，集成后再验收 Mongo/SMTP/Wire/HTTP/gRPC |
 | [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `PROPOSED` | `NOT_STARTED` | 邮箱门禁、自助开通与本人资格查询草案 | UC011/012 恢复能力、设计接受、Proto/路由、资格与审计原子提交及 App Center 联合验收 |
 
 ## 实现边界
@@ -92,3 +92,14 @@ UC011 已接受，协议与公开测试向量、脚本生成 brief 位于 docs �
 工作包包括 REGISTER/BIND、精确可选 Session 鉴权、原子注册与绑定、真实 TLS SMTP、
 有界持久化发送额度、邮件 HMAC 与关联密钥冷更新清理，以及生产 Wire/Mongo/HTTP/gRPC 验收。
 客户端、Gateway 和 UC012/013 保持独立交付。
+
+## 2026-09-25 邮箱登录
+
+UC012 契约、公开向量和脚本生成 brief 已在 `c63af0c` 接受。`implement_uc012`
+subagent 已在隔离 worktree `worktrees/iwut-auth-center-uc012`（Auth 分支 `auth-center/uc012`，
+独立 API 分支 `auth-email-login/v1`）开始协议、API、领域层及测试工作。
+
+UC011 的 API 基线为 `39122c2`，后端仍在实现。UC012 完整集成必须等待其稳定 Auth/API 提交，
+随后 rebase 并复用邮箱目录、共享额度、SMTP 和认证事务；不能以重复邮箱目录或 fixture 代替依赖。
+两位 subagent 通过消息交接，不在同一 worktree 并发修改。完整 Mongo/Wire/SMTP/HTTP/gRPC 验收待交付，
+未提前标记完成；UC013、客户端与 Gateway 仍独立跟踪。
