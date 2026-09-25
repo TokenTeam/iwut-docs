@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-012",
-  "note": "Accepted UC012 backend design. Implemented on auth-center/uc012 atop stable UC011 e6711d9, code 9ee4d4b and API 46544d1; local branch integration into auth-center/v1 remains separate. Reuse UC011 authoritative email bindings, shared SMTP/quotas and transaction fence. EMAIL_CODE_AND_DEVICE must work through every Session consumer. No new USER or student association submission, no UC013, no Gateway/client delivery claim, no production email.",
+  "note": "Accepted UC012 backend design. Implemented atop stable UC011 e6711d9, code 9ee4d4b and API 46544d1; fast-forwarded into auth-center/v1 at 58f8a67. Reuse UC011 authoritative email bindings, shared SMTP/quotas and transaction fence. EMAIL_CODE_AND_DEVICE must work through every Session consumer. No new USER or student association submission, no UC013, no Gateway/client delivery claim, no production email.",
   "uc_sections": [
     "目标与范围",
     "参与者与前置条件",

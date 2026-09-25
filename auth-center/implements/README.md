@@ -17,7 +17,7 @@
 | [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) | `ACCEPTED` | `COMPLETE` | 有效 Session 授权及事务内复核、本人目标隔离、首次撤销记录、公钥归属保留、引用 Session 即时拒绝、并发登录/撤销及生产 HTTP/gRPC E2E | —（客户端编排独立交付） |
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
-| [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 仍在 auth-center/uc012，尚未合回 auth-center/v1；Gateway 与客户端独立交付 |
+| [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
 | [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `PROPOSED` | `NOT_STARTED` | 邮箱门禁、自助开通与本人资格查询草案 | UC011/012 恢复能力、设计接受、Proto/路由、资格与审计原子提交及 App Center 联合验收 |
 
 ## 实现边界
@@ -112,10 +112,27 @@ UC011 的 API 基线为 `39122c2`，后端仍在实现。UC012 完整集成必�
   固定独立 API `39122c2d03aafd151aeb808789cb19fe7e5a87c4`。
 - UC012：已 rebase UC011，代码提交为 `ac8765f`、`9ee4d4b37f5ec198321e8b288ce3d2e0ecf27d24`，
   固定独立 API `46544d1912e002ceb7d218e326bacc64874caf67`。
-  后续 `58f8a67` 仅补充 README/工作包说明。分支 `auth-center/uc012` 仍独立，未合回主实现分支。
+  后续 `58f8a67` 仅补充 README/工作包说明。本次核对时该分支尚未合回；随后合入记录见下节。
 - 两个 subagent 均报告 `make check`、`make test-race`、完整 `make test-mongo` 通过，
   另有真实 Mongo/Wire/TLS SMTP 的针对性 race 验收及三套协议向量检查。测试资源已清理，无真实用户邮件。
 - 本次核对确认提交、API 指针、祖先关系、干净工作区及对应测试代码；未重复运行已通过的代码门禁。
   UC008 对未知认证方法/损坏来源记录失败关闭，保持正常未知/过期/已撤销 token 的幂等撤销。
 - 本页 COMPLETE 仍指 Auth/API 后端工作包。Gateway 尚未加入邮箱路由，客户端、公网与生产邮件配置独立验收。
   UC013 仍为 PROPOSED/NOT_STARTED；不能将后端实现完成解释为开发者申请已开放。
+
+## 2026-09-25 UC012 合入后验证
+
+UC012 已在完成 rebase 的基础上快进合入 `worktrees/iwut-auth-center-ddd` 的 `auth-center/v1`。
+当前 Auth HEAD 为 `58f8a67c945705e390eb3378fc634df9ea8f1dda`，API 工作树与提交指针均为
+`46544d1912e002ceb7d218e326bacc64874caf67`；没有合并冲突或额外实现改动。
+
+在合入后的主实现工作树重新运行并全部通过：
+
+- `make check`：格式、构建、单元/契约测试、vet、Wire 和 Proto 生成一致性。
+- `make test-race`：race 检查通过。
+- `MONGODB_INTEGRATION_PORT=27047 make test-mongo`：真实 MongoDB 副本集全包验收，
+  包含生产 Wire HTTP/gRPC 和可控 TLS SMTP；Mongo 包约 75 秒。
+- 旧设备、邮箱注册与邮箱登录三套公开协议向量检查。
+
+测试容器已由脚本退出清理；Auth/API 工作树干净，所有提交仍仅本地保存，未推送。
+Gateway 邮箱路由及客户端/生产配置交付不包含在此次合入和测试内。
