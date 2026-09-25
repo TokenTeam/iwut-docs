@@ -136,7 +136,7 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 
 ## 交付依赖
 
-- 产品启用依赖 UC011 已激活邮箱与 UC012 完整登录/设备恢复能力。UC011 已接受；UC012 与本 UC 仍为 PROPOSED，不因前置用例接受而自动进入实现。
+- 产品启用依赖 UC011 已激活邮箱与 UC012 完整登录/设备恢复能力。UC011/012 已接受且实现分别跟踪；本 UC 仍为 PROPOSED，不因前置用例接受而自动进入实现。
 - 后端复用 UC002 的权威状态、UC007/012 的有效 Session 和 UC010 的事务栅栏；新增开通记录/审计及 Apply/GetOwn 两个精确 RPC。
 - 建议 HTTP/gRPC/gRPC-Web 经 Gateway DIRECT 携带原 Session 交给 Auth 在线检查；不得要求 Developer 权限或先交换含 Developer claim 的 JWS。精确路由和 Proto 在接受后按共享契约交付。
 - 完成真实 Mongo/HTTP/gRPC 并发与故障验收，及“申请成功后用原 Session 访问 App Center”的联合验收。全局和每账号请求限流有界，参数为部署选择。

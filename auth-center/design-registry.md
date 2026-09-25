@@ -34,7 +34,7 @@
 | `UC-AUTH-009` | 撤销自己的设备凭据 | `ACCEPTED` | [UC-AUTH-009-revoke-own-credential.md](use-cases/UC-AUTH-009-revoke-own-credential.md) | — | 有效用户撤销本人凭据，并使引用它的 Session 后续检查失败。 [brief](briefs/UC-AUTH-009.md)。 |
 | `UC-AUTH-010` | 由 Session 签发可信用户身份 | `ACCEPTED` | [UC-AUTH-010-issue-user-identity-from-session.md](use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | — | 受授权服务以有效 Session 换取目标 audience 的短期用户 JWS；不缓存身份结果。 |
 | `UC-AUTH-011` | 设置并激活邮箱 | `ACCEPTED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 无 Session 验证后创建账号，有效 Session 绑定/更换；已有账号邮箱登录独立交付。 |
-| `UC-AUTH-012` | 使用邮箱登录 | `PROPOSED` | [UC-AUTH-012-login-with-email.md](use-cases/UC-AUTH-012-login-with-email.md) | — | 邮箱验证码授权本机设备，回到原账号并建立 Session；不自动注册。 |
+| `UC-AUTH-012` | 使用邮箱登录 | `ACCEPTED` | [UC-AUTH-012-login-with-email.md](use-cases/UC-AUTH-012-login-with-email.md) | — | 邮箱验证码授权本机设备，回到原账号并建立 Session；不自动注册。 |
 | `UC-AUTH-013` | 申请 Developer | `PROPOSED` | [UC-AUTH-013-apply-for-developer.md](use-cases/UC-AUTH-013-apply-for-developer.md) | — | 当前激活邮箱及可用邮箱登录为前提，自助开通 APPROVED；不增加人工资格审核。 |
 
 ## Business Rules

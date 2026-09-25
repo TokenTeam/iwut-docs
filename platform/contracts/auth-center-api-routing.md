@@ -3,7 +3,7 @@
 状态：`ACTIVE`
 
 本契约补充 [App 设备认证与 Session v1](auth-device-session-v1.md) 的 HTTP 绑定。
-业务语义及错误 reason 仍由 UC-AUTH-004–009 和 UC-AUTH-011 拥有；可执行 HTTP annotation、消息字段和
+业务语义及错误 reason 仍由 UC-AUTH-004–009、UC-AUTH-011/012 拥有；可执行 HTTP annotation、消息字段和
 生成客户端位于独立 API 仓库。现有 gRPC package、方法名、字段编号保持不变。
 
 ## 路由边界
@@ -36,6 +36,15 @@ UC011 追加三个 DIRECT 路由，完整字段及 Session 例外见 [邮箱设�
 | GET | `/v1/users/me/email-binding` | EmailBindingService/GetOwnEmailBinding | DIRECT | 200 |
 
 EmailBindingService package 为 `auth_center.v1.email_binding`；额外受 AUTH_EMAIL_BINDING_ENABLED 开关控制，默认不启用。DIRECT 不得将空/坏 Session 清理成缺失 Session。
+
+UC012 追加独立的邮箱登录 DIRECT 路由，见 [邮箱登录协议](auth-email-login-v1.md)：
+
+| HTTP method | Auth 服务内部路径 | RPC 方法 | Gateway 策略 | 成功状态 |
+| --- | --- | --- | --- | --- |
+| POST | `/v1/email-logins` | EmailLoginService/BeginEmailLogin | DIRECT | 200 |
+| POST | `/v1/email-logins/{operation_id}/completion` | EmailLoginService/CompleteEmailLogin | DIRECT | 201 |
+
+EmailLoginService package 为 `auth_center.v1.email_login`，由 AUTH_EMAIL_LOGIN_ENABLED 独立控制，默认关闭；两个入口拒绝任何已提供的 x-iwut-session。Complete body 为 code 和 proof，路径 operation_id 覆盖体中值。
 
 ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，管理接口还须由 Auth 校验 `auth.reviewer.manage`；路由 SESSION 身份本身不授予管理权。
 

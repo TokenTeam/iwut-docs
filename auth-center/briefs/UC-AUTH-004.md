@@ -192,6 +192,15 @@ UC011 追加三个 DIRECT 路由，完整字段及 Session 例外见 [邮箱设�
 
 EmailBindingService package 为 `auth_center.v1.email_binding`；额外受 AUTH_EMAIL_BINDING_ENABLED 开关控制，默认不启用。DIRECT 不得将空/坏 Session 清理成缺失 Session。
 
+UC012 追加独立的邮箱登录 DIRECT 路由，见 [邮箱登录协议](../../platform/contracts/auth-email-login-v1.md)：
+
+| HTTP method | Auth 服务内部路径 | RPC 方法 | Gateway 策略 | 成功状态 |
+| --- | --- | --- | --- | --- |
+| POST | `/v1/email-logins` | EmailLoginService/BeginEmailLogin | DIRECT | 200 |
+| POST | `/v1/email-logins/{operation_id}/completion` | EmailLoginService/CompleteEmailLogin | DIRECT | 201 |
+
+EmailLoginService package 为 `auth_center.v1.email_login`，由 AUTH_EMAIL_LOGIN_ENABLED 独立控制，默认关闭；两个入口拒绝任何已提供的 x-iwut-session。Complete body 为 code 和 proof，路径 operation_id 覆盖体中值。
+
 ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，管理接口还须由 Auth 校验 `auth.reviewer.manage`；路由 SESSION 身份本身不授予管理权。
 
 AuthenticationService package 为 `auth_center.v1.authentication`；UserProfileService package
@@ -392,6 +401,6 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 128 | `57354143ae4b` |
-| `platform/contracts/auth-center-api-routing.md` | 80 | `31876c5ca9ea` |
+| `platform/contracts/auth-center-api-routing.md` | 89 | `3fa4fb1521e9` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 79 | `94ff92abf91d` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `4bb4d40a23c8` |
