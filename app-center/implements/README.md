@@ -36,9 +36,10 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、真实 CSPRNG/SHA-256、env 可配置 mock URL、MongoDB 原子轮换与管理员栅栏、0009 migration、并发/回滚/脱敏集成测试、资源化 Proto、可信身份 HTTP/gRPC Transport、no-store、Wire、默认/自定义前缀真实 MongoDB E2E | —（当前 mock 入口后端工作包；前端及 UC-APP-009 独立交付） |
 | [UC-APP-009](../use-cases/UC-APP-009-join-application-as-tester.md) | `ACCEPTED` | `COMPLETE` | Membership Domain/UseCase、0010 migration、Application 写栅栏与事务内 ACTIVE 统计/插入、普通用户可信身份、API/Wire、并发/回滚/脱敏测试及真实 MongoDB HTTP/gRPC E2E | —（当前后端工作包；生产 Gateway 身份签发与客户端独立交付） |
 | [UC-APP-010](../use-cases/UC-APP-010-remove-application-tester.md) | `ACCEPTED` | `COMPLETE` | 精确 episode 移除、不可变审计、幂等无 Clock、共享写栅栏与人数统计、500/INTERNAL 安全告警、API/Wire、真实并发/回滚/HTTP/gRPC E2E | —（当前后端工作包；列表查询、前端与生产 Gateway 独立交付） |
-| [UC-APP-011](../use-cases/UC-APP-011-revoke-tester-join-link.md) | `ACCEPTED` | `IN_PROGRESS` | 依赖检查通过；复用 MANUAL schema、写栅栏与内部错误分类；brief 已配置 | 显式撤销 Domain/UseCase/Repository、API/Wire、撤销/加入/轮换/管理员并发及真实 E2E 验收 |
+| [UC-APP-011](../use-cases/UC-APP-011-revoke-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | 精确链接 MANUAL 撤销、无 Clock 幂等、ROTATED 历史保护、写栅栏、500/INTERNAL 安全告警、API/Wire、真实 MongoDB 并发及 HTTP/gRPC E2E | —（当前后端工作包；前端和生产 Gateway 独立交付） |
+| [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `IN_PROGRESS` | 依赖检查通过；选定只读 snapshot 与发布批准事实校验；brief 已配置 | Catalog 查询、MongoDB snapshot resolver、HTTP/gRPC/Wire、授权/兼容/并发及真实 E2E 验收 |
 
-当前激活 UC-APP-011；代码仓库 `AGENTS.md` 和 [UC-APP-011 brief](../briefs/UC-APP-011.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+当前激活 UC-APP-012；代码仓库 `AGENTS.md` 和 [UC-APP-012 brief](../briefs/UC-APP-012.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -177,3 +178,14 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 - [开工检查](UC-APP-011-readiness.md) 无前置实现阻塞。沿用用户已确认的内部不变量异常 500/INTERNAL 分类，无新增业务决策。
 - UC011 已 ACCEPTED，脚本生成 brief，代码仓库 AGENTS 工作包切换，交由 subagent 实现当前后端范围。
+
+## 2026-09-26 UC-APP-011 完成核对
+
+- 实现提交为服务 `1630c9c`、API `6dc372d`；当前基线已包含统一 API 路径变更（服务 `88f3a6d`、API `ef89575`），工作树干净，无推送操作。
+- 原实现 agent 已报告全量 go test/vet/race、Proto/Wire 与完整副本集 runner 通过（Mongo190.136s，cmd E2E26.958s）。本次进一步检查实际仓库代码，重跑全量 go test、vet、Proto/Wire，并运行 `./scripts/test-mongo-integration.sh -run 'Revocation|UCAPP011'`：Mongo23.134s，真实HTTP/gRPC E2E2.731s，exit0。
+- BR-TST-029–036 已交付；无新增 migration，Membership 和人数不受撤销影响。当前后端工作包登记 COMPLETE。
+
+## 2026-09-26 UC-APP-012 激活记录
+
+- [开工检查](UC-APP-012-readiness.md) 确认前置数据、事务与接入设施已具备；UC007 的外部 Auth Catalog 交付不阻塞本只读解析。
+- UC012 已 ACCEPTED，brief 由脚本生成，AGENTS 切换至 Catalog & Resolution 查询工作包，交由 subagent 实现；前端宿主和生产认证链路独立交付。

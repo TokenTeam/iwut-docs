@@ -1,6 +1,6 @@
 # UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -371,10 +371,16 @@ API 与安全测试：
 - 响应设置 `Cache-Control: private, no-store`。
 - 缺失 capabilities 只返回当前 Version 要求但宿主缺少的能力名。
 
-## 实现前需要确认
+## 实现依赖与交付边界
 
-- 官方客户端或 Gateway 如何提供规范化的 hostRpcApiMajor 与 hostCapabilities；这些输入不作为 Tester 授权来源。
-- MongoDB 使用 aggregation 还是只读事务提供 Membership/Publication/Version 的逻辑一致快照。
+- UC-APP-007 已实现 Publication/History 与批准 Review 快照；UC-APP-009/010 已实现 ACTIVE/REMOVED Membership；可信普通用户身份、Version、MongoDB 副本集和 HTTP/gRPC/Wire 基础设施均可复用。UC007 尚未闭合的 Auth 权威 Scope Catalog 交付不阻塞本只读查询，因为 BR-RUN-008 禁止同步外部复检。
+- 当前采用 MongoDB 只读 snapshot 事务，按 Application → 当前用户 ACTIVE Membership → exact-major Publication → 对应发布 History、Version 和批准 Review 的顺序组合事实。不得增加 coordinationRevision 写栅栏、访问计数、持久化 Descriptor 或查询外部服务；失败不返回部分结果。
+- 按当前 Publication 的 publicationId/revision 精确取得 [BR-PUB-007](UC-APP-007-place-approved-version-in-test-slot.md#br-pub-007) 定义的发布 History，核对 applicationId、rpcApiMajor、newVersionId 与当前指针一致，并用其 approvedReviewId 定位本次发布的批准依据。依照 [BR-PUB-003](UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)、[BR-REV-013](UC-APP-005-decide-application-version-review.md#br-rev-013)、[BR-REV-014](UC-APP-005-decide-application-version-review.md#br-rev-014) 和 [BR-REV-004](UC-APP-004-submit-application-version-review.md#br-rev-004) 检查当前批准状态、最新审核关系、revision 及受审核内容；缺失、悬空或漂移按 BR-RUN-004 处理，不只信任 APPROVED 字符串。
+- 宿主上下文使用本 UC 已定义的请求正文。官方客户端/Gateway 从实际宿主运行时构造 major 与 capabilities；App Center 校验格式、按集合去重排序，并独立用可信 authId 检查 Tester 资格。不引入 capability 在线目录、宿主证明或额外授权机制，实际客户端接入独立交付。
+- capability 名称仅复用 BR-VER-006 格式；hostCapabilities 的重复项按本 UC 去重，不沿用 requiredCapabilities 的重复拒绝规则，也不自行增加未定义的业务数量上限。
+- 按 ADR-003 在 `internal/catalog/{domain,usecase,port}` 实现 Catalog & Resolution 查询能力，Mongo adapter 组合现有文档；领域/用例不直接导入其他能力的内部类型。现有 schema 可供读取，不预设新增 migration。
+- 保持本 UC 的错误语义：缺少能力返回 HTTP422，内部 Publication/Version/Review 不一致返回 HTTP503/gRPC UNAVAILABLE 与安全告警；不套用 UC010/011 写命令的一致性异常 HTTP500 分类。成功及敏感错误响应遵守 private, no-store，不在授权前泄露版本细节。
+- 前端/WebView、RPC bridge、Auth consent/token、Gateway 生产登录链路及后续公开资料用例均独立交付，不阻塞当前后端工作包。
 
 ## 后续用例
 
@@ -392,3 +398,6 @@ test 闭环到此完成。后续发布设计可以进入：
 ## 变更记录
 
 - 2026-09-16：建立 UC-APP-012；将原“客户端解析”重命名为 App Center 服务端查询“为 Tester 解析 test 启动目标”，明确客户端实现与 Auth consent 均在边界外。
+
+- 2026-09-26：开工检查确认依赖具备；选定只读 snapshot 事务，明确 PublicationHistory/批准 Review 校验路径、宿主输入边界及 Catalog & Resolution 归属。
+- 2026-09-26：UC011 实现及当前基线复核通过，UC012 状态改为 ACCEPTED，生成 brief 并激活后端查询工作包。
