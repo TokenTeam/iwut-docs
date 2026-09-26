@@ -40,10 +40,10 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `COMPLETE` | Catalog Domain/UseCase、只读 MongoDB snapshot、ACTIVE Tester 授权、exact-major 解析、批准事实校验、HTTP/gRPC/Wire、真实并发与 E2E；服务 `95f3feb`、API `acfab91` | —（当前后端范围；前端宿主和生产认证链路独立交付） |
 
 | [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、严格 NFC、0011 migration、事务/指针/序号、HTTP/gRPC/Wire 与完整 backend 验收；服务 `d121d4e`、API `219419b` | —（当前后端范围） |
-| [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（真实编辑/提交双命令竞争由015补齐） |
-| [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `IN_PROGRESS` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 当前后端实现、真实编辑/提交竞争及完整验收 |
+| [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（015已闭合真实编辑/提交双命令竞争） |
+| [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（当前后端范围；审核决定、资料查询、前端与生产Gateway独立交付） |
 
-当前激活 UC-APP-015；代码仓库 `AGENTS.md` 和 [UC-APP-015 brief](../briefs/UC-APP-015.md) 声明本次范围。UC013、UC014 均已完成；本轮不启动 UC016。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+本轮 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成。代码仓库 `AGENTS.md` 保留最后交付的 UC015 范围与 [UC-APP-015 brief](../briefs/UC-APP-015.md) 引用；当前没有新的实现工作包，UC016 尚未启动。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -211,3 +211,11 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - 修正013/014的生成HTTP客户端绑定：资料放独立profile子message，HTTP正文仍为原三字段；path-only字段显式JSON名与路由模板匹配。013旧请求字段编号2/3/4及名称reserved，gRPC创建改用profile子message，所有本地调用与生成物同步更新；新增真实生成HTTP客户端创建/更新回归。未扩展其他历史接口。
 - 最终 `make check-full` 21/21通过：`.artifacts/verification/20260926T165213Z-dyloh589/report.json`，`changed_sources=[]`，Mongo race317.175s、HTTP/gRPC E2E39.931s。修复前中断的报告不作为验收证据。
 - 015前置依赖已满足，按既有ACCEPTED设计和脚本brief激活。只交付提交审核，不提前实现审核决定/查询/前端。
+
+## 2026-09-27 UC015 完成与本轮串行交付闭合
+
+- 服务 `3a87a0f`、API `a0c158c`，均本地提交，工作树干净，未push。BR-PRF-015–022全部覆盖；显式 `0012_application_profile_review` migration已接入readiness。
+- 最终 `make check-full` 21/21通过，报告 `.artifacts/verification/20260926T171817Z-0o1w1gkw/report.json`，`changed_sources=[]`；Mongo race415.916s、真实HTTP/gRPC E2E69.237s，包含实际生成HTTP客户端。验收后仅提交相同源码内容。
+- 真实公开 `ReplaceDraft` / `SubmitDraft` 的两种确定性竞争胜序已验证，闭合014留下的双命令测试义务；同时覆盖快照深拷贝、内容复检/内部异常区分、attempt唯一性与溢出、重复请求、管理员转让、回滚及指针保留。
+- 首轮完整回归发现两处既有迁移数量断言仍为11，修正为12后定向验证并完整重跑；首轮失败报告不作为验收证据。
+- 本批次013/014/015均为ACCEPTED/COMPLETE，各自完整backend验收通过。部署当前代码需显式执行包含0011与0012的迁移；审核决定、资料管理查询、前端和生产Gateway仍独立交付，未启动UC016。
