@@ -40,10 +40,10 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `COMPLETE` | Catalog Domain/UseCase、只读 MongoDB snapshot、ACTIVE Tester 授权、exact-major 解析、批准事实校验、HTTP/gRPC/Wire、真实并发与 E2E；服务 `95f3feb`、API `acfab91` | —（当前后端范围；前端宿主和生产认证链路独立交付） |
 
 | [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、严格 NFC、0011 migration、事务/指针/序号、HTTP/gRPC/Wire 与完整 backend 验收；服务 `d121d4e`、API `219419b` | —（当前后端范围） |
-| [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `IN_PROGRESS` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 当前后端实现及完整验收 |
-| [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `NOT_STARTED` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 等待 UC-APP-014 完整验收后串行实现 |
+| [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（真实编辑/提交双命令竞争由015补齐） |
+| [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `IN_PROGRESS` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 当前后端实现、真实编辑/提交竞争及完整验收 |
 
-当前激活 UC-APP-014；代码仓库 `AGENTS.md` 和 [UC-APP-014 brief](../briefs/UC-APP-014.md) 声明本次范围。UC013 已完成；UC015 只在 UC014 完成验收后激活。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+当前激活 UC-APP-015；代码仓库 `AGENTS.md` 和 [UC-APP-015 brief](../briefs/UC-APP-015.md) 声明本次范围。UC013、UC014 均已完成；本轮不启动 UC016。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -204,3 +204,10 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - 服务 `d121d4e`、API `219419b`，本地工作树干净，无push。BR-PRF-001–007全覆盖；0011 migration显式执行并由readiness检查。
 - `make check-full` 21/21通过，报告 `.artifacts/verification/20260926T163406Z-_pj4bwls/report.json`；`changed_sources=[]`，Mongo race314.489s、真实HTTP/gRPC E2E35.516s。严格NFC另经Python独立12,064条向量逐字对照，无差异。
 - UC014的前置依赖已完成，按已生成brief串行激活；UC015继续等待。
+
+## 2026-09-27 UC014 完成与 UC015 激活
+
+- 服务 `a712456`、API `94347df`，均本地提交且工作树干净。BR-PRF-008–014完成；无schema/migration变化。真实编辑与提交双命令竞争由015闭合。
+- 修正013/014的生成HTTP客户端绑定：资料放独立profile子message，HTTP正文仍为原三字段；path-only字段显式JSON名与路由模板匹配。013旧请求字段编号2/3/4及名称reserved，gRPC创建改用profile子message，所有本地调用与生成物同步更新；新增真实生成HTTP客户端创建/更新回归。未扩展其他历史接口。
+- 最终 `make check-full` 21/21通过：`.artifacts/verification/20260926T165213Z-dyloh589/report.json`，`changed_sources=[]`，Mongo race317.175s、HTTP/gRPC E2E39.931s。修复前中断的报告不作为验收证据。
+- 015前置依赖已满足，按既有ACCEPTED设计和脚本brief激活。只交付提交审核，不提前实现审核决定/查询/前端。
