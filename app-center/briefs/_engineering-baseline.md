@@ -81,6 +81,7 @@ Port 方法使用业务语言并表达所需原子边界，不先建立 `Save/Ge
 - UseCase 只能依赖同能力 Domain、Port 与 `internal/shared`。
 - `internal/shared` 不得反向依赖任何业务能力。
 - Domain、UseCase、Port 与 `internal/shared` 默认不得新增第三方依赖；确需窄依赖时先接受相应架构变更并显式调整测试。
+- 已接受的窄例外（2026-09-27，UC-APP-013）：仅 `internal/profile/domain` 可直接导入 `golang.org/x/text/unicode/norm`，用于 BR-PRF-003–005 的纯 NFC 规范化。它无网络、时钟或存储副作用；不扩大到 x/text 其他包、其他能力、UseCase、Port 或 shared。架构测试必须同时覆盖允许位置及这些拒绝位置。
 - 具体 adapter package 之间不得互相导入；只有 transport adapter 可以导入 UseCase，MongoDB/Auth 等 provider adapter 只面向能力 Port 与必要的 Domain 类型。
 - Adapter 不得读取 `internal/config`；只有 composition root 可以同时依赖配置与具体 adapter。
 - 禁止全局 `internal/biz`、`internal/data`、`internal/domain`、`internal/service` 和 `internal/util` package。
@@ -186,6 +187,6 @@ Transport adapter 在一个集中映射表中把领域错误转换为：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `adr/ADR-003-go-package-and-dependency-boundaries.md` | 115 | `25e8785cbe02` |
+| `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `4cb59593e39d` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `084c3d26d483` |

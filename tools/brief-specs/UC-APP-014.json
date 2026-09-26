@@ -1,0 +1,39 @@
+{
+  "uc": "UC-APP-014",
+  "note": "Replace complete DRAFT profile content with expected revision, normalized no-op, current-admin write fence and immutable creation facts. Depends on completed UC013; no submission or decisions.",
+  "uc_sections": [
+    "目标与范围",
+    "可编辑与不可编辑字段",
+    "输入与身份",
+    "主流程",
+    "异常流程",
+    "最小领域行为",
+    "用例端口",
+    "数据模型变化",
+    "API 草图",
+    "测试与验收",
+    "实现依赖与交付边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

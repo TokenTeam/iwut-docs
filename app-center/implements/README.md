@@ -37,9 +37,13 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-009](../use-cases/UC-APP-009-join-application-as-tester.md) | `ACCEPTED` | `COMPLETE` | Membership Domain/UseCase、0010 migration、Application 写栅栏与事务内 ACTIVE 统计/插入、普通用户可信身份、API/Wire、并发/回滚/脱敏测试及真实 MongoDB HTTP/gRPC E2E | —（当前后端工作包；生产 Gateway 身份签发与客户端独立交付） |
 | [UC-APP-010](../use-cases/UC-APP-010-remove-application-tester.md) | `ACCEPTED` | `COMPLETE` | 精确 episode 移除、不可变审计、幂等无 Clock、共享写栅栏与人数统计、500/INTERNAL 安全告警、API/Wire、真实并发/回滚/HTTP/gRPC E2E | —（当前后端工作包；列表查询、前端与生产 Gateway 独立交付） |
 | [UC-APP-011](../use-cases/UC-APP-011-revoke-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | 精确链接 MANUAL 撤销、无 Clock 幂等、ROTATED 历史保护、写栅栏、500/INTERNAL 安全告警、API/Wire、真实 MongoDB 并发及 HTTP/gRPC E2E | —（当前后端工作包；前端和生产 Gateway 独立交付） |
-| [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `IN_PROGRESS` | 依赖检查通过；选定只读 snapshot 与发布批准事实校验；brief 已配置 | Catalog 查询、MongoDB snapshot resolver、HTTP/gRPC/Wire、授权/兼容/并发及真实 E2E 验收 |
+| [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `COMPLETE` | Catalog Domain/UseCase、只读 MongoDB snapshot、ACTIVE Tester 授权、exact-major 解析、批准事实校验、HTTP/gRPC/Wire、真实并发与 E2E；服务 `95f3feb`、API `acfab91` | —（当前后端范围；前端宿主和生产认证链路独立交付） |
 
-当前激活 UC-APP-012；代码仓库 `AGENTS.md` 和 [UC-APP-012 brief](../briefs/UC-APP-012.md) 声明本次范围。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+| [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `IN_PROGRESS` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 当前后端实现及完整验收 |
+| [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `NOT_STARTED` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 等待 UC-APP-013 完整验收后串行实现 |
+| [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `NOT_STARTED` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 等待 UC-APP-014 完整验收后串行实现 |
+
+当前激活 UC-APP-013；代码仓库 `AGENTS.md` 和 [UC-APP-013 brief](../briefs/UC-APP-013.md) 声明本次范围。UC014、UC015 只在前一用例完成验收后依次激活。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -189,3 +193,8 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 - [开工检查](UC-APP-012-readiness.md) 确认前置数据、事务与接入设施已具备；UC007 的外部 Auth Catalog 交付不阻塞本只读解析。
 - UC012 已 ACCEPTED，brief 由脚本生成，AGENTS 切换至 Catalog & Resolution 查询工作包，交由 subagent 实现；前端宿主和生产认证链路独立交付。
+
+## 2026-09-27 UC012 完成与 UC013–015 开工核对
+
+- UC012 已交付服务 `95f3feb`、API `acfab91`；随后工程工具提交 `489a117` 的完整 cross-service 报告通过22道门禁，包含全量 race、Mongo 与 HTTP/gRPC E2E，验证期间来源未变化。报告为服务工作树 `.artifacts/verification/20260926T161006Z-rbq4hmto/report.json`。
+- [统一依赖检查](UC-APP-013-015-readiness.md) 已完成，无新增产品决策阻塞；按用户要求串行推进013、014、015，禁止提前并行实现后续用例。

@@ -1,6 +1,6 @@
 # UC-APP-015：提交应用公开资料修订审核
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与边界
 
@@ -228,3 +228,27 @@ ApplicationProfileReview 引用 ProfileRevision，但不放入 ApplicationProfil
 ## 后续方向
 
 后续命令已由 [UC-APP-016](UC-APP-016-decide-application-profile-revision-review.md) 定义：Reviewer 批准或拒绝 PENDING ApplicationProfileReview。批准将原子记录 decision、把 ProfileRevision 迁移为 APPROVED，并自动更新当前公开资料；拒绝将迁移为 REJECTED，但不会影响旧公开资料。
+
+## 实现依赖与交付边界
+
+本次交付为当前后端工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
+
+沿用 Application `coordinationRevision` 技术写栅栏，在事务内保护当前管理员资格；资料生命周期、revision 和工作指针同时受最终条件检查保护。数据不变量异常使用 `ApplicationProfileStateInconsistent`，HTTP 500 / gRPC INTERNAL，并输出脱敏 ERROR 告警；不得伪装成客户端冲突或自动修复损坏状态。数据库驱动错误、完整资料文本和身份凭据不进入错误响应或普通日志。
+
+验收必须运行 `make check-full`，覆盖所有 BR 的单元测试、真实副本集 validator/index、回滚、管理员转让竞争和 HTTP/gRPC E2E；冻结代码、API 和设计来源后运行，交付报告与本地 commit，禁止 push。
+
+前置依赖是 UC-APP-013 和 UC-APP-014 已完成且通过各自完整验证；提交命令不等待 UC016、Reviewer 身份签发或审核策略。独立的 ApplicationProfileReview 聚合仍属于 `internal/profile` 能力；不复用运行版本 Review 的 scopes、URL 预检或恢复逻辑。
+
+Repository 使用业务原子方法 SubmitDraft，输入 applicationId、profileRevisionId、expectedAdminId、expectedRevision、profileReviewId、submittedAt，返回提交后的 ProfileRevision 与 ProfileReview。事务内部重新加载内容并验证，使用当前持久化内容形成快照；不信任事务外或客户端传来的 snapshot。UUIDv7 与时钟经端口提供，技术重试不重新分配外部身份或时间。
+
+新增 `application_profile_reviews` migration：profileReviewId 唯一、(profileRevisionId,attempt) 唯一、(profileRevisionId,sourceRevision) 唯一、PENDING profileRevisionId 部分唯一。applicationId/profileRevisionId/profileReviewId 为 UUIDv7，attempt 为正 int32，sourceRevision 为正 int64；snapshot 三字段必需且遵守已有资料规则；submittedBy 为可信 authId，submittedAt 为 UTC datetime，decision 字段必须存在且当前为 null，status 当前只写 PENDING。由服务负责不可变快照，测试不得用被引用的可变指针替代复制。attempt 在事务内取该修订已有最大值加一，检查溢出；正常新修订首次为1，无历史恢复入口。ProfileRevision revision 同样防溢出。
+
+工作指针丢失/指错、DRAFT 已存在 PENDING 或同一 sourceRevision 的 Review 等属于内部不变量异常，按500/INTERNAL失败并回滚。合法重复请求见已 SUBMITTED 时返回 `ApplicationProfileRevisionNotDraft`（409/ABORTED），不作为幂等成功，也不创建第二份 Review。并发 loser 可按最终状态返回 NotDraft 或 revision conflict；只允许一个成功。字段复检失败为 `InvalidApplicationProfileContent`，不创建 Review。当前公开指针必须逐字保持。
+
+## API 实现契约
+
+内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews`；外部只加 `/app-center`。原生 gRPC：`app_center.v1.application_profile_review.ApplicationProfileReview/SubmitApplicationProfileRevisionReview`。复用 UC004 提交审核惯例，HTTP 正文为 `{ "expectedRevision": "3" }`（Proto int64 JSON 形状），gRPC command.expected_revision；本命令不使用 If-Match。正文只接受 expectedRevision，不接受 snapshot、身份、归属、attempt 或审计；query 不可覆盖正文和路径。
+
+成功 HTTP201 返回 `{ "profileRevision": <完整提交后修订>, "review": <完整审核记录> }`，ETag 为提交后 ProfileRevision.revision。Review 包含 profileReviewId、applicationId、profileRevisionId、attempt、sourceRevision、status、snapshot、submittedBy、submittedAt、decision:null；snapshot 的 description/icon 沿用 UC013 的 string/null 表达。decision 在 Proto 使用 google.protobuf.Value 且只输出 null_value 表示当前唯一合法形状，UC016 再定义 object 内容契约；不预建审核决定业务。
+
+错误：身份401/UNAUTHENTICATED，Developer/管理员不足403/PERMISSION_DENIED，归属错误或不存在404/NOT_FOUND，非法输入/内容400/INVALID_ARGUMENT，非DRAFT或stale409/ABORTED，内部不变量或基础设施失败500/INTERNAL。response loss 后查询的读模型契约独立交付，不在本工作包偷偷增加 GET，也不能声称完整管理端流程已可用。

@@ -1,6 +1,6 @@
 # UC-APP-014：更新应用公开资料修订草稿
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -320,3 +320,17 @@ API 测试：
 
 - 2026-09-16：建立 UC-APP-014，只允许当前管理员以 expectedRevision 完整替换 DRAFT ApplicationProfileRevision 的 displayName 和 description。
 - 2026-09-17：将 icon 纳入完整替换内容；它当前为可空不透明字符串，不建立资产生命周期。
+
+## 实现依赖与交付边界
+
+本次交付为当前后端工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
+
+沿用 Application `coordinationRevision` 技术写栅栏，在事务内保护当前管理员资格；资料生命周期、revision 和工作指针同时受最终条件检查保护。数据不变量异常使用 `ApplicationProfileStateInconsistent`，HTTP 500 / gRPC INTERNAL，并输出脱敏 ERROR 告警；不得伪装成客户端冲突或自动修复损坏状态。数据库驱动错误、完整资料文本和身份凭据不进入错误响应或普通日志。
+
+验收必须运行 `make check-full`，覆盖所有 BR 的单元测试、真实副本集 validator/index、回滚、管理员转让竞争和 HTTP/gRPC E2E；冻结代码、API 和设计来源后运行，交付报告与本地 commit，禁止 push。
+
+前置依赖是 UC-APP-013 已完成且通过 `make check-full`，复用其领域值对象、Proto 资料表达、工作指针与 schema。当前工作包不新增集合；如发现约束不能表达真实更新，先通过显式 migration 演进，禁止启动时静默修改 schema。
+
+内部路由 `PUT /v1/applications/{application_id}/profile-revisions/{profile_revision_id}`，gRPC `app_center.v1.application_profile_revision.ApplicationProfileRevision/UpdateApplicationProfileRevision`。正文严格只接受三个完整可编辑字段，沿用 UC013 的显式 null 和绑定检查。HTTP expectedRevision 只来自一个强 ETag 的 If-Match（引号内十进制正整数，int64 范围），禁止弱 ETag、星号、多值和 query/body 覆盖；原生 gRPC 使用 expected_revision。缺少 If-Match 为428，格式错误400；stale 为412，原生 gRPC 为ABORTED；NotDraft 为409/ABORTED，其余沿用 UC013 的分类。
+
+no-op 也必须在同一事务验证当前管理员、DRAFT、expectedRevision 和工作指针，然后返回当前记录，保持全部业务字段和审计不变。技术写栅栏允许变化。revision 溢出为内部失败，不能绕回。UC014 验证更新与状态迁移的底层竞争；UC015 完成后补充通过真实提交命令与编辑竞争的闭环测试。

@@ -1,6 +1,6 @@
 # UC-APP-013：创建应用公开资料修订草稿
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -382,3 +382,23 @@ API 测试：
 - 2026-09-16：建立 UC-APP-013，创建只含 displayName 与可空 description 的 DRAFT ApplicationProfileRevision；图标等待受控资产用例。
 - 2026-09-16：UC-APP-014 建立 DRAFT 的完整替换编辑和乐观并发语义。
 - 2026-09-17：将可空 icon 定义为不透明字符串；将单一草稿收紧为单一 DRAFT/SUBMITTED 工作修订，PENDING 审核期间不得创建下一份 DRAFT。
+
+## 实现依赖与交付边界
+
+本次交付为当前后端工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
+
+沿用 Application `coordinationRevision` 技术写栅栏，在事务内保护当前管理员资格；资料生命周期、revision 和工作指针同时受最终条件检查保护。数据不变量异常使用 `ApplicationProfileStateInconsistent`，HTTP 500 / gRPC INTERNAL，并输出脱敏 ERROR 告警；不得伪装成客户端冲突或自动修复损坏状态。数据库驱动错误、完整资料文本和身份凭据不进入错误响应或普通日志。
+
+验收必须运行 `make check-full`，覆盖所有 BR 的单元测试、真实副本集 validator/index、回滚、管理员转让竞争和 HTTP/gRPC E2E；冻结代码、API 和设计来源后运行，交付报告与本地 commit，禁止 push。
+
+UC-APP-001 已提供 Application、`nextProfileRevisionSequence=1`、计数器 validator 和可信 Developer 身份；无需重建计数器。UC-APP-013 新增 `application_profile_revisions` 与 `application_profiles` 的显式 migration，并纳入启动 readiness。
+
+`application_profiles` 以 applicationId 唯一：workingProfileRevisionId 和 currentPublishedProfileRevisionId 均为必须存在的可空 UUIDv7。首次创建 Profile 时公开指针为 null；再次创建仅设置工作指针，保留已有公开指针。Revision schema 表达 DRAFT/SUBMITTED/APPROVED/REJECTED 已定义生命周期，但当前入口只写 DRAFT。工作指针和实际 DRAFT/SUBMITTED 唯一记录必须相符；有正常工作修订返回 AlreadyExists，损坏或悬空指针返回内部一致性失败。sequence 分配须检查 int32 溢出，失败不消费序号。
+
+NFC 在 `internal/profile/domain` 的值对象构造中执行，严格拒绝非法 UTF-8，依照 ADR-003 接受的窄依赖使用 `golang.org/x/text/unicode/norm`。领域重建持久化数据时验证已为规范形式，不悄悄修复数据库。
+
+内部 HTTP 路径为 `POST /v1/applications/{application_id}/profile-revisions`，外部路径只加 `/app-center`；gRPC 使用 `app_center.v1.application_profile_revision.ApplicationProfileRevision/CreateApplicationProfileRevision`。HTTP body 仅包含 displayName、description、icon；路径/query 不能覆盖正文、归属或系统字段。未知、重复、缺失字段和非预期 JSON 类型均拒绝；不得依赖 Proto 的忽略未知字段默认行为。
+
+Proto 的 description/icon 使用 `google.protobuf.Value`，只接受 string_value 或 null_value，缺失 Value 和其他 kind 均非法；保持 HTTP 的 string/null 形状，同时让原生 gRPC 区分缺失与显式 null。响应使用相同 string/null 表示，不省略空值。Domain/UseCase 使用本地类型，不依赖 Proto。
+
+错误映射：身份缺失401/UNAUTHENTICATED，资格或管理员不足403/PERMISSION_DENIED，Application 不存在404/NOT_FOUND，非法 applicationId/字段或请求400/INVALID_ARGUMENT，正常工作位冲突409/ABORTED，内部失败500/INTERNAL。沿用稳定 ErrorReason，不以 message 文本判断错误。成功201并携带 ETag。完整创建、空值和非法输入必须双协议验收。

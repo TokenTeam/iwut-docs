@@ -1,0 +1,37 @@
+{
+  "uc": "UC-APP-015",
+  "note": "Atomically submit a DRAFT profile revision, freeze its full content in a PENDING profile review and retain the working pointer. Depends on completed UC013/014; no decisions, queries, publication, Auth Catalog or frontend.",
+  "uc_sections": [
+    "目标与边界",
+    "参与者与输入",
+    "成功结果",
+    "主流程",
+    "失败结果",
+    "领域模型影响",
+    "验收场景",
+    "实现依赖与交付边界",
+    "API 实现契约"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}
