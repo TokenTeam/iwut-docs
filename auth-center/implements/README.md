@@ -18,7 +18,7 @@
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
 | [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
-| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `IN_PROGRESS` | UC011/012 后端依赖已合入；精确接口、部署就绪门禁与生成 brief；implement_uc013 已启动 | Auth/API 实现、资格与审计原子提交及 App Center 联合验收；Gateway/客户端独立交付 |
+| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 68046e7/API 9bcddc3；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计、真实 Mongo/Wire/HTTP/gRPC 与实际 App Center 联合验收 | Gateway/移动端独立交付；入口与恢复就绪开关默认关闭 |
 
 ## 实现边界
 
@@ -144,3 +144,17 @@ UC012 的 Auth/API worktree 与主实现的提交完全一致且无未保存改�
 UC013 后端依赖已由 UC011/012 合入及测试闭合。现已接受自助开通设计，固定两个有效 Session 接口、字段 presence、部署恢复就绪声明及验收边界，并用脚本生成 [brief](../briefs/UC-AUTH-013.md)。实现状态单独跟踪，不把设计接受或后端测试视为公网入口已开放。
 
 `implement_uc013` 已确认开始，在 `worktrees/iwut-auth-center-ddd` 的 `auth-center/v1` 及嵌套独立 API 仓库实现；设计/brief 提交为 `c254d9f`。工作包要求 check、race、真实 Mongo/Wire/HTTP/gRPC 和实际 App Center 联合验收。当前为 IN_PROGRESS，尚无本用例完成或测试通过的声明；父代理不轮询工作日志。
+
+## 2026-09-26 UC013 完成交付核对
+
+UC013 已由 implement_uc013 完成，直接提交在 auth-center/v1，Auth 提交
+`68046e7842a0ccdfbc48e707edbf97c8b1286fa3`，固定 API
+`9bcddc3bfc3383cce6d21bcb2ed6aca3ff94d521`。此前 IN_PROGRESS 是历史进度。
+
+代理报告通过 make check、make test-race、MONGODB_INTEGRATION_PORT=27048 make test-mongo
+及三套协议向量检查；实际 App Center 生产服务接受开通后的新 JWS 创建应用，配额与 Reviewer
+限制仍生效。测试资源已清理，无推送。本次核对确认主分支提交、API 指针、实现及测试代码，
+未重复运行已报告通过的完整测试。生产入口和邮箱恢复就绪声明默认关闭。
+
+当前全部十三项 UC 已接受，但 UC001 仍使用硬编码 Scope Catalog，MongoDB 权威目录尚未交付；
+UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分别跟踪，不能把 UC013 完成解释为全部生产交付完成。
