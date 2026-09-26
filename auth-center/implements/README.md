@@ -162,3 +162,5 @@ UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分�
 ## 2026-09-26 UC013 开发者 ID 修正
 
 用户要求为 Developer 增加自取公开 ID。UC013 保持 ACCEPTED，增加 BR-DEV-011/012 及共享协议字段，重新生成 brief；实现从原 COMPLETE 回到 IN_PROGRESS。修正基线为 Auth 68046e7/API 9bcddc3，要求原子唯一占用、同名幂等、禁止改名及历史 APPROVED 一次补设，不改变 App UUID、adminId 或 JWS，也不在此交付公开名称路由。
+
+`implement_uc013` 已确认恢复工作，按文档提交 `68f4626` 在原 Auth/API 分支修正。要求完成 check、race、真实 Mongo 并发/故障/索引升级、生产 HTTP/gRPC 与实际 App 回归；新增 handle 能力尚未声明实现完成。
