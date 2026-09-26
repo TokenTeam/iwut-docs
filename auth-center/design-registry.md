@@ -11,7 +11,7 @@
 | Use Case / Auth Center | `UC-AUTH-014` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
-| Business Rule / Developer Status | `BR-DEV-011` |
+| Business Rule / Developer Status | `BR-DEV-013` |
 | Business Rule / System Principal | `BR-SYS-005` |
 | Business Rule / Reviewer Permission | `BR-RVW-005` |
 | Business Rule / User Profile | `BR-UPF-012` |
@@ -63,6 +63,8 @@
 | `BR-DEV-008` | 资格写入与审计的一致性 | Atomicity / Audit | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-008) | — | — |
 | `BR-DEV-009` | 资格与应用授权的边界 | Authority / Separation | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-009) | — | — |
 | `BR-DEV-010` | 本人资格查询与门禁解释 | Query / Eligibility | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-010) | — | — |
+| `BR-DEV-011` | 开发者公开 ID 与唯一占用 | Identity / Uniqueness | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-011) | — | — |
+| `BR-DEV-012` | 已开通账号首次补设公开 ID | Compatibility / Atomicity | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-012) | — | — |
 
 ### System Principal (`BR-SYS`)
 

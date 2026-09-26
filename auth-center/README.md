@@ -22,7 +22,7 @@
 - `UC-AUTH-010`：受授权 Gateway 根据有效 Session 获取目标服务的可信用户 JWS。
 - `UC-AUTH-011`（ACCEPTED）：无 Session 时通过邮箱验证创建账号；有有效 Session 时绑定或更换邮箱。
 - `UC-AUTH-012`（ACCEPTED）：邮箱验证码登录原账号，登记/复用本机设备凭据并建立 Session。
-- `UC-AUTH-013`（ACCEPTED）：具备激活邮箱及可用邮箱登录的普通用户自助申请 Developer。
+- `UC-AUTH-013`（ACCEPTED）：具备激活邮箱及可用邮箱登录的普通用户选择唯一 developerHandle 自助申请 Developer；历史已开通账号可显式补设一次。
 
 用户资料的字段定义和编辑规则已归入 UC-AUTH-005 的 `BR-UPF-*`，读取本人资料和表单 schema
 见[配套查询契约](query-contracts/user-profile-editing.md)。可信身份签发由 UC-AUTH-010 定义，

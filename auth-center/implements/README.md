@@ -18,7 +18,7 @@
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | Gateway 联合入口验收（UC-GW-001 独立交付） |
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
 | [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
-| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 68046e7/API 9bcddc3；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计、真实 Mongo/Wire/HTTP/gRPC 与实际 App Center 联合验收 | Gateway/移动端独立交付；入口与恢复就绪开关默认关闭 |
+| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `IN_PROGRESS` | Auth 68046e7/API 9bcddc3；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计、真实 Mongo/Wire/HTTP/gRPC 与实际 App Center 联合验收 | developerHandle 修正：唯一归属、历史账号补设、审计索引升级及测试；原实现已完成，新增要求待交付 |
 
 ## 实现边界
 
@@ -158,3 +158,7 @@ UC013 已由 implement_uc013 完成，直接提交在 auth-center/v1，Auth 提�
 
 当前全部十三项 UC 已接受，但 UC001 仍使用硬编码 Scope Catalog，MongoDB 权威目录尚未交付；
 UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分别跟踪，不能把 UC013 完成解释为全部生产交付完成。
+
+## 2026-09-26 UC013 开发者 ID 修正
+
+用户要求为 Developer 增加自取公开 ID。UC013 保持 ACCEPTED，增加 BR-DEV-011/012 及共享协议字段，重新生成 brief；实现从原 COMPLETE 回到 IN_PROGRESS。修正基线为 Auth 68046e7/API 9bcddc3，要求原子唯一占用、同名幂等、禁止改名及历史 APPROVED 一次补设，不改变 App UUID、adminId 或 JWS，也不在此交付公开名称路由。

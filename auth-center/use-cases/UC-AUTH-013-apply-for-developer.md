@@ -4,11 +4,11 @@
 
 ## 目标与范围
 
-> 当前普通 USER 已具备激活邮箱和可用的邮箱登录方式，明确申请 Developer 后，由 Auth 检查前置条件并自助开通资格。
+> 当前普通 USER 已具备激活邮箱和可用的邮箱登录方式，选择开发者 ID 并明确申请 Developer 后，由 Auth 原子确认名称占用和前置条件，自助开通资格。
 
 首版采用**满足条件直接 APPROVED，不设人工资格审核**。应用创建、资料/版本审核与发布仍由 App Center 各自用例决定；Developer 开通不代表任何应用自动获准发布，也不授予 Reviewer 或管理员权限。
 
-本用例包含申请命令及本人资格/申请条件查询，不包含暂停、恢复、拒绝后重申、人工审批、资格注销或条款管理。Developer 是原 USER 的可选资格，不创建另一个身份或新的 authId。
+本用例包含携带 developerHandle 的申请命令、已有 APPROVED 账号首次补设 handle，以及本人资格/申请条件查询，不包含暂停、恢复、拒绝后重申、人工审批、资格注销或条款管理。Developer 是原 USER 的可选资格，不创建另一个身份或新的 authId。
 
 ## 参与者与前置条件
 
@@ -20,10 +20,13 @@
 ## 输入与输出
 
 ```text
-ApplyForDeveloper {}
+ApplyForDeveloper {
+  developerHandle: string          // 必填；规则见 BR-DEV-011
+}
 
 DeveloperApplicationResult {
   developerStatus: APPROVED
+  developerHandle: string          // 已确认归属的规范小写值
   activatedAt: Instant | null     // 既有资格无可核实开通记录时为 null
 }
 
@@ -32,6 +35,7 @@ GetOwnDeveloperEligibility {}
 OwnDeveloperEligibility {
   developerStatus: null | PENDING | APPROVED | REJECTED | SUSPENDED
   activatedAt: Instant | null
+  developerHandle: string | null   // 尚未占用时为 null
   canApply: bool
   blockers: []DeveloperApplicationBlocker
 }
@@ -43,14 +47,14 @@ DeveloperApplicationBlocker =
 
 申请命令不接受期望角色、目标 authId、审核通过标志、学生材料、邮箱字符串或 Developer 状态。没有申请理由表单或额外学校认证。activatedAt 是本用例首次实际开通时间；既有状态没有可核实开通记录时，查询返回 null，不通过查询虚构历史。
 
-查询的 canApply 只是同一读取快照下的指引，提交时重新确认；允许普通 USER 的 developerStatus 为 null，不用 UC002 的内部批量查询冒充本人状态查询。
+查询的 canApply 只表示可进入首次开通或历史账号补设流程，不承诺某个候选 handle 可用；它是同一读取快照下的指引，提交时重新确认；允许普通 USER 的 developerStatus 为 null，不用 UC002 的内部批量查询冒充本人状态查询。
 
 ## 主流程
 
 1. 用户查询本人资格；客户端对无邮箱账号引导 UC011，对未交付/暂未开放邮箱登录的部署显示暂不可申请。
-2. 用户明确申请，Auth 在线检查 Session 和当前主体。
-3. 在事务确认点检查当前 Developer 状态、激活邮箱、邮箱登录能力启用配置；只允许尚未进入 Developer 生命周期的普通 USER 首次开通。
-4. 原子将 developerStatus 从 null 设为 APPROVED，记录 activatedAt/主体 updatedAt 和不可变开通审计，保留其它字段和权限。
+2. 用户填写 developerHandle 并明确申请，Auth 在线检查 Session 和当前主体，校验并规范化 handle。
+3. 在事务确认点检查当前 Developer 状态、已有 handle、激活邮箱、邮箱登录能力启用配置及全局名称占用；按首次开通、幂等重试或历史账号补设规则处理。
+4. 首次申请原子占用 handle、将 developerStatus 从 null 设为 APPROVED，记录 activatedAt/主体 updatedAt 和不可变开通审计；历史账号补设只写 handle、补设审计和主体 updatedAt，不重置资格与开通历史。保留其它字段和权限。
 5. 提交确定成功后返回结果。客户端沿用当前 Session，后续访问 App Center 时由 UC010 签发带有当前 Developer 状态的 JWS。
 
 ## 业务规则
@@ -71,13 +75,14 @@ DeveloperApplicationBlocker =
 
 | 当前状态 | 申请结果 |
 | --- | --- |
-| null，前置条件满足 | 首次开通为 APPROVED |
-| APPROVED | 幂等返回当前资格和可核实的 activatedAt，不新增审计或重置时间；既有记录没有开通时间时返回 null，不伪造历史 |
+| null，前置条件满足且 handle 未占用 | 原子占用 handle 并首次开通为 APPROVED |
+| APPROVED，已有 handle | 请求规范化后等于本人 handle 则幂等返回；不同则 DEVELOPER_HANDLE_CHANGE_NOT_ALLOWED，不改名 |
+| APPROVED，历史账号尚无 handle | 按 BR-DEV-012 补设一次，保留现有 activatedAt（可能为 null） |
 | PENDING | 已有申请，冲突，不在本入口自动审批 |
 | REJECTED 或 SUSPENDED | 拒绝重新申请，不恢复资格 |
 | 非法状态或数据不一致 | 不可用，失败关闭 |
 
-重复成功申请仍需有效 Session 和当前 APPROVED 状态，但不把全局邮箱登录临时停用变成重做首次开通；已有资格是否可用于业务由当前状态和消费用例判断。后续状态变化后再重试必须返回当前拒绝/冲突，不能根据历史成功记录把资格写回 APPROVED。
+重复成功申请仍需有效 Session、当前 APPROVED 状态以及相同的规范 handle，但不把全局邮箱登录临时停用变成重做首次开通；已有资格是否可用于业务由当前状态和消费用例判断。后续状态变化后再重试必须返回当前拒绝/冲突，不能根据历史成功记录把资格写回 APPROVED。
 
 本用例不设置人工审核任务，不需要 Reviewer permission，也不发送待审批通知。未来若要人工审核或重新申请，新增命令及迁移规则，不通过改一个运行配置悄悄改变本用例状态机。
 
@@ -86,16 +91,18 @@ DeveloperApplicationBlocker =
 
 当前 Session、主体状态、邮箱绑定与 Developer 状态必须在一次确认边界内检查。邮箱更换沿用 UC011 的原子替换，不产生中间无邮箱状态；未来若引入解绑，必须与本命令在同一认证事务栅栏内确认，避免申请与解绑并发破坏邮箱前置条件。
 
-开发者状态、首次开通记录与审计原子提交。开通记录按 authId 唯一，记录首次 activatedAt；审计包含 actorAuthId/subjectAuthId（两者相同）、操作类型、null 到 APPROVED 的前后状态、用于决策的邮箱绑定 revision、时间和结果，不记录邮箱明文或任何凭据秘密。只更新所需主体字段，不覆盖 profile、学生关联、permissions 或 permissionRevision。
+首次开通的 handle 占用、开发者状态、首次开通记录与审计原子提交。开通记录按 authId 唯一，记录首次 activatedAt；审计包含 actorAuthId/subjectAuthId（两者相同）、操作类型、null 到 APPROVED 的前后状态、用于决策的邮箱绑定 revision、规范 developerHandle、时间和结果，不记录邮箱明文或任何凭据秘密。只更新所需主体字段，不覆盖 profile、学生关联、permissions 或 permissionRevision。
 
 与 [BR-IDN-004](UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004) 使用相同认证事务栅栏：开通提交后开始的新身份签发读取 APPROVED；之前已签发的短期 JWS 保持原 claims，不原地修改或追发。UC002 从同一权威 principal 读取新的 Developer 状态，不另建一个最终一致的状态副本。
 
-并发首次申请最多一次 null 到 APPROVED 和一条开通事件，其余按当前结果处理。仓储失败、审计失败全部回滚；提交结果未知返回不可用。用户可以用原有效 Session 重试或查询本人状态，不需要新建账号、重新登录或用 requestId 强制重复申请。
+并发首次申请最多一次 null 到 APPROVED 和一条开通事件，其余按当前状态和 handle 处理；不同账号争抢大小写等价 handle 时最多一个成功。同账号并发申请不同 handle 时，只有一个名称被占用，其余返回改名冲突。仓储失败、审计失败全部回滚；提交结果未知返回不可用。用户可以用原有效 Session 重试或查询本人状态，不需要新建账号、重新登录或用 requestId 强制重复申请。
 
 <a id="br-dev-009"></a>
 ### BR-DEV-009：资格与应用授权的边界
 
-开通仅修改原 authId 的 developerStatus，不修改 principalType，不授予 `app.version.review`、`auth.reviewer.manage` 或其它原子权限，也不创建应用、预占 App Center 配额或签发 OAuth 凭据。
+开通在原 authId 上设置 developerStatus 并建立公开 handle 的归属，不修改 principalType，不授予 `app.version.review`、`auth.reviewer.manage` 或其它原子权限，也不创建应用、预占 App Center 配额或签发 OAuth 凭据。
+
+developerHandle 是公开命名空间，不是认证秘密、另一个用户身份或官方认证标志。`developerHandle/nameKey` 可作为未来可读应用标识，但本用例不实现该标识的查询/路由、改名、转让或重定向；应用 UUID、adminId=authId 和 `(adminId, nameKey)` 约束保持不变，不新增 JWS claim 或 UC002 字段。
 
 App Center 继续检查可信身份中的 APPROVED，并执行自身配额、管理员归属及审核规则；本 UC 不替代这些门禁。学校关联只是客户端声明，不保证“一个自然人只开通一个 Developer”，也不把关联组内其它账号一并升级。
 
@@ -106,9 +113,29 @@ Developer 日常可继续使用设备凭据。首版不提供邮箱解绑；未�
 
 GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前合法状态及有序 blockers。普通 USER 的 null 是正常结果；SYSTEM/无效主体拒绝，不将未知或损坏状态解释为普通用户。
 
-仅当状态为 null、存在当前激活邮箱且邮箱登录部署能力启用时 canApply 为 true。null 状态可同时返回 EMAIL_REQUIRED 和 EMAIL_LOGIN_UNAVAILABLE，顺序按枚举列出；非 null 状态分别返回 ALREADY_DEVELOPER、EXISTING_APPLICATION 或 REAPPLICATION_NOT_ALLOWED，canApply 为 false。查询不暴露邮箱地址或其它账号，也不隐式创建开通记录。
+仅当（状态为 null，或符合 BR-DEV-012 的历史 APPROVED 且尚无 handle），并且存在当前激活邮箱及邮箱登录部署能力启用时，canApply 为 true。这两种可进入申请的状态可同时返回 EMAIL_REQUIRED 和 EMAIL_LOGIN_UNAVAILABLE，顺序按枚举列出。已有 handle 的 APPROVED、PENDING、REJECTED/SUSPENDED 分别返回 ALREADY_DEVELOPER、EXISTING_APPLICATION、REAPPLICATION_NOT_ALLOWED，canApply 为 false。developerHandle 返回本人已占用的规范值，尚无占用时为 null；查询不暴露邮箱地址或其它账号，也不隐式创建开通记录或抢占名称。
 
 查询结果不作为提交凭证；读取失败返回不可用，不能回退到客户端缓存显示“可以申请”。本查询与 Apply 均不要求已有 Developer JWS，避免资格申请先要求资格的循环依赖。
+
+<a id="br-dev-011"></a>
+### BR-DEV-011：开发者公开 ID 与唯一占用
+
+产品称“开发者 ID”，契约字段为 developerHandle，由用户填写。输入为 3–32 个 ASCII 字符，首字符必须是英文字母，后续只允许英文字母、数字、`_`、`-`，即 `^[A-Za-z][A-Za-z0-9_-]{2,31}$`。不 trim，不接受空白、中文、斜杠、点或 Unicode 相似字符；只把合法 ASCII 大写转成小写作为规范值，存储与响应均为该值，不另存显示大小写。
+
+规范 handle 在全平台唯一，一个 authId 最多占用一个；例如 Alice 与 alice 冲突。首版不引入保留词表，不把任何名称（包括 official/admin）作为权限或官方背书依据。首版不支持改名、转让、解除占用或回收；账号禁用、Developer 暂停/拒绝及同校关联不释放或共享 handle。任何后续删除功能必须另行明确名称保留策略，不通过 TTL 释放。
+
+只有通过当前账号状态及邮箱门禁后才尝试占用名称；名称已归属其他账号返回 DEVELOPER_HANDLE_TAKEN，不透露其 authId 或邮箱。没有匿名可用性探测接口、预占操作或客户端提供的 handleKey。相同账号与规范 handle 的重复 Apply 幂等；修改大小写不产生新名称，不新增审计。提交另一个合法 handle 返回 DEVELOPER_HANDLE_CHANGE_NOT_ALLOWED，即使目标未占用也不能借 Apply 改名。
+
+缺失/空值/非法格式一律 INVALID_DEVELOPER_HANDLE，不因已经 APPROVED 而省略输入校验；原空请求不再是合法申请。存储冲突分类必须识别具体 handle 唯一约束，不能将任意 Mongo duplicate-key 或未知提交错误伪装成“名称被占用”。
+
+<a id="br-dev-012"></a>
+### BR-DEV-012：已开通账号首次补设公开 ID
+
+为已有合法 APPROVED 且尚未设置 handle 的账号保留一次显式补设路径，复用 Apply 的相同请求。补设要求当前有效 Session、激活邮箱及恢复能力就绪；占用规则与首次申请一致。补设不会再次开通 Developer，也不创建/重置 activatedAt，不补造旧的开通记录；历史时间不可核实时仍返回 null。
+
+补设在同一认证事务栅栏内原子提交唯一 handle、主体 updatedAt 和一条 `CLAIM_DEVELOPER_HANDLE` 审计，记录 actor/subject、规范 handle、当前邮箱 revision、时间与结果。已有开通审计不变；同账号最多一条补设审计。并发补设相同名称幂等，不同名称只有一个成功，其余返回改名冲突。提交未知或审计失败沿用 BR-DEV-008 的回滚/重试语义。
+
+只有未曾占用 handle 的历史记录才可补设；已有 handle 历史证据但权威归属缺失、归属指向他人或数据不一致时返回不可用，不得当成可重新命名的历史账号。null 状态却已有 handle/开通历史同样失败关闭。PENDING、REJECTED、SUSPENDED 不经此路径补设、批准或恢复。
 
 ## 错误语义
 
@@ -116,9 +143,12 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 | --- | --- | --- |
 | 请求携带未知字段、query 参数或非法消息格式 | `INVALID_DEVELOPER_APPLICATION_REQUEST` | 400 / INVALID_ARGUMENT |
 | Session 缺失、重复、编码非法、无效或主体不可用 | `SESSION_INVALID` | 401 / UNAUTHENTICATED |
+| developerHandle 缺失、空值或格式非法 | `INVALID_DEVELOPER_HANDLE` | 400 / INVALID_ARGUMENT |
+| 合法候选 handle 已被他人占用 | `DEVELOPER_HANDLE_TAKEN` | 409 / ALREADY_EXISTS |
+| 已有 handle 的账号提交不同的规范 handle | `DEVELOPER_HANDLE_CHANGE_NOT_ALLOWED` | 409 / FAILED_PRECONDITION |
 | 请求大小超限 | `DEVELOPER_APPLICATION_REQUEST_TOO_LARGE` | 413 / RESOURCE_EXHAUSTED |
-| 首次申请没有当前激活邮箱 | `DEVELOPER_EMAIL_REQUIRED` | 409 / FAILED_PRECONDITION |
-| 首次申请时邮箱登录能力未启用 | `DEVELOPER_EMAIL_LOGIN_UNAVAILABLE` | 503 / UNAVAILABLE |
+| 首次申请或历史补设没有当前激活邮箱 | `DEVELOPER_EMAIL_REQUIRED` | 409 / FAILED_PRECONDITION |
+| 首次申请或历史补设时邮箱登录能力未启用 | `DEVELOPER_EMAIL_LOGIN_UNAVAILABLE` | 503 / UNAVAILABLE |
 | 当前 PENDING | `DEVELOPER_APPLICATION_EXISTS` | 409 / ALREADY_EXISTS |
 | 当前 REJECTED 或 SUSPENDED | `DEVELOPER_REAPPLICATION_NOT_ALLOWED` | 403 / PERMISSION_DENIED |
 | 限流 | `DEVELOPER_APPLICATION_RATE_LIMITED` | 429 / RESOURCE_EXHAUSTED |
@@ -135,17 +165,23 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 7. 本人查询正确处理 null、全部已有枚举、blockers 和不可用；不能查询他人或以旧查询结果绕过提交校验。
 8. App Center 仍执行自身配额和审核，Developer 不自动获得 Reviewer/管理员权限；已有 APPROVED 的历史数据不通过查询伪造激活记录。
 9. 默认不注册入口；显式启用入口但恢复就绪声明或 UC012 功能关闭时，普通账号收到明确 blocker，已有 APPROVED 可幂等读取。配置非法拒绝启动，未知 RPC 不获得匿名访问。
-10. HTTP 与 gRPC 返回同一 nullable 状态/时间语义；严格拒绝未知字段、query 和替代 Session 载体；全局及每账号限流有界并返回重试时间。
+10. HTTP 与 gRPC 返回同一 nullable 状态/时间/handle 语义；严格拒绝未知字段、query 和替代 Session 载体；全局及每账号限流有界并返回重试时间。
+
+11. handle 长度边界、ASCII 首字符/允许字符、大小写规范化、空值/空白/Unicode/未知字段拒绝；原空请求不再成功。
+12. 两账号并发争抢大小写等价名称只有一个成功；败方保持原资格且没有名称/审计残留。审计失败释放未提交占用，提交未知后重试同名不产生第二次开通。
+13. 同账号重复同名幂等、不同名冲突；历史 APPROVED 可补设一次，activatedAt/权限/开通审计不变；恢复关闭或无邮箱时不能补设。暂停/拒绝后原 handle 不释放，历史归属损坏不能重新命名。
 
 ## 实现约定
 
 - 接口及字段 presence 按 [Developer 自助申请协议 v1](../../platform/contracts/auth-developer-application-v1.md)；使用现有 Session 格式，无新签名算法或密钥。
 - `AUTH_DEVELOPER_APPLICATION_ENABLED` 默认 false，与 `AUTH_USER_ENDPOINTS_ENABLED` 一起控制两个用户入口；显式启用前者但关闭后者视为配置错误。关闭时 HTTP/gRPC 均不注册这两个方法，不扩大其它方法权限。
-- `AUTH_EMAIL_RECOVERY_READY` 默认 false，是运维确认 Gateway/客户端邮箱登录与设备恢复入口已交付的部署声明，不接受请求覆盖，也不表示 Auth 自动探测了 UI。首次申请的邮箱登录能力就绪条件为该声明为 true 且现有 `AUTH_EMAIL_LOGIN_ENABLED=true` 的配置已校验并成功组合真实邮件适配器。配置畸形按既有启动校验拒绝；合法关闭只使首次申请不可用，不阻止已开通账号查询/幂等申请。`AUTH_EMAIL_BINDING_ENABLED` 不作为额外条件，邮箱事实取当前权威绑定；既有邮箱登录可独立启用。
+- `AUTH_EMAIL_RECOVERY_READY` 默认 false，是运维确认 Gateway/客户端邮箱登录与设备恢复入口已交付的部署声明，不接受请求覆盖，也不表示 Auth 自动探测了 UI。首次申请和历史补设的邮箱登录能力就绪条件为该声明为 true 且现有 `AUTH_EMAIL_LOGIN_ENABLED=true` 的配置已校验并成功组合真实邮件适配器。配置畸形按既有启动校验拒绝；合法关闭使首次申请及历史补设不可用，不阻止已开通账号查询或已占用相同 handle 的幂等申请。`AUTH_EMAIL_BINDING_ENABLED` 不作为额外条件，邮箱事实取当前权威绑定；既有邮箱登录可独立启用。
 - 复用 [BR-LGN-004](UC-AUTH-007-login.md#br-lgn-004) 在线检查与 [BR-LGN-016](UC-AUTH-012-login-with-email.md#br-lgn-016) 的两类 Session，有效调用更新既有会话使用时间，不延长固定寿命。事务内重新确认，不能只信 middleware 的预检查。
 - 当前邮箱按 [BR-EML-004](UC-AUTH-011-set-and-activate-email.md#br-eml-004) 的绑定记录读取：待验证提案不算激活邮箱；合法缺失返回 EMAIL_REQUIRED，损坏记录返回不可用。全局就绪配置在进程启动时固定，变更通过重启生效；申请不发送邮件、不新建邮箱目录。
+- `auth_developer_handles` 为 handle 归属的唯一权威集合，至少保存 authId、规范 developerHandle、claimedAt；分别建立 authId 和 developerHandle 的唯一索引，使用 simple/binary 比较规范小写值，无 TTL。首次开通与补设使用同一集合，不在 principal 建立第二份可漂移的权威 handle。
+- `auth_developer_application_audit` 唯一约束调整为 `(subjectAuthId, action)`，保留原 APPLY_FOR_DEVELOPER 事件并支持 CLAIM_DEVELOPER_HANDLE；升级时先建立新复合索引再撤除旧的 subjectAuthId 单字段唯一索引，不删除数据。新开通记录与审计保存 handle 历史证据；旧记录没有该字段仍可按 BR-DEV-012 读取/补设，不能自动生成名字。索引/数据冲突启动失败并报告，迁移幂等且不监听后再临时修索引。
 - 开通记录按 authId 唯一，首次时间使用服务端 UTC 毫秒，并与审计、principal 更新同事务提交。记录含可核实的邮箱绑定 revision；状态 null 却已有开通记录、非法 revision/时间或未知枚举均失败关闭。已存在合法 Developer 状态但无开通记录允许作为历史数据读取，activatedAt 为 null；不在此用例回填。
-- 申请结果优先按当前合法 Developer 状态处理；首次申请同时缺少邮箱和恢复能力时，先返回 DEVELOPER_EMAIL_REQUIRED。本人查询收集两个 blocker，遵守 BR-DEV-010 的固定顺序。存储读取/完整性失败不能伪装为业务 blocker。
+- 有效 Session 和消息/handle 校验后，申请结果优先按当前合法 Developer 状态与已有 handle 处理；首次申请/历史补设同时缺少邮箱和恢复能力时，先返回 DEVELOPER_EMAIL_REQUIRED；通过资格门禁后再判断他人名称占用。本人查询收集两个 blocker，遵守 BR-DEV-010 的固定顺序。存储读取/完整性失败不能伪装为业务 blocker。
 - 单机部署使用有界全局和每账号限流；Apply 与查询均受限，参数、有限容量和超出容量行为在实现配置中明确并测试。未认证请求复用有界来源门禁；不因任意 token 创建无限账号桶，不引入 Redis。限流不写开通审计，幂等成功不重复写审计。
 - 后端联合验收使用真实 Auth/Mongo 与实际 App Center verifier/服务入口，证明同一 Session 在开通后签发的 App audience JWS 可进入原有创建流程，且配额/权限约束继续生效；不需要为了本工作包先实现公网 Gateway 或移动客户端。公网三协议路由和 UI 仍独立交付，生产恢复就绪声明保持关闭，直至完成部署验收。
 
@@ -158,6 +194,8 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 - 人工资格审核、暂停/恢复、拒绝后重新申请、资格注销及历史 Developer 开通记录迁移不在本用例中静默处理。
 
 ## 变更记录
+
+- 2026-09-26：按用户要求加入必填 developerHandle、全局规范化唯一占用及原子审计；同名幂等、禁止改名、历史 APPROVED 显式补设一次。Auth/API 重新进入修正，保持现有应用 UUID 与鉴权模型。
 
 - 2026-09-26：确认 UC011/012 后端依赖已合入并通过测试，接受 UC013；固定 RPC/HTTP、nullable 字段、限流/失败语义及默认关闭的恢复就绪声明，生成实现 brief。
 - 2026-09-24：提出 Developer 自助申请草案，以当前激活邮箱和已启用邮箱登录为门禁，直接 null 到 APPROVED，不增加人工资格审核。
