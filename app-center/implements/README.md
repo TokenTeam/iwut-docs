@@ -39,11 +39,11 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-011](../use-cases/UC-APP-011-revoke-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | 精确链接 MANUAL 撤销、无 Clock 幂等、ROTATED 历史保护、写栅栏、500/INTERNAL 安全告警、API/Wire、真实 MongoDB 并发及 HTTP/gRPC E2E | —（当前后端工作包；前端和生产 Gateway 独立交付） |
 | [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `COMPLETE` | Catalog Domain/UseCase、只读 MongoDB snapshot、ACTIVE Tester 授权、exact-major 解析、批准事实校验、HTTP/gRPC/Wire、真实并发与 E2E；服务 `95f3feb`、API `acfab91` | —（当前后端范围；前端宿主和生产认证链路独立交付） |
 
-| [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `IN_PROGRESS` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 当前后端实现及完整验收 |
-| [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `NOT_STARTED` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 等待 UC-APP-013 完整验收后串行实现 |
+| [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、严格 NFC、0011 migration、事务/指针/序号、HTTP/gRPC/Wire 与完整 backend 验收；服务 `d121d4e`、API `219419b` | —（当前后端范围） |
+| [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `IN_PROGRESS` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 当前后端实现及完整验收 |
 | [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `NOT_STARTED` | 统一依赖审计完成；技术契约闭合；brief 已生成 | 等待 UC-APP-014 完整验收后串行实现 |
 
-当前激活 UC-APP-013；代码仓库 `AGENTS.md` 和 [UC-APP-013 brief](../briefs/UC-APP-013.md) 声明本次范围。UC014、UC015 只在前一用例完成验收后依次激活。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+当前激活 UC-APP-014；代码仓库 `AGENTS.md` 和 [UC-APP-014 brief](../briefs/UC-APP-014.md) 声明本次范围。UC013 已完成；UC015 只在 UC014 完成验收后激活。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -198,3 +198,9 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 - UC012 已交付服务 `95f3feb`、API `acfab91`；随后工程工具提交 `489a117` 的完整 cross-service 报告通过22道门禁，包含全量 race、Mongo 与 HTTP/gRPC E2E，验证期间来源未变化。报告为服务工作树 `.artifacts/verification/20260926T161006Z-rbq4hmto/report.json`。
 - [统一依赖检查](UC-APP-013-015-readiness.md) 已完成，无新增产品决策阻塞；按用户要求串行推进013、014、015，禁止提前并行实现后续用例。
+
+## 2026-09-27 UC013 完成与 UC014 激活
+
+- 服务 `d121d4e`、API `219419b`，本地工作树干净，无push。BR-PRF-001–007全覆盖；0011 migration显式执行并由readiness检查。
+- `make check-full` 21/21通过，报告 `.artifacts/verification/20260926T163406Z-_pj4bwls/report.json`；`changed_sources=[]`，Mongo race314.489s、真实HTTP/gRPC E2E35.516s。严格NFC另经Python独立12,064条向量逐字对照，无差异。
+- UC014的前置依赖已完成，按已生成brief串行激活；UC015继续等待。
