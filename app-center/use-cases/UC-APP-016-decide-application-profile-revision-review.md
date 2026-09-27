@@ -1,6 +1,6 @@
 # UC-APP-016：审核应用公开资料修订
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与边界
 
@@ -21,7 +21,7 @@
 - 设置 Test/Grey/Stable、修改 FilterRule 或审核 ApplicationVersion。
 - 使用 AI 审核 DRAFT 或自动批准、拒绝。未来 AI 审核的结论效力与状态模型由独立用例定义；当前只有人工 Reviewer 能写入本用例的 decision。
 - 紧急隐藏公开资料。该需求属于由 Application admin 或 SysAdmin 发起的 Application 禁用，不是撤销某条 ProfileRevision。
-- 定义 HTTP、数据库或代码实现。
+- Auth 权限授予/签发、管理查询和前端；本次后端实现契约见文末。
 
 ## 参与者与输入
 
@@ -187,6 +187,13 @@ ProfileReviewPolicy {
 
 APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snapshot 要求的检查；REJECT 时 confirmedCheckIds 为空。历史 policy 保留用于解释既有 decision，RETIRED policy 不用于新决定。
 
+首版策略由 App Center migration 写入：version=`app-profile-review-v1`、status=`ACTIVE`，固定要求以下两项：
+
+- `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
+- `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
+
+策略内容不可原地修改；变更检查项使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。首版不提供策略管理或查询接口。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
 <a id="br-prf-029"></a>
 
 ### BR-PRF-029：批准时资料复检
@@ -266,3 +273,40 @@ ApplicationProfileReview、ApplicationProfileRevision 和 ApplicationProfile 仍
 ## 后续方向
 
 后续若设计紧急下架，应建立 Application 级禁用用例，明确 admin/SysAdmin 权限、对目录与运行解析的影响以及重新启用规则。系统内申诉渠道当前不建立，开发者直接联系平台。AI 对 DRAFT 的审核属于未来独立能力，当前不增加 AI 结论、状态或自动迁移。
+
+
+## 实现依赖与交付边界
+
+UC013–015 已完成并通过完整 backend 验收；本工作包交付 App Center Domain、UseCase、原子 Mongo Repository、migration、资源化 HTTP/原生 gRPC、Wire 与真实 Mongo E2E。权限仅来自可信请求，不调用 Auth Catalog、Developer Status、System principal、DNS 或资产服务。生产 Auth 的 `app.profile.review` 授予/签发尚未实现，作为独立外部交付记录，不以测试签名 token 冒充生产权限链路完成。
+
+复用 Application `coordinationRevision` 真写栅栏，最终事务重查 BR-PRF-023–032 的本地事实。策略在同一事务中取得 ACTIVE 版本并使用真实技术写栅栏，使并发退休与决定可串行；不可变策略定义与可变 status/技术协调字段分离，不提供运行时策略 CRUD。时钟经端口取得，事务重试不重新生成决定时间。revision 和技术计数器溢出失败并回滚。
+
+Review、Revision、ApplicationProfile 分别持久化。新增 migration 升级 Review 的 APPROVED/REJECTED 与 decision 结构、状态一致性、理由与审计约束，保留既有唯一索引；建立独立 `profile_review_policies` 的 version 唯一索引并写入首版策略。migration/readiness 和迁移账本测试同步更新。已决定对象只能读取，不可再次写决定。
+
+REJECT 的候选重建必须保持原始内容，先验证 BSON 字段存在/类型、metadata、路径、sourceRevision、当前 PENDING attempt、工作指针与逐字 snapshot 相等；不能调用无条件复检内容的提交/工作指针 helper，也不能规范化后再比较。仅 APPROVE 调用资料内容复检。决定后的 REJECTED 响应/历史重建同样保留原文。Revision 与 Review validator 仅在 REJECTED 状态把内容长度/字符规则放宽为完整 string/string-or-null 类型约束，其余结构、审计、decision 约束保持严格；其它状态仍要求完整资料内容规则。不得使用运行时 bypassDocumentValidation。
+
+合法终态 Review 返回 `ApplicationProfileReviewAlreadyDecided`；尚为 PENDING 但目标修订非 SUBMITTED 返回 `ApplicationProfileReviewStateConflict`。非法状态/decision 组合、悬空/错误工作指针、内容漂移、sourceRevision 或 attempt 关系异常返回 `ApplicationProfileReviewStateInconsistent`，HTTP500/gRPC INTERNAL，并输出不含资料正文、reason、凭据或数据库错误的安全 ERROR 告警；不自动修复。stale revision 与公开指针冲突是业务冲突，不冒充内部异常。
+
+完整验收执行 `make check-auth-app`（包含 backend 与现有真实 Auth 回归），覆盖 BR、双协议及实际生成 HTTP 客户端、真实副本集 validators/indexes、回滚、并发决定、管理员转让和策略退休、公开指针前置冲突、revision 溢出、REJECT 坏内容与后续创建新 DRAFT。跨服务回归不代表尚未实现的 Auth 资料审核权限签发已验收。冻结 service/API/docs/涉及的 Auth 来源后验收，API 先本地提交再提交服务 gitlink；不得 push。
+
+## API 实现契约
+
+内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision`；外部只加 `/app-center`。原生 gRPC 为 `app_center.v1.application_profile_review.ApplicationProfileReview/DecideApplicationProfileRevisionReview`。
+
+Proto Request 使用匹配路径模板的显式 json_name，正文 annotation 为 `body: "command"`；HTTP 正文仅为 command 字段，不接受身份、快照、归属、decision 或审计注入，不允许 query 覆盖。命令字段如下：
+
+```json
+{
+  "expectedProfileRevisionRevision": "2",
+  "expectedCurrentPublishedProfileRevisionId": null,
+  "expectedPolicyVersion": "app-profile-review-v1",
+  "outcome": "APPROVE",
+  "confirmedCheckIds": ["content-policy-reviewed", "icon-content-reviewed"]
+}
+```
+
+expectedProfileRevisionRevision 是正 int64（ProtoJSON 表达），不使用 If-Match。expectedCurrentPublishedProfileRevisionId 使用 `google.protobuf.Value` 保留 presence：APPROVE 时必须显式 string(UUIDv7) 或 null（NONE），缺失或其它类型非法；REJECT 时省略该字段，不检查或改变公开指针。outcome 只接受 APPROVE/REJECT。expectedPolicyVersion 为 1–50 ASCII `[A-Za-z0-9._-]`。reason 使用可选 string，省略代表无理由，显式空串非法；REJECT 必须有有效 reason，原样保存、不规范化。
+
+HTTP200 返回 `{ "profileRevision": <完整决定后修订>, "review": <完整审核记录>, "currentPublishedProfileRevisionId": <string|null> }`，ETag 是决定后 ProfileRevision.revision。保留已提交的 ReviewRecord.decision 的 field 10 与 `google.protobuf.Value` 类型；PENDING 输出 null，终态输出对象：outcome（APPROVED/REJECTED）、policyVersion、confirmedCheckIds（排序）、reason（string/null）、decidedBy、decidedAt（UTC RFC3339）。其它已提交字段编号/类型不改。
+
+错误映射：身份401/UNAUTHENTICATED；缺权限或利益冲突403/PERMISSION_DENIED；不存在或路径归属不匹配404/NOT_FOUND；非法输入、reason、checks或批准内容400/INVALID_ARGUMENT；已决定、状态/revision/公开指针冲突或策略不可用409/ABORTED；内部不变量或基础设施失败500/INTERNAL。错误码稳定且不泄漏存储细节。响应丢失后的管理查询仍单独交付，不在本 UC 添加 GET。

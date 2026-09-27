@@ -48,7 +48,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-013` | 创建应用公开资料修订草稿 | `ACCEPTED` | [UC-APP-013-create-application-profile-revision.md](use-cases/UC-APP-013-create-application-profile-revision.md) | — | — |
 | `UC-APP-014` | 更新应用公开资料修订草稿 | `ACCEPTED` | [UC-APP-014-update-draft-application-profile-revision.md](use-cases/UC-APP-014-update-draft-application-profile-revision.md) | — | — |
 | `UC-APP-015` | 提交应用公开资料修订审核 | `ACCEPTED` | [UC-APP-015-submit-application-profile-revision-review.md](use-cases/UC-APP-015-submit-application-profile-revision-review.md) | — | — |
-| `UC-APP-016` | 审核应用公开资料修订 | `PROPOSED` | [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md) | — | — |
+| `UC-APP-016` | 审核应用公开资料修订 | `ACCEPTED` | [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md) | — | — |
 
 ## Business Rules
 

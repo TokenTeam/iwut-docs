@@ -38,12 +38,12 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-010](../use-cases/UC-APP-010-remove-application-tester.md) | `ACCEPTED` | `COMPLETE` | 精确 episode 移除、不可变审计、幂等无 Clock、共享写栅栏与人数统计、500/INTERNAL 安全告警、API/Wire、真实并发/回滚/HTTP/gRPC E2E | —（当前后端工作包；列表查询、前端与生产 Gateway 独立交付） |
 | [UC-APP-011](../use-cases/UC-APP-011-revoke-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | 精确链接 MANUAL 撤销、无 Clock 幂等、ROTATED 历史保护、写栅栏、500/INTERNAL 安全告警、API/Wire、真实 MongoDB 并发及 HTTP/gRPC E2E | —（当前后端工作包；前端和生产 Gateway 独立交付） |
 | [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `COMPLETE` | Catalog Domain/UseCase、只读 MongoDB snapshot、ACTIVE Tester 授权、exact-major 解析、批准事实校验、HTTP/gRPC/Wire、真实并发与 E2E；服务 `95f3feb`、API `acfab91` | —（当前后端范围；前端宿主和生产认证链路独立交付） |
-
 | [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、严格 NFC、0011 migration、事务/指针/序号、HTTP/gRPC/Wire 与完整 backend 验收；服务 `d121d4e`、API `219419b` | —（当前后端范围） |
 | [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（015已闭合真实编辑/提交双命令竞争） |
 | [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（当前后端范围；审核决定、资料查询、前端与生产Gateway独立交付） |
+| [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `IN_PROGRESS` | [依赖检查](UC-APP-016-readiness.md)与首版策略确认、实现契约、生成 brief | Domain/事务/迁移/API/完整验收；Auth 正式资料权限授予与签发独立交付 |
 
-本轮 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成。代码仓库 `AGENTS.md` 保留最后交付的 UC015 范围与 [UC-APP-015 brief](../briefs/UC-APP-015.md) 引用；当前没有新的实现工作包，UC016 尚未启动。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成。当前工作包为 UC016，设计输入为 [UC-APP-016 brief](../briefs/UC-APP-016.md)。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 

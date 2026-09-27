@@ -629,7 +629,7 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 5. 写请求 message 只包含 `name`，不包含身份字段（`authId`、`developer_status`）、服务端字段（`id`、`adminId`、`createdAt`）或持久化技术字段。
 6. 响应 message 不包含 `nameKey`、`nextVersionSequence`、`nextProfileRevisionSequence` 或其它内部技术字段。
 7. 审核决定的外部/内部路径与上述 UC-APP-005 映射精确一致，gRPC full method 使用同一生成 service。
-8. 审核决定 request body 只包含 `outcome`、`expected_policy_version`、`confirmed_check_ids`、`reason`，不包含 `auth_id`、`permissions`、`developer_status`、`decided_by`、`decided_at`、`approval_validation` 或最终状态。
+8. UC-APP-005 审核决定 request body 只包含 `outcome`、`expected_policy_version`、`confirmed_check_ids`、`reason`，不包含 `auth_id`、`permissions`、`developer_status`、`decided_by`、`decided_at`、`approval_validation` 或最终状态。
 
 外部路径可以作为 contract constant / fixture 存在于测试中，但它必须与内部路径、前缀和 gRPC method 在同一测试里被自动验证，任何一侧漂移都必须让测试失败。
 
@@ -722,5 +722,5 @@ Provider 与 Consumer 至少共同验证：
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 498 | `5db0577b6aed` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
-| `platform/contracts/app-center-api-routing.md` | 67 | `2595342af7cd` |
+| `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 91 | `cab448326f29` |
