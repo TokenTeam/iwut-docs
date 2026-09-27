@@ -87,3 +87,10 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 UC-APP-001 和 UC-APP-002 已进入 `ACCEPTED`，其业务设计是当前实现的权威依据；二者的实现覆盖均为 `CORE_COMPLETE`，不表示 Transport、进程组装与端到端链路已经完成。UC-APP-003 至 UC-APP-016 仍处于 `PROPOSED`。
 
 后续用例可以修改当前模型，不维持尚未对外承诺的兼容性。
+
+## OAuth / OIDC 设计（2026-09-27，PROPOSED）
+
+整体顺序、现有能力和交付门禁见 [OAuth/OIDC 工作包总览](../auth-center/design-notes/oauth-oidc-delivery-plan.md)。以下条目尚未接受或实现，不改变已启用接口。
+
+- [UC-APP-018：管理应用 OAuth Client](use-cases/UC-APP-018-manage-oauth-client.md)。
+- [UC-APP-019：为 Auth 解析 OAuth 应用授权上下文](use-cases/UC-APP-019-resolve-oauth-authorization-context.md)。

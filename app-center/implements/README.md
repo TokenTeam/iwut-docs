@@ -229,3 +229,12 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - 最终 `make check-auth-app` 22/22通过，报告为服务工作树 `.artifacts/verification/20260927T023242Z-hs0ev8iq/report.json`，`changed_sources=[]`。Mongo race439.604s、真实HTTP/gRPC E2E59.976s、真实Auth进程回归3.184s。报告记录提交前服务 `3a87a0f` / API `a0c158c` 的dirty来源；提交前指纹与报告完全一致，提交后逐文件内容校验保持一致。
 - 首轮全量验收发现0013 schema 使用多键无序map，造成fresh/sequential的BSON字段顺序不同；已改为有序BSON并新增递归schema及重复编码一致性测试。定向真实迁移验证后完整重跑通过，首轮失败报告不作为验收证据。独立最终审查未发现剩余问题。
 - Auth 正式 `app.profile.review` 授予/签发仍单独交付；现有真实Auth回归不证明该新增权限的生产链路已可用。资料管理查询、前端、生产Gateway与后续UC未扩展。本次验收后只记录提交和完成状态，未再改变服务/API内容。
+
+## OAuth / OIDC 后续工作包
+
+以下只完成设计，均未启动实现；既有实现完成记录不包含这些能力。
+
+| Use Case | 设计状态 | 实现状态 | 主要交付 |
+| --- | --- | --- | --- |
+| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `PROPOSED` | `NOT_STARTED` | 管理应用 OAuth Client |
+| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `PROPOSED` | `NOT_STARTED` | 为 Auth 解析 OAuth 应用授权上下文 |

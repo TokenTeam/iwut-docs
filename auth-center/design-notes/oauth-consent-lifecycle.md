@@ -1,6 +1,8 @@
 # 应用登录、用户 Scope 授权与撤销：设计讨论草案
 
-状态：`PROPOSED` — 非权威的讨论材料；尚未分配 UC/BR、接受协议或启动实现。
+状态：`SUPERSEDED` — 保留讨论过程，非权威；下文的待定项和建议不再代表最新设计。
+
+2026-09-27：用户选择 OIDC、client secret 与 PKCE 接入，并要求 Traefik 入口鉴权。新 PROPOSED 用例与契约已建立，见 [工作包总览](oauth-oidc-delivery-plan.md)。尤其 subject 改为标准 OIDC sector 语义，不能沿用下文“按 Application 隔离”的候选建议；正式规则以新 UC 和契约为准。尚未接受或启动实现。
 
 ## 本轮优先级
 

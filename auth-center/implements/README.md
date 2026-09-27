@@ -164,3 +164,16 @@ UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分�
 用户要求为 Developer 增加自取公开 ID。UC013 保持 ACCEPTED，增加 BR-DEV-011/012 及共享协议字段，重新生成 brief；实现从原 COMPLETE 回到 IN_PROGRESS。修正基线为 Auth 68046e7/API 9bcddc3，要求原子唯一占用、同名幂等、禁止改名及历史 APPROVED 一次补设，不改变 App UUID、adminId 或 JWS，也不在此交付公开名称路由。
 
 `implement_uc013` 已确认恢复工作，按文档提交 `68f4626` 在原 Auth/API 分支修正。要求完成 check、race、真实 Mongo 并发/故障/索引升级、生产 HTTP/gRPC 与实际 App 回归；新增 handle 能力尚未声明实现完成。
+
+## OAuth / OIDC 后续工作包
+
+以下只完成设计，均未启动实现；既有实现完成记录不包含这些能力。
+
+| Use Case | 设计状态 | 实现状态 | 主要交付 |
+| --- | --- | --- | --- |
+| [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) | `PROPOSED` | `NOT_STARTED` | 用户确认应用授权并签发授权码 |
+| [UC-AUTH-015](../use-cases/UC-AUTH-015-exchange-authorization-code.md) | `PROPOSED` | `NOT_STARTED` | 兑换授权码并签发 OIDC 凭据 |
+| [UC-AUTH-016](../use-cases/UC-AUTH-016-refresh-application-tokens.md) | `PROPOSED` | `NOT_STARTED` | 刷新应用访问凭据 |
+| [UC-AUTH-017](../use-cases/UC-AUTH-017-get-oidc-user-info.md) | `PROPOSED` | `NOT_STARTED` | 读取 OIDC 用户信息 |
+| [UC-AUTH-018](../use-cases/UC-AUTH-018-revoke-application-authorization.md) | `PROPOSED` | `NOT_STARTED` | 查看及收回本人应用授权 |
+| [UC-AUTH-019](../use-cases/UC-AUTH-019-issue-delegation-context.md) | `PROPOSED` | `NOT_STARTED` | 校验应用访问凭据并签发可信委托上下文 |

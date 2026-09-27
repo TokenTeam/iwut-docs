@@ -4,7 +4,7 @@
 
 ## 当前设计优先级（2026-09-27）
 
-用户决定先推进应用登录、用户 scope 授权和收回，Scope Catalog 写入管理暂缓。候选用例、信任边界与待定项见 [OAuth 授权闭环讨论草案](design-notes/oauth-consent-lifecycle.md)。接入场景和具体协议尚未接受，Gateway OAUTH2 保持未启用；低频目录管理不影响先设计授权闭环。
+用户决定先推进 OIDC 登录、用户 scope 授权和收回，支持 PUBLIC_PKCE 与 CONFIDENTIAL_SECRET。已建立 Auth014–019、App018–019、Gateway002 的 PROPOSED 设计，见 [工作包总览](design-notes/oauth-oidc-delivery-plan.md)。Gateway OAUTH2 仍未启用；生产 Catalog 初始装载、官方门户、资源委托验证及联合测试属于明确交付依赖，在线 Catalog 管理后移。TEST 之外的正式运行资格、原生无感浏览器 SSO 桥和动态资料 scope 仍需后续设计。
 
 ## Scope Catalog 后续写侧
 

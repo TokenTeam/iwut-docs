@@ -68,3 +68,12 @@ Auth HTTP/JSON 的路径、ProtoJSON 与部署边界见 [Auth API 路由](contra
 邮箱登录与本机设备授权的独立协议见 [邮箱登录 v1](contracts/auth-email-login-v1.md)，向量校验命令为 `tools/auth_email_login_vectors.py --check`；与邮箱注册保持用途隔离。
 
 Developer 自助申请的有效 Session 接口、nullable 状态及 HTTP 路由见 [Developer 自助申请协议 v1](contracts/auth-developer-application-v1.md)；不改变 UC002 内部目录或既有 JWS 格式。
+
+## OAuth / OIDC 新设计
+
+以下契约均为 PROPOSED，当前实现尚未启用：
+
+- [OAuth/OIDC 接入协议 v1](contracts/oauth-oidc-v1.md)：两种 client 配置、标准端点、门户、token 与 subject。
+- [App OAuth Client 提供方契约 v1](contracts/app-oauth-client-v1.md)：应用管理员管理接口、Auth 内部配置/secret 验证/授权上下文接口。
+- [OAuth 委托上下文与 Traefik v1](contracts/oauth-delegation-v1.md)：opaque access token 在线校验、专用 JWS、路由与三协议入口。
+- [工作包与依赖总览](../auth-center/design-notes/oauth-oidc-delivery-plan.md)：Auth 014–019、App 018–019、Gateway 002；不覆盖已接受的 Session/USER 契约。

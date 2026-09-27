@@ -8,7 +8,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-014` |
+| Use Case / Auth Center | `UC-AUTH-020` |
+| Business Rule / OAuth Authorization | `BR-OAU-021` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
 | Business Rule / Developer Status | `BR-DEV-013` |
@@ -36,6 +37,12 @@
 | `UC-AUTH-011` | 设置并激活邮箱 | `ACCEPTED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 无 Session 验证后创建账号，有效 Session 绑定/更换；已有账号邮箱登录独立交付。 |
 | `UC-AUTH-012` | 使用邮箱登录 | `ACCEPTED` | [UC-AUTH-012-login-with-email.md](use-cases/UC-AUTH-012-login-with-email.md) | — | 邮箱验证码授权本机设备，回到原账号并建立 Session；不自动注册。 |
 | `UC-AUTH-013` | 申请 Developer | `ACCEPTED` | [UC-AUTH-013-apply-for-developer.md](use-cases/UC-AUTH-013-apply-for-developer.md) | — | 当前激活邮箱及可用邮箱登录为前提，自助开通 APPROVED；不增加人工资格审核。 |
+| `UC-AUTH-014` | 用户确认应用授权并签发授权码 | `PROPOSED` | [UC-AUTH-014](use-cases/UC-AUTH-014-authorize-application.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-015` | 兑换授权码并签发 OIDC 凭据 | `PROPOSED` | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-016` | 刷新应用访问凭据 | `PROPOSED` | [UC-AUTH-016](use-cases/UC-AUTH-016-refresh-application-tokens.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-017` | 读取 OIDC 用户信息 | `PROPOSED` | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-018` | 查看及收回本人应用授权 | `PROPOSED` | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `PROPOSED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
 
 ## Business Rules
 
@@ -138,7 +145,7 @@
 
 ## 维护规则
 
-- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML-NNN`。
+- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU-NNN`。
 - `UPF` 表示 User Profile，覆盖用户资料字段定义与资料编辑；不复用 App Center 的 `PRF` 编号空间。
 - `REG` 表示用户创建及初始关联，`LGN` 表示登录、Session 与设备凭据撤销规则。
 - `EML` 表示邮箱绑定与激活；邮箱认证用例不得复用绑定挑战。
@@ -170,3 +177,28 @@
 | `BR-EML-007` | 查询与占用披露边界 | Query / Privacy | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-007) | — | — |
 | `BR-EML-008` | 恢复与 Developer 开通边界 | Boundary / Recovery | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-008) | — | — |
 | `BR-EML-009` | 邮箱注册的原子创建 | Registration / Atomicity | [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-009) | — | — |
+
+### OAuth Authorization (`BR-OAU`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-OAU-001` | 授权来源与运行资格 | Authorization / Boundary | [UC-AUTH-014](use-cases/UC-AUTH-014-authorize-application.md#br-oau-001) | — | — |
+| `BR-OAU-002` | 显式同意与最小授权 | Authorization / Boundary | [UC-AUTH-014](use-cases/UC-AUTH-014-authorize-application.md#br-oau-002) | — | — |
+| `BR-OAU-003` | 交互和授权码原子性 | Authorization / Boundary | [UC-AUTH-014](use-cases/UC-AUTH-014-authorize-application.md#br-oau-003) | — | — |
+| `BR-OAU-004` | 门户与撤销语义隔离 | Authorization / Boundary | [UC-AUTH-014](use-cases/UC-AUTH-014-authorize-application.md#br-oau-004) | — | — |
+| `BR-OAU-005` | 客户端认证与证明不可降级 | Authorization / Boundary | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-005) | — | — |
+| `BR-OAU-006` | 授权码一次性兑换与重放处置 | Authorization / Boundary | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-006) | — | — |
+| `BR-OAU-007` | 独立凭据与有界权限 | Authorization / Boundary | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-007) | — | — |
+| `BR-OAU-008` | 签发一致性与故障关闭 | Authorization / Boundary | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-008) | — | — |
+| `BR-OAU-009` | 离线访问须单独同意 | Authorization / Boundary | [UC-AUTH-016](use-cases/UC-AUTH-016-refresh-application-tokens.md#br-oau-009) | — | — |
+| `BR-OAU-010` | 旋转重放与并发边界 | Authorization / Boundary | [UC-AUTH-016](use-cases/UC-AUTH-016-refresh-application-tokens.md#br-oau-010) | — | — |
+| `BR-OAU-011` | 刷新不得扩权或复活 | Authorization / Boundary | [UC-AUTH-016](use-cases/UC-AUTH-016-refresh-application-tokens.md#br-oau-011) | — | — |
+| `BR-OAU-012` | UserInfo 在线授权与 subject 一致性 | Authorization / Boundary | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md#br-oau-012) | — | — |
+| `BR-OAU-013` | 最小资料披露 | Authorization / Boundary | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md#br-oau-013) | — | — |
+| `BR-OAU-014` | 资料读取的撤销与故障语义 | Authorization / Boundary | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md#br-oau-014) | — | — |
+| `BR-OAU-015` | 本人查询和范围撤销 | Authorization / Boundary | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md#br-oau-015) | — | — |
+| `BR-OAU-016` | 撤销版本和重授隔离 | Authorization / Boundary | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md#br-oau-016) | — | — |
+| `BR-OAU-017` | 应用 token 撤销与平台登录分离 | Authorization / Boundary | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md#br-oau-017) | — | — |
+| `BR-OAU-018` | 服务调用者和用户授权双重门禁 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-018) | — | — |
+| `BR-OAU-019` | 路由许可与委托身份隔离 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-019) | — | — |
+| `BR-OAU-020` | 签发撤销一致性与在线依赖 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-020) | — | — |

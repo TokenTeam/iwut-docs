@@ -28,7 +28,7 @@
 见[配套查询契约](query-contracts/user-profile-editing.md)。可信身份签发由 UC-AUTH-010 定义，
 Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与本机设备恢复、Developer 自助申请
 分别见已接受的 UC-AUTH-011/012/013；Scope 管理后台、Developer 暂停/恢复、旧设备迁移、
-第三方应用资料开放和 consent 仍属于后续独立用例。
+第三方应用 OIDC/consent 已有下方 PROPOSED 用例；动态资料开放仍需独立设计。
 
 创建、登录和两项撤销用例已接受，设备签名、关联声明与 Session/RPC 载体统一引用
 [App 设备认证与 Session v1](../platform/contracts/auth-device-session-v1.md)。运行参数及存储原子性由对应 UC 定义。
@@ -54,7 +54,7 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 文档入口
 
-- [应用登录、Scope 授权与撤销讨论草案](design-notes/oauth-consent-lifecycle.md)：本轮优先设计方向，Catalog 写入管理后移；接入场景及协议待确认，尚未接受或分配新 UC。
+- [应用登录、Scope 授权与撤销讨论草案](design-notes/oauth-consent-lifecycle.md)：历史讨论材料；本轮已分配 UC014–019 与 OIDC 契约，见下方工作包总览，均尚未接受。
 
 - [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md)：邮箱验证码登录与本机设备授权已接受；[brief](briefs/UC-AUTH-012.md)，实现集成依赖 UC011。
 - [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md)：Developer 自助申请与本人资格查询已接受；[实现 brief](briefs/UC-AUTH-013.md)。
@@ -87,3 +87,14 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 设计使用 `PROPOSED`、`ACCEPTED`、`DEPRECATED`、`SUPERSEDED`；实现覆盖使用
 `NOT_STARTED`、`IN_PROGRESS`、`CORE_COMPLETE`、`COMPLETE`。设计状态和实现状态彼此独立。
+
+## OAuth / OIDC 设计（2026-09-27，PROPOSED）
+
+整体顺序、现有能力和交付门禁见 [OAuth/OIDC 工作包总览](design-notes/oauth-oidc-delivery-plan.md)。以下条目尚未接受或实现，不改变已启用接口。
+
+- [UC-AUTH-014：用户确认应用授权并签发授权码](use-cases/UC-AUTH-014-authorize-application.md)。
+- [UC-AUTH-015：兑换授权码并签发 OIDC 凭据](use-cases/UC-AUTH-015-exchange-authorization-code.md)。
+- [UC-AUTH-016：刷新应用访问凭据](use-cases/UC-AUTH-016-refresh-application-tokens.md)。
+- [UC-AUTH-017：读取 OIDC 用户信息](use-cases/UC-AUTH-017-get-oidc-user-info.md)。
+- [UC-AUTH-018：查看及收回本人应用授权](use-cases/UC-AUTH-018-revoke-application-authorization.md)。
+- [UC-AUTH-019：校验应用访问凭据并签发可信委托上下文](use-cases/UC-AUTH-019-issue-delegation-context.md)。
