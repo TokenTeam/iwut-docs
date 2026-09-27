@@ -60,7 +60,7 @@ Auth 继续拥有身份、Developer 资格、Reviewer 权限和 Scope Catalog；
 管理员分别准备两类内容：
 
 - `ApplicationProfileRevision`：面向目录展示的名称、简介和可空 icon 字符串；icon 暂不具有受控资产语义。
-- `ApplicationVersion`：入口 URL、RPC API 兼容范围、宿主能力要求、scopes，以及按 OAuth client type 分组的 redirect URIs。
+- `ApplicationVersion`：入口 URL、RPC API 兼容范围、宿主能力要求、scopes，以及依附 Version 的 pkce/confidential redirect URI 配置。
 
 两类内容各自采用草稿修订和审核快照。公开资料修改不制造虚假的运行版本，运行版本发布也不隐式改变公开资料。
 
@@ -143,7 +143,7 @@ Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确�
 | Tester Management | 是 | 加入链接、加入、移除、撤销链接和 test 目标解析 |
 | Runtime Publication | 是 | 按 RPC API major 的 test、grey、stable、回退和停止分发 |
 | Catalog & Resolution | 是 | 候选应用聚合、Filter 规则分发、客户端展示过滤和服务端发布目标解析 |
-| OAuth/OIDC Application Integration | 扩展纳入 | 独立 clientId、PUBLIC/CONFIDENTIAL 类型、secret 生命周期，以及从批准 Version 解析回调和 scopes |
+| OAuth/OIDC Application Integration | 扩展纳入 | Application 级稳定 PUBLIC/CONFIDENTIAL clientId、独立 secret credential，以及从批准 Version 解析回调和 scopes |
 | Application Creation Quota | 是 | 保留当前按 Developer 管理的可调整配额方向 |
 
 这里的“读取”包含开发者管理查询、Reviewer 待办查询和用户目录查询，但它们可以采用较短的 Query Contract，不需要全部扩写成与命令相同体量的 UC。

@@ -234,9 +234,9 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 以下只完成设计，均未启动实现；既有实现完成记录不包含这些能力。
 
-在 UC-APP-018/019 开工前，既有 UC-APP-002/003/004/005/007 还需要一个串行的 OAuth Version 扩展工作包：加入 `oauthRedirects` 的 Domain/API/Mongo 字段与历史空数组 migration，审核 snapshot 深拷贝和校验，`app-version-review-v2`，以及发布时与已有 client sector 的一致性检查。原有能力的 `COMPLETE/CORE_COMPLETE` 记录继续描述当时范围，不表示这些 OAuth 扩展已经实现。
+OAuth/OIDC 设计采用三种生命周期，当前均未实现：Application 级 `ApplicationOAuthRegistration` 保存稳定 PUBLIC/CONFIDENTIAL client identity；独立 `OAuthClientCredential` 保存可轮换 secret 与 credentialRevision；`ApplicationVersionOAuthConfig` 以 `{pkceRedirectUris, confidentialRedirectUris}` 一对一依附 Version。既有 UC-APP-002/003/004/005/007 需要加入配置的 Domain/API/Mongo 与历史双空数组 migration、同事务/revision 编辑、审核 snapshot 深拷贝和校验、`app-version-review-v2`，以及发布时非空数组对应 identity/credential 的存在性检查。原有能力的 `COMPLETE/CORE_COMPLETE` 记录继续描述当时范围，不表示这些 OAuth 扩展已经实现。
 
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
-| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `PROPOSED` | `NOT_STARTED` | 管理应用 OAuth Client |
-| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `PROPOSED` | `NOT_STARTED` | 为 Auth 解析 OAuth 应用授权上下文 |
+| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `PROPOSED` | `NOT_STARTED` | 管理稳定 OAuth registration 与独立 credential |
+| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `PROPOSED` | `NOT_STARTED` | 以 clientId+channel+rpcApiMajor 为 Auth 解析 OAuth 应用授权上下文 |

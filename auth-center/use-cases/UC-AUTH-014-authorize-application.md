@@ -8,16 +8,16 @@
 
 ## 输入与输出
 
-标准 authorize 参数、门户 Session/确认命令及 HTTP 线格式见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。服务端 interaction 记录 clientId、精确 redirectUri、state、nonce、PKCE、请求 scopes、用户绑定、App 资格版本、展示时的 grant revision（不存在为 0）和到期时间。匿名创建交互时 authId 为空，门户完成有效登录后只能绑定一次；换账号必须创建新交互。
+标准 authorize 参数、门户 Session/确认命令及 HTTP 线格式见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。服务端 interaction 记录 clientId、channel、rpcApiMajor、精确 redirectUri、state、nonce、PKCE、请求 scopes、用户绑定、App 运行 tuple、展示时的 grant revision（不存在为 0）和到期时间。匿名创建交互时 authId 为空，门户完成有效登录后只能绑定一次；换账号必须创建新交互。
 
 输出为官方授权页或带 code/state/iss 的回调；拒绝返回 access_denied。服务端内部生成 grantId、revision，不在回调 URL 中公开内部 authId 或 Session。
 
 ## 主流程
 
-1. 读取 client 元数据，调用 App 的 `ResolveClientRuntimeConfiguration` 取得当前批准 Version 的 redirect URIs、scopes 和 runtime tuple；先对 redirect_uri 做完整字符串精确匹配，再校验其余协议参数并建立限时 interaction。未知或非法回调只显示 Auth 本地错误，不得重定向。
+1. 读取稳定 client 元数据，以请求中的 channel/rpcApiMajor 调用 App 的 `ResolveClientRuntimeConfiguration`，取得当前批准 Version 的 redirect URIs、scopes 和 runtime tuple；先对 redirect_uri 做完整字符串精确匹配，再校验其余协议参数并建立限时 interaction。未知或非法回调只显示 Auth 本地错误，不得重定向。
 2. 官方门户确认当前登录用户；Auth 使用预登录 runtime tuple 调用 `ResolveAuthorizationContext`，取得 Tester 资格并确认运行配置未变化，再从自己的 Catalog 取得 scope 含义和映射。
 3. 展示应用及开发者可核实信息、必需/可选权限、已有授权与新增权限。用户可以拒绝整个申请，也可以不选 optional 项。
-4. 确认时重新检查 Session、App 授权上下文及目录，并逐字段比较 configRevision、versionId、publicationRevision、testerMembershipId 和 adminAuthId；权限/资格变化时要求重新开始或重新展示，不能静默提交旧页面。
+4. 确认时重新检查 Session、App 授权上下文及目录，并逐字段比较 registrationRevision、versionId、publicationRevision、testerMembershipId 和 adminAuthId；权限/资格变化时要求重新开始或重新展示，不能静默提交旧页面。
 5. 原子确认 interaction、保存 grant 及审计、创建一次性 code。仅确定提交后回调；未知提交结果不重放旧 code，重新发起授权。
 
 ## 业务规则
@@ -32,12 +32,14 @@
 
 令 D=当前批准版本 requiredScopes∪optionalScopes，R=本次请求 scopes，S=用户本次选择；必须 requiredScopes⊆R⊆D，S 包含 requiredScopes 且 S⊆R。登录必需 openid；不允许用“不选 optional”偷增其他权限。无法接受必需权限时用户仍可拒绝全部。
 
-Grant 按 (authId,clientId) 唯一，保存 grantedScopes、revision、status、consentContext（本次确认的 App 资格版本）。已有相同或更大授权且 consentContext 仍一致时可在 prompt 允许时复用；新增权限和 offline_access 按各自规则显式同意。首次为 S，新增授权取既有集合与 S 的并集，再收缩到当前 D；实际 code 只绑定本次 S，不携带全部历史 grant。集合或 consentContext 改变递增 revision，使旧凭据重新验证失败；两者相同的重复同意不无故增版本。资格版本变化必须重新展示确认，不能只按 scope 名称相同静默复用。应用声明/升级不会自行新增 grant。已有授权是否撤销由 UC-AUTH-018 决定。
+Grant 按 (authId,clientId) 唯一，保存 grantedScopes、revision 和 status；Version/runtime tuple 只记录为最近一次 consent 审计，不构成 grant 身份。首次为 S；以后先把既有集合收缩为 `grantedScopes∩D`，相同或更小范围可在 prompt 允许时复用，新增权限和 offline_access 按各自规则显式同意，再把本次 S 合并。实际 code 只绑定本次 S，不携带全部历史 grant。
+
+grantedScopes 集合或 status 改变时递增 grant revision；单纯 Version、Publication 或 secret credential revision 变化不递增 grant revision，也不使旧 grant 自动失效。应用升级不会自行新增 grant；若 D 缩小，超出的授权在下一安全边界收缩，若 D 扩大，新增项仍需 consent。已有授权是否撤销由 UC-AUTH-018 决定。
 
 <a id="br-oau-003"></a>
 ### BR-OAU-003：交互和授权码原子性
 
-确认必须绑定当前 Session 的用户、interaction、CSRF 及展示版本；同一 interaction 只能同意或拒绝一次。code 保存用户、client、grant revision、完整 App 资格 tuple、从受审核回调集合精确匹配的 redirect URI、scope、nonce、auth_time、PKCE 和到期时间，存摘要不存原值。
+确认必须绑定当前 Session 的用户、interaction、CSRF 及展示版本；同一 interaction 只能同意或拒绝一次。code 保存用户、client、channel/rpcApiMajor、grant revision、完整 App 资格 tuple、从受审核回调集合精确匹配的 redirect URI、scope、nonce、auth_time、PKCE 和到期时间，存摘要不存原值。grant 可跨兼容 Version 延续，不允许 code 脱离其精确 tuple 使用。
 
 同意时 grant、code、interaction 状态和不可变审计同一 Mongo 事务提交；与本人撤销同一 grant 的写入栅栏串行确认。撤销后旧页面不得悄悄重授，必须刷新交互并显式确认。无效请求不改变既有 grant。
 
@@ -53,6 +55,7 @@ Grant 按 (authId,clientId) 唯一，保存 grantedScopes、revision、status、
 - 必需权限不能静默省略，可选权限未勾选不签入 code；openid 不自动附带 email。
 - prompt=none 无登录/新权限按协议报错；已有同范围 grant 可复用。
 - 两次确认、确认与撤销并发、App 发布变化、事务失败均不多发码或复活已撤回授权。
+- 同一 clientId 升级到新 Version 时既有同范围 grant 可延续；新增 scope 必须重新 consent，旧 interaction/code 不能改绑新 redirect。
 
 ## 依赖与实现边界
 

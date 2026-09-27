@@ -98,7 +98,7 @@ UpdateDraftApplicationVersionCommand {
   requiredCapabilities: []string
   requiredScopes: []string
   optionalScopes: []string
-  oauthRedirects: []OAuthRedirectGroup
+  oauthRedirects: OAuthRedirectConfiguration
 }
 ```
 
@@ -188,11 +188,11 @@ revision 属于整个 ApplicationVersion，而不是只属于草稿内容；UC-A
 <a id="br-ver-014"></a>
 ### BR-VER-014：集合规范化
 
-requiredCapabilities、requiredScopes、optionalScopes 和 oauthRedirects 在业务上都是集合；oauthRedirects 内部的 redirectUris 也是集合：
+requiredCapabilities、requiredScopes、optionalScopes 以及 oauthRedirects 的两个 URI 数组在业务上都是集合：
 
 - 输入包含重复项时仍然拒绝，而不是静默去重。
 - requiredScopes 与 optionalScopes 不能交叉。
-- 校验通过后分别按 BR-VER-018 规定的 clientType 顺序或 Unicode code point 字典序排序再保存。
+- 校验通过后分别按 Unicode code point 字典序排序再保存；oauthRedirects 的两个具名数组不因输入顺序互换。
 - 集合顺序变化不构成业务修改。
 
 <a id="br-ver-015"></a>
@@ -262,7 +262,7 @@ Repository 必须区分：NotFound、NotAdmin、NotDraft、RevisionConflict、Ve
 
 ## 数据模型变化
 
-UC-APP-003 不增加 collection。`application_versions` 增加三个非空字段；UC-APP-002 创建时同时初始化。
+UC-APP-003 不增加独立生命周期。Repository 必须在同一事务中以 Version revision 完整替换 `application_version_oauth_configs` 中的依附配置；配置没有独立 revision。`application_versions` 的三个审计字段由 UC-APP-002 创建时初始化。
 
 | Key | desc | type | format | unique? | nullable? |
 | --- | --- | --- | --- | --- | --- |
@@ -297,10 +297,10 @@ If-Match: "3"
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
   "optionalScopes": ["schedule.read"],
-  "oauthRedirects": [{
-    "clientType": "PUBLIC_PKCE",
-    "redirectUris": ["https://example.edu/oauth/callback"]
-  }]
+  "oauthRedirects": {
+    "pkceRedirectUris": ["https://example.edu/oauth/callback"],
+    "confidentialRedirectUris": []
+  }
 }
 ```
 
@@ -366,7 +366,7 @@ UC-APP-004：提交 ApplicationVersion 审核
 
 ## 迁移说明
 
-既有实现需要与 UC-APP-002 同步加入 oauthRedirects 的完整替换、no-op 比较、API 和持久化支持；在此之前不能把 OAuth 扩展视为已交付。新入口继续使用完整替换和 revision。
+既有实现需要与 UC-APP-002 同步加入双数组 oauthRedirects 的完整替换、no-op 比较、API 和持久化支持；Version 与其依附配置必须共用事务和 revision，在此之前不能把 OAuth 扩展视为已交付。新入口继续使用完整替换和 revision。
 
 ## 变更记录
 
@@ -374,3 +374,4 @@ UC-APP-004：提交 ApplicationVersion 审核
 - 2026-09-15：UC-APP-004 明确 Version 生命周期迁移也增加 revision；ScopeCatalog 端口返回提交审计所需的 catalog revision。
 - 2026-09-15：UC-APP-006 明确 REJECTED 不能直接编辑，必须先显式恢复为 DRAFT。
 - 2026-09-27：oauthRedirects 加入完整替换内容并复用 BR-VER-018。
+- 2026-09-27：oauthRedirects 改为 Version 依附的 pkce/confidential 双数组配置。

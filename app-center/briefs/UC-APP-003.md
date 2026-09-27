@@ -103,7 +103,7 @@ UpdateDraftApplicationVersionCommand {
   requiredCapabilities: []string
   requiredScopes: []string
   optionalScopes: []string
-  oauthRedirects: []OAuthRedirectGroup
+  oauthRedirects: OAuthRedirectConfiguration
 }
 ```
 
@@ -198,7 +198,7 @@ Repository 必须区分：NotFound、NotAdmin、NotDraft、RevisionConflict、Ve
 
 ### 数据模型变化
 
-UC-APP-003 不增加 collection。`application_versions` 增加三个非空字段；UC-APP-002 创建时同时初始化。
+UC-APP-003 不增加独立生命周期。Repository 必须在同一事务中以 Version revision 完整替换 `application_version_oauth_configs` 中的依附配置；配置没有独立 revision。`application_versions` 的三个审计字段由 UC-APP-002 创建时初始化。
 
 | Key | desc | type | format | unique? | nullable? |
 | --- | --- | --- | --- | --- | --- |
@@ -288,11 +288,11 @@ revision 属于整个 ApplicationVersion，而不是只属于草稿内容；UC-A
 <!-- 权威位置: use-cases/UC-APP-003-update-draft-application-version.md#br-ver-014 -->
 ### BR-VER-014：集合规范化
 
-requiredCapabilities、requiredScopes、optionalScopes 和 oauthRedirects 在业务上都是集合；oauthRedirects 内部的 redirectUris 也是集合：
+requiredCapabilities、requiredScopes、optionalScopes 以及 oauthRedirects 的两个 URI 数组在业务上都是集合：
 
 - 输入包含重复项时仍然拒绝，而不是静默去重。
 - requiredScopes 与 optionalScopes 不能交叉。
-- 校验通过后分别按 BR-VER-018 规定的 clientType 顺序或 Unicode code point 字典序排序再保存。
+- 校验通过后分别按 Unicode code point 字典序排序再保存；oauthRedirects 的两个具名数组不因输入顺序互换。
 - 集合顺序变化不构成业务修改。
 
 <!-- 权威位置: use-cases/UC-APP-003-update-draft-application-version.md#br-ver-015 -->
@@ -379,23 +379,24 @@ Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRP
 <!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
 ### BR-VER-018：版本化 OAuth 回调
 
-`oauthRedirects` 是受审核的版本内容，不属于 OAuthClient，也不从 launchUrl 推导。它是 0–2 个回调组组成的非 null 数组：
+`oauthRedirects` 是受审核的版本内容，不属于 client registration，也不从 launchUrl 推导：
 
 ```text
-OAuthRedirectGroup {
-  clientType: PUBLIC_PKCE | CONFIDENTIAL_SECRET
-  redirectUris: []RedirectURI
+OAuthRedirectConfiguration {
+  pkceRedirectUris: []RedirectURI
+  confidentialRedirectUris: []RedirectURI
 }
 ```
 
-- 每种 clientType 至多一组；每组包含 1–10 个不重复 URI。空数组表示该 Version 不提供 OAuth/OIDC 回调。
+- 两个数组都必须存在且非 null，各包含 0–10 个不重复 URI。空数组表示该 Version 不为对应 client type 提供 OAuth/OIDC 回调。
+- 两个数组之间也不得重复；同一个回调不能同时声称由 PUBLIC PKCE 和 CONFIDENTIAL secret client 使用。
 - URI 必须是绝对 HTTPS URL，最多 2048 UTF-8 bytes；禁止 userinfo、fragment、wildcard、IP literal、localhost，以及 [BR-REV-007](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) 固定的 IANA `2026-05-22` special-use 域名或其子域。
 - 禁止预占 OAuth/OIDC 响应参数 `code/state/iss/error/error_description/error_uri`。
-- 同一组的所有 URI 必须使用同一个规范 DNS hostname。hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。其余 URL 部分保存后按完整字符串精确匹配。
-- callback path、query 和 port 可以不同；运行时不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
-- 回调组按 clientType 固定顺序保存，组内 URI 按 Unicode code point 排序。输入顺序不表达业务含义。
+- hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。同一数组可以包含多个 hostname，以支持受审核的环境切换和域名迁移。
+- callback hostname、path、query 和 port 可以不同；运行时始终做完整字符串精确匹配，不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
+- 两个数组分别按 Unicode code point 排序。输入顺序不表达业务含义。
 
-OAuthClient 创建时从当前批准并发布的回调组派生不可变 sector。存在该运行上下文的 client 后，后续发布由 UC-APP-007 检查同 type 回调组的 hostname；改变 hostname 需要新的 clientId。Version 草稿本身可以在 client 创建前存在，因此创建/编辑阶段不依赖 OAuthClient。
+`ApplicationVersionOAuthConfig` 使用独立 collection 保存，但它是 Version 的依附实体：创建、编辑与 Version 使用同一事务和 revision，不能独立修改或删除。client identity 可以在 Version 前后独立登记；两者只在运行解析时按 client type 组合。redirect hostname 变化不重建稳定 clientId。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -445,6 +446,6 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-003-update-draft-application-version.md` | 376 | `b7874248d2c4` |
-| `use-cases/UC-APP-002-create-application-version.md` | 463 | `aed995d52573` |
+| `use-cases/UC-APP-003-update-draft-application-version.md` | 377 | `429ee4761a19` |
+| `use-cases/UC-APP-002-create-application-version.md` | 475 | `1c96b528f65c` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |

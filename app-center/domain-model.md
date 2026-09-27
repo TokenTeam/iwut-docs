@@ -21,8 +21,12 @@ DeveloperApplicationQuota                                      │
          │     └─ 0..1 currentPublishedProfileRevisionId
          ├─ 0..* ApplicationProfileReview (aggregate root, references ProfileRevision)
          ├─ 0..* ApplicationVersion (aggregate root)
+         │     └─ 1 ApplicationVersionOAuthConfig (dependent entity/value)
          ├─ 0..* ApplicationReview (aggregate root, references Version)
-         ├─ 0..* OAuthClient (aggregate root, references published Version at resolution time)
+         ├─ 0..1 ApplicationOAuthRegistration (aggregate root)
+         │     ├─ 0..1 PUBLIC client identity
+         │     ├─ 0..1 CONFIDENTIAL client identity
+         │     └─ 0..1 OAuthClientCredential (separate revision)
          ├─ 0..* ApplicationPublication (aggregate root, one per RPC major)
          │     └─ 0..* ApplicationPublicationHistory
          └─ 1 ApplicationTesterAccess (aggregate root)
@@ -61,19 +65,23 @@ DeveloperApplicationQuota 自身的 `limit` 与 `usedCount` 是配额的唯一�
 ```text
 ApplicationVersion
   identity: versionId + applicationId + sequence
-  content: versionLabel + launchUrl + RpcApiRange + CapabilitySet + ScopeRequest + OAuthRedirectGroups
+  content: versionLabel + launchUrl + RpcApiRange + CapabilitySet + ScopeRequest + OAuthRedirectConfiguration
   lifecycle: reviewStatus + revision + audit
 ```
 
-ApplicationReview 不放在 ApplicationVersion 聚合内部；二者通过 versionId、attempt 和 sourceVersionRevision 建立关系。Version 聚合只保存自己的内容、reviewStatus、revision 与审计事实。
+`ApplicationVersionOAuthConfig` 以 versionId 一对一依附 Version，保存 pkceRedirectUris 与 confidentialRedirectUris。它可以物理拆表，但与 Version 同事务创建/编辑、共用 Version revision、提交后不能独立修改；ApplicationReview snapshot 深拷贝其内容。
+
+ApplicationReview 不放在 ApplicationVersion 聚合内部；二者通过 versionId、attempt 和 sourceVersionRevision 建立关系。Version 聚合保存自己的内容、依附 OAuth 配置、reviewStatus、revision 与审计事实。
 
 ApplicationPublication 只引用 Version，不属于该聚合；发布槽位变化也不改变 Version 的审核状态，参见 [BR-PUB-004](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-004)。
 
-### OAuthClient
+### ApplicationOAuthRegistration 与 OAuthClientCredential
 
-OAuthClient 是独立聚合根，身份为 clientId，保存 applicationId、type、channel、rpcApiMajor、不可变 sector、状态、configRevision 和 confidential secret 摘要。它不保存 redirect URI 或 scopes；这些事实由 exact-major 当前 Publication 指向的批准 ApplicationVersion snapshot 提供。PUBLIC 与 CONFIDENTIAL 使用不同 clientId，分别执行不可降级的安全规则。
+ApplicationOAuthRegistration 是每个 Application 至多一个的聚合根，以 applicationId 为身份。它保存可选 publicClientId/publicStatus、confidentialClientId/confidentialStatus 和 registrationRevision。两个 clientId 都是全局稳定身份，不包含 channel、rpcApiMajor、Version 或 hostname；PUBLIC 与 CONFIDENTIAL 使用不同 clientId，分别执行不可降级的安全规则。
 
-clientId 生命周期独立于 ApplicationVersion，因此切换 Version 或修改同 sector 的回调 path 不需要重建 client；改变回调 hostname 时需要新 clientId。App Center 只提供配置与资格快照，Auth 拥有 consent、code、grant 和 token。
+OAuthClientCredential 只属于 confidentialClientId，保存 secret 摘要、credentialRevision 与 rotatedAt。它使用独立 revision，使常见的 secret 轮换不改变 registration、Version、grant 或发布资格。轮换只影响以后 confidential client authentication。
+
+Registration 不保存 redirect URI 或 scopes；这些事实由当前 Publication 指向的批准 ApplicationVersion snapshot 提供。切换 Version、RPC major 或 redirect hostname 不重建 clientId。App Center 只提供配置与资格快照，Auth 拥有 consent、code、grant 和 token。
 
 ### ApplicationReview
 
@@ -150,7 +158,9 @@ Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生�
 | Application | ApplicationId | Application | 引用当前 adminId；被所有下级聚合引用 |
 | ApplicationVersion | ApplicationVersionId | ApplicationVersion | 属于一个 Application；拥有多个 Review attempt |
 | ApplicationReview | ApplicationReviewId | ApplicationReview | 引用一个 Version；冻结 snapshot 并保存一次性决定 |
-| OAuthClient | ClientId | OAuthClient | 属于一个 Application 和运行上下文；运行时引用当前批准 Version snapshot |
+| ApplicationVersionOAuthConfig | ApplicationVersionId | ApplicationVersion | 一对一依附 Version；与 Version 共用 revision 和审核生命周期 |
+| ApplicationOAuthRegistration | ApplicationId | ApplicationOAuthRegistration | 属于一个 Application；保存两种可选稳定 client identity |
+| OAuthClientCredential | ConfidentialClientId | OAuthClientCredential | 属于 confidential identity；使用独立 credentialRevision |
 | ApplicationProfileRevision | ApplicationProfileRevisionId | ApplicationProfile | 属于一个 Application；可被资料 Review 和当前公开指针引用 |
 | ApplicationProfileReview | ApplicationProfileReviewId | ApplicationProfileReview | 引用一个 ProfileRevision；冻结 snapshot 并保存一次性决定 |
 | ApplicationPublication | ApplicationPublicationId | ApplicationPublication | 对应一个 Application 与一个 RPC major；引用 Version |
@@ -172,7 +182,7 @@ Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生�
 | RpcApiRange | `[min, maxExclusive)` 的宿主 RPC major 兼容范围 |
 | CapabilitySet | 按客户端 RPC 契约命名、由 App Center 本地校验格式、拒绝重复并稳定排序的宿主能力集合；当前没有在线 Catalog |
 | ScopeRequest | requiredScopes 与 optionalScopes 的互斥规范化集合；名称是 Auth Catalog 的不透明 token |
-| OAuthRedirectGroups | 按 PUBLIC_PKCE/CONFIDENTIAL_SECRET 分组、稳定排序并随 Version 审核的精确 HTTPS 回调集合 |
+| OAuthRedirectConfiguration | pkceRedirectUris/confidentialRedirectUris 两个互斥、稳定排序并随 Version 审核的精确 HTTPS 回调集合 |
 | ApplicationVersionReviewSnapshot | 一次版本审核读取的不可变内容 |
 | ApplicationDisplayName、ApplicationDescription | NFC 规范化的公开纯文本 |
 | ProfileContent | 一版完整资料内容；未来可以加入受控 IconAssetId |

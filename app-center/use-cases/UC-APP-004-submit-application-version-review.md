@@ -115,7 +115,7 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
    - reviewStatus 是 `DRAFT`。
    - revision 等于 expectedRevision。
 4. 通过 ScopeCatalog 重新确认 requiredScopes 和 optionalScopes 当前仍允许被新版本申请，并取得本次 Auth catalog revision。
-5. 按 BR-VER-018 重新验证 oauthRedirects 的结构、规范 hostname 和安全限制。
+5. 按 BR-VER-018 重新验证 oauthRedirects 的双数组结构、规范 URL 和安全限制。
 6. 通过 LaunchURLSubmissionPolicy 确认 launchUrl 是当前可提交审核的公网 HTTPS URL。
 7. 生成 UUIDv7 reviewId，并从 Clock 取得 submittedAt。
 8. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
@@ -288,7 +288,7 @@ ApplicationVersionReviewSnapshot {
   requiredCapabilities: []CapabilityName
   requiredScopes: []ScopeName
   optionalScopes: []ScopeName
-  oauthRedirects: []OAuthRedirectGroup
+  oauthRedirects: OAuthRedirectConfiguration
 }
 ```
 
@@ -363,7 +363,7 @@ type ApplicationReviewRepository interface {
 | `snapshot.requiredCapabilities` | 提交时必需宿主能力 | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.requiredScopes` | 提交时必需 scopes | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.optionalScopes` | 提交时可选 scopes | array&lt;string&gt; | 已排序；元素唯一且不与 required 交叉 | no | no |
-| `snapshot.oauthRedirects` | 提交时 OAuth 回调 | array&lt;object&gt; | BR-VER-018；已规范排序 | no | no |
+| `snapshot.oauthRedirects` | 提交时 OAuth 回调 | object | `pkceRedirectUris/confidentialRedirectUris`；BR-VER-018；已规范排序 | no | no |
 | `scopeCatalogRevision` | scope 校验使用的 Auth catalog revision | int64 | Auth 单调递增版本 | no | no |
 | `preflightPolicyVersion` | URL 提交预检规则版本 | string | 稳定策略标识，1–50 ASCII `[A-Za-z0-9._-]` | no | no |
 | `submittedBy` | 实际提交者 | string | opaque authId | no | no |
@@ -421,10 +421,10 @@ Location: /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}
       "requiredCapabilities": ["user.profile.v1"],
       "requiredScopes": ["profile.basic"],
       "optionalScopes": ["schedule.read"],
-      "oauthRedirects": [{
-        "clientType": "PUBLIC_PKCE",
-        "redirectUris": ["https://example.edu/oauth/callback"]
-      }]
+      "oauthRedirects": {
+        "pkceRedirectUris": ["https://example.edu/oauth/callback"],
+        "confidentialRedirectUris": []
+      }
     },
     "scopeCatalogRevision": 17,
     "preflightPolicyVersion": "submit-v1",
@@ -499,7 +499,7 @@ UC-APP-005：审核 ApplicationVersion
 
 ## 迁移说明
 
-既有实现需要 migration 为历史 Review snapshot 回填 `oauthRedirects: []`，并同步 snapshot 深拷贝、schema、API 与测试；完成前不覆盖 OAuth 扩展。旧 Application 的 `AUDITING` 状态和直接改审核状态 API 不保留。
+既有实现需要 migration 为历史 Review snapshot 回填 `oauthRedirects: {pkceRedirectUris: [], confidentialRedirectUris: []}`，并同步 Version 依附配置读取、snapshot 深拷贝、schema、API 与测试；完成前不覆盖 OAuth 扩展。旧 Application 的 `AUDITING` 状态和直接改审核状态 API 不保留。
 
 ## 变更记录
 
@@ -507,3 +507,4 @@ UC-APP-005：审核 ApplicationVersion
 - 2026-09-15：UC-APP-005 引入一次性 decision；UC-APP-004 创建 PENDING Review 时将其初始化为 null。
 - 2026-09-15：UC-APP-006 引入拒绝后的 draftRestoration；UC-APP-004 创建 Review 时将其初始化为 null。
 - 2026-09-27：审核 snapshot 增加 oauthRedirects，并在提交时复查 BR-VER-018。
+- 2026-09-27：审核 snapshot 改为冻结 Version 依附的 pkce/confidential 双数组配置。

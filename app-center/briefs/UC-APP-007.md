@@ -122,7 +122,7 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
 5. 针对 approved Review.snapshot：
    - 通过 ScopeCatalog 确认 scopes 当前仍允许新版本使用，并取得 scopeCatalogRevision。
    - 通过 LaunchURLSubmissionPolicy 重新检查公网 HTTPS URL，并取得 preflightPolicyVersion。
-   - 读取该 application、TEST、rpcApiMajor 下已有 OAuthClients；snapshot 若为某 client type 提供回调组，其规范 hostname 必须等于该 client 的不可变 sector。省略某 type 回调组允许发布，但会使该 type 暂时不可授权。
+   - 读取该 Application 的 OAuth registration。snapshot 的 pkceRedirectUris 非空时必须已经登记 publicClientId；confidentialRedirectUris 非空时必须已经登记 confidentialClientId 及 credential。空数组允许发布，表示该 Version 暂不提供对应 OAuth 接入。
 6. 为新 Publication（若需要）和本次 History 分别生成 UUIDv7，并从 Clock 取得 changedAt。
 7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
    - Publication 不存在时创建 revision=1、testVersionId=versionId 的记录。
@@ -151,7 +151,7 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
 - Scope Catalog 不可用：`ScopeCatalogUnavailable`。
 - URL 不再满足公网 HTTPS 策略：`ApplicationLaunchUrlNotReviewable`。
 - URL 检查依赖不可用：`LaunchUrlInspectionUnavailable`。
-- oauthRedirects 为已有 client type 提供了不同 hostname：`OAuthClientSectorMismatch`。
+- oauthRedirects 非空但对应稳定 client identity 尚未登记：`OAuthClientRegistrationRequired`。
 - ID 生成或持久化失败：内部失败，不产生部分 Publication 或 History。
 
 路径关系不匹配统一按 NotFound 处理，不泄露其他应用的 Version。所有失败都不能改变当前槽位。
@@ -382,7 +382,8 @@ Repository 集成测试：
 - 两个相同 expected revision 的并发替换最多一个成功。
 - 管理员转让、Version revoke 与设置并发时旧条件不能成功。
 - approved Review、snapshot、Version status/revision 的一致性检查生效。
-- 已有 OAuthClient 时，同 type 回调 hostname 改变拒绝；省略该 type 可以发布且运行解析失败关闭。
+- 非空 pkce/confidential 回调缺少对应稳定 identity/credential 时拒绝；空数组可以发布且对应 OAuth 运行解析失败关闭。
+- 同一稳定 clientId 可以发布 hostname 不同的新 Version，运行时只接受当前批准数组中的精确 URI。
 - `(applicationId, rpcApiMajor)` 和 `(publicationId, publicationRevision)` 唯一约束生效。
 - 替换后旧 Version 保持 APPROVED，历史指针仍可审计。
 
@@ -394,7 +395,7 @@ API 测试：
 
 ### 实现依赖与交付边界
 
-- Application、ApplicationVersion 与 ApplicationReview 的前置行为已由 UC-APP-001 至 UC-APP-006 实现；发布从完整 APPROVED decision 和 snapshot 读取资格。OAuthClient 尚不存在时不增加额外条件；UC-APP-018 落地后，发布 adapter 必须加入 sector 一致性查询与最终事务复查。
+- Application、ApplicationVersion 与 ApplicationReview 的前置行为已由 UC-APP-001 至 UC-APP-006 实现；发布从完整 APPROVED decision 和 snapshot 读取资格。UC-APP-018 落地后，发布 adapter 必须加入非空 OAuth 配置的 registration/credential 存在性查询与最终事务复查。
 - 复用现有可信 DeveloperIdentity、Auth Scope Catalog gRPC consumer/有界缓存、DNS-only URL 预检、UUIDv7/Clock 与 Wire；新能力通过自己的 ports 适配，遵守 ADR-003 的能力边界。
 - MongoDB 使用 ADR-004 要求的事务拓扑；现有隔离 replica-set 测试脚本可验证跨 Application、Version、Review、Publication、History 的事务、回滚和并发。最终事务必须以真实写入栅栏或等价机制防止读快照下的管理员转让/审核撤销竞争；不得改变 Application/Version 的业务字段或业务 revision。
 - Auth 的 MongoDB 权威 Scope Catalog 尚未交付，不阻止 App Center consumer 实现及隔离 E2E，但在权威目录和完整双服务验证闭合前，不将本 UC 标为生产依赖全部闭合的 COMPLETE。
@@ -402,7 +403,7 @@ API 测试：
 
 ### 迁移说明
 
-既有 UC-APP-007 实现需要在 OAuthClient 落地时加入 sector 一致性检查及竞争测试；在此之前其原有发布能力仍有效，但不覆盖 OAuth 扩展。旧 Application.betaVersion、Version.status=TEST 或内嵌 tester 数组不迁移。
+既有 UC-APP-007 实现需要在稳定 registration 落地时加入非空 redirect 对应 identity/credential 的存在性检查及竞争测试；在此之前其原有发布能力仍有效，但不覆盖 OAuth 扩展。旧 Application.betaVersion、Version.status=TEST 或内嵌 tester 数组不迁移。
 
 ## 业务规则（UC-APP-007 权威正文）
 
@@ -436,7 +437,9 @@ testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Re
 
 `DRAFT/SUBMITTED/REJECTED/REVOKED` 都不能进入 test 槽位。历史上曾经 APPROVED 但当前已失去资格的 Version 也不能重新设置。
 
-如果该运行上下文已经登记 OAuthClient，snapshot 中同 type 回调组的规范 hostname 必须等于 client.sector；改变 hostname 必须新建 clientId。snapshot 可以省略该 type，明确让当前 test 发布不提供 OAuth 回调；运行解析必须失败关闭，不能回退旧 Version。
+OAuth 回调属于 Version，但非空配置必须可映射到 Application 的稳定 client identity：pkceRedirectUris 需要 publicClientId，confidentialRedirectUris 需要 confidentialClientId 及 credential。client 处于 DISABLED 不阻止发布，只会让 Auth 拒绝授权；空数组同样允许发布，并明确让该 Version 暂不提供对应 OAuth 接入。运行解析失败时不能回退旧 Version。
+
+redirect hostname 不是发布兼容键。新 Version 可以审核并发布不同 hostname，仍使用同一稳定 clientId；一次具体授权交互和 code 继续绑定当时批准的精确 redirect URI 与 Version/Publication tuple。
 
 <!-- 权威位置: use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-004 -->
 ### BR-PUB-004：测试槽位不是审核状态
@@ -492,7 +495,7 @@ History 是操作审计，不是 event sourcing 的权威状态；当前 Publica
 <!-- 权威位置: use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-008 -->
 ### BR-PUB-008：发布前复检
 
-真实改变 test 槽位前，必须针对 approved Review.snapshot 重新执行 ScopeCatalog、LaunchURLSubmissionPolicy 和 OAuth client sector 一致性检查，并把外部策略版本写入 History。
+真实改变 test 槽位前，必须针对 approved Review.snapshot 重新执行 ScopeCatalog、LaunchURLSubmissionPolicy 和非空 OAuth 配置的 registration 存在性检查，并把外部策略版本写入 History。
 
 ScopeCatalog 使用 [ADR-001](../adr/ADR-001-scope-catalog-cache.md) 的有界缓存和失败关闭语义；LaunchURLSubmissionPolicy 复用 [BR-REV-007](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) 的公网 HTTPS/DNS 预检，不新增内容抓取。
 
@@ -504,6 +507,7 @@ ScopeCatalog 使用 [ADR-001](../adr/ADR-001-scope-catalog-cache.md) 的有界�
 以下操作必须全部成功或全部失败：
 
 - 当前 admin 和 Version/Review 发布资格复查。
+- 非空 OAuth 配置对应的稳定 client identity/credential 存在性复查。
 - Publication 存在性和 expected revision 检查。
 - Publication 创建或 testVersionId/revision/审计更新。
 - PublicationHistory 插入。
@@ -977,9 +981,9 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 544 | `3e7d25287f64` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 509 | `f68b6f1eadb6` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `b213564fd3ae` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 549 | `94d02775e6c7` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `0a1f73af1ac8` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

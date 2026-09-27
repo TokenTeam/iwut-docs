@@ -430,7 +430,9 @@ testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Re
 
 `DRAFT/SUBMITTED/REJECTED/REVOKED` 都不能进入 test 槽位。历史上曾经 APPROVED 但当前已失去资格的 Version 也不能重新设置。
 
-如果该运行上下文已经登记 OAuthClient，snapshot 中同 type 回调组的规范 hostname 必须等于 client.sector；改变 hostname 必须新建 clientId。snapshot 可以省略该 type，明确让当前 test 发布不提供 OAuth 回调；运行解析必须失败关闭，不能回退旧 Version。
+OAuth 回调属于 Version，但非空配置必须可映射到 Application 的稳定 client identity：pkceRedirectUris 需要 publicClientId，confidentialRedirectUris 需要 confidentialClientId 及 credential。client 处于 DISABLED 不阻止发布，只会让 Auth 拒绝授权；空数组同样允许发布，并明确让该 Version 暂不提供对应 OAuth 接入。运行解析失败时不能回退旧 Version。
+
+redirect hostname 不是发布兼容键。新 Version 可以审核并发布不同 hostname，仍使用同一稳定 clientId；一次具体授权交互和 code 继续绑定当时批准的精确 redirect URI 与 Version/Publication tuple。
 
 <!-- 权威位置: use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-007 -->
 ### BR-PUB-007：PublicationHistory
@@ -693,10 +695,10 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 544 | `3e7d25287f64` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 509 | `f68b6f1eadb6` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `b213564fd3ae` |
-| `use-cases/UC-APP-002-create-application-version.md` | 463 | `aed995d52573` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 549 | `94d02775e6c7` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
+| `use-cases/UC-APP-002-create-application-version.md` | 475 | `1c96b528f65c` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |

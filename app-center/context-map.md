@@ -17,7 +17,7 @@ App Center Context
   ├─ 拥有独立 ApplicationProfileReview 与提交快照
   ├─ 拥有 ApplicationVersion 及其审核生命周期
   ├─ 拥有 ApplicationReview 与提交快照
-  ├─ 拥有 OAuthClient 身份、类型、状态与 secret 摘要
+  ├─ 拥有 Application 级 OAuth registration、稳定 client identity 与独立 credential
   ├─ 拥有按 RPC major 分区的 ApplicationPublication
   ├─ 拥有 ApplicationPublicationHistory
   ├─ 拥有 Application 级 Tester 加入链接
@@ -36,7 +36,7 @@ App Center Context
 - 哪个 authId 是 Application 当前 adminId。
 - 同一 adminId 下哪些名称已经被占用。
 - adminId 当前的应用创建配额和已使用数量。
-- ApplicationVersion 的身份、应用内 sequence、入口 URL、RPC 兼容声明、scopes、按 client type 分组的 OAuth redirect URIs、审核状态、revision，以及创建和最近修改审计。
+- ApplicationVersion 的身份、应用内 sequence、入口 URL、RPC 兼容声明、scopes、依附 Version 的 pkce/confidential OAuth redirect URIs、审核状态、revision，以及创建和最近修改审计。
 - 每次审核 attempt 的身份、不可变提交快照、一次性决定、状态，以及提交/决定/草稿恢复审计。
 - App Center 自己的版本化审核策略和检查项。
 - 每个 `(applicationId, rpcApiMajor)` 当前 test 发布指针、Publication revision 和修改审计。
@@ -44,7 +44,7 @@ App Center Context
 - 每个 Application 当前有效的 Tester 加入链接、secret 哈希，以及 `ROTATED/MANUAL` 撤销审计。
 - 哪些 authId 当前是某个 Application 的 Tester、历史 Membership episode，以及固定 100 人上限下的 ACTIVE Tester 数量。
 - 对给定 Tester、hostRpcApiMajor 和 hostCapabilities，哪个 test ApplicationVersion 构成当前 TestLaunchDescriptor。
-- OAuthClient 的独立 clientId、不可变接入上下文、状态、sector 和 secret 摘要，以及 Auth 所需的当前 Version 运行配置和用户资格快照。
+- ApplicationOAuthRegistration 的稳定 PUBLIC/CONFIDENTIAL clientId 与状态、OAuthClientCredential 的摘要/revision，以及 Auth 按 channel/rpcApiMajor 所需的当前 Version 运行配置和用户资格快照。
 
 只有 App Center 可以创建和保存这些 Application 事实。
 
@@ -77,7 +77,7 @@ App Center Context
 - UC-APP-015 复用同一身份边界，重新验证现有资料字段，在本地原子边界创建独立 PENDING ProfileReview 并把 ProfileRevision 迁移为 SUBMITTED；工作修订指针继续占用，因此不能创建并行 DRAFT。icon 不触发资产服务或外部内容检查。
 - UC-APP-016 使用 Auth 授予的 `app.profile.review` 和本地版本化 ProfileReviewPolicy；它原子决定 Review/Revision，批准时同时替换当前公开指针，不修改发布槽位。
 - UC-APP-016 把 REJECTED ProfileRevision 定义为终态。网页端可以读取被拒绝内容并预填 UC-APP-013 创建表单；App Center 只看到一次普通的新建草稿，不提供恢复/复制接口或保存来源关系。
-- UC-APP-018 管理 OAuthClient 身份、类型、状态与 secret；redirect URI 不复制到 client，而由当前批准并发布的 ApplicationVersion 提供。
+- UC-APP-018 管理 Application 级稳定 client identity、状态与独立 secret credential；redirect URI 不复制到 registration，而由当前批准并发布的 ApplicationVersion 提供。
 - UC-APP-019 向 Auth 分别提供登录前运行配置和登录后用户授权上下文；Auth 拥有 consent、code、token 和 grant。
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。

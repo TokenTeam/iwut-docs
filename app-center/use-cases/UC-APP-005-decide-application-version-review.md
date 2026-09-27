@@ -307,7 +307,7 @@ APPROVE 必须针对 ApplicationReview.snapshot 重新执行：
 - DeveloperSuspensionChecker 对当前 adminId 与 Review.submittedBy 的暂停检查。
 - ScopeCatalog requestable 检查。
 - LaunchURLSubmissionPolicy 公网 HTTPS 与 DNS 地址策略检查。
-- BR-VER-018 的 OAuth 回调结构、规范 hostname 与安全限制检查。
+- BR-VER-018 的 OAuth 回调双数组结构、规范 URL 与安全限制检查。
 
 使用 snapshot 而不是当前 Version 拼装输入。通过后把 catalog revision 和 URL policy version 写入 decision.approvalValidation。
 
@@ -461,7 +461,7 @@ requiredChecks:
 status: ACTIVE
 ```
 
-`oauth-redirects-reviewed` 要求 reviewer 确认所有已登记 callback 与声明的 client type 相符；数组为空时明确确认该版本未启用 OAuth/OIDC 回调。未来修改检查项必须使用新的 policy version；不能原地修改 v1 或 v2。`version_review_policies.version` 唯一，历史版本保留。所有新决定必须使用当前 ACTIVE v2；已经用 v1 作出的决定不重写。
+`oauth-redirects-reviewed` 要求 reviewer 确认 pkceRedirectUris 与 confidentialRedirectUris 中的 callback 分别适用于相应 client type；两个数组都为空时明确确认该版本未启用 OAuth/OIDC 回调。未来修改检查项必须使用新的 policy version；不能原地修改 v1 或 v2。`version_review_policies.version` 唯一，历史版本保留。所有新决定必须使用当前 ACTIVE v2；已经用 v1 作出的决定不重写。
 
 ## API 草图
 
@@ -602,7 +602,7 @@ UC-APP-006：将被拒绝的 ApplicationVersion 恢复为 DRAFT
 
 ## 迁移说明
 
-既有实现需要 migration 不可变地加入 `app-version-review-v2`、retire v1，并同步 oauthRedirects snapshot 复检、策略测试与 API 示例；不得改写 v1 的检查项或历史 decision。旧 `is_admin` 直接设置 Application 状态的接口继续不保留。
+既有实现需要 migration 不可变地加入 `app-version-review-v2`、retire v1，并同步双数组 oauthRedirects snapshot 复检、策略测试与 API 示例；不得改写 v1 的检查项或历史 decision。旧 `is_admin` 直接设置 Application 状态的接口继续不保留。
 
 ## 变更记录
 

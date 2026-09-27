@@ -116,7 +116,7 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
    - reviewStatus 是 `DRAFT`。
    - revision 等于 expectedRevision。
 4. 通过 ScopeCatalog 重新确认 requiredScopes 和 optionalScopes 当前仍允许被新版本申请，并取得本次 Auth catalog revision。
-5. 按 BR-VER-018 重新验证 oauthRedirects 的结构、规范 hostname 和安全限制。
+5. 按 BR-VER-018 重新验证 oauthRedirects 的双数组结构、规范 URL 和安全限制。
 6. 通过 LaunchURLSubmissionPolicy 确认 launchUrl 是当前可提交审核的公网 HTTPS URL。
 7. 生成 UUIDv7 reviewId，并从 Clock 取得 submittedAt。
 8. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
@@ -173,7 +173,7 @@ ApplicationVersionReviewSnapshot {
   requiredCapabilities: []CapabilityName
   requiredScopes: []ScopeName
   optionalScopes: []ScopeName
-  oauthRedirects: []OAuthRedirectGroup
+  oauthRedirects: OAuthRedirectConfiguration
 }
 ```
 
@@ -248,7 +248,7 @@ type ApplicationReviewRepository interface {
 | `snapshot.requiredCapabilities` | 提交时必需宿主能力 | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.requiredScopes` | 提交时必需 scopes | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.optionalScopes` | 提交时可选 scopes | array&lt;string&gt; | 已排序；元素唯一且不与 required 交叉 | no | no |
-| `snapshot.oauthRedirects` | 提交时 OAuth 回调 | array&lt;object&gt; | BR-VER-018；已规范排序 | no | no |
+| `snapshot.oauthRedirects` | 提交时 OAuth 回调 | object | `pkceRedirectUris/confidentialRedirectUris`；BR-VER-018；已规范排序 | no | no |
 | `scopeCatalogRevision` | scope 校验使用的 Auth catalog revision | int64 | Auth 单调递增版本 | no | no |
 | `preflightPolicyVersion` | URL 提交预检规则版本 | string | 稳定策略标识，1–50 ASCII `[A-Za-z0-9._-]` | no | no |
 | `submittedBy` | 实际提交者 | string | opaque authId | no | no |
@@ -306,10 +306,10 @@ Location: /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}
       "requiredCapabilities": ["user.profile.v1"],
       "requiredScopes": ["profile.basic"],
       "optionalScopes": ["schedule.read"],
-      "oauthRedirects": [{
-        "clientType": "PUBLIC_PKCE",
-        "redirectUris": ["https://example.edu/oauth/callback"]
-      }]
+      "oauthRedirects": {
+        "pkceRedirectUris": ["https://example.edu/oauth/callback"],
+        "confidentialRedirectUris": []
+      }
     },
     "scopeCatalogRevision": 17,
     "preflightPolicyVersion": "submit-v1",
@@ -497,23 +497,24 @@ MongoDB 实现应使用同一事务覆盖 Application、ApplicationVersion 和 A
 <!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
 ### BR-VER-018：版本化 OAuth 回调
 
-`oauthRedirects` 是受审核的版本内容，不属于 OAuthClient，也不从 launchUrl 推导。它是 0–2 个回调组组成的非 null 数组：
+`oauthRedirects` 是受审核的版本内容，不属于 client registration，也不从 launchUrl 推导：
 
 ```text
-OAuthRedirectGroup {
-  clientType: PUBLIC_PKCE | CONFIDENTIAL_SECRET
-  redirectUris: []RedirectURI
+OAuthRedirectConfiguration {
+  pkceRedirectUris: []RedirectURI
+  confidentialRedirectUris: []RedirectURI
 }
 ```
 
-- 每种 clientType 至多一组；每组包含 1–10 个不重复 URI。空数组表示该 Version 不提供 OAuth/OIDC 回调。
+- 两个数组都必须存在且非 null，各包含 0–10 个不重复 URI。空数组表示该 Version 不为对应 client type 提供 OAuth/OIDC 回调。
+- 两个数组之间也不得重复；同一个回调不能同时声称由 PUBLIC PKCE 和 CONFIDENTIAL secret client 使用。
 - URI 必须是绝对 HTTPS URL，最多 2048 UTF-8 bytes；禁止 userinfo、fragment、wildcard、IP literal、localhost，以及 [BR-REV-007](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) 固定的 IANA `2026-05-22` special-use 域名或其子域。
 - 禁止预占 OAuth/OIDC 响应参数 `code/state/iss/error/error_description/error_uri`。
-- 同一组的所有 URI 必须使用同一个规范 DNS hostname。hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。其余 URL 部分保存后按完整字符串精确匹配。
-- callback path、query 和 port 可以不同；运行时不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
-- 回调组按 clientType 固定顺序保存，组内 URI 按 Unicode code point 排序。输入顺序不表达业务含义。
+- hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。同一数组可以包含多个 hostname，以支持受审核的环境切换和域名迁移。
+- callback hostname、path、query 和 port 可以不同；运行时始终做完整字符串精确匹配，不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
+- 两个数组分别按 Unicode code point 排序。输入顺序不表达业务含义。
 
-OAuthClient 创建时从当前批准并发布的回调组派生不可变 sector。存在该运行上下文的 client 后，后续发布由 UC-APP-007 检查同 type 回调组的 hostname；改变 hostname 需要新的 clientId。Version 草稿本身可以在 client 创建前存在，因此创建/编辑阶段不依赖 OAuthClient。
+`ApplicationVersionOAuthConfig` 使用独立 collection 保存，但它是 Version 的依附实体：创建、编辑与 Version 使用同一事务和 revision，不能独立修改或删除。client identity 可以在 Version 前后独立登记；两者只在运行解析时按 client type 组合。redirect hostname 变化不重建稳定 clientId。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -757,8 +758,8 @@ Provider 与 Consumer 至少共同验证：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 509 | `f68b6f1eadb6` |
-| `use-cases/UC-APP-002-create-application-version.md` | 463 | `aed995d52573` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
+| `use-cases/UC-APP-002-create-application-version.md` | 475 | `1c96b528f65c` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

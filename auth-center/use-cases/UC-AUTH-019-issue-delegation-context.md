@@ -14,7 +14,7 @@
 
 1. 验证 Gateway 服务身份及允许 route/audience，解析本地可信路由策略。
 2. 按用途查 access token 摘要，确认期限、用户、grant/revision、family 和 token 撤销状态。
-3. 从 App 重新确认 client/发布/Tester 资格版本，检查当前 Developer，确认请求的 audience 和所有 route scopes 均被 token 许可。
+3. 从 App 重新确认稳定 client、当前发布/Tester 资格，检查当前 Developer，确认请求的 audience 和所有 route scopes 均被 token 与当前 Version 许可。
 4. 在 Auth 原子授权确认点签发短期委托 JWS，Gateway 转发给指定资源；任何失败不返回半成品上下文。
 
 ## 业务规则
@@ -24,7 +24,7 @@
 
 Gateway 服务身份只允许调用签发方法，不授予终端用户任何业务权限。用户身份、client、grant、scope 只来自 Auth 的 access token 记录与当前权威状态，客户端自报 claims/角色全部忽略并拒绝相关越权字段。
 
-有效 token 必须同时满足：用户 ACTIVE、应用管理员 APPROVED、client ACTIVE、App 资格版本相符、grant ACTIVE 且 revision 一致、scope 仍在当前许可中、token/family 未撤销未过期。原平台 Session 是否已退出不在条件中。
+有效 token 必须同时满足：用户 ACTIVE、应用管理员 APPROVED、client ACTIVE、当前 App 运行资格有效、grant ACTIVE 且 revision 一致、token scopes 仍是当前许可 scopes 的子集、token/family 未撤销未过期。签发时 Version ID 与当前不同不单独判定 token 失效；Tester episode、client 状态、grant revision 或 scope 资格变化仍失败关闭。原平台 Session 是否已退出不在条件中。
 
 <a id="br-oau-019"></a>
 ### BR-OAU-019：路由许可与委托身份隔离

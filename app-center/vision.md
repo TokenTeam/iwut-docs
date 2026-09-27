@@ -8,7 +8,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 
 本阶段不尝试一次定义完整应用平台；前十六个用例验证应用管理与封闭测试闭环，UC-APP-018/019 继续定义 OAuth/OIDC 接入边界：
 
-> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；已批准运行版本可放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标，并为 Auth 提供独立 OAuth client 与当前批准 Version 的回调、scope 和 Tester 资格快照。
+> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；已批准运行版本可放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标，并为 Auth 提供 Application 级稳定 OAuth client identity、Version 级受审核回调、scope 和 Tester 资格快照。
 
 ## 当前用户
 
@@ -34,7 +34,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 被拒绝的 ProfileRevision 保持终态；网页端可以依据 [BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) 用旧内容预填创建表单，再调用普通创建用例产生新 DRAFT；服务端不提供恢复接口。
 - 返回创建后的完整 Application。
 - 当前管理员可以创建一个 DRAFT ApplicationVersion。
-- Version 获得独立 UUIDv7、应用内 sequence、入口 URL、RPC API 兼容范围、capabilities、scopes 和按 client type 分组的 OAuth redirect URIs。
+- Version 获得独立 UUIDv7、应用内 sequence、入口 URL、RPC API 兼容范围、capabilities、scopes 和依附 Version 的 pkce/confidential OAuth redirect URIs。
 - 当前管理员可以完整替换 DRAFT 的可编辑内容；revision 防止多个编辑页面静默覆盖。
 - 当前管理员可以提交 DRAFT；系统重新验证 scopes 和公网 HTTPS URL，并创建独立 ApplicationReview 快照。
 - reviewer 使用版本化策略作出一次性决定；批准前再次验证 scopes 和 URL，拒绝必须说明原因。
@@ -45,7 +45,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 每个 Application 最多有 100 个 ACTIVE Tester；当前管理员可以按 membershipId 幂等移除并原子释放名额。
 - 当前管理员可以按 joinLinkId 幂等执行 MANUAL 撤销；撤销立即阻止后续加入，但不影响现有 Tester。
 - App Center 根据 ACTIVE Membership、exact RPC major Publication 和 host capabilities 返回 TestLaunchDescriptor，不把授权或版本选择下放给客户端。
-- 当前管理员可以为已批准并发布的 exact-major 运行上下文创建独立 OAuth clientId；PUBLIC/CONFIDENTIAL 类型、状态与 secret 生命周期由 OAuthClient 保存，redirect URI 与 scopes 继续由 ApplicationVersion 审核和发布。
+- 当前管理员可以为 Application 登记长期稳定的 PUBLIC/CONFIDENTIAL clientId；identity/status 与 confidential credential 使用独立 revision，redirect URI 与 scopes 继续由 ApplicationVersion 审核和发布。Version、major 或 hostname 变化不重建 clientId。
 - Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得绑定 ACTIVE Tester episode 的授权上下文；App Center 不签发 code 或 token。
 
 ## 当前非目标

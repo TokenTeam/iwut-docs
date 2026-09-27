@@ -38,14 +38,14 @@ family 的绝对期限和初始 token 期限见共享协议。用户退出平台
 
 省略 scope 沿用该 refresh 的集合；指定时必须含 openid 和 offline_access、且为旧 refresh 的子集。不再需要离线访问时通过 UC018 撤销 family 或重新取得不含 offline_access 的授权，不签发缺失离线许可的后继 refresh。缩减权限后，下一代 refresh 同样只保留缩减集合，不允许以后恢复为祖先集合；每次仍受当前 grant、App 资格与 Auth 映射限制。
 
-grant revision 或 App 绑定版本变化、client 禁用/轮换、用户不可用、family 已撤销/到期均 invalid_grant。不能通过更新记录上的 revision 使旧授权重新有效。正常刷新不主动撤销尚未到期的同 family access token；family/授权撤销则统一生效。
+grant revision 变化、client 禁用、用户不可用、Tester episode 变化、family 已撤销/到期或 token scopes 不再是当前 Version 许可的子集均 invalid_grant。单纯 Version/publication 变化不使 family 失效；Auth 重新解析当前上下文并把 scopes 收缩到当前许可。CONFIDENTIAL 刷新必须使用当前 secret，轮换后旧 secret 认证失败，但 credentialRevision 变化本身不撤销 family。不能通过更新记录上的 revision 使旧授权重新有效。正常刷新不主动撤销尚未到期的同 family access token；family/授权撤销则统一生效。
 
 ## 验收场景
 
 - 没有明确 offline_access 同意不返回 refresh；停用该能力时 discovery 同步收缩。
 - 正常旋转，缩小后不能再扩大；绝对期限不随刷新延长。
 - 双并发、丢响应重试、跨 client 重放、错误 secret、祖先 token 重放覆盖 family 状态与秘密保护。
-- 用户撤回、部分 scope 撤回后再授予、client 轮换、Tester 重加均不能恢复旧 refresh。
+- 用户撤回、部分 scope 撤回后再授予、Tester 重加均不能恢复旧 refresh；secret 轮换要求后续使用新 secret，但不删除 family。
 
 ## 依赖与实现边界
 

@@ -38,7 +38,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 | Runtime Publication | 对某个 RPC API major，服务端当前选择哪些 test/grey/stable 目标？ | ApplicationPublication、槽位、grey rollout、PublicationHistory | 服务端发布目标与可追溯变化 |
 | Public Profile | 普通用户看到的应用资料是哪一版，它是否已经获准公开？ | ApplicationProfileRevision、资料审核与当前公开修订 | 已发布目录资料 |
 | Tester Management | 哪些用户拥有某个 Application 的封闭测试资格？ | TesterJoinLink、ApplicationTesterMembership、容量 | Application 级 Tester 资格 |
-| OAuth Client Integration | Auth 应该信任哪个 client、回调、版本范围和用户资格？ | OAuthClient、Version oauthRedirects、Publication 与 Tester snapshot | client 元数据、secret 校验和短时授权上下文 |
+| OAuth Client Integration | Auth 应该信任哪个稳定 client、哪个已发布 Version 的回调和用户资格？ | ApplicationOAuthRegistration、OAuthClientCredential、Version oauthRedirects、Publication 与 Tester snapshot | client 元数据、secret 校验和短时授权上下文 |
 | Catalog & Resolution | 当前请求有哪些候选应用，每个候选使用哪个服务端目标？ | 聚合读取模型和解析结果；不复制来源事实 | 候选应用、公开资料、唯一启动目标与 Filter 规则 |
 
 ## 能力边界
@@ -106,7 +106,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 ### OAuth Client Integration
 
-负责独立 clientId、PUBLIC/CONFIDENTIAL 类型、状态和 secret 生命周期，并把当前批准 Version 的 redirect URIs/scopes 与 Tester 资格组合为 Auth 可验证的短时快照。redirect URI 属于 Version Review，运行选择属于 Runtime Publication；本能力不复制它们，也不拥有用户 consent、code 或 token。
+负责 Application 级稳定 clientId、PUBLIC/CONFIDENTIAL 状态和独立 secret credential，并按 channel/rpcApiMajor 把当前批准 Version 的 redirect URIs/scopes 与 Tester 资格组合为 Auth 可验证的短时快照。redirect URI 属于 Version Review，运行选择属于 Runtime Publication；本能力不复制它们，也不拥有用户 consent、code、grant 或 token。
 
 ## Filter 在能力图中的位置
 

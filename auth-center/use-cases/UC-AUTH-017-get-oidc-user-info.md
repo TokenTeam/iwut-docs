@@ -42,7 +42,7 @@ UserInfo 在 Auth 本地一致检查点确认授权和读取投影；撤销提�
 - openid-only 只返回 sub；email 获批且用户同意后才返回当前激活邮箱。
 - 未绑定、邮箱更换、资料 KV 伪造 email 均按权威源投影；不自动披露其他字段。
 - ID Token/Session 冒充 Bearer、跨用途 token、撤回/过期/family 撤销拒绝。
-- 同一 sector subject 一致，不同 sector 不相关；同 client 的 ID Token/UserInfo sub 完全相同。
+- 同一 clientId 的 subject 跨 Version/redirect hostname 一致；PUBLIC 与 CONFIDENTIAL clientId 不相关；同 client 的 ID Token/UserInfo sub 完全相同。
 
 ## 依赖与实现边界
 

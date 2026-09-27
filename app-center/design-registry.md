@@ -235,10 +235,10 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 
 | ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| `BR-OAC-001` | 应用归属与接入身份 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-001) | — | — |
-| `BR-OAC-002` | 不可变接入上下文与版本化回调 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-002) | — | — |
+| `BR-OAC-001` | 应用归属与稳定接入身份 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-001) | — | — |
+| `BR-OAC-002` | Registration 与 Version 配置分离 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-002) | — | — |
 | `BR-OAC-003` | 高熵 secret 与一次披露 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-003) | — | — |
-| `BR-OAC-004` | 配置版本与原子管理 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-004) | — | — |
+| `BR-OAC-004` | 分离的并发版本与原子管理 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-004) | — | — |
 | `BR-OAC-005` | scope 与授权所有权 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-005) | — | — |
 | `BR-OAC-006` | 内部查询与最小披露 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-006) | — | — |
 | `BR-OAC-007` | TEST 资格与批准运行配置 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-007) | — | — |
