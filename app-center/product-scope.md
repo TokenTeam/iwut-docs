@@ -143,7 +143,7 @@ Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确�
 | Tester Management | 是 | 加入链接、加入、移除、撤销链接和 test 目标解析 |
 | Runtime Publication | 是 | 按 RPC API major 的 test、grey、stable、回退和停止分发 |
 | Catalog & Resolution | 是 | 候选应用聚合、Filter 规则分发、客户端展示过滤和服务端发布目标解析 |
-| OAuth/OIDC Application Integration | 扩展纳入 | Application 级稳定 PUBLIC/CONFIDENTIAL clientId、独立 secret credential，以及从批准 Version 解析回调和 scopes |
+| OAuth/OIDC Application Integration | 扩展纳入 | Application＋channel 级稳定 PUBLIC/CONFIDENTIAL clientId、独立 secret credential，以及从批准 Version 解析回调和 scopes |
 | Application Creation Quota | 是 | 保留当前按 Developer 管理的可调整配额方向 |
 
 这里的“读取”包含开发者管理查询、Reviewer 待办查询和用户目录查询，但它们可以采用较短的 Query Contract，不需要全部扩写成与命令相同体量的 UC。
@@ -189,3 +189,5 @@ Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确�
 6. **Filter 规则模型**：规则可引用哪些本地用户字段、使用何种声明格式、缺失字段采取何种结果，以及规则自身如何审核和修订？
 
 这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016 以及 OAuth/OIDC 扩展 UC-APP-018/019 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
+
+OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

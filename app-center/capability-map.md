@@ -106,7 +106,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 ### OAuth Client Integration
 
-负责 Application 级稳定 clientId、PUBLIC/CONFIDENTIAL 状态和独立 secret credential，并按 channel/rpcApiMajor 把当前批准 Version 的 redirect URIs/scopes 与 Tester 资格组合为 Auth 可验证的短时快照。redirect URI 属于 Version Review，运行选择属于 Runtime Publication；本能力不复制它们，也不拥有用户 consent、code、grant 或 token。
+负责 Application＋channel 级稳定 clientId、PUBLIC/CONFIDENTIAL 状态和独立 secret credential，并按 channel/rpcApiMajor 把当前批准 Version 的 redirect URIs/scopes 与 Tester 资格组合为 Auth 可验证的短时快照。redirect URI 属于 Version Review，运行选择属于 Runtime Publication；本能力不复制它们，也不拥有用户 consent、code、grant 或 token。
 
 ## Filter 在能力图中的位置
 
@@ -154,3 +154,5 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 4. HTTP、数据库索引、缓存和 Go package 结构留到实现设计，不写入 Capability Map。
 
 这两份模型文档与 Capability Map 共同构成本次设计检查点；具体行为仍回到近期 UC 与 Query Contract 中定义。
+
+OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

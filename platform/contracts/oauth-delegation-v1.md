@@ -27,7 +27,7 @@ Traefik 阶段完成入口检查，但 token 真伪、grant、scope 的权威判
 
 请求字段：routeId、policyDigest、protocol、method、targetPath；签名协议值固定 HTTP 或 GRPC，gRPC-Web 转换后也是 GRPC。HTTP method 为大写方法名；gRPC method 为完整 RPC 名且不发送 targetPath。响应字段：delegationJws、expiresAt。不接收 userId、clientId、scope、角色、上游 URL 或任意 audience 覆盖。
 
-部署路由目录是静态可信输入，同一工具生成 Gateway 路由与 Auth 的 OAuth route policy 清单。每项固定 routeId、目标 audience/upstream、协议与方法、HTTP 精确路径或受限路径模板及重写规则、requiredScopes（全部满足）、策略版本；对规范化完整清单取 SHA-256 得 policyDigest。Auth/Gateway digest 不匹配拒绝服务，不从请求补全策略。OAuth 路由必须有明确非空 scope 要求；只拥有 openid 不自动获得业务 API 权限。
+部署路由目录是静态可信输入，同一工具生成 Gateway 路由与 Auth 的 OAuth route policy 清单。每项固定 routeId、目标 audience/upstream、协议与方法、HTTP 精确路径或受限路径模板及重写规则、requiredScopes（全部满足）、allowedChannels、策略版本；对规范化完整清单取 SHA-256 得 policyDigest。Auth/Gateway digest 不匹配拒绝服务，不从请求补全策略。OAuth 路由必须有明确非空 scope 要求；只拥有 openid 不自动获得业务 API 权限。
 
 Gateway 以已匹配的静态路由构造请求，Auth 根据本地清单复核 method/path/audience。现有服务签发允许列表新增此精确 RPC 与允许 routeId/audience，不能用 `auth_center.*` 通配。UserInfo 是 Auth 自行认证的标准 DIRECT 端点，不再调用自身委托 RPC。
 
@@ -40,15 +40,16 @@ Gateway 以已匹配的静态路由构造请求，Auth 根据本地清单复核 
 | iss、aud | 配置的 Auth issuer、单个目标资源 audience |
 | sub | 内部 authId，只在平台内网下游使用，不向应用返回 |
 | client_id、application_id | 已认证 token 所属 client 和应用 |
-| grant_id、grant_revision | 当前用户授权及版本 |
-| scopes | 本 token 当前有效的字符串数组；不扩大为所有历史授权 |
+| grant_id、grant_revision、grant_revocation_epoch | 当前用户授权、审计 revision 与撤销 epoch |
+| channel、rpc_api_major、client_authorization_epoch | token 固定运行上下文及 client 状态 epoch |
+| scopes | UC-AUTH-019 计算的有效交集 E；不包含当前版本未允许的历史同意或 token 外的新增 scope |
 | route_id、policy_digest、protocol、method | 绑定本次路由/策略/协议/操作 |
 | target_path | HTTP 重写后的 escaped path；gRPC 不出现 |
 | iat、nbf、exp、jti | 签发时间、当前有效、最长 5 秒、独立随机 ID |
 
 exp 不晚于 access token 到期时间。无 permissions、developer_status、email、学校关联值、平台 Session 或 token 原文。Auth 检查 token 对本 audience 的许可；token 的 audience 集合由已授予 scope 的受信映射产生，客户端不能自报。
 
-资源服务必须验证签名、固定算法/typ/kid/issuer/audience、时限和本次 method/route/policy/target_path，再以 sub 做数据归属检查，以 client_id/application_id 做应用约束。可验证委托 JWS 不等于全部业务许可。不得把委托转换成通用 USER 管理身份。只在配置明确启用的 OAuth 方法接受该 header，未知入口拒绝。
+资源服务必须验证签名、固定算法/typ/kid/issuer/audience、时限和本次 method/route/policy/target_path，再以 sub 做数据归属检查，以 client_id/application_id/channel 做应用环境约束。route policy 显式配置非空 allowedChannels；首版只能启用 TEST。仅限正式渠道的路由拒绝 TEST token；允许多个渠道的共享资源仍分别检查各自 grant/E，不能因为 OIDC sub 相同绕过渠道许可。可验证委托 JWS 不等于全部业务许可。不得把委托转换成通用 USER 管理身份。只在配置明确启用的 OAuth 方法接受该 header，未知入口拒绝。
 
 HTTP path 必须经过路由生成器规定的单次解析和固定重写；拒绝非法 percent encoding、编码斜线/反斜线、dot segment 和无法唯一匹配的路径。Gateway 签发请求与后端收到的 escaped path 必须字节相等；查询参数不作为路径签名的一部分，业务仍验证其中的资源 ID/过滤条件，不能把 query 当授权范围来源。
 
@@ -64,7 +65,7 @@ OAUTH2 路由中间件顺序固定：
 
 以上行为需用固定版本的真实 Traefik 验收；若 ForwardAuth 200 缺 header 无法由原生配置拒绝，Gateway 的认证处理器必须将缺失签名转换为 503，资源服务也必须拒绝缺失身份。关闭 authSigninURL 等自动 API 登录跳转。签发/转发每步有界 deadline（初始建议总鉴权 2 秒）；认证失败不得转发业务请求，不自动重试业务 mutation。
 
-`OIDC_HTTP` DIRECT 另设明确凭据白名单：/token 与 /revoke 可保留 Basic；/userinfo 可保留 Bearer；/authorize 与 /portal/* 只向 Auth 传门户 cookie/指定 Session；其他 client 身份头仍先清理。只有明确登记的 POST /portal/session 可保留 x-iwut-session。不允许为了 token endpoint 全局打开 Authorization 转发。发现/JWKS 只 GET；授权页面及标准端点不经 gRPC-Web 转换。
+`OIDC_HTTP` DIRECT 另设明确凭据白名单：/token 与 /revoke 可保留 Basic；/userinfo 可保留 Bearer；/authorize 与 /portal/* 只向 Auth 传门户 cookie/指定 Session；其他 client 身份头仍先清理。只有明确登记的 POST /portal/session 可保留 x-iwut-session。不允许为了 token endpoint 全局打开 Authorization 转发。Auth sector URI 的专用 host 路由也仅 GET /redirect-uris.json，Traefik 按部署受信后缀及固定 UUID 主机名格式匹配到 Auth upstream，Auth 再核对完整 host 与已分配 sector 的归属。新增 sector 无需重新生成每应用 Router；未知 UUID 由 Auth 返回 404。不得把请求 Host 当作新 sector 的创建依据或自由上游地址，未知 host 拒绝。发现/JWKS 只 GET；授权页面及标准端点不经 gRPC-Web 转换。
 
 ## 错误与协议适配
 

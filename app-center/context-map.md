@@ -77,7 +77,7 @@ App Center Context
 - UC-APP-015 复用同一身份边界，重新验证现有资料字段，在本地原子边界创建独立 PENDING ProfileReview 并把 ProfileRevision 迁移为 SUBMITTED；工作修订指针继续占用，因此不能创建并行 DRAFT。icon 不触发资产服务或外部内容检查。
 - UC-APP-016 使用 Auth 授予的 `app.profile.review` 和本地版本化 ProfileReviewPolicy；它原子决定 Review/Revision，批准时同时替换当前公开指针，不修改发布槽位。
 - UC-APP-016 把 REJECTED ProfileRevision 定义为终态。网页端可以读取被拒绝内容并预填 UC-APP-013 创建表单；App Center 只看到一次普通的新建草稿，不提供恢复/复制接口或保存来源关系。
-- UC-APP-018 管理 Application 级稳定 client identity、状态与独立 secret credential；redirect URI 不复制到 registration，而由当前批准并发布的 ApplicationVersion 提供。
+- UC-APP-018 管理 Application＋channel 级稳定 client identity、状态与独立 secret credential；redirect URI 不复制到 registration，而由当前批准并发布的 ApplicationVersion 提供。
 - UC-APP-019 向 Auth 分别提供登录前运行配置和登录后用户授权上下文；Auth 拥有 consent、code、token 和 grant。
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。
@@ -89,3 +89,5 @@ App Center Context
 - 没有 Hosting Runtime。
 
 这些关系只有在后续真实用例需要时才加入 Context Map。
+
+OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

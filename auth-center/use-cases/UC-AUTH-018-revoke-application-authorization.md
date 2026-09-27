@@ -16,7 +16,7 @@
 
 1. 本人查询从当前 Session 解析 authId，不接受任意目标用户；只返回本人 grant。
 2. 本人明确提交撤销范围，Auth 校验归属、revision，原子收缩/撤销 grant 并记录审计。
-3. 旧 code、access、refresh 后续通过 grant revision 检查统一失效；不必同步遍历每条 token 文档。
+3. 旧 code、access、refresh 后续通过 grant revocationEpoch 检查统一失效；不必同步遍历每条 token 文档。
 4. 应用 token 撤销先认证 client，匹配 token 所属 client 后撤销对应 token 或 family；对未知/已撤销值幂等成功。
 
 ## 业务规则
@@ -24,16 +24,16 @@
 <a id="br-oau-015"></a>
 ### BR-OAU-015：本人查询和范围撤销
 
-本人入口仅接受有效 ACTIVE USER Session，目标从 Session 决定。列表按 client 分组展示应用、授权时间、scope 和当前状态，同一 Application 的 public/confidential client 分开显示，不能误导成已一键撤销所有接入。
+本人入口仅接受有效 ACTIVE USER Session，目标从 Session 决定。列表按 client 分组展示应用、授权时间、scope 和当前状态，同一 Application 的不同 channel 以及 public/confidential client 分开显示，不能误导成已一键撤销所有接入。
 
 允许撤回 required scope，包括 openid；应用可能不能继续运行，UI 应说明，但服务端不得强制保留。撤回 openid 等同撤销该 grant 全部；其余部分撤回保留剩余集合。App 暂时不可用时仍允许本人列表/撤销，用存储的 application/client ID 与历史展示快照标明名称可能过时；不因无法查询 App 阻止用户收回授权。
 
 <a id="br-oau-016"></a>
 ### BR-OAU-016：撤销版本和重授隔离
 
-首次全部撤销或实际 scope 收缩都原子递增 revision，并与签发/确认共用 grant 写入栅栏。全部撤销置 REVOKED、清空当前集合；记录不可变审计，保留 ID 与历史版本。expectedRevision 不匹配返回冲突及当前状态，不能用旧 UI 覆盖后来授权；同 revision 下无变化的重复操作返回当前结果，不额外递增。
+首次全部撤销或用户显式 scope 收缩都原子递增 revision 和 revocationEpoch，并与签发/确认共用 grant 写入栅栏。全部撤销置 REVOKED、清空当前集合；记录不可变审计，保留 ID 与历史版本。expectedRevision 不匹配返回冲突及当前状态，不能用旧 UI 覆盖后来授权；同 revision 下无变化的重复操作返回当前结果，不额外递增。
 
-任何旧 token/code 的 grant revision 不等于当前值即不可用，即使它仅使用保留下来的 scope。重新同意通过 UC014 产生新 revision，不能复活旧凭据；已同意但尚未兑换的 code 同样受约束。
+任何旧 token/code/family 的 grant revocationEpoch 不等于当前值即不可用，即使它仅使用保留下来的 scope。重新同意保留新的 epoch，不能复活旧代；UC014 仅新增同意引起 revision 变化不属于撤销。当前 Version 允许范围缩小只限制运行权限，不执行本用例、不删除历史 G。
 
 <a id="br-oau-017"></a>
 ### BR-OAU-017：应用 token 撤销与平台登录分离

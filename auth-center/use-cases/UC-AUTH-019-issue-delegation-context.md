@@ -13,7 +13,7 @@
 ## 主流程
 
 1. 验证 Gateway 服务身份及允许 route/audience，解析本地可信路由策略。
-2. 按用途查 access token 摘要，确认期限、用户、grant/revision、family 和 token 撤销状态。
+2. 按用途查 access token 摘要，确认期限、用户、grant/revocationEpoch、family 和 token 撤销状态。
 3. 从 App 重新确认稳定 client、当前发布/Tester 资格，检查当前 Developer，确认请求的 audience 和所有 route scopes 均被 token 与当前 Version 许可。
 4. 在 Auth 原子授权确认点签发短期委托 JWS，Gateway 转发给指定资源；任何失败不返回半成品上下文。
 
@@ -24,12 +24,14 @@
 
 Gateway 服务身份只允许调用签发方法，不授予终端用户任何业务权限。用户身份、client、grant、scope 只来自 Auth 的 access token 记录与当前权威状态，客户端自报 claims/角色全部忽略并拒绝相关越权字段。
 
-有效 token 必须同时满足：用户 ACTIVE、应用管理员 APPROVED、client ACTIVE、当前 App 运行资格有效、grant ACTIVE 且 revision 一致、token scopes 仍是当前许可 scopes 的子集、token/family 未撤销未过期。签发时 Version ID 与当前不同不单独判定 token 失效；Tester episode、client 状态、grant revision 或 scope 资格变化仍失败关闭。原平台 Session 是否已退出不在条件中。
+有效 token 必须满足用户 ACTIVE、应用管理员 APPROVED、client ACTIVE 且 authorizationEpoch 一致、grant ACTIVE 且 revocationEpoch 一致、原 Tester episode 仍有效、token/family 未撤销未过期。channel/major 必须取自 token，不接受外部请求改选；先解析该上下文当前 RuntimeConfiguration，再以本次新 tuple 解析用户资格，不要求旧 Version ID 与当前相同。
+
+计算 `E=token.scopes∩grantedScopes∩当前批准版本 scopes∩当前可用 Catalog scopes`。只校验本路由 requiredScopes 是否全部属于 E，并限制 audience 为 token 原 audience 与当前 E 映射的交集；不能仅因 token 含有一个当前未许可 scope 就拒绝仍获准的其他路由。委托 JWS 的 scopes 只填 E。当前未允许的 scope 不向资源服务传递，不修改 token 原集合或历史 grant。E 恢复某项曾有权限不代表扩大 token 原有权限；需要 token 原集合外的新项必须重新取得凭据。原平台 Session 是否已退出不在条件中。
 
 <a id="br-oau-019"></a>
 ### BR-OAU-019：路由许可与委托身份隔离
 
-所有 requiredScopes 必须被 token 覆盖，audience 必须在 token 的受信资源集合。route policy 来源、digest 和 JWS 格式唯一引用 [委托上下文契约](../../platform/contracts/oauth-delegation-v1.md)。不能从请求 body/headers 取得任意 audience 或上游地址，不接受通配能力。
+token.channel 必须属于 route.allowedChannels；所有 requiredScopes 必须被有效集合 E 覆盖，audience 必须在 token 原受信资源集合与当前 E 映射的交集中。route policy 来源、digest 和 JWS 格式唯一引用 [委托上下文契约](../../platform/contracts/oauth-delegation-v1.md)。不能从请求 body/headers 取得任意 audience 或上游地址，不接受通配能力。
 
 委托只表达当前用户让特定应用做特定范围操作；不投影用户 Developer/Reviewer/管理员权限，也不把 applicationId 当用户 subject。资源服务仍执行数据归属和具体业务条件检查。
 
@@ -41,6 +43,9 @@ Gateway 服务身份只允许调用签发方法，不授予终端用户任何业
 App 快照、委托期限及撤销传播上界按 [委托上下文契约](../../platform/contracts/oauth-delegation-v1.md) 执行；Auth/App 故障必须失败关闭。首版不缓存授权结果，不能为可用性退回仅验 JWT 或仅信任 client_id。
 
 ## 验收场景
+
+- 当前版本移除 email 时，旧 token 仍可访问其 E 覆盖的其他路由，email 路由拒绝；当前版本恢复后只可恢复原 token/G 内的权限。
+- TEST token 不得改用 STABLE 或其他 major 的配置；同应用同 sub 不代替 channel/client 授权。
 
 - 正确 token/route 成功；ID Token、Session、service JWT、随机值不能替代 access token。
 - scope、audience、policyDigest、method/path、client 资格任一不符均不签发。

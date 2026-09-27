@@ -68,3 +68,7 @@ UC-AUTH-006 至 009 已 ACCEPTED；设备证明、学号规范化和散列、Ses
 - 邮箱设置/注册见 [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)，已有账号邮箱登录及本机设备授权见 [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md)，Developer 自助申请见 [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md)，UC011 已 ACCEPTED，其独立协议与向量已闭合；UC012 的专用签名、向量和接口也已闭合并 ACCEPTED，后端已基于 UC011 完成集成并合回 auth-center/v1，仍需交付 Gateway/客户端；UC013 已 ACCEPTED，后端依赖已满足，协议与默认关闭的恢复就绪声明已固定，进入实现流程。公网资格开通仍等待邮箱恢复链路实际交付，不能仅以后端实现完成视为产品可用。
 - 旧设备明确授权新增凭据、凭据/Session 列表与命名、撤销其它 Session、账号禁用/重新启用和注销仍需独立用例。当前 token 的 Session 撤销由 [UC-AUTH-008](use-cases/UC-AUTH-008-revoke-own-session.md) 定义，本人 credentialId 的凭据撤销由 [UC-AUTH-009](use-cases/UC-AUTH-009-revoke-own-credential.md) 定义，客户端退出组合见[生命周期建议](client-guides/authentication-lifecycle.md)。
 - 外部应用的专属学生关联标识：披露授权、未关联语义、保留/删除/改绑与配额连续性；当前注册仅建立内部关系，不发布新的对外身份 claim。
+
+## OAuth 身份与授权分组已明确
+
+sector 与 sub 由 Auth 按 Application 保存，不由 App 保存；渠道/type/major 共用该身份分组。client/credential 和用户授权按渠道隔离，major 共用历史授权，版本变化不自动删减历史同意。具体规则与标准 sector URI 见 [OAuth/OIDC v1](../platform/contracts/oauth-oidc-v1.md)，当前仍待整体用例接受与实现。

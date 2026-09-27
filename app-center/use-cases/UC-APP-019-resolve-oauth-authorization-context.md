@@ -8,13 +8,13 @@
 
 ## 输入与输出
 
-四个精确内部方法、权限和字段见 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md)。clientId 必填；运行解析还必须给出 channel 和 rpcApiMajor。authId 只来自受信 Auth 服务身份，不开放普通用户查询。
+五个精确内部方法、权限和字段见 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md)。clientId 必填；运行解析还必须给出 channel 和 rpcApiMajor。authId 只来自受信 Auth 服务身份，不开放普通用户查询。
 
 ## 主流程
 
 1. 验证服务 JWS、audience 和方法级 permission。
 2. `GetClientConfiguration` 返回稳定 identity 元数据，并为 CONFIDENTIAL 返回当前 credentialRevision；`VerifyClientSecret` 只比较调用方刚读取的 expectedCredentialRevision 与当前摘要。
-3. `ResolveClientRuntimeConfiguration` 由 clientId 找到 Application 和 type，再使用请求中的 channel/rpcApiMajor 在单个 Mongo snapshot 中读取当前 Publication、APPROVED Version/Review 及依附 Version 的 OAuth 配置，从批准 snapshot 取得该 type 的 redirect URIs 与 scopes。该方法不需要 authId，供 Auth 在登录前校验 redirect URI。
+3. `ResolveClientRuntimeConfiguration` 由 clientId 找到 Application 和 type，先核对请求 channel 等于登记 channel，再使用该 channel/rpcApiMajor 在单个 Mongo snapshot 中读取当前 Publication、APPROVED Version/Review 及依附 Version 的 OAuth 配置，从批准 snapshot 取得该 type 的 redirect URIs 与 scopes。该方法不需要 authId，供 Auth 在登录前校验 redirect URI。
 4. `ResolveAuthorizationContext` 在相同运行配置检查基础上读取指定用户当前 ACTIVE Tester，并校验调用方传入的 expected runtime tuple。
 5. 返回资格版本、最小展示资料与短时快照期限；任何缺失或不一致失败关闭。
 
@@ -23,7 +23,7 @@
 <a id="br-oac-006"></a>
 ### BR-OAC-006：内部查询与最小披露
 
-只允许显式配置的 Auth service principal，并按共享契约分离读取、验证、运行配置解析和用户上下文解析权限。输入中的 channel/rpcApiMajor 只能选择服务端权威 Publication，不能替换批准 redirect URI、scopes、Version 或 adminAuthId；输出不含 secret/摘要、学生资料或用户邮箱。
+只允许显式配置的 Auth service principal，并按共享契约分离读取、验证、运行配置解析和用户上下文解析权限。输入 channel 必须等于 client 固定渠道；rpcApiMajor 只能选择该渠道服务端权威 Publication，不能替换批准 redirect URI、scopes、Version 或 adminAuthId；输出不含 secret/摘要、学生资料或用户邮箱。
 
 GetClientConfiguration 可以返回 DISABLED 元数据供 Auth 解释；VerifyClientSecret、ResolveClientRuntimeConfiguration 和 ResolveAuthorizationContext 对 DISABLED client 均不成功。
 
@@ -37,7 +37,7 @@ redirect URIs、requiredScopes 和 optionalScopes 都从该批准 snapshot 取�
 <a id="br-oac-008"></a>
 ### BR-OAC-008：一致快照与资格版本
 
-一次 provider 响应的 registration、Publication、Version、Review、回调和 scopes 来自同一个 Mongo snapshot。`RuntimeConfiguration` 返回 `(registrationRevision, versionId, publicationRevision, adminAuthId)`；用户授权上下文在此基础上增加 `testerMembershipId`。Auth 必须把运行 tuple 作为不可拆分值比较，不能拼接不同调用的字段。
+一次 provider 响应的 registration、Publication、Version、Review、回调和 scopes 来自同一个 Mongo snapshot。`RuntimeConfiguration` 返回 `(registrationRevision, authorizationEpoch, versionId, publicationRevision, adminAuthId)`；用户授权上下文在此基础上增加 `testerMembershipId`。Auth 必须把运行 tuple 作为不可拆分值比较，不能拼接不同调用的字段。
 
 credentialRevision 只用于一次 confidential secret 验证，不属于运行 tuple。secret 轮换不会使已建立的 grant、授权交互、code 或 token 仅因 revision 改变而失效。移除后重新加入的 Tester 必须产生新的 membership episode；发布、管理员或 client 状态变化后不能用旧查询继续成功。App 不回调 Auth；当前 Developer 状态由 Auth 自己确认。
 
@@ -53,12 +53,18 @@ consent 展示只能读取当前已公开 ApplicationProfile 的投影；未有�
 
 Auth 必须先调用 `ResolveClientRuntimeConfiguration`，并在发起登录或任何可能跳转到应用的响应前，对请求 redirect URI 做完整字符串精确匹配。未知或非法 redirect URI 只在 Auth 本地显示错误，绝不跳转。
 
-用户登录后，Auth 使用预登录取得的 runtime tuple 调用 `ResolveAuthorizationContext`。App 必须在同一 snapshot 复查 tuple 和 ACTIVE Tester；任一字段变化返回前置条件失败。Auth 不得把旧 runtime 的 redirect URI 与新 Version 的 scopes 或 Tester 资格组合。授权确认和 code 兑换仍重新解析并绑定精确 Version/Publication；grant 与已签发 token 是否延续则按当前允许 scopes 和资格判断，Version ID 变化本身不是撤销理由。
+用户登录后，Auth 使用预登录取得的 runtime tuple 调用 `ResolveAuthorizationContext`。App 必须在同一 snapshot 复查 tuple 和 ACTIVE Tester；任一字段变化返回前置条件失败。Auth 不得把旧 runtime 的 redirect URI 与新 Version 的 scopes 或 Tester 资格组合。授权确认和 code 兑换仍重新解析并绑定精确 Version/Publication；grant 的历史同意集合不因版本许可减少而删减；已签发 token 以原 channel/major 的当前资格和有效 scope 交集决定访问，Version ID 变化本身不是撤销理由。
+
+<a id="br-oac-011"></a>
+### BR-OAC-011：Auth sector 的回调事实来源
+
+GetApplicationPublishedRedirects 仅向授权 Auth 服务返回单个应用当前批准且已发布回调的快照并集，具体字段与快照比较见共享契约。App 不生成 sector、不保存用户 sub；同一应用所有渠道/type 可归入一个 sector，但查询成功不授予任何用户运行资格。清单不含草稿或未发布历史版本，故障不得用空清单伪装成功。
 
 ## 验收场景
 
 - 服务凭据逐方法授权；错误 audience、USER token 和公网访问拒绝。
-- 同一 clientId 可解析不同 exact-major Publication；请求 major 不匹配时不会回退或猜测。
+- 同一渠道 clientId 可解析不同 exact-major Publication；跨渠道解析拒绝，major 不存在不回退。
+- sector 回调查询跨已启用渠道/major 取得同一应用的批准并集，忽略 draft；App 输出无 sector/sub。
 - 登录前可取得当前受审核回调并精确校验，不需要伪造 authId；非法回调不发生重定向。
 - 当前 Tester 正常解析；移除后重加返回新 membershipId，旧资格不能恢复。
 - TEST 槽切换、major 不同、跨应用 Version、批准 snapshot 不一致或对应 redirect 数组为空失败。
@@ -74,3 +80,5 @@ Auth 必须先调用 `ResolveClientRuntimeConfiguration`，并在发起登录或
 - 2026-09-27：建立 OAuth 授权上下文提供方设计。
 - 2026-09-27：增加用户无关的运行配置解析与登录前后 runtime tuple 检查。
 - 2026-09-27：运行选择改为稳定 clientId 加显式 channel/rpcApiMajor；credential revision 与运行资格分离。
+
+- 2026-09-27：client/registration 按渠道隔离，同渠道各 major 共享；sector/sub 由 Auth 按 Application 唯一管理。

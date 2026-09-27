@@ -13,7 +13,7 @@ POST /token，grant_type=refresh_token、refresh_token、可选 scope，client �
 ## 主流程
 
 1. 先校验登记 client 的认证，再验证 refresh 摘要及 family 归属。
-2. 重新读取 App 资格、用户/开发者状态、grant revision、family 绝对期限和请求范围。
+2. 重新读取 App 资格、用户/开发者状态、grant revocationEpoch、family 绝对期限和请求范围。
 3. 原子消费旧 refresh，登记下一代 refresh 与 access token，审计并确认提交。
 4. 正确绑定的已消费 refresh 再次使用时，原子撤销整个 family，要求重新交互登录授权。
 
@@ -36,14 +36,19 @@ family 的绝对期限和初始 token 期限见共享协议。用户退出平台
 <a id="br-oau-011"></a>
 ### BR-OAU-011：刷新不得扩权或复活
 
-省略 scope 沿用该 refresh 的集合；指定时必须含 openid 和 offline_access、且为旧 refresh 的子集。不再需要离线访问时通过 UC018 撤销 family 或重新取得不含 offline_access 的授权，不签发缺失离线许可的后继 refresh。缩减权限后，下一代 refresh 同样只保留缩减集合，不允许以后恢复为祖先集合；每次仍受当前 grant、App 资格与 Auth 映射限制。
+Refresh family 保存原 channel/rpcApiMajor、client authorizationEpoch、Tester episode、grant revocationEpoch 和已授予的 refreshScopeCeiling F。省略 scope 使用 F；显式 scope 必须包含 openid/offline_access 且为 F 子集，越界返回 invalid_scope，不能以 grant 后来增加了 scope 为理由扩大旧 family。新权限通过 UC014/015 取得新凭据。
 
-grant revision 变化、client 禁用、用户不可用、Tester episode 变化、family 已撤销/到期或 token scopes 不再是当前 Version 许可的子集均 invalid_grant。单纯 Version/publication 变化不使 family 失效；Auth 重新解析当前上下文并把 scopes 收缩到当前许可。CONFIDENTIAL 刷新必须使用当前 secret，轮换后旧 secret 认证失败，但 credentialRevision 变化本身不撤销 family。不能通过更新记录上的 revision 使旧授权重新有效。正常刷新不主动撤销尚未到期的同 family access token；family/授权撤销则统一生效。
+本次拟用集合记为 Q。Auth 先通过 ResolveClientRuntimeConfiguration 读取 token 原 channel/major 的当前版本，再用返回的 registration/runtime tuple 调用 ResolveAuthorizationContext；不能把签发时旧 Version tuple 作为刷新前置值，也不能根据请求换 major/channel。确认用户、client、Tester episode 和 grant epoch 有效后，实际签发 access scopes 为 `Q∩G∩D∩当前可用 Catalog scopes`，必须仍包含 openid/offline_access，否则 invalid_grant、不签后继凭据。本次 token 响应 scope 必须如实返回实际集合。
+
+自动求交只限制本次 access token，不裁剪历史 G，也不把当前 D 写成下一代 refresh 的永久上限。下一代 refresh 保留 Q 作为 ceiling；仅客户端显式缩小 Q 才永久缩小该 family 上限。因 D 暂时缩小而未使用的、原本已同意的 scope，可在后续批准版本恢复时由 refresh 再次取得，但永远不能超过 F/G。本用例不弹 UI 或自动扩大用户同意。
+
+grant revocationEpoch 或 client authorizationEpoch 不匹配、client 禁用、用户不可用、Tester episode 改变、family 撤销/到期均 invalid_grant。grant 仅增加权限而 revision 改变、单纯 Version/publication/credentialRevision 变化不使 family 失效。CONFIDENTIAL 必须使用当前 secret。正常刷新不撤销同 family 尚未到期的 access token，family/用户撤销仍统一生效；不能覆盖旧 epoch 来恢复已撤销凭据。
 
 ## 验收场景
 
 - 没有明确 offline_access 同意不返回 refresh；停用该能力时 discovery 同步收缩。
-- 正常旋转，缩小后不能再扩大；绝对期限不随刷新延长。
+- 正常旋转；客户端显式缩小 ceiling 后不能扩大，D 临时变小不裁剪 G/ceiling；绝对期限不延长。
+- 当前版本移除 email，refresh 返回不含 email 的 access；原 major 后续恢复 email，可在原 ceiling/G 内恢复，不要求再次同意。
 - 双并发、丢响应重试、跨 client 重放、错误 secret、祖先 token 重放覆盖 family 状态与秘密保护。
 - 用户撤回、部分 scope 撤回后再授予、Tester 重加均不能恢复旧 refresh；secret 轮换要求后续使用新 secret，但不删除 family。
 

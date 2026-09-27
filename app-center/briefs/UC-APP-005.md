@@ -613,7 +613,7 @@ OAuthRedirectConfiguration {
 - callback hostname、path、query 和 port 可以不同；运行时始终做完整字符串精确匹配，不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
 - 两个数组分别按 Unicode code point 排序。输入顺序不表达业务含义。
 
-`ApplicationVersionOAuthConfig` 使用独立 collection 保存，但它是 Version 的依附实体：创建、编辑与 Version 使用同一事务和 revision，不能独立修改或删除。client identity 可以在 Version 前后独立登记；两者只在运行解析时按 client type 组合。redirect hostname 变化不重建稳定 clientId。
+`ApplicationVersionOAuthConfig` 使用独立 collection 保存，但它是 Version 的依附实体：创建、编辑与 Version 使用同一事务和 revision，不能独立修改或删除。client identity 可以在 Version 前后独立登记；发布时检查目标渠道对应 registration/credential 的存在性，运行时按 client 固定渠道和 type 组合。Version 不保存 sector；sector 由 Auth 按 Application 管理，redirect hostname 变化不重建 clientId 或 sector。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -1094,7 +1094,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
-| `use-cases/UC-APP-002-create-application-version.md` | 475 | `1c96b528f65c` |
+| `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

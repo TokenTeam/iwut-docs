@@ -13,7 +13,7 @@
 | UC | 工作包 | 主要前置 |
 | --- | --- | --- |
 | ApplicationVersion OAuth 扩展 | 在 UC-APP-002/003/004/005/007 中创建、编辑、审核并发布依附 Version 的 pkce/confidential 回调配置 | 已有 Version/Review/Publication |
-| [UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) | 管理 Application 级稳定 client identity、独立 secret credential 和停用 | 已有 Application/Developer 管理门禁；不依赖 Publication |
+| [UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) | 管理 Application＋channel 级稳定 client identity、独立 secret credential 和停用 | 已有 Application/Developer 管理门禁；不依赖 Publication |
 | [UC-APP-019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | Auth 读取配置、验证 secret、取得当前回调/scopes 和用户运行资格 | APP018、已有 TEST/Tester/批准快照 |
 | [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) | 官方登录/consent、用户 grant、一次性授权码 | APP019、平台 Session、生产 Catalog |
 | [UC-AUTH-015](../use-cases/UC-AUTH-015-exchange-authorization-code.md) | 两种 client 兑换 code，签发 ID/access token | AUTH014、OIDC 签名/JWKS |
@@ -29,8 +29,8 @@
 
 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md) 分成两类：
 
-- 当前应用管理员：RegisterOAuthClient、GetApplicationOAuthRegistration、SetOAuthClientStatus、GetOAuthClientCredentialMetadata、RotateOAuthClientSecret。每个 Application 每种 type 只有一个稳定 clientId；redirect URI 在 ApplicationVersion 中管理；secret 仅登记/轮换时返回一次，不存在读取旧 secret 的接口。
-- Auth 内部：GetClientConfiguration、VerifyClientSecret、ResolveClientRuntimeConfiguration、ResolveAuthorizationContext。运行配置以稳定 clientId 加 channel/rpcApiMajor 在登录前返回批准 Version 的回调/scopes；最后一项再绑定当前 TEST/Tester 资格。客户端不能提交“申请哪些就批准哪些”。
+- 当前应用管理员：RegisterOAuthClient、GetApplicationOAuthRegistration、SetOAuthClientStatus、GetOAuthClientCredentialMetadata、RotateOAuthClientSecret。每个 Application 每渠道每种 type 只有一个稳定 clientId；redirect URI 在 ApplicationVersion 中管理；secret 仅登记/轮换时返回一次，不存在读取旧 secret 的接口。
+- Auth 内部：GetClientConfiguration、VerifyClientSecret、ResolveClientRuntimeConfiguration、ResolveAuthorizationContext、GetApplicationPublishedRedirects。运行配置以稳定 clientId 加 channel/rpcApiMajor 在登录前返回批准 Version 的回调/scopes；最后一项再绑定当前 TEST/Tester 资格。客户端不能提交“申请哪些就批准哪些”。
 
 App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 App MongoDB，也不保有可独立变更的第二份 client 注册表。
 
@@ -46,10 +46,22 @@ App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 A
 ## 需要明确接受的取舍
 
 - 当前 App 只有 TEST/Tester 的运行规则，因此首版 OAuth 只绑定该渠道；面向所有用户的 STABLE 接入需先设计正式发布/运行资格。
-- client 禁用、Tester episode 或 grant revision 变化会使旧凭据失效；Version 升级保留同一 clientId 下兼容 scopes 的 grant，新增 scopes 重新 consent。secret 轮换只影响后续 confidential client authentication，不撤销既有 grant/token/family。
+- client authorizationEpoch、Tester episode 或 grant revocationEpoch 变化使旧代失效；grant revision 仅用于 OCC/审计。Version 或 major 切换保留历史同意，资源使用当前交集，新增 scopes 才重新 consent。secret 轮换只影响后续 confidential client authentication，不撤销既有 grant/token/family。
 - refresh 严格旋转，无重试宽限；客户端须串行刷新，丢响应可能需要重新授权。
-- pairwise subject 按稳定 clientId 隔离，同一 clientId 跨 Version/hostname 保持稳定，PUBLIC 与 CONFIDENTIAL 不相关；它不是学号分组，也不是全局 authId。启用前仍需验证目标 OIDC 认证套件对静态 sector metadata 的要求。
+- sector 与 pairwise subject 由 Auth 管理，按 Application 隔离，所有渠道/type/major/hostname 共用；不同应用不因开发者相同而合并。标准 sector URI 使用 Auth 管理的每应用独立 hostname 和批准回调清单；App 不保存映射。
 - 标准门户先支持浏览器重新登录。原生已有 Session 的无感 SSO 桥、更多回调类型、更多动态资料 scopes、公开 introspection、单点登出均不在本轮。
 - [Traefik 契约](../../platform/contracts/oauth-delegation-v1.md)明确已有短期上下文及在途请求的撤销传播窗口；不承诺第三方应用会话/已取得数据同步删除。
 
 这些是本轮具体建议，不是用户已经逐条接受的决定。后续可以调整 PROPOSED 文档后再生成 brief；已有 SESSION/身份契约保持其原有权威性。
+
+## 本轮确认的分离边界
+
+| 对象 | 归属与稳定范围 |
+| --- | --- |
+| sector / OIDC sub | Auth；每 Application 一个，所有渠道/type/major 共享 |
+| registration / clientId / secret | App；按 Application＋channel 登记 PUBLIC/CONFIDENTIAL，各 major 复用 |
+| grant / 历史同意 | Auth；按 authId＋clientId 保存，因此渠道隔离、major 共享；不因版本许可减少而删除 |
+| 本次有效权限 | Auth；token、历史同意、当前批准版本和可用目录的交集 |
+| code / token / refresh 运行选择 | channel 固定于 client，major 固定于本次凭据；Version 可在校验时重读当前值 |
+
+UC015 包含 sector 首次原子建立和稳定 sub；APP019 增加批准回调并集查询；Gateway 增加受控 sector URI 的只读路由。新契约仍为 PROPOSED，本轮更新不标记为已实现或开启 GREY/STABLE。

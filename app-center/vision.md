@@ -8,7 +8,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 
 本阶段不尝试一次定义完整应用平台；前十六个用例验证应用管理与封闭测试闭环，UC-APP-018/019 继续定义 OAuth/OIDC 接入边界：
 
-> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；已批准运行版本可放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标，并为 Auth 提供 Application 级稳定 OAuth client identity、Version 级受审核回调、scope 和 Tester 资格快照。
+> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；已批准运行版本可放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope 和 Tester 资格快照。
 
 ## 当前用户
 
@@ -92,3 +92,5 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 资料审核决定只能写入一次，不能审核自己创建、提交或当前管理的资料；Review 与 Revision 的结果原子一致。
 - 资料批准与当前公开指针替换原子完成，但不创建 stable 槽位；资料拒绝不改变原公开指针。
 - REJECTED ProfileRevision 保持原 decision、snapshot、内容与审计；网页端重新编辑时通过 UC-APP-013 创建独立新 DRAFT，仍受单一 DRAFT 约束保护。
+
+OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

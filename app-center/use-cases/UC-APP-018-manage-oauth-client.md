@@ -4,7 +4,7 @@
 
 ## 目标与范围
 
-Application 当前管理员为应用登记长期稳定的 OAuth client identity，查询元数据、轮换 confidential secret、禁用或重新启用 client。client identity 与 Application 同寿命，不随 ApplicationVersion、发布 channel 或 RPC API major 变化；redirect URI 与 scopes 属于受审核的 ApplicationVersion。
+Application 当前管理员为应用登记长期稳定的 OAuth client identity，查询元数据、轮换 confidential secret、禁用或重新启用 client。client identity 与 Application 同寿命，固定归属一个发布 channel，不随 ApplicationVersion 或 RPC API major 变化；redirect URI 与 scopes 属于受审核的 ApplicationVersion。
 
 App Center 不签发用户 token、不保存 consent，也不把 launchUrl 推断成 redirect URI。
 
@@ -17,7 +17,7 @@ App Center 不签发用户 token、不保存 consent，也不把 launchUrl 推�
 登记 client identity：
 
 1. 校验操作者为当前 Application 管理员，当前 Developer 为 `APPROVED`。
-2. 校验 type，并读取 Application 的 `ApplicationOAuthRegistration`；记录不存在时要求 expectedRegistrationRevision 为空，记录已存在时要求它等于当前 revision。
+2. 校验 channel/type，并读取该 `(applicationId, channel)` 的 `ApplicationOAuthRegistration`；记录不存在时要求 expectedRegistrationRevision 为空，记录已存在时要求它等于当前 revision。
 3. 若该 type 已有 clientId，返回已存在错误；否则分配全局唯一 clientId。CONFIDENTIAL 同时生成高熵 secret。
 4. 在同一事务中通过 Application 管理员写栅栏复查归属，首次建立 registration 时写 revision=1，否则写入对应 type 的 clientId、`ACTIVE` 状态并递增 registrationRevision；CONFIDENTIAL 同时写入独立 `OAuthClientCredential` 的摘要与 credentialRevision=1。
 5. 仅在确定提交后返回元数据；confidential secret 只在本次成功响应出现。
@@ -39,16 +39,16 @@ secret 轮换：
 <a id="br-oac-001"></a>
 ### BR-OAC-001：应用归属与稳定接入身份
 
-只有当前 Application 管理员且符合 Developer 门禁者可管理 client。每个 Application 至多拥有一个 PUBLIC clientId 和一个 CONFIDENTIAL clientId；二者均由服务端生成、全局唯一、永久不重用。
+只有当前 Application 管理员且符合 Developer 门禁者可管理 client。每个 Application 每渠道至多拥有一个 PUBLIC clientId 和一个 CONFIDENTIAL clientId；二者均由服务端生成、全局唯一、永久不重用。
 
-clientId 与 Application 同寿命，不包含 channel、rpcApiMajor、Version 或 hostname。Version 升级、redirect URI 调整、发布槽切换、应用改名、管理员转让和 Developer 公开 ID 变化都不重建 clientId。创建 client 不代表用户已经 consent，也不扩大 Version 已审核的 scopes。
+clientId 与 Application 同寿命，固定归属一个 channel，不包含 rpcApiMajor、Version 或 hostname。Version 升级、redirect URI 调整、发布槽切换、应用改名、管理员转让和 Developer 公开 ID 变化都不重建 clientId。创建 client 不代表用户已经 consent，也不扩大 Version 已审核的 scopes。
 
 <a id="br-oac-002"></a>
 ### BR-OAC-002：Registration 与 Version 配置分离
 
-`ApplicationOAuthRegistration` 以 applicationId 为唯一身份，保存两种可选 client identity 的 clientId、状态和 registrationRevision。`ApplicationVersionOAuthConfig` 依附于 Version，保存该 Version 的 `pkceRedirectUris` 与 `confidentialRedirectUris`，不复制到 registration。
+`ApplicationOAuthRegistration` 以 `(applicationId, channel)` 为唯一身份，保存两种可选 client identity 的 clientId、状态和 registrationRevision。`ApplicationVersionOAuthConfig` 依附于 Version，保存该 Version 的 `pkceRedirectUris` 与 `confidentialRedirectUris`，不复制到 registration。
 
-client identity 可以在首个 Version 或 Publication 之前创建；创建时不读取发布槽、redirect URI 或 scopes。hostname 迁移通过新 Version 的受审核 redirect 配置完成，不创建新 clientId，也不修改 registration。运行时由 UC-APP-019 使用调用方明确给出的 channel 和 rpcApiMajor 选择当前 Publication。
+channel 在登记后不可变；首版仅启用 TEST，GREY/STABLE 的登记和使用必须等待相应发布/运行资格用例，不能借其他渠道代用。client identity 可以在首个 Version 或 Publication 之前创建；创建时不读取发布槽、redirect URI 或 scopes。hostname 迁移通过新 Version 的受审核 redirect 配置完成，不创建新 clientId，也不修改 registration。运行时由 UC-APP-019 使用调用方明确给出的 channel 和 rpcApiMajor 选择当前 Publication。
 
 <a id="br-oac-003"></a>
 ### BR-OAC-003：高熵 secret 与一次披露
@@ -62,19 +62,19 @@ PUBLIC 不产生或保存 secret；CONFIDENTIAL 由 App 服务端生成，只在
 
 登记 identity、禁用和重新启用由 registrationRevision 执行 OCC；secret 轮换由 credentialRevision 独立执行 OCC。相同状态请求为 no-op，不增加 revision。redirect URI 或 scope 随 Version/Publication 变化，由 versionId/publicationRevision 表达，不增加这两个 revision。
 
-registration 修改、credential 修改与当前管理员/Developer 门禁按现有 App 命令一致性策略确认，事务包含配置和审计；并发登记由 applicationId 和 clientId 唯一约束收敛。状态停用保留记录，不释放 clientId；重新启用同一 identity，不恢复或替换 secret。
+registration 修改、credential 修改与当前管理员/Developer 门禁按现有 App 命令一致性策略确认，事务包含配置和审计；并发登记由 `(applicationId, channel)` 和 clientId 唯一约束收敛。状态停用保留记录，不释放 clientId；重新启用同一 identity，不恢复或替换 secret。每个 slot 另存 authorizationEpoch（初始 1），每次实际禁用或重新启用递增；登记另一 type、secret 轮换和 Version 变化不改变该 slot 的 epoch。token/family 绑定它，防止禁用后重新启用复活旧凭据，也避免另一 type 的登记使已有 token 失效。
 
 <a id="br-oac-005"></a>
 ### BR-OAC-005：scope 与授权所有权
 
-Registration 和 Credential 都不保存可由管理员自由编辑的 scope 白名单。当前批准 Version 声明的 requiredScopes/optionalScopes 由版本审核和发布规则决定，UC-APP-019 对 Auth 提供；scope 语义、consent、code、grant 和 token 归 Auth。
+sector、sector_identifier_uri 和用户 sub 均由 Auth 管理，App 不保存副本；两个渠道或两种 type 的 clientId 不同不代表它们的 sector 不同。Registration 和 Credential 都不保存可由管理员自由编辑的 scope 白名单。当前批准 Version 声明的 requiredScopes/optionalScopes 由版本审核和发布规则决定，UC-APP-019 对 Auth 提供；scope 语义、consent、code、grant 和 token 归 Auth。
 
 管理查询只返回当前管理员所需元数据；审计记录操作、ID/revision 和状态变化，不记录 secret。API 访问日志、HTTP 缓存和 trace 同样不能保留秘密。
 
 ## 验收场景
 
 - 普通用户、其他应用管理员和已转让的旧管理员拒绝；并发转让与登记/轮换不能越权。
-- 同一 Application 每种 type 至多一个稳定 clientId；Version、major、channel 或 hostname 变化均不产生第二个同 type identity。
+- 同一 Application 每渠道每种 type 至多一个稳定 clientId；Version、major 或 hostname 变化不更换 identity，TEST/GREY/STABLE 的 clientId 和 credential 分别隔离。
 - PUBLIC 没有 secret；CONFIDENTIAL secret 只返回一次，读取永远不含明文或摘要。
 - registration CAS/no-op 与 credential CAS 相互独立；secret 轮换不改变 registrationRevision、grant 或已签发 token。
 - client 可以在没有 Version、Review 或 Publication 时登记；运行解析仍必须满足 UC-APP-019 的完整资格。
@@ -90,3 +90,5 @@ Registration 和 Credential 都不保存可由管理员自由编辑的 scope 白
 - 2026-09-27：建立 OAuth client 管理设计。
 - 2026-09-27：redirect URI 改由 ApplicationVersion 保存、审核和发布。
 - 2026-09-27：client identity 改为 Application 级稳定 registration；secret credential 与 Version 配置使用独立生命周期和 revision。
+
+- 2026-09-27：client/registration 按渠道隔离，同渠道各 major 共享；sector/sub 由 Auth 按 Application 唯一管理。

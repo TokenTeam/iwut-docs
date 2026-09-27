@@ -48,6 +48,9 @@ HTTP 采用 ForwardAuth，native gRPC 与转换后的 gRPC-Web 保留合法 stat
 
 ## 验收场景
 
+- route.allowedChannels 拒绝跨环境 token，同一 OIDC sub 不能绕过 TEST/STABLE 授权隔离。
+- 受控 sector host 仅 GET 固定清单路径；未知 sector/host、伪造转发 host 或任意代理 URL 拒绝，App 故障不返回旧清单。
+
 - PUBLIC/CONFIDENTIAL 签出的 access token 均可走对应已批准 scope 路由，正确传入专用上下文。
 - 外来身份头、重复/别名 Authorization、错误 issuer/aud/typ、错路由/路径、ID Token 冒充全部拒绝。
 - 401/403/429/503 在 HTTP/gRPC/gRPC-Web 中语义一致，所有鉴权失败均零上游调用。

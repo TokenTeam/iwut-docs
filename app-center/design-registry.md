@@ -23,7 +23,7 @@
 | Business Rule / Publication | `BR-PUB-011` |
 | Business Rule / Tester | `BR-TST-037` |
 | Business Rule / Runtime Resolution | `BR-RUN-011` |
-| Business Rule / OAuth Client | `BR-OAC-011` |
+| Business Rule / OAuth Client | `BR-OAC-012` |
 | Architecture Decision | `ADR-007` |
 
 Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确认没有未登记的既有定义。
@@ -245,6 +245,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-OAC-008` | 一致快照与资格版本 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-008) | — | — |
 | `BR-OAC-009` | 展示来源与失败关闭 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-009) | — | — |
 | `BR-OAC-010` | 登录前回调校验与两阶段一致性 | Authorization / Consistency | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-010) | — | — |
+| `BR-OAC-011` | Auth sector 的回调事实来源 | Boundary / Query | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-011) | — | App 只返回批准回调事实。 |
 
 
 ## Architecture Decision Records

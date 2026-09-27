@@ -9,7 +9,7 @@
 | 编号空间 | Next ID |
 | --- | --- |
 | Use Case / Auth Center | `UC-AUTH-020` |
-| Business Rule / OAuth Authorization | `BR-OAU-021` |
+| Business Rule / OAuth Authorization | `BR-OAU-022` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
 | Business Rule / Developer Status | `BR-DEV-013` |
@@ -202,3 +202,4 @@
 | `BR-OAU-018` | 服务调用者和用户授权双重门禁 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-018) | — | — |
 | `BR-OAU-019` | 路由许可与委托身份隔离 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-019) | — | — |
 | `BR-OAU-020` | 签发撤销一致性与在线依赖 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-020) | — | — |
+| `BR-OAU-021` | Application 级 sector 与主体映射 | Identity / Privacy | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-021) | — | Auth 唯一拥有 sector/sub。 |

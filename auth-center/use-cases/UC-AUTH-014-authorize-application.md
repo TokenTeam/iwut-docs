@@ -14,10 +14,10 @@
 
 ## 主流程
 
-1. 读取稳定 client 元数据，以请求中的 channel/rpcApiMajor 调用 App 的 `ResolveClientRuntimeConfiguration`，取得当前批准 Version 的 redirect URIs、scopes 和 runtime tuple；先对 redirect_uri 做完整字符串精确匹配，再校验其余协议参数并建立限时 interaction。未知或非法回调只显示 Auth 本地错误，不得重定向。
+1. 读取稳定 client 元数据，以请求中的 channel/rpcApiMajor 调用 App 的 `ResolveClientRuntimeConfiguration`，取得当前批准 Version 的 redirect URIs、scopes 和 runtime tuple；先对 redirect_uri 做完整字符串精确匹配，再校验其余协议参数并建立限时 interaction。未知或非法回调只显示 Auth 本地错误，不得重定向。准备静态 OIDC 注册元数据时复用 UC015/BR-OAU-021 的 Auth sector 模块确认该 Application 的稳定 sector，并按共享协议验证批准回调清单；不要求 App 保存 sector。
 2. 官方门户确认当前登录用户；Auth 使用预登录 runtime tuple 调用 `ResolveAuthorizationContext`，取得 Tester 资格并确认运行配置未变化，再从自己的 Catalog 取得 scope 含义和映射。
 3. 展示应用及开发者可核实信息、必需/可选权限、已有授权与新增权限。用户可以拒绝整个申请，也可以不选 optional 项。
-4. 确认时重新检查 Session、App 授权上下文及目录，并逐字段比较 registrationRevision、versionId、publicationRevision、testerMembershipId 和 adminAuthId；权限/资格变化时要求重新开始或重新展示，不能静默提交旧页面。
+4. 确认时重新检查 Session、App 授权上下文及目录，并逐字段比较 registrationRevision、authorizationEpoch、versionId、publicationRevision、testerMembershipId 和 adminAuthId；权限/资格变化时要求重新开始或重新展示，不能静默提交旧页面。
 5. 原子确认 interaction、保存 grant 及审计、创建一次性 code。仅确定提交后回调；未知提交结果不重放旧 code，重新发起授权。
 
 ## 业务规则
@@ -32,14 +32,18 @@
 
 令 D=当前批准版本 requiredScopes∪optionalScopes，R=本次请求 scopes，S=用户本次选择；必须 requiredScopes⊆R⊆D，S 包含 requiredScopes 且 S⊆R。登录必需 openid；不允许用“不选 optional”偷增其他权限。无法接受必需权限时用户仍可拒绝全部。
 
-Grant 按 (authId,clientId) 唯一，保存 grantedScopes、revision 和 status；Version/runtime tuple 只记录为最近一次 consent 审计，不构成 grant 身份。首次为 S；以后先把既有集合收缩为 `grantedScopes∩D`，相同或更小范围可在 prompt 允许时复用，新增权限和 offline_access 按各自规则显式同意，再把本次 S 合并。实际 code 只绑定本次 S，不携带全部历史 grant。
+Grant 按 `(authId,clientId)` 唯一；client 固定所属 channel，因此 TEST/GREY/STABLE 的 consent 分离，同渠道各 RPC major 共享该 client 的 grant。PUBLIC/CONFIDENTIAL 仍有独立 grant，不因拥有相同用户 sub 自动共享权限。保存历史同意集合 G=grantedScopes、revision、revocationEpoch（初始 1）和 status；运行 tuple 仅用于审计。
 
-grantedScopes 集合或 status 改变时递增 grant revision；单纯 Version、Publication 或 secret credential revision 变化不递增 grant revision，也不使旧 grant 自动失效。应用升级不会自行新增 grant；若 D 缩小，超出的授权在下一安全边界收缩，若 D 扩大，新增项仍需 consent。已有授权是否撤销由 UC-AUTH-018 决定。
+首次同意保存 S；以后只展示本次尚未同意的 `S−G`，明确同意后更新为 `G∪S`。若本次 R 已包含于 G 且满足当前 D，可按 prompt 规则静默取得本次需要的 S。prompt=consent 仍展示确认，offline_access 的专用规则保持有效。不能把历史 G 全部签入 token；S 必须是当前请求与当前允许集合的子集。
+
+Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 `G∩D`，也不改变 grant 的 revision/epoch。某个 scope 未来再次由批准版本声明，只要用户未主动撤回，仍可复用原同意。未知/停用的 Catalog scope 在运行时不生效，恢复同名含义必须保持 Catalog 的稳定语义。所有资源实际权限为 `token.scopes ∩ G ∩ D ∩ 当前可用 Catalog scopes`，不满足本次路由的权限时拒绝该操作，而非因为 token 另含一个暂不可用 scope 就拒绝全部操作。
+
+新增同意递增 revision（OCC/审计），不递增 revocationEpoch，不使已签发凭据失效；旧 token 不会因此自动获得新 scope。用户显式撤回按 UC018 改变 G/status 并递增两者，旧 code/token/family 通过 epoch 失效。重新同意也不能复活已撤销代的凭据。交互提交仍比较展示时 revision，竞争时要求刷新页面，不能覆盖用户后来决定。
 
 <a id="br-oau-003"></a>
 ### BR-OAU-003：交互和授权码原子性
 
-确认必须绑定当前 Session 的用户、interaction、CSRF 及展示版本；同一 interaction 只能同意或拒绝一次。code 保存用户、client、channel/rpcApiMajor、grant revision、完整 App 资格 tuple、从受审核回调集合精确匹配的 redirect URI、scope、nonce、auth_time、PKCE 和到期时间，存摘要不存原值。grant 可跨兼容 Version 延续，不允许 code 脱离其精确 tuple 使用。
+确认必须绑定当前 Session 的用户、interaction、CSRF 及展示版本；同一 interaction 只能同意或拒绝一次。code 保存用户、client、channel/rpcApiMajor、grant revision（审计）、revocationEpoch、完整 App 资格 tuple、从受审核回调集合精确匹配的 redirect URI、scope、nonce、auth_time、PKCE 和到期时间，存摘要不存原值。grant 可跨兼容 Version 延续，不允许 code 脱离其精确 tuple 使用。
 
 同意时 grant、code、interaction 状态和不可变审计同一 Mongo 事务提交；与本人撤销同一 grant 的写入栅栏串行确认。撤销后旧页面不得悄悄重授，必须刷新交互并显式确认。无效请求不改变既有 grant。
 
@@ -49,6 +53,10 @@ grantedScopes 集合或 status 改变时递增 grant revision；单纯 Version�
 登录入口、prompt/max_age、cookie/CSRF 和回调规则见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。门户只复用或重新完成已有注册/登录，不因 OAuth 请求静默创建平台账号。用户取消本次交互不撤回历史授权；退出平台 Session 不注销第三方应用。交互日志只含内部 ID、scope 名称与决定，不含凭据、资料值。
 
 ## 验收场景
+
+- 同渠道 major 1 只需 openid、major 2 需 openid/email：运行 major 1 不删除已同意 email，major 2 不重复要求同意。
+- TEST grant 不用于 GREY/STABLE；同一应用各渠道/type 的 sub 相同也不绕过 consent。
+- 增加 scope 仅更新 G/revision；旧 token 继续使用原权限，撤回则通过 revocationEpoch 使旧代失效。
 
 - public 缺 challenge、错误回调、伪造 App 版本或未批准 scope 拒绝，且不会回跳恶意 URL。
 - 匿名用户可登录后继续；换账号、跨 Session 确认、CSRF、过期交互拒绝。

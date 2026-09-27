@@ -77,11 +77,11 @@ ApplicationPublication 只引用 Version，不属于该聚合；发布槽位变�
 
 ### ApplicationOAuthRegistration 与 OAuthClientCredential
 
-ApplicationOAuthRegistration 是每个 Application 至多一个的聚合根，以 applicationId 为身份。它保存可选 publicClientId/publicStatus、confidentialClientId/confidentialStatus 和 registrationRevision。两个 clientId 都是全局稳定身份，不包含 channel、rpcApiMajor、Version 或 hostname；PUBLIC 与 CONFIDENTIAL 使用不同 clientId，分别执行不可降级的安全规则。
+ApplicationOAuthRegistration 是每个 Application 每渠道至多一个的聚合根，以 `(applicationId, channel)` 为身份。它保存可选 publicClientId/publicStatus、confidentialClientId/confidentialStatus 、各 slot 的 authorizationEpoch 和 registrationRevision。两个 clientId 都是全局稳定身份，固定归属一个 channel，不包含 rpcApiMajor、Version 或 hostname；PUBLIC 与 CONFIDENTIAL 使用不同 clientId，分别执行不可降级的安全规则。
 
 OAuthClientCredential 只属于 confidentialClientId，保存 secret 摘要、credentialRevision 与 rotatedAt。它使用独立 revision，使常见的 secret 轮换不改变 registration、Version、grant 或发布资格。轮换只影响以后 confidential client authentication。
 
-Registration 不保存 redirect URI 或 scopes；这些事实由当前 Publication 指向的批准 ApplicationVersion snapshot 提供。切换 Version、RPC major 或 redirect hostname 不重建 clientId。App Center 只提供配置与资格快照，Auth 拥有 consent、code、grant 和 token。
+Registration 不保存 redirect URI 或 scopes；这些事实由当前 Publication 指向的批准 ApplicationVersion snapshot 提供。同渠道切换 Version、RPC major 或 redirect hostname 不重建 clientId。App Center 只提供配置与资格快照，Auth 拥有 consent、code、grant 和 token。
 
 ### ApplicationReview
 
@@ -231,3 +231,5 @@ FilterRule 已进入首版产品范围，但尚无足够用例决定其聚合归
 - FilterRule 最终归属及其审核、修订和发布模型。
 
 这些问题用于验证边界，不要求现在为每个问题创建独立 UC。
+
+OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

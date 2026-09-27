@@ -122,7 +122,7 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
 5. 针对 approved Review.snapshot：
    - 通过 ScopeCatalog 确认 scopes 当前仍允许新版本使用，并取得 scopeCatalogRevision。
    - 通过 LaunchURLSubmissionPolicy 重新检查公网 HTTPS URL，并取得 preflightPolicyVersion。
-   - 读取该 Application 的 OAuth registration。snapshot 的 pkceRedirectUris 非空时必须已经登记 publicClientId；confidentialRedirectUris 非空时必须已经登记 confidentialClientId 及 credential。空数组允许发布，表示该 Version 暂不提供对应 OAuth 接入。
+   - 读取该 `(applicationId, TEST)` 的 OAuth registration。snapshot 的 pkceRedirectUris 非空时必须已经登记 publicClientId；confidentialRedirectUris 非空时必须已经登记 confidentialClientId 及 credential。空数组允许发布，表示该 Version 暂不提供对应 OAuth 接入。
 6. 为新 Publication（若需要）和本次 History 分别生成 UUIDv7，并从 Clock 取得 changedAt。
 7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，以及步骤 5 中非空 OAuth redirect 数组所需的 registration/credential 仍存在，然后：
    - Publication 不存在时创建 revision=1、testVersionId=versionId 的记录。
@@ -438,7 +438,7 @@ testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Re
 
 `DRAFT/SUBMITTED/REJECTED/REVOKED` 都不能进入 test 槽位。历史上曾经 APPROVED 但当前已失去资格的 Version 也不能重新设置。
 
-OAuth 回调属于 Version，但非空配置必须可映射到 Application 的稳定 client identity：pkceRedirectUris 需要 publicClientId，confidentialRedirectUris 需要 confidentialClientId 及 credential。client 处于 DISABLED 不阻止发布，只会让 Auth 拒绝授权；空数组同样允许发布，并明确让该 Version 暂不提供对应 OAuth 接入。运行解析失败时不能回退旧 Version。
+OAuth 回调属于 Version，但非空配置必须可映射到该 Application 的 TEST 渠道稳定 client identity（其他渠道的 registration 不能代替）：pkceRedirectUris 需要 publicClientId，confidentialRedirectUris 需要 confidentialClientId 及 credential。client 处于 DISABLED 不阻止发布，只会让 Auth 拒绝授权；空数组同样允许发布，并明确让该 Version 暂不提供对应 OAuth 接入。运行解析失败时不能回退旧 Version。
 
 redirect hostname 不是发布兼容键。新 Version 可以审核并发布不同 hostname，仍使用同一稳定 clientId；一次具体授权交互和 code 继续绑定当时批准的精确 redirect URI 与 Version/Publication tuple。
 
@@ -982,7 +982,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 550 | `10414447a48d` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 552 | `232cd7640475` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
