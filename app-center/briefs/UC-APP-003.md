@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-003` 更新草稿应用版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-VER-010`–`BR-VER-017`（8 条） |
-| 外部引用 BR | `BR-VER-003`–`BR-VER-007`（5 条）（来自 `UC-APP-002`） |
+| 外部引用 BR | `BR-VER-003`、`BR-VER-004`、`BR-VER-005`、`BR-VER-006`、`BR-VER-007`、`BR-VER-018`（来自 `UC-APP-002`） |
 | ADR | `ADR-001` |
 
 ## 遇到 brief 未覆盖的问题
@@ -60,6 +60,7 @@ rpcApiMaxVersionExclusive
 requiredCapabilities
 requiredScopes
 optionalScopes
+oauthRedirects
 ```
 
 系统在成功修改时更新：
@@ -102,6 +103,7 @@ UpdateDraftApplicationVersionCommand {
   requiredCapabilities: []string
   requiredScopes: []string
   optionalScopes: []string
+  oauthRedirects: []OAuthRedirectGroup
 }
 ```
 
@@ -121,9 +123,9 @@ HTTP adapter 从 `If-Match` 读取 expectedRevision；gRPC adapter 使用 comman
 1. 从可信身份上下文取得 authId 和 developerStatus。
 2. 确认 developerStatus 为 `APPROVED`。
 3. 确认 expectedRevision `>= 1`。
-4. 使用 UC-APP-002 的相同规则校验所有可编辑字段。
+4. 使用 UC-APP-002 的相同规则校验所有可编辑字段，包括 BR-VER-018 的 oauthRedirects。
 5. 通过 ScopeCatalog adapter 确认 requiredScopes 和 optionalScopes 当前允许被新版本申请。
-6. 将 capabilities 和 scopes 分别按字典序规范化为稳定集合表示。
+6. 将 capabilities、scopes 和 OAuth 回调分别规范化为稳定集合表示。
 7. 从系统时钟取得 updatedAt。
 8. Repository 原子确认并更新：
    - Application 存在且 adminId 仍等于调用者 authId。
@@ -220,7 +222,7 @@ UC-APP-003 不增加 collection。`application_versions` 增加三个非空字�
 - 非 DRAFT 或 revision 不匹配时不产生变化。
 - 不可变字段在更新后保持不变。
 - 相同规范化内容是 no-op，不增加 revision。
-- 集合乱序输入规范化后得到稳定顺序；重复和 scope 交叉仍被拒绝。
+- 集合乱序输入规范化后得到稳定顺序；重复、scope 交叉和非法 OAuth 回调仍被拒绝。
 
 UseCase 测试：
 
@@ -261,7 +263,7 @@ API 测试：
 
 请求必须提供全部可编辑字段，服务端以新值整体替换旧值。空数组表示明确清空该集合，不表示“不修改”。
 
-本用例不提供单字段 Patch，也不使用字段 mask。这样 URL、RPC range、capabilities 和 scopes 可以在同一组校验和一次原子写入中保持一致。
+本用例不提供单字段 Patch，也不使用字段 mask。这样 URL、RPC range、capabilities、scopes 和 oauthRedirects 可以在同一组校验和一次原子写入中保持一致。
 
 <!-- 权威位置: use-cases/UC-APP-003-update-draft-application-version.md#br-ver-012 -->
 ### BR-VER-012：不可变身份与创建审计
@@ -286,17 +288,17 @@ revision 属于整个 ApplicationVersion，而不是只属于草稿内容；UC-A
 <!-- 权威位置: use-cases/UC-APP-003-update-draft-application-version.md#br-ver-014 -->
 ### BR-VER-014：集合规范化
 
-requiredCapabilities、requiredScopes 和 optionalScopes 在业务上都是集合：
+requiredCapabilities、requiredScopes、optionalScopes 和 oauthRedirects 在业务上都是集合；oauthRedirects 内部的 redirectUris 也是集合：
 
 - 输入包含重复项时仍然拒绝，而不是静默去重。
 - requiredScopes 与 optionalScopes 不能交叉。
-- 校验通过后分别按 Unicode code point 字典序排序再保存。
+- 校验通过后分别按 BR-VER-018 规定的 clientType 顺序或 Unicode code point 字典序排序再保存。
 - 集合顺序变化不构成业务修改。
 
 <!-- 权威位置: use-cases/UC-APP-003-update-draft-application-version.md#br-ver-015 -->
 ### BR-VER-015：字段规则复用
 
-versionLabel、launchUrl、RPC range、capabilities 和 scopes 必须满足 UC-APP-002 的 BR-VER-003 至 BR-VER-007。规则只有一个定义来源，UC-APP-003 不维护宽松副本。
+versionLabel、launchUrl、RPC range、capabilities、scopes 和 oauthRedirects 必须满足 UC-APP-002 的 BR-VER-003 至 BR-VER-007 及 BR-VER-018。规则只有一个定义来源，UC-APP-003 不维护宽松副本。
 
 尤其是：HTTP 开发 URL 仍只能用于 DRAFT；改为公开 HTTPS 后才能进入未来提交审核用例。
 
@@ -374,6 +376,27 @@ Scope Catalog 的权威来源是 Auth。UC-APP-002 使用 App Center 进程内�
 
 Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRPC 形状。Cache adapter 通过构造参数接收 TTL、Clock 与窄的 Auth snapshot source；只有测试使用 fake/mock，生产代码不得提供硬编码 Scope 目录。真实 Auth transport 实现根级 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)，提供方行为由 [UC-AUTH-001](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) 拥有。
 
+<!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
+### BR-VER-018：版本化 OAuth 回调
+
+`oauthRedirects` 是受审核的版本内容，不属于 OAuthClient，也不从 launchUrl 推导。它是 0–2 个回调组组成的非 null 数组：
+
+```text
+OAuthRedirectGroup {
+  clientType: PUBLIC_PKCE | CONFIDENTIAL_SECRET
+  redirectUris: []RedirectURI
+}
+```
+
+- 每种 clientType 至多一组；每组包含 1–10 个不重复 URI。空数组表示该 Version 不提供 OAuth/OIDC 回调。
+- URI 必须是绝对 HTTPS URL，最多 2048 UTF-8 bytes；禁止 userinfo、fragment、wildcard、IP literal、localhost，以及 [BR-REV-007](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) 固定的 IANA `2026-05-22` special-use 域名或其子域。
+- 禁止预占 OAuth/OIDC 响应参数 `code/state/iss/error/error_description/error_uri`。
+- 同一组的所有 URI 必须使用同一个规范 DNS hostname。hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。其余 URL 部分保存后按完整字符串精确匹配。
+- callback path、query 和 port 可以不同；运行时不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
+- 回调组按 clientType 固定顺序保存，组内 URI 按 Unicode code point 排序。输入顺序不表达业务含义。
+
+OAuthClient 创建时从当前批准并发布的回调组派生不可变 sector。存在该运行上下文的 client 后，后续发布由 UC-APP-007 检查同 type 回调组的 hostname；改变 hostname 需要新的 clientId。Version 草稿本身可以在 client 创建前存在，因此创建/编辑阶段不依赖 OAuthClient。
+
 ## 架构决定（仅本次需要的章节）
 
 ### ADR-001：Scope Catalog 权威来源与缓存（`PROPOSED`）
@@ -422,6 +445,6 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-003-update-draft-application-version.md` | 369 | `db3d6fac8074` |
-| `use-cases/UC-APP-002-create-application-version.md` | 427 | `8e8bb5e13166` |
+| `use-cases/UC-APP-003-update-draft-application-version.md` | 376 | `b7874248d2c4` |
+| `use-cases/UC-APP-002-create-application-version.md` | 463 | `aed995d52573` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |

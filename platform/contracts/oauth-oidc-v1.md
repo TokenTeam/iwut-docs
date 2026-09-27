@@ -4,7 +4,7 @@
 
 ## 范围与职责
 
-提供 Authorization Code Flow，用 OIDC ID Token 表达应用登录结果，用独立的 opaque access token 表达委托访问。Auth 拥有登录、consent、grant 和 token；App 拥有 client 配置、secret、当前版本的申请/批准范围；Traefik/Gateway 执行入口鉴权，资源服务执行业务授权。
+提供 Authorization Code Flow，用 OIDC ID Token 表达应用登录结果，用独立的 opaque access token 表达委托访问。Auth 拥有登录、consent、grant 和 token；App 拥有 client 身份/secret，以及 ApplicationVersion 中受审核的 redirect URI 和 scopes；Traefik/Gateway 执行入口鉴权，资源服务执行业务授权。
 
 相关业务规则由 [UC-AUTH-014](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../../auth-center/use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md)/[019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](oauth-delegation-v1.md)。
 
@@ -18,6 +18,8 @@
 两者都是授权码流程；client secret 认证应用后端，PKCE 绑定本次发起者与兑换者。不是 `client_credentials` 登录用户，也不支持 implicit/password grant。不支持 `client_secret_post`、`plain` PKCE、URL 中的 secret；多个认证来源或重复单值参数直接拒绝。Basic 按 RFC 6749 §2.3.1 编码。
 
 PUBLIC client 不能提交 secret 冒充 confidential；CONFIDENTIAL client 不能省略 secret 降级为 public。无 PKCE 的 confidential OIDC 客户端必须依照下述 nonce 检查，在验证 ID Token 前不得建立应用会话或使用返回的 token。
+
+每个 clientId 固定一种 type、channel 和 RPC major。redirect URI 不保存在 client 记录中，而在当前批准并发布的 ApplicationVersion 中按 clientType 分组；切换 Version 可以改变同 sector 下的 path、query 或 port。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
 
 ## 公网端点与响应
 
@@ -46,13 +48,15 @@ PUBLIC client 不能提交 secret 冒充 confidential；CONFIDENTIAL client 不�
 }
 ```
 
-只有按 UC016 获得离线授权时才增加 `refresh_token`。刷新响应保留 access_token/token_type/expires_in/scope/refresh_token，首版不重新签发 ID Token。
+只有按 UC-AUTH-016 获得离线授权时才增加 `refresh_token`。刷新响应保留 access_token/token_type/expires_in/scope/refresh_token，首版不重新签发 ID Token。
 
 Discovery 必须准确声明 issuer、authorization_endpoint、token_endpoint、userinfo_endpoint、jwks_uri、revocation_endpoint；`response_types_supported=[code]`、`grant_types_supported=[authorization_code,refresh_token]`、`subject_types_supported=[pairwise]`、`id_token_signing_alg_values_supported=[RS256]`、`token_endpoint_auth_methods_supported=[none,client_secret_basic]`、`code_challenge_methods_supported=[S256]`。`response_modes_supported=[query]`、`authorization_response_iss_parameter_supported=true`；revocation 同样支持 none/basic。scopes_supported 仅列出实际装载并实现的 scope；不宣称动态注册、logout、introspection 或 JWT access token profile 已实现。
 
 ## 授权请求与登录门户
 
 必填 `response_type=code`、client_id、精确 redirect_uri、含 `openid` 的 scope、state、nonce；PUBLIC 额外必填 code_challenge/code_challenge_method。客户端每次新建至少 32 随机字节的 state、nonce；服务端接受 43–128 字符的 base64url 值，不把 nonce 当用户身份。PKCE verifier 为 RFC 7636 规定的 43–128 个 unreserved ASCII 字符；challenge 为 SHA-256 后无 padding 的 base64url，固定 43 字符。
+
+Auth 在建立登录 interaction 前调用 App 的 `ResolveClientRuntimeConfiguration`，从 exact-major 当前 TEST Publication 的批准 snapshot 取得 effective redirect URIs 和 scopes，并先精确匹配 redirect_uri。用户登录后再以预登录 runtime tuple 调用 `ResolveAuthorizationContext`；确认和 code 兑换时继续重查。任何 tuple 变化都不能把旧回调与新 scopes 或 Tester 资格拼接。
 
 支持 `prompt=none|login|consent`（首版单值）、非负整数 max_age。申请 offline_access 必须 prompt=consent 并实际确认，缺失时返回 invalid_request，不静默授予离线访问。无 prompt 时可复用尚有效的平台登录与既有 grant；none 不允许显示 UI，缺登录/新权限分别返回 login_required/consent_required。login/max_age 要求重新走 UC007/012 的认证，不能靠刷新门户 cookie 伪造 auth_time。nonce 写入最终 ID Token，state 原样返回。重新认证不得复用进入 prompt=login 前的同一 Session；auth_time 取 Auth 记录的实际认证时间，不接受浏览器上报。
 
@@ -80,7 +84,7 @@ ID Token 使用独立 OIDC RSA 签名密钥与 JWKS（RS256，RSA 至少 2048 bi
 
 client 必须用预先信任 issuer 的 discovery/JWKS 验签，检查算法、iss、aud、exp、nonce、at_hash；ID Token 的时钟容差最多 30 秒，max_age 请求还须检查 auth_time；未知 kid 只允许对固定 JWKS 地址进行有界刷新，不访问 JWT 提供的 URL。ID Token 不作为 API Bearer token；取得后 client 可自行建立应用会话，其寿命由应用管理。OIDC 签名密钥退役前保留公钥至少覆盖已签 token 的有效期、容许时钟差和 JWKS 缓存期限。
 
-pairwise sub 按 OIDC sector 生成：本版不支持 sector_identifier_uri，client 的所有 redirect URI 必须同一规范化 hostname，以该 hostname 为 sector。Auth 为 `(authId, sector)` 保存唯一、不可重用的随机 UUID subject，首次创建有唯一约束；同 sector 下不同 client 得到同 sub，不承诺按 Application 隔离。sector 不含 scheme/port/path。client sector 不可修改，迁移 hostname 需新 client，应用须显式处理账号衔接。学生 association 不参与 sub 计算。
+pairwise sub 按 OIDC sector 生成：本版不支持 sector_identifier_uri。创建 client 时由当前批准 Version 中该 type 回调组的唯一规范 hostname 派生 sector；后续 Version 的对应回调组必须保持该 hostname。Auth 为 `(authId, sector)` 保存唯一、不可重用的随机 UUID subject，首次创建有唯一约束；同 sector 下不同 client 得到同 sub，不承诺按 Application 隔离。sector 不含 scheme/port/path。client sector 不可修改，迁移 hostname 需新 client，应用须显式处理账号衔接。学生 association 不参与 sub 计算。
 
 ## 错误、CORS 与限额
 
@@ -88,18 +92,18 @@ pairwise sub 按 OIDC sector 生成：本版不支持 sector_identifier_uri，cl
 
 UserInfo 无效 token 返回 401 Bearer invalid_token；scope 不够返回 403 insufficient_scope。API 不返回登录 302。revocation 已失效/未知/不属于调用 client 的 token 统一 200；不支持的 token 类型用 unsupported_token_type。
 
-PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许 client 登记回调对应的 HTTPS origin（无 cookie credentials），缺 Origin 的原生调用仍按协议认证；preflight 无 token 时仅根据当前登记的 public origins 联集返回允许的方法/headers，实际请求仍按认证后的 client 再匹配 Origin；验证 preflight 不授予访问权限。CONFIDENTIAL token/revoke 不启用跨域浏览器访问。授权端点仅允许顶层导航，不提供跨域 fetch 登录。
+PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Version 中 PUBLIC_PKCE effective callbacks 对应的 HTTPS origin（无 cookie credentials），缺 Origin 的原生调用仍按协议认证；preflight 无 token 时仅根据当前 effective public origins 联集返回允许的方法/headers，实际请求仍按认证后的 client 再匹配 Origin；验证 preflight 不授予访问权限。CONFIDENTIAL token/revoke 不启用跨域浏览器访问。授权端点仅允许顶层导航，不提供跨域 fetch 登录。
 
 请求体最大 16 KiB、scope 最多 32 项、单项最多 128 ASCII 字符；单值参数重复、未知 grant/response_type 均拒绝。默认每 IP 120 次/分钟、每 client 300 次/分钟、每登录用户 30 次授权确认/分钟，可部署调小；429 携 Retry-After。code、token、secret、verifier、cookie、签名上下文、邮件及用户资料不得进入访问日志、trace、metrics 标签或审计原文。
 
 ## 交付依赖与验收
 
-1. UC-APP-018/019 先提供 client、secret 校验及应用资格快照。
-2. Auth 实现 UC014/015/017/018/019，门户与 Gateway 同步交付；UC016 是独立离线授权工作包，未启用时 discovery 必须去掉 refresh_token，拒绝 offline_access，不能部分宣称支持。
+1. App 先扩展 UC-APP-002/003/004/005/007 的 oauthRedirects 创建、编辑、审核、策略和发布一致性，再由 UC-APP-018/019 提供 client、secret 校验及应用资格快照。
+2. Auth 实现 UC-AUTH-014/015/017/018/019，门户与 Gateway 同步交付；UC-AUTH-016 是独立离线授权工作包，未启用时 discovery 必须去掉 refresh_token，拒绝 offline_access，不能部分宣称支持。
 3. 初版最小生产 scope 装载 `openid`、`email`、`offline_access`：Auth 维护稳定语义/用户可读说明/映射；App 版本仍须声明并通过原有审核。其他业务 scope 必须有已交付资源服务、scope→audience→route 映射；不接受开发 fixture。生产 Catalog 装载能力是实现依赖，不需要先做在线 Catalog 管理 UC。
 4. Gateway OAUTH2、OIDC_HTTP 与资源服务委托验证通过真实三方联合测试后显式启用。当前 ACTIVE 契约继续有效，本文不使旧实现自动具备新能力。
 
-验收至少覆盖两种 client、confidential+PKCE、code/refresh 重放、nonce/state 错配、未登记回调、scope 越权、部分撤回后重授、App 停用/版本变更、UserInfo 最小披露、HTTP/原生 gRPC/gRPC-Web，以及依赖故障时不转发。启用前还需实际 OIDC 客户端库互通测试；未通过认证不得宣称通过 OpenID Certification。
+验收至少覆盖两种 client、confidential+PKCE、code/refresh 重放、nonce/state 错配、Version 回调切换与未登记回调、登录前后 runtime tuple 变化、scope 越权、部分撤回后重授、App 停用/版本变更、UserInfo 最小披露、HTTP/原生 gRPC/gRPC-Web，以及依赖故障时不转发。启用前还需实际 OIDC 客户端库互通测试；未通过认证不得宣称通过 OpenID Certification。
 
 ## 标准依据
 

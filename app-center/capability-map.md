@@ -16,17 +16,12 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
                                   │
                                   ▼
                       Application Ownership
-                     /          │           \
-                    ▼           ▼            ▼
-          Public Profile  Version Review  Tester Management
-                    │           │            │
-                    │           └────┬───────┘
-                    │                ▼
-                    │      Runtime Publication
-                    │                │
-                    └────────┬───────┘
-                             ▼
-                  Catalog & Resolution
+                    ├── Public Profile ───────────────┐
+                    ├── Version Review ───┐           │
+                    ├── Tester Management ├── Runtime Publication
+                    └── OAuth Client Integration ◄────┤
+                                                     ▼
+                                          Catalog & Resolution
                                   │
                     candidate apps + Filter rules
                                   │
@@ -43,13 +38,14 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 | Runtime Publication | 对某个 RPC API major，服务端当前选择哪些 test/grey/stable 目标？ | ApplicationPublication、槽位、grey rollout、PublicationHistory | 服务端发布目标与可追溯变化 |
 | Public Profile | 普通用户看到的应用资料是哪一版，它是否已经获准公开？ | ApplicationProfileRevision、资料审核与当前公开修订 | 已发布目录资料 |
 | Tester Management | 哪些用户拥有某个 Application 的封闭测试资格？ | TesterJoinLink、ApplicationTesterMembership、容量 | Application 级 Tester 资格 |
+| OAuth Client Integration | Auth 应该信任哪个 client、回调、版本范围和用户资格？ | OAuthClient、Version oauthRedirects、Publication 与 Tester snapshot | client 元数据、secret 校验和短时授权上下文 |
 | Catalog & Resolution | 当前请求有哪些候选应用，每个候选使用哪个服务端目标？ | 聚合读取模型和解析结果；不复制来源事实 | 候选应用、公开资料、唯一启动目标与 Filter 规则 |
 
 ## 能力边界
 
 ### Application Ownership
 
-负责 Application 的稳定身份和管理权，是其他五项能力的共同根。创建配额属于这项能力，因为它约束 Developer 可以拥有多少个 Application，而不是版本或发布数量。
+负责 Application 的稳定身份和管理权，是其他能力的共同根。创建配额属于这项能力，因为它约束 Developer 可以拥有多少个 Application，而不是版本或发布数量。
 
 首版方向包括创建、管理视图、受控改名与归档。管理员转让是否进入首版仍未确定；即使暂缓，`adminId` 继续表达“当前管理员”而不是永久创建者。
 
@@ -108,6 +104,10 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 已有设计只覆盖 Tester 的 test 启动目标解析。首版还需要候选列表、详情、统一发布目标解析和 Filter 规则分发契约。这些读取行为优先写成较短的 Query Contract，而不是复制命令 UC 的全部结构。
 
+### OAuth Client Integration
+
+负责独立 clientId、PUBLIC/CONFIDENTIAL 类型、状态和 secret 生命周期，并把当前批准 Version 的 redirect URIs/scopes 与 Tester 资格组合为 Auth 可验证的短时快照。redirect URI 属于 Version Review，运行选择属于 Runtime Publication；本能力不复制它们，也不拥有用户 consent、code 或 token。
+
 ## Filter 在能力图中的位置
 
 Filter 不是第四种发布槽位，也不参与 Test/Grey/Stable 的服务端选择。
@@ -124,6 +124,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Public Profile | Ownership 的当前 adminId；Identity 的 Developer/Reviewer | 管理和审核公开资料 |
 | Tester Management | Ownership 的当前 adminId；Identity 的 authId | 管理链接与 Membership |
 | Runtime Publication | Ownership、Version Review、Tester Management | 检查管理权和发布资格，解析 test 资格与服务端槽位 |
+| OAuth Client Integration | Ownership、Version Review、Runtime Publication、Tester Management | 管理 client 并为 Auth 解析登录前运行配置与登录后用户资格 |
 | Catalog & Resolution | Ownership、Public Profile、Runtime Publication、Tester Management、Version Review | 构造内部一致的候选目录与启动目标 |
 | 官方客户端 | Catalog & Resolution 返回的候选与 Filter 规则；客户端本地用户信息 | 执行 Filter 并展示最终列表 |
 
@@ -139,6 +140,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md) | 普通用户公开资料查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
 | Catalog & Resolution | `UC-APP-012` 的 test-only 解析 | 候选列表、详情、统一解析、Filter 规则契约 |
+| OAuth Client Integration | `UC-APP-018`–`UC-APP-019` | API/持久化、Auth 联调与 OAuth/OIDC 端到端验证 |
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。
 

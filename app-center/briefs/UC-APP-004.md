@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-004` 提交应用版本审核 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-REV-001`–`BR-REV-009`（9 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-VER-018`（来自 `UC-APP-002`） |
 | ADR | `ADR-001`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-scope-catalog-v1.md` |
 
@@ -116,9 +116,10 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
    - reviewStatus 是 `DRAFT`。
    - revision 等于 expectedRevision。
 4. 通过 ScopeCatalog 重新确认 requiredScopes 和 optionalScopes 当前仍允许被新版本申请，并取得本次 Auth catalog revision。
-5. 通过 LaunchURLSubmissionPolicy 确认 launchUrl 是当前可提交审核的公网 HTTPS URL。
-6. 生成 UUIDv7 reviewId，并从 Clock 取得 submittedAt。
-7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
+5. 按 BR-VER-018 重新验证 oauthRedirects 的结构、规范 hostname 和安全限制。
+6. 通过 LaunchURLSubmissionPolicy 确认 launchUrl 是当前可提交审核的公网 HTTPS URL。
+7. 生成 UUIDv7 reviewId，并从 Clock 取得 submittedAt。
+8. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
    - 为该 Version 分配下一个 attempt，从 1 开始递增。
    - 复制候选 Version 的受审核字段形成不可变 snapshot。
    - 插入 status 为 `PENDING`、decision 和 draftRestoration 均为 null 的 ApplicationReview。
@@ -140,6 +141,7 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
 - launchUrl 不是公网 HTTPS URL：`ApplicationLaunchUrlNotReviewable`。
 - launchUrl DNS 解析失败或检查依赖暂时不可用：`LaunchUrlInspectionUnavailable`。
 - scope 已不存在、deprecated 或不再允许新申请：`InvalidApplicationScope`。
+- oauthRedirects 不再满足 BR-VER-018：`InvalidOAuthRedirectConfiguration`。
 - Scope Catalog 无可用的新鲜快照：`ScopeCatalogUnavailable`。
 - reviewId 冲突或持久化失败：内部失败，不产生半完成提交。
 
@@ -171,6 +173,7 @@ ApplicationVersionReviewSnapshot {
   requiredCapabilities: []CapabilityName
   requiredScopes: []ScopeName
   optionalScopes: []ScopeName
+  oauthRedirects: []OAuthRedirectGroup
 }
 ```
 
@@ -245,6 +248,7 @@ type ApplicationReviewRepository interface {
 | `snapshot.requiredCapabilities` | 提交时必需宿主能力 | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.requiredScopes` | 提交时必需 scopes | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.optionalScopes` | 提交时可选 scopes | array&lt;string&gt; | 已排序；元素唯一且不与 required 交叉 | no | no |
+| `snapshot.oauthRedirects` | 提交时 OAuth 回调 | array&lt;object&gt; | BR-VER-018；已规范排序 | no | no |
 | `scopeCatalogRevision` | scope 校验使用的 Auth catalog revision | int64 | Auth 单调递增版本 | no | no |
 | `preflightPolicyVersion` | URL 提交预检规则版本 | string | 稳定策略标识，1–50 ASCII `[A-Za-z0-9._-]` | no | no |
 | `submittedBy` | 实际提交者 | string | opaque authId | no | no |
@@ -301,7 +305,11 @@ Location: /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}
       "rpcApiMaxVersionExclusive": 5,
       "requiredCapabilities": ["user.profile.v1"],
       "requiredScopes": ["profile.basic"],
-      "optionalScopes": ["schedule.read"]
+      "optionalScopes": ["schedule.read"],
+      "oauthRedirects": [{
+        "clientType": "PUBLIC_PKCE",
+        "redirectUris": ["https://example.edu/oauth/callback"]
+      }]
     },
     "scopeCatalogRevision": 17,
     "preflightPolicyVersion": "submit-v1",
@@ -330,7 +338,7 @@ Location: /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}
 领域测试：
 
 - 只有 DRAFT 可以进入 SUBMITTED。
-- 提交产生与候选内容完全一致、集合顺序稳定的 snapshot。
+- 提交产生与候选内容完全一致、集合顺序稳定且包含 oauthRedirects 的 snapshot。
 - 提交增加 Version revision，并更新最近修改审计。
 - snapshot 与提交审计创建后不可修改。
 - 新 Review 的 decision 固定为 null。
@@ -342,6 +350,7 @@ UseCase 测试：
 - 只有 `APPROVED` 的当前 admin 可以提交。
 - 使用 expectedRevision 加载候选，并在写入时再次校验。
 - scopes 在提交时重新验证，并保存 catalog revision。
+- oauthRedirects 在提交时按 BR-VER-018 重新验证并冻结进 snapshot。
 - 开发 HTTP/私网 URL 不能提交；合规公网 HTTPS URL 可以提交。
 - 外部检查失败时不调用最终 Submit。
 - reviewId 和 submittedAt 只能来自系统端口。
@@ -405,6 +414,7 @@ rpcApiMaxVersionExclusive
 requiredCapabilities
 requiredScopes
 optionalScopes
+oauthRedirects
 ```
 
 snapshot 创建后不可修改。Application.name 和独立的 ApplicationProfileRevision 不进入本次版本审核快照；公开目录资料由其自身的 revision 审核流程负责。
@@ -477,6 +487,33 @@ snapshot 冻结的是登记信息，不是 launchUrl 指向的网页字节。开
 - Version 状态、revision 和更新审计变更。
 
 MongoDB 实现应使用同一事务覆盖 Application、ApplicationVersion 和 ApplicationReview，或提供能证明相同语义的原子方案。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-002`
+
+<!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
+### BR-VER-018：版本化 OAuth 回调
+
+`oauthRedirects` 是受审核的版本内容，不属于 OAuthClient，也不从 launchUrl 推导。它是 0–2 个回调组组成的非 null 数组：
+
+```text
+OAuthRedirectGroup {
+  clientType: PUBLIC_PKCE | CONFIDENTIAL_SECRET
+  redirectUris: []RedirectURI
+}
+```
+
+- 每种 clientType 至多一组；每组包含 1–10 个不重复 URI。空数组表示该 Version 不提供 OAuth/OIDC 回调。
+- URI 必须是绝对 HTTPS URL，最多 2048 UTF-8 bytes；禁止 userinfo、fragment、wildcard、IP literal、localhost，以及 [BR-REV-007](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) 固定的 IANA `2026-05-22` special-use 域名或其子域。
+- 禁止预占 OAuth/OIDC 响应参数 `code/state/iss/error/error_description/error_uri`。
+- 同一组的所有 URI 必须使用同一个规范 DNS hostname。hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。其余 URL 部分保存后按完整字符串精确匹配。
+- callback path、query 和 port 可以不同；运行时不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
+- 回调组按 clientType 固定顺序保存，组内 URI 按 Unicode code point 排序。输入顺序不表达业务含义。
+
+OAuthClient 创建时从当前批准并发布的回调组派生不可变 sector。存在该运行上下文的 client 后，后续发布由 UC-APP-007 检查同 type 回调组的 hostname；改变 hostname 需要新的 clientId。Version 草稿本身可以在 client 创建前存在，因此创建/编辑阶段不依赖 OAuthClient。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -710,6 +747,7 @@ Provider 与 Consumer 至少共同验证：
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：旧实现观察、后续用例、迁移说明、变更记录
+- `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
@@ -719,7 +757,8 @@ Provider 与 Consumer 至少共同验证：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 498 | `5db0577b6aed` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 509 | `f68b6f1eadb6` |
+| `use-cases/UC-APP-002-create-application-version.md` | 463 | `aed995d52573` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

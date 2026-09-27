@@ -234,6 +234,8 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 以下只完成设计，均未启动实现；既有实现完成记录不包含这些能力。
 
+在 UC-APP-018/019 开工前，既有 UC-APP-002/003/004/005/007 还需要一个串行的 OAuth Version 扩展工作包：加入 `oauthRedirects` 的 Domain/API/Mongo 字段与历史空数组 migration，审核 snapshot 深拷贝和校验，`app-version-review-v2`，以及发布时与已有 client sector 的一致性检查。原有能力的 `COMPLETE/CORE_COMPLETE` 记录继续描述当时范围，不表示这些 OAuth 扩展已经实现。
+
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `PROPOSED` | `NOT_STARTED` | 管理应用 OAuth Client |

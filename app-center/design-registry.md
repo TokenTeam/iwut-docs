@@ -18,12 +18,12 @@
 | Use Case / App Center | `UC-APP-020` |
 | Business Rule / Application | `BR-APP-008` |
 | Business Rule / Application Profile | `BR-PRF-041` |
-| Business Rule / ApplicationVersion | `BR-VER-018` |
+| Business Rule / ApplicationVersion | `BR-VER-019` |
 | Business Rule / Review | `BR-REV-029` |
 | Business Rule / Publication | `BR-PUB-011` |
 | Business Rule / Tester | `BR-TST-037` |
 | Business Rule / Runtime Resolution | `BR-RUN-011` |
-| Business Rule / OAuth Client | `BR-OAC-010` |
+| Business Rule / OAuth Client | `BR-OAC-011` |
 | Architecture Decision | `ADR-007` |
 
 Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确认没有未登记的既有定义。
@@ -125,6 +125,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-VER-015` | 字段规则复用 | Rule Reuse | [UC-APP-003](use-cases/UC-APP-003-update-draft-application-version.md#br-ver-015) | — | — |
 | `BR-VER-016` | 权限与更新原子性 | Authorization / Consistency | [UC-APP-003](use-cases/UC-APP-003-update-draft-application-version.md#br-ver-016) | — | — |
 | `BR-VER-017` | 草稿审计粒度 | Audit Policy | [UC-APP-003](use-cases/UC-APP-003-update-draft-application-version.md#br-ver-017) | — | — |
+| `BR-VER-018` | 版本化 OAuth 回调 | Field / Security / Invariant | [UC-APP-002](use-cases/UC-APP-002-create-application-version.md#br-ver-018) | — | — |
 
 ### Review (`BR-REV`)
 
@@ -235,14 +236,15 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
 | --- | --- | --- | --- | --- | --- |
 | `BR-OAC-001` | 应用归属与接入身份 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-001) | — | — |
-| `BR-OAC-002` | 静态回调与不可变接入配置 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-002) | — | — |
+| `BR-OAC-002` | 不可变接入上下文与版本化回调 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-002) | — | — |
 | `BR-OAC-003` | 高熵 secret 与一次披露 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-003) | — | — |
 | `BR-OAC-004` | 配置版本与原子管理 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-004) | — | — |
 | `BR-OAC-005` | scope 与授权所有权 | Authorization / Boundary | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md#br-oac-005) | — | — |
 | `BR-OAC-006` | 内部查询与最小披露 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-006) | — | — |
-| `BR-OAC-007` | TEST 资格与批准范围 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-007) | — | — |
+| `BR-OAC-007` | TEST 资格与批准运行配置 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-007) | — | — |
 | `BR-OAC-008` | 一致快照与资格版本 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-008) | — | — |
 | `BR-OAC-009` | 展示来源与失败关闭 | Authorization / Boundary | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-009) | — | — |
+| `BR-OAC-010` | 登录前回调校验与两阶段一致性 | Authorization / Consistency | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-010) | — | — |
 
 
 ## Architecture Decision Records

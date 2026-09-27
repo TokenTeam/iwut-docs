@@ -28,6 +28,7 @@ rpcApiMaxVersionExclusive
 requiredCapabilities
 requiredScopes
 optionalScopes
+oauthRedirects
 ```
 
 系统在成功修改时更新：
@@ -97,6 +98,7 @@ UpdateDraftApplicationVersionCommand {
   requiredCapabilities: []string
   requiredScopes: []string
   optionalScopes: []string
+  oauthRedirects: []OAuthRedirectGroup
 }
 ```
 
@@ -116,9 +118,9 @@ HTTP adapter 从 `If-Match` 读取 expectedRevision；gRPC adapter 使用 comman
 1. 从可信身份上下文取得 authId 和 developerStatus。
 2. 确认 developerStatus 为 `APPROVED`。
 3. 确认 expectedRevision `>= 1`。
-4. 使用 UC-APP-002 的相同规则校验所有可编辑字段。
+4. 使用 UC-APP-002 的相同规则校验所有可编辑字段，包括 BR-VER-018 的 oauthRedirects。
 5. 通过 ScopeCatalog adapter 确认 requiredScopes 和 optionalScopes 当前允许被新版本申请。
-6. 将 capabilities 和 scopes 分别按字典序规范化为稳定集合表示。
+6. 将 capabilities、scopes 和 OAuth 回调分别规范化为稳定集合表示。
 7. 从系统时钟取得 updatedAt。
 8. Repository 原子确认并更新：
    - Application 存在且 adminId 仍等于调用者 authId。
@@ -161,7 +163,7 @@ HTTP adapter 从 `If-Match` 读取 expectedRevision；gRPC adapter 使用 comman
 
 请求必须提供全部可编辑字段，服务端以新值整体替换旧值。空数组表示明确清空该集合，不表示“不修改”。
 
-本用例不提供单字段 Patch，也不使用字段 mask。这样 URL、RPC range、capabilities 和 scopes 可以在同一组校验和一次原子写入中保持一致。
+本用例不提供单字段 Patch，也不使用字段 mask。这样 URL、RPC range、capabilities、scopes 和 oauthRedirects 可以在同一组校验和一次原子写入中保持一致。
 
 <a id="br-ver-012"></a>
 ### BR-VER-012：不可变身份与创建审计
@@ -186,17 +188,17 @@ revision 属于整个 ApplicationVersion，而不是只属于草稿内容；UC-A
 <a id="br-ver-014"></a>
 ### BR-VER-014：集合规范化
 
-requiredCapabilities、requiredScopes 和 optionalScopes 在业务上都是集合：
+requiredCapabilities、requiredScopes、optionalScopes 和 oauthRedirects 在业务上都是集合；oauthRedirects 内部的 redirectUris 也是集合：
 
 - 输入包含重复项时仍然拒绝，而不是静默去重。
 - requiredScopes 与 optionalScopes 不能交叉。
-- 校验通过后分别按 Unicode code point 字典序排序再保存。
+- 校验通过后分别按 BR-VER-018 规定的 clientType 顺序或 Unicode code point 字典序排序再保存。
 - 集合顺序变化不构成业务修改。
 
 <a id="br-ver-015"></a>
 ### BR-VER-015：字段规则复用
 
-versionLabel、launchUrl、RPC range、capabilities 和 scopes 必须满足 UC-APP-002 的 BR-VER-003 至 BR-VER-007。规则只有一个定义来源，UC-APP-003 不维护宽松副本。
+versionLabel、launchUrl、RPC range、capabilities、scopes 和 oauthRedirects 必须满足 UC-APP-002 的 BR-VER-003 至 BR-VER-007 及 BR-VER-018。规则只有一个定义来源，UC-APP-003 不维护宽松副本。
 
 尤其是：HTTP 开发 URL 仍只能用于 DRAFT；改为公开 HTTPS 后才能进入未来提交审核用例。
 
@@ -294,7 +296,11 @@ If-Match: "3"
   "rpcApiMaxVersionExclusive": 5,
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
-  "optionalScopes": ["schedule.read"]
+  "optionalScopes": ["schedule.read"],
+  "oauthRedirects": [{
+    "clientType": "PUBLIC_PKCE",
+    "redirectUris": ["https://example.edu/oauth/callback"]
+  }]
 }
 ```
 
@@ -321,7 +327,7 @@ ETag: "4"
 - 非 DRAFT 或 revision 不匹配时不产生变化。
 - 不可变字段在更新后保持不变。
 - 相同规范化内容是 no-op，不增加 revision。
-- 集合乱序输入规范化后得到稳定顺序；重复和 scope 交叉仍被拒绝。
+- 集合乱序输入规范化后得到稳定顺序；重复、scope 交叉和非法 OAuth 回调仍被拒绝。
 
 UseCase 测试：
 
@@ -360,10 +366,11 @@ UC-APP-004：提交 ApplicationVersion 审核
 
 ## 迁移说明
 
-服务从未上线，不迁移旧字段级更新 API。新入口直接使用完整替换和 revision；旧代码只作为需求证据。
+既有实现需要与 UC-APP-002 同步加入 oauthRedirects 的完整替换、no-op 比较、API 和持久化支持；在此之前不能把 OAuth 扩展视为已交付。新入口继续使用完整替换和 revision。
 
 ## 变更记录
 
 - 2026-09-15：建立 UC-APP-003，只允许当前管理员以 expectedRevision 完整替换 DRAFT 内容，并引入 revision、updatedBy、updatedAt。
 - 2026-09-15：UC-APP-004 明确 Version 生命周期迁移也增加 revision；ScopeCatalog 端口返回提交审计所需的 catalog revision。
 - 2026-09-15：UC-APP-006 明确 REJECTED 不能直接编辑，必须先显式恢复为 DRAFT。
+- 2026-09-27：oauthRedirects 加入完整替换内容并复用 BR-VER-018。

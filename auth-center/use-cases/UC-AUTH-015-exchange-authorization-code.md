@@ -12,9 +12,9 @@ POST /token，grant_type=authorization_code、code、redirect_uri；PUBLIC 表�
 
 ## 主流程
 
-1. 校验 client 类型与认证，取得当前一致的 App 配置。
-2. 查 code 摘要，验证 client、精确 redirect、PKCE、期限和用途；重新确认 App 资格、用户与 Developer 状态、grant revision 及 scope。
-3. 生成 opaque access token 与独立 ID Token；符合 UC016 时生成 refresh family。
+1. 读取 client 元数据，按登记类型校验认证；secret 验证结果必须与当前 configRevision 一致。
+2. 查 code 摘要，验证 client、code 中绑定的精确 redirect、PKCE、期限和用途；使用 code 保存的 expected runtime tuple 与 authId 重新调用 App `ResolveAuthorizationContext`，确认当前 Version 回调仍包含该精确 URI，并重新确认用户、Developer、grant revision 及 scope。
+3. 生成 opaque access token 与独立 ID Token；符合 UC-AUTH-016 时生成 refresh family。
 4. 在原子确认点消费 code，登记凭据摘要、family 和审计，检查 grant/用户写入栅栏。
 5. 仅确定提交成功后返回。客户端验证 OIDC 输出再建立自己的应用会话。
 
@@ -42,7 +42,7 @@ ID Token 是面向 client 的登录证据，格式和 pairwise sub 由 [OAuth/OI
 <a id="br-oau-008"></a>
 ### BR-OAU-008：签发一致性与故障关闭
 
-最终写入与 grant 撤销、family 撤销及用户可用状态检查共用 Auth 本地原子栅栏。App 外部快照只在限定时间有效，不声称跨库事务。secret 轮换、client 禁用、发布/Tester 资格变化或凭据记录与快照不一致均拒绝本次兑换。
+最终写入与 grant 撤销、family 撤销及用户可用状态检查共用 Auth 本地原子栅栏。App 外部快照只在限定时间有效，不声称跨库事务。secret 轮换、client 禁用、发布/Tester 资格变化、当前 Version 不再包含 code 绑定的精确 redirect URI，或凭据记录与快照不一致，均拒绝本次兑换。
 
 未知/过期/错误 code 及错误 verifier 统一 invalid_grant；服务故障用 temporarily_unavailable。日志、审计和 metrics 不记录任何 token、code、secret 或 verifier。
 
@@ -56,4 +56,8 @@ ID Token 是面向 client 的登录证据，格式和 pairwise sub 由 [OAuth/OI
 
 ## 依赖与实现边界
 
-依赖 UC014、UC-APP-018/019 与 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。没有 UC016 时不签 refresh token；UC017 提供标准 UserInfo，UC019 为业务资源校验 access token。Mongo unique/TTL 索引与事务写入栅栏在实现工作包落实，不以 TTL 删除代替在线状态判断。
+依赖 UC-AUTH-014、UC-APP-018/019 与 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。没有 UC-AUTH-016 时不签 refresh token；UC-AUTH-017 提供标准 UserInfo，UC-AUTH-019 为业务资源校验 access token。Mongo unique/TTL 索引与事务写入栅栏在实现工作包落实，不以 TTL 删除代替在线状态判断。
+
+## 变更记录
+
+- 2026-09-27：code 兑换以完整 App runtime/Tester tuple 重新解析，并确认当前批准 Version 仍包含 code 绑定的精确 redirect URI。

@@ -6,9 +6,9 @@
 
 App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户端在后续用例中发现和使用这些应用。
 
-本阶段不尝试一次定义完整应用平台，只验证十六个最基础的业务事实：
+本阶段不尝试一次定义完整应用平台；前十六个用例验证应用管理与封闭测试闭环，UC-APP-018/019 继续定义 OAuth/OIDC 接入边界：
 
-> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；已批准运行版本可放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标。
+> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；已批准运行版本可放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标，并为 Auth 提供独立 OAuth client 与当前批准 Version 的回调、scope 和 Tester 资格快照。
 
 ## 当前用户
 
@@ -34,7 +34,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 被拒绝的 ProfileRevision 保持终态；网页端可以依据 [BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) 用旧内容预填创建表单，再调用普通创建用例产生新 DRAFT；服务端不提供恢复接口。
 - 返回创建后的完整 Application。
 - 当前管理员可以创建一个 DRAFT ApplicationVersion。
-- Version 获得独立 UUIDv7、应用内 sequence、入口 URL、RPC API 兼容范围、capabilities 和 scopes。
+- Version 获得独立 UUIDv7、应用内 sequence、入口 URL、RPC API 兼容范围、capabilities、scopes 和按 client type 分组的 OAuth redirect URIs。
 - 当前管理员可以完整替换 DRAFT 的可编辑内容；revision 防止多个编辑页面静默覆盖。
 - 当前管理员可以提交 DRAFT；系统重新验证 scopes 和公网 HTTPS URL，并创建独立 ApplicationReview 快照。
 - reviewer 使用版本化策略作出一次性决定；批准前再次验证 scopes 和 URL，拒绝必须说明原因。
@@ -45,11 +45,12 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 每个 Application 最多有 100 个 ACTIVE Tester；当前管理员可以按 membershipId 幂等移除并原子释放名额。
 - 当前管理员可以按 joinLinkId 幂等执行 MANUAL 撤销；撤销立即阻止后续加入，但不影响现有 Tester。
 - App Center 根据 ACTIVE Membership、exact RPC major Publication 和 host capabilities 返回 TestLaunchDescriptor，不把授权或版本选择下放给客户端。
+- 当前管理员可以为已批准并发布的 exact-major 运行上下文创建独立 OAuth clientId；PUBLIC/CONFIDENTIAL 类型、状态与 secret 生命周期由 OAuthClient 保存，redirect URI 与 scopes 继续由 ApplicationVersion 审核和发布。
+- Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得绑定 ACTIVE Tester episode 的授权上下文；App Center 不签发 code 或 token。
 
 ## 当前非目标
 
 - 查询、更新或删除应用。
-- client ID、client secret 或 OAuth 注册。
 - 协作者和角色。
 - 管理员转让；当前只为未来转让保留 adminId 语义。
 - ApplicationVersion 的审核撤回、决定推翻、grey/stable 发布和公开上线。
@@ -59,7 +60,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - Application admin 或 SysAdmin 发起的 Application 级禁用及重新启用；紧急隐藏不作为 ProfileRevision 状态。
 - Tester 主动退出、grey/stable 槽位和灰度分桶。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
-- Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；本轮只登记版本申请的 scopes。
+- Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。
 - 兼容现有 App Center API 和 MongoDB 文档。
 
 ## 本轮成功标准

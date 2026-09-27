@@ -10,7 +10,7 @@
 
 - 验证 reviewer 权限和利益冲突。
 - 使用 reviewer 实际看到的版本化审核策略。
-- 批准前重新验证 scopes 和公网 HTTPS URL。
+- 批准前重新验证 scopes、公网 HTTPS launchUrl 和版本化 OAuth 回调。
 - 批准前检查当前 admin 与 submittedBy 的暂停状态，并在任一人已暂停时由系统自动拒绝。
 - 一次性写入不可修改的审核决定。
 - 原子同步 ApplicationReview.status 与 ApplicationVersion.reviewStatus。
@@ -155,7 +155,7 @@ Command 使用动作词 `APPROVE/REJECT`；持久化后的结果状态使用 `AP
 6. 确认 confirmedCheckIds 无重复、全部由策略定义，并覆盖本次全部 requiredCheckIds。
 7. 通过 DeveloperSuspensionChecker 检查 candidate 中的当前 adminId 和 submittedBy。任一人已暂停时，跳过 ScopeCatalog 和 URL 检查，使用 System Auth ID 和固定 reason 构造自动 `REJECTED` decision，并进入步骤 11。
 8. 通过 ScopeCatalog 再次确认 snapshot 中的 scopes 仍允许新版本申请，取得 approvalScopeCatalogRevision。
-9. 通过 LaunchURLSubmissionPolicy 再次检查 snapshot.launchUrl，取得 approvalPreflightPolicyVersion。
+9. 通过 LaunchURLSubmissionPolicy 再次检查 snapshot.launchUrl，取得 approvalPreflightPolicyVersion；按 BR-VER-018 重新验证 snapshot.oauthRedirects。
 10. 从 Clock 取得 decidedAt，构造 outcome=`APPROVED` 的不可变 decision。
 11. Repository 原子重新确认步骤 4 的状态和利益冲突，并确认 current adminId 仍等于暂停检查所使用的 adminId，然后同时：
     - 将 ApplicationReview.status 改为 decision.outcome 并写入 decision。
@@ -192,6 +192,7 @@ Command 使用动作词 `APPROVE/REJECT`；持久化后的结果状态使用 `AP
 - 批准时 scope 不再允许申请：`InvalidApplicationScope`。
 - 批准时 Scope Catalog 不可用：`ScopeCatalogUnavailable`。
 - 批准时 URL 不再满足公网 HTTPS 策略：`ApplicationLaunchUrlNotReviewable`。
+- 批准时 oauthRedirects 不再满足 BR-VER-018：`InvalidOAuthRedirectConfiguration`。
 - 批准时 URL 检查依赖不可用：`LaunchUrlInspectionUnavailable`。
 - 批准时开发者暂停状态依赖不可用：`DeveloperStatusUnavailable`；Review 保持 PENDING。
 - 自动拒绝所需 System principal 不可解析：`SystemPrincipalUnavailable`；Review 保持 PENDING，后续请求可重试。
@@ -306,6 +307,7 @@ APPROVE 必须针对 ApplicationReview.snapshot 重新执行：
 - DeveloperSuspensionChecker 对当前 adminId 与 Review.submittedBy 的暂停检查。
 - ScopeCatalog requestable 检查。
 - LaunchURLSubmissionPolicy 公网 HTTPS 与 DNS 地址策略检查。
+- BR-VER-018 的 OAuth 回调结构、规范 hostname 与安全限制检查。
 
 使用 snapshot 而不是当前 Version 拼装输入。通过后把 catalog revision 和 URL policy version 写入 decision.approvalValidation。
 
@@ -440,9 +442,7 @@ validator 必须保证：
 
 `application_versions` 不增加字段。决定时原子更新 reviewStatus、revision、updatedBy 和 updatedAt。
 
-App Center 另以 `version_review_policies` 保存自己拥有的不可变正式策略。首版 migration
-写入且只写入以下 ACTIVE 策略；已存在同版本但内容不同时 migration 必须失败，运行时
-不提供覆盖或删除接口：
+App Center 另以 `version_review_policies` 保存自己拥有的不可变正式策略。历史 v1 保留供解释既有决定；引入版本化 OAuth 回调后，新 migration 将 v1 标为 RETIRED，并写入以下 ACTIVE v2。任何已存在同版本但内容不同时 migration 必须失败，运行时不提供覆盖或删除接口：
 
 ```text
 version: app-version-review-v1
@@ -450,11 +450,18 @@ requiredChecks:
   - content-policy-reviewed
   - launch-url-content-reviewed
   - requested-access-reviewed
+status: RETIRED
+
+version: app-version-review-v2
+requiredChecks:
+  - content-policy-reviewed
+  - launch-url-content-reviewed
+  - requested-access-reviewed
+  - oauth-redirects-reviewed
 status: ACTIVE
 ```
 
-未来修改检查项必须使用新的 policy version；不能原地修改
-`app-version-review-v1`。`version_review_policies.version` 唯一，历史版本保留。
+`oauth-redirects-reviewed` 要求 reviewer 确认所有已登记 callback 与声明的 client type 相符；数组为空时明确确认该版本未启用 OAuth/OIDC 回调。未来修改检查项必须使用新的 policy version；不能原地修改 v1 或 v2。`version_review_policies.version` 唯一，历史版本保留。所有新决定必须使用当前 ACTIVE v2；已经用 v1 作出的决定不重写。
 
 ## API 草图
 
@@ -468,11 +475,12 @@ Authorization: <authenticated reviewer identity>
 ```json
 {
   "outcome": "APPROVE",
-  "expectedPolicyVersion": "app-version-review-v1",
+  "expectedPolicyVersion": "app-version-review-v2",
   "confirmedCheckIds": [
     "content-policy-reviewed",
     "launch-url-content-reviewed",
-    "requested-access-reviewed"
+    "requested-access-reviewed",
+    "oauth-redirects-reviewed"
   ]
 }
 ```
@@ -482,7 +490,7 @@ Authorization: <authenticated reviewer identity>
 ```json
 {
   "outcome": "REJECT",
-  "expectedPolicyVersion": "app-version-review-v1",
+  "expectedPolicyVersion": "app-version-review-v2",
   "confirmedCheckIds": [],
   "reason": "应用在未说明用途的情况下请求了用户课表读取权限。"
 }
@@ -497,11 +505,12 @@ Authorization: <authenticated reviewer identity>
     "status": "APPROVED",
     "decision": {
       "outcome": "APPROVED",
-      "reviewPolicyVersion": "app-version-review-v1",
+      "reviewPolicyVersion": "app-version-review-v2",
       "confirmedCheckIds": [
         "content-policy-reviewed",
         "launch-url-content-reviewed",
-        "requested-access-reviewed"
+        "requested-access-reviewed",
+        "oauth-redirects-reviewed"
       ],
       "reason": null,
       "decidedBy": "reviewer-auth-id",
@@ -593,7 +602,7 @@ UC-APP-006：将被拒绝的 ApplicationVersion 恢复为 DRAFT
 
 ## 迁移说明
 
-服务从未上线，不迁移旧 `is_admin` 直接设置 Application 状态的接口，也不把旧 Version status 当作审核结论。新模型直接写入一次性 decision。
+既有实现需要 migration 不可变地加入 `app-version-review-v2`、retire v1，并同步 oauthRedirects snapshot 复检、策略测试与 API 示例；不得改写 v1 的检查项或历史 decision。旧 `is_admin` 直接设置 Application 状态的接口继续不保留。
 
 ## 变更记录
 
@@ -606,3 +615,4 @@ UC-APP-006：将被拒绝的 ApplicationVersion 恢复为 DRAFT
   `app-version-review-v1` 的三个正式检查项及本地不可变策略仓库。
 - 2026-09-22：使用 caller-signed service JWS 调用 Auth；自动拒绝的 SYSTEM principal
   改为按 purpose 延迟解析并缓存，移除静态 System Auth ID 启动依赖。
+- 2026-09-27：增加 OAuth 回调复检和 `app-version-review-v2`；v1 仅保留用于解释历史决定。

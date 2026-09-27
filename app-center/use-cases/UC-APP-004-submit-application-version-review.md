@@ -115,9 +115,10 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
    - reviewStatus 是 `DRAFT`。
    - revision 等于 expectedRevision。
 4. 通过 ScopeCatalog 重新确认 requiredScopes 和 optionalScopes 当前仍允许被新版本申请，并取得本次 Auth catalog revision。
-5. 通过 LaunchURLSubmissionPolicy 确认 launchUrl 是当前可提交审核的公网 HTTPS URL。
-6. 生成 UUIDv7 reviewId，并从 Clock 取得 submittedAt。
-7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
+5. 按 BR-VER-018 重新验证 oauthRedirects 的结构、规范 hostname 和安全限制。
+6. 通过 LaunchURLSubmissionPolicy 确认 launchUrl 是当前可提交审核的公网 HTTPS URL。
+7. 生成 UUIDv7 reviewId，并从 Clock 取得 submittedAt。
+8. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
    - 为该 Version 分配下一个 attempt，从 1 开始递增。
    - 复制候选 Version 的受审核字段形成不可变 snapshot。
    - 插入 status 为 `PENDING`、decision 和 draftRestoration 均为 null 的 ApplicationReview。
@@ -139,6 +140,7 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
 - launchUrl 不是公网 HTTPS URL：`ApplicationLaunchUrlNotReviewable`。
 - launchUrl DNS 解析失败或检查依赖暂时不可用：`LaunchUrlInspectionUnavailable`。
 - scope 已不存在、deprecated 或不再允许新申请：`InvalidApplicationScope`。
+- oauthRedirects 不再满足 BR-VER-018：`InvalidOAuthRedirectConfiguration`。
 - Scope Catalog 无可用的新鲜快照：`ScopeCatalogUnavailable`。
 - reviewId 冲突或持久化失败：内部失败，不产生半完成提交。
 
@@ -186,6 +188,7 @@ rpcApiMaxVersionExclusive
 requiredCapabilities
 requiredScopes
 optionalScopes
+oauthRedirects
 ```
 
 snapshot 创建后不可修改。Application.name 和独立的 ApplicationProfileRevision 不进入本次版本审核快照；公开目录资料由其自身的 revision 审核流程负责。
@@ -285,6 +288,7 @@ ApplicationVersionReviewSnapshot {
   requiredCapabilities: []CapabilityName
   requiredScopes: []ScopeName
   optionalScopes: []ScopeName
+  oauthRedirects: []OAuthRedirectGroup
 }
 ```
 
@@ -359,6 +363,7 @@ type ApplicationReviewRepository interface {
 | `snapshot.requiredCapabilities` | 提交时必需宿主能力 | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.requiredScopes` | 提交时必需 scopes | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.optionalScopes` | 提交时可选 scopes | array&lt;string&gt; | 已排序；元素唯一且不与 required 交叉 | no | no |
+| `snapshot.oauthRedirects` | 提交时 OAuth 回调 | array&lt;object&gt; | BR-VER-018；已规范排序 | no | no |
 | `scopeCatalogRevision` | scope 校验使用的 Auth catalog revision | int64 | Auth 单调递增版本 | no | no |
 | `preflightPolicyVersion` | URL 提交预检规则版本 | string | 稳定策略标识，1–50 ASCII `[A-Za-z0-9._-]` | no | no |
 | `submittedBy` | 实际提交者 | string | opaque authId | no | no |
@@ -415,7 +420,11 @@ Location: /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}
       "rpcApiMaxVersionExclusive": 5,
       "requiredCapabilities": ["user.profile.v1"],
       "requiredScopes": ["profile.basic"],
-      "optionalScopes": ["schedule.read"]
+      "optionalScopes": ["schedule.read"],
+      "oauthRedirects": [{
+        "clientType": "PUBLIC_PKCE",
+        "redirectUris": ["https://example.edu/oauth/callback"]
+      }]
     },
     "scopeCatalogRevision": 17,
     "preflightPolicyVersion": "submit-v1",
@@ -444,7 +453,7 @@ Location: /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}
 领域测试：
 
 - 只有 DRAFT 可以进入 SUBMITTED。
-- 提交产生与候选内容完全一致、集合顺序稳定的 snapshot。
+- 提交产生与候选内容完全一致、集合顺序稳定且包含 oauthRedirects 的 snapshot。
 - 提交增加 Version revision，并更新最近修改审计。
 - snapshot 与提交审计创建后不可修改。
 - 新 Review 的 decision 固定为 null。
@@ -456,6 +465,7 @@ UseCase 测试：
 - 只有 `APPROVED` 的当前 admin 可以提交。
 - 使用 expectedRevision 加载候选，并在写入时再次校验。
 - scopes 在提交时重新验证，并保存 catalog revision。
+- oauthRedirects 在提交时按 BR-VER-018 重新验证并冻结进 snapshot。
 - 开发 HTTP/私网 URL 不能提交；合规公网 HTTPS URL 可以提交。
 - 外部检查失败时不调用最终 Submit。
 - reviewId 和 submittedAt 只能来自系统端口。
@@ -489,10 +499,11 @@ UC-APP-005：审核 ApplicationVersion
 
 ## 迁移说明
 
-服务从未上线，不迁移旧 Application 的 `AUDITING` 状态，也不保留调用者直接改审核状态的 API。旧代码只作为“需要权限与可查询审核状态”的需求证据。
+既有实现需要 migration 为历史 Review snapshot 回填 `oauthRedirects: []`，并同步 snapshot 深拷贝、schema、API 与测试；完成前不覆盖 OAuth 扩展。旧 Application 的 `AUDITING` 状态和直接改审核状态 API 不保留。
 
 ## 变更记录
 
 - 2026-09-15：建立 UC-APP-004；提交时创建独立审核快照，把 Version 原子迁移为 SUBMITTED，并重新验证 Scope Catalog 与公网 HTTPS 入口。
 - 2026-09-15：UC-APP-005 引入一次性 decision；UC-APP-004 创建 PENDING Review 时将其初始化为 null。
 - 2026-09-15：UC-APP-006 引入拒绝后的 draftRestoration；UC-APP-004 创建 Review 时将其初始化为 null。
+- 2026-09-27：审核 snapshot 增加 oauthRedirects，并在提交时复查 BR-VER-018。

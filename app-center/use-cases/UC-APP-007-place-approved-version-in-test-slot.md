@@ -121,6 +121,7 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
 5. 针对 approved Review.snapshot：
    - 通过 ScopeCatalog 确认 scopes 当前仍允许新版本使用，并取得 scopeCatalogRevision。
    - 通过 LaunchURLSubmissionPolicy 重新检查公网 HTTPS URL，并取得 preflightPolicyVersion。
+   - 读取该 application、TEST、rpcApiMajor 下已有 OAuthClients；snapshot 若为某 client type 提供回调组，其规范 hostname 必须等于该 client 的不可变 sector。省略某 type 回调组允许发布，但会使该 type 暂时不可授权。
 6. 为新 Publication（若需要）和本次 History 分别生成 UUIDv7，并从 Clock 取得 changedAt。
 7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
    - Publication 不存在时创建 revision=1、testVersionId=versionId 的记录。
@@ -149,6 +150,7 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
 - Scope Catalog 不可用：`ScopeCatalogUnavailable`。
 - URL 不再满足公网 HTTPS 策略：`ApplicationLaunchUrlNotReviewable`。
 - URL 检查依赖不可用：`LaunchUrlInspectionUnavailable`。
+- oauthRedirects 为已有 client type 提供了不同 hostname：`OAuthClientSectorMismatch`。
 - ID 生成或持久化失败：内部失败，不产生部分 Publication 或 History。
 
 路径关系不匹配统一按 NotFound 处理，不泄露其他应用的 Version。所有失败都不能改变当前槽位。
@@ -184,6 +186,8 @@ testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Re
 审核状态一致性和 revision 的既有约束分别见 [BR-REV-013](UC-APP-005-decide-application-version-review.md#br-rev-013) 与 [BR-REV-014](UC-APP-005-decide-application-version-review.md#br-rev-014)；受审核快照字段见 [BR-REV-004](UC-APP-004-submit-application-version-review.md#br-rev-004)。
 
 `DRAFT/SUBMITTED/REJECTED/REVOKED` 都不能进入 test 槽位。历史上曾经 APPROVED 但当前已失去资格的 Version 也不能重新设置。
+
+如果该运行上下文已经登记 OAuthClient，snapshot 中同 type 回调组的规范 hostname 必须等于 client.sector；改变 hostname 必须新建 clientId。snapshot 可以省略该 type，明确让当前 test 发布不提供 OAuth 回调；运行解析必须失败关闭，不能回退旧 Version。
 
 <a id="br-pub-004"></a>
 ### BR-PUB-004：测试槽位不是审核状态
@@ -239,7 +243,7 @@ History 是操作审计，不是 event sourcing 的权威状态；当前 Publica
 <a id="br-pub-008"></a>
 ### BR-PUB-008：发布前复检
 
-真实改变 test 槽位前，必须针对 approved Review.snapshot 重新执行 ScopeCatalog 和 LaunchURLSubmissionPolicy 检查，并把所用版本写入 History。
+真实改变 test 槽位前，必须针对 approved Review.snapshot 重新执行 ScopeCatalog、LaunchURLSubmissionPolicy 和 OAuth client sector 一致性检查，并把外部策略版本写入 History。
 
 ScopeCatalog 使用 [ADR-001](../adr/ADR-001-scope-catalog-cache.md) 的有界缓存和失败关闭语义；LaunchURLSubmissionPolicy 复用 [BR-REV-007](UC-APP-004-submit-application-version-review.md#br-rev-007) 的公网 HTTPS/DNS 预检，不新增内容抓取。
 
@@ -496,6 +500,7 @@ Repository 集成测试：
 - 两个相同 expected revision 的并发替换最多一个成功。
 - 管理员转让、Version revoke 与设置并发时旧条件不能成功。
 - approved Review、snapshot、Version status/revision 的一致性检查生效。
+- 已有 OAuthClient 时，同 type 回调 hostname 改变拒绝；省略该 type 可以发布且运行解析失败关闭。
 - `(applicationId, rpcApiMajor)` 和 `(publicationId, publicationRevision)` 唯一约束生效。
 - 替换后旧 Version 保持 APPROVED，历史指针仍可审计。
 
@@ -507,7 +512,7 @@ API 测试：
 
 ## 实现依赖与交付边界
 
-- Application、ApplicationVersion 与 ApplicationReview 的前置行为已由 UC-APP-001 至 UC-APP-006 实现；发布从完整 APPROVED decision 和 snapshot 读取资格，不依赖 Tester、公开资料或后续发布能力。
+- Application、ApplicationVersion 与 ApplicationReview 的前置行为已由 UC-APP-001 至 UC-APP-006 实现；发布从完整 APPROVED decision 和 snapshot 读取资格。OAuthClient 尚不存在时不增加额外条件；UC-APP-018 落地后，发布 adapter 必须加入 sector 一致性查询与最终事务复查。
 - 复用现有可信 DeveloperIdentity、Auth Scope Catalog gRPC consumer/有界缓存、DNS-only URL 预检、UUIDv7/Clock 与 Wire；新能力通过自己的 ports 适配，遵守 ADR-003 的能力边界。
 - MongoDB 使用 ADR-004 要求的事务拓扑；现有隔离 replica-set 测试脚本可验证跨 Application、Version、Review、Publication、History 的事务、回滚和并发。最终事务必须以真实写入栅栏或等价机制防止读快照下的管理员转让/审核撤销竞争；不得改变 Application/Version 的业务字段或业务 revision。
 - Auth 的 MongoDB 权威 Scope Catalog 尚未交付，不阻止 App Center consumer 实现及隔离 E2E，但在权威目录和完整双服务验证闭合前，不将本 UC 标为生产依赖全部闭合的 COMPLETE。
@@ -527,7 +532,7 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 
 ## 迁移说明
 
-服务从未上线，不迁移 Application.betaVersion、Version.status=TEST 或内嵌 tester 数组。新模型直接创建按 rpcApiMajor 分区的 Publication 和追加式 History。
+既有 UC-APP-007 实现需要在 OAuthClient 落地时加入 sector 一致性检查及竞争测试；在此之前其原有发布能力仍有效，但不覆盖 OAuth 扩展。旧 Application.betaVersion、Version.status=TEST 或内嵌 tester 数组不迁移。
 
 ## 变更记录
 
@@ -536,3 +541,4 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 - 2026-09-16：由 UC-APP-012 确认 App Center 使用 exact rpcApiMajor Publication 和 capabilities 为 ACTIVE Tester 返回 TestLaunchDescriptor，不把选择规则下放给客户端。
 
 - 2026-09-22：接受 UC-APP-007；核对现有审核、身份、Scope/URL 与 MongoDB 事务依赖，明确 consumer 实现可开始及 Auth 权威目录的交付边界，并补充复用规则引用。
+- 2026-09-27：发布前增加 Version oauthRedirects 与既有 OAuthClient sector 的一致性检查；省略回调组表示该发布暂不提供对应 OAuth 接入。

@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-005` 审核应用版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-REV-010`–`BR-REV-020`（11 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-VER-018`（来自 `UC-APP-002`） |
 | ADR | `ADR-001`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-developer-status-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/auth-system-principal-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -43,7 +43,7 @@
 
 - 验证 reviewer 权限和利益冲突。
 - 使用 reviewer 实际看到的版本化审核策略。
-- 批准前重新验证 scopes 和公网 HTTPS URL。
+- 批准前重新验证 scopes、公网 HTTPS launchUrl 和版本化 OAuth 回调。
 - 批准前检查当前 admin 与 submittedBy 的暂停状态，并在任一人已暂停时由系统自动拒绝。
 - 一次性写入不可修改的审核决定。
 - 原子同步 ApplicationReview.status 与 ApplicationVersion.reviewStatus。
@@ -152,7 +152,7 @@ Command 使用动作词 `APPROVE/REJECT`；持久化后的结果状态使用 `AP
 6. 确认 confirmedCheckIds 无重复、全部由策略定义，并覆盖本次全部 requiredCheckIds。
 7. 通过 DeveloperSuspensionChecker 检查 candidate 中的当前 adminId 和 submittedBy。任一人已暂停时，跳过 ScopeCatalog 和 URL 检查，使用 System Auth ID 和固定 reason 构造自动 `REJECTED` decision，并进入步骤 11。
 8. 通过 ScopeCatalog 再次确认 snapshot 中的 scopes 仍允许新版本申请，取得 approvalScopeCatalogRevision。
-9. 通过 LaunchURLSubmissionPolicy 再次检查 snapshot.launchUrl，取得 approvalPreflightPolicyVersion。
+9. 通过 LaunchURLSubmissionPolicy 再次检查 snapshot.launchUrl，取得 approvalPreflightPolicyVersion；按 BR-VER-018 重新验证 snapshot.oauthRedirects。
 10. 从 Clock 取得 decidedAt，构造 outcome=`APPROVED` 的不可变 decision。
 11. Repository 原子重新确认步骤 4 的状态和利益冲突，并确认 current adminId 仍等于暂停检查所使用的 adminId，然后同时：
     - 将 ApplicationReview.status 改为 decision.outcome 并写入 decision。
@@ -189,6 +189,7 @@ Command 使用动作词 `APPROVE/REJECT`；持久化后的结果状态使用 `AP
 - 批准时 scope 不再允许申请：`InvalidApplicationScope`。
 - 批准时 Scope Catalog 不可用：`ScopeCatalogUnavailable`。
 - 批准时 URL 不再满足公网 HTTPS 策略：`ApplicationLaunchUrlNotReviewable`。
+- 批准时 oauthRedirects 不再满足 BR-VER-018：`InvalidOAuthRedirectConfiguration`。
 - 批准时 URL 检查依赖不可用：`LaunchUrlInspectionUnavailable`。
 - 批准时开发者暂停状态依赖不可用：`DeveloperStatusUnavailable`；Review 保持 PENDING。
 - 自动拒绝所需 System principal 不可解析：`SystemPrincipalUnavailable`；Review 保持 PENDING，后续请求可重试。
@@ -305,9 +306,7 @@ validator 必须保证：
 
 `application_versions` 不增加字段。决定时原子更新 reviewStatus、revision、updatedBy 和 updatedAt。
 
-App Center 另以 `version_review_policies` 保存自己拥有的不可变正式策略。首版 migration
-写入且只写入以下 ACTIVE 策略；已存在同版本但内容不同时 migration 必须失败，运行时
-不提供覆盖或删除接口：
+App Center 另以 `version_review_policies` 保存自己拥有的不可变正式策略。历史 v1 保留供解释既有决定；引入版本化 OAuth 回调后，新 migration 将 v1 标为 RETIRED，并写入以下 ACTIVE v2。任何已存在同版本但内容不同时 migration 必须失败，运行时不提供覆盖或删除接口：
 
 ```text
 version: app-version-review-v1
@@ -315,11 +314,18 @@ requiredChecks:
   - content-policy-reviewed
   - launch-url-content-reviewed
   - requested-access-reviewed
+status: RETIRED
+
+version: app-version-review-v2
+requiredChecks:
+  - content-policy-reviewed
+  - launch-url-content-reviewed
+  - requested-access-reviewed
+  - oauth-redirects-reviewed
 status: ACTIVE
 ```
 
-未来修改检查项必须使用新的 policy version；不能原地修改
-`app-version-review-v1`。`version_review_policies.version` 唯一，历史版本保留。
+`oauth-redirects-reviewed` 要求 reviewer 确认所有已登记 callback 与声明的 client type 相符；数组为空时明确确认该版本未启用 OAuth/OIDC 回调。未来修改检查项必须使用新的 policy version；不能原地修改 v1 或 v2。`version_review_policies.version` 唯一，历史版本保留。所有新决定必须使用当前 ACTIVE v2；已经用 v1 作出的决定不重写。
 
 ### API 草图
 
@@ -333,11 +339,12 @@ Authorization: <authenticated reviewer identity>
 ```json
 {
   "outcome": "APPROVE",
-  "expectedPolicyVersion": "app-version-review-v1",
+  "expectedPolicyVersion": "app-version-review-v2",
   "confirmedCheckIds": [
     "content-policy-reviewed",
     "launch-url-content-reviewed",
-    "requested-access-reviewed"
+    "requested-access-reviewed",
+    "oauth-redirects-reviewed"
   ]
 }
 ```
@@ -347,7 +354,7 @@ Authorization: <authenticated reviewer identity>
 ```json
 {
   "outcome": "REJECT",
-  "expectedPolicyVersion": "app-version-review-v1",
+  "expectedPolicyVersion": "app-version-review-v2",
   "confirmedCheckIds": [],
   "reason": "应用在未说明用途的情况下请求了用户课表读取权限。"
 }
@@ -362,11 +369,12 @@ Authorization: <authenticated reviewer identity>
     "status": "APPROVED",
     "decision": {
       "outcome": "APPROVED",
-      "reviewPolicyVersion": "app-version-review-v1",
+      "reviewPolicyVersion": "app-version-review-v2",
       "confirmedCheckIds": [
         "content-policy-reviewed",
         "launch-url-content-reviewed",
-        "requested-access-reviewed"
+        "requested-access-reviewed",
+        "oauth-redirects-reviewed"
       ],
       "reason": null,
       "decidedBy": "reviewer-auth-id",
@@ -553,6 +561,7 @@ APPROVE 必须针对 ApplicationReview.snapshot 重新执行：
 - DeveloperSuspensionChecker 对当前 adminId 与 Review.submittedBy 的暂停检查。
 - ScopeCatalog requestable 检查。
 - LaunchURLSubmissionPolicy 公网 HTTPS 与 DNS 地址策略检查。
+- BR-VER-018 的 OAuth 回调结构、规范 hostname 与安全限制检查。
 
 使用 snapshot 而不是当前 Version 拼装输入。通过后把 catalog revision 和 URL policy version 写入 decision.approvalValidation。
 
@@ -577,6 +586,33 @@ APPROVED Version 只是后续 ApplicationPublication 可以引用的候选。审
 reviewer 实际观察的是某个时间点 launchUrl 返回的自托管内容，而 snapshot 只能冻结 URL 与权限声明。decision 记录审核人、时间、策略和确认项，但不是远端字节的密码学证明。
 
 因此 APPROVED 的准确语义是“该 snapshot 按记录的策略被 reviewer 接受”，不是“这个 URL 永远安全”。内容撤换检测、摘要、平台托管和紧急撤销属于后续能力。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-002`
+
+<!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
+### BR-VER-018：版本化 OAuth 回调
+
+`oauthRedirects` 是受审核的版本内容，不属于 OAuthClient，也不从 launchUrl 推导。它是 0–2 个回调组组成的非 null 数组：
+
+```text
+OAuthRedirectGroup {
+  clientType: PUBLIC_PKCE | CONFIDENTIAL_SECRET
+  redirectUris: []RedirectURI
+}
+```
+
+- 每种 clientType 至多一组；每组包含 1–10 个不重复 URI。空数组表示该 Version 不提供 OAuth/OIDC 回调。
+- URI 必须是绝对 HTTPS URL，最多 2048 UTF-8 bytes；禁止 userinfo、fragment、wildcard、IP literal、localhost，以及 [BR-REV-007](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) 固定的 IANA `2026-05-22` special-use 域名或其子域。
+- 禁止预占 OAuth/OIDC 响应参数 `code/state/iss/error/error_description/error_uri`。
+- 同一组的所有 URI 必须使用同一个规范 DNS hostname。hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。其余 URL 部分保存后按完整字符串精确匹配。
+- callback path、query 和 port 可以不同；运行时不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
+- 回调组按 clientType 固定顺序保存，组内 URI 按 Unicode code point 排序。输入顺序不表达业务含义。
+
+OAuthClient 创建时从当前批准并发布的回调组派生不可变 sector。存在该运行上下文的 client 后，后续发布由 UC-APP-007 检查同 type 回调组的 hostname；改变 hostname 需要新的 clientId。Version 草稿本身可以在 client 创建前存在，因此创建/编辑阶段不依赖 OAuthClient。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -1043,6 +1079,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：旧实现观察、后续用例、迁移说明、变更记录
+- `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
@@ -1055,7 +1092,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 608 | `ff0f43b11bd2` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `b213564fd3ae` |
+| `use-cases/UC-APP-002-create-application-version.md` | 463 | `aed995d52573` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

@@ -11,8 +11,8 @@
 | --- | --- |
 | Use Case | `UC-APP-002` 创建应用版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
-| 本 UC 权威 BR | `BR-VER-001`–`BR-VER-009`（9 条） |
-| 外部引用 BR | — |
+| 本 UC 权威 BR | `BR-VER-001`、`BR-VER-002`、`BR-VER-003`、`BR-VER-004`、`BR-VER-005`、`BR-VER-006`、`BR-VER-007`、`BR-VER-008`、`BR-VER-009`、`BR-VER-018` |
+| 外部引用 BR | `BR-REV-007`（来自 `UC-APP-004`） |
 | ADR | `ADR-001` |
 | 平台共享 | `platform/contracts/auth-scope-catalog-v1.md` |
 
@@ -62,6 +62,7 @@ CreateApplicationVersionCommand {
   requiredCapabilities: []string
   requiredScopes: []string
   optionalScopes: []string
+  oauthRedirects: []OAuthRedirectGroup
 }
 ```
 
@@ -80,7 +81,7 @@ applicationId、reviewStatus、sequence、versionId、createdBy、createdAt、re
 
 1. 从可信身份上下文取得 authId 和 developerStatus。
 2. 确认 developerStatus 为 `APPROVED`。
-3. 校验 versionLabel、launchUrl、RPC range、capabilities 和 scopes。
+3. 校验 versionLabel、launchUrl、RPC range、capabilities、scopes 和 oauthRedirects。
 4. 通过 ScopeCatalog port 确认所有 scope 当前允许被新版本申请；生产组装最终使用 ADR-001 定义的带本地有界缓存 adapter，其快照源调用 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)。
 5. 生成 UUIDv7 versionId，并取得 UTC createdAt；初始化 revision 为 1、updatedBy 为 createdBy、updatedAt 为 createdAt。
 6. Repository 在同一个原子操作中：
@@ -102,6 +103,7 @@ applicationId、reviewStatus、sequence、versionId、createdBy、createdAt、re
 - RPC range 非法：`InvalidRpcApiRange`。
 - capability 名称非法或重复：`InvalidRequiredCapability`。
 - requiredScopes 或 optionalScopes 包含未知、重复或交叉项：`InvalidApplicationScope`。
+- oauthRedirects 的 type、数量、URL 或 hostname 规则不满足：`InvalidOAuthRedirectConfiguration`。
 - Scope Catalog 无可用的新鲜快照：`ScopeCatalogUnavailable`，不创建版本。
 - ID 或持久化失败：内部失败，不产生部分版本。
 
@@ -122,7 +124,11 @@ Authorization: <authenticated identity>
   "rpcApiMaxVersionExclusive": 5,
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
-  "optionalScopes": ["schedule.read"]
+  "optionalScopes": ["schedule.read"],
+  "oauthRedirects": [{
+    "clientType": "PUBLIC_PKCE",
+    "redirectUris": ["https://example.edu/oauth/callback"]
+  }]
 }
 ```
 
@@ -144,6 +150,10 @@ ETag: "1"
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
   "optionalScopes": ["schedule.read"],
+  "oauthRedirects": [{
+    "clientType": "PUBLIC_PKCE",
+    "redirectUris": ["https://example.edu/oauth/callback"]
+  }],
   "reviewStatus": "DRAFT",
   "createdBy": "auth-id-from-identity",
   "createdAt": "2026-08-23T12:00:00Z",
@@ -157,13 +167,14 @@ ETag: "1"
 
 领域测试：
 
-- versionLabel、URL、RPC range、capabilities 和 scope 集合的不变量成立。
+- versionLabel、URL、RPC range、capabilities、scope 集合和 OAuth 回调的不变量成立。
 - versionLabel 大小写敏感，`v1.0.0` 与 `V1.0.0` 可以分别创建。
 - 2048-byte URL 边界可接受，2049 bytes 被拒绝。
 - DRAFT 接受符合范围的 HTTP 私网开发 URL，不接受公网 HTTP 或非 HTTP(S) scheme。
 - 单 major 范围和多 major 范围均可表达，无上界范围被拒绝。
 - requiredScopes 与 optionalScopes 的重复或交叉项被拒绝。
 - capabilities 和 scopes 校验后以稳定字典序保存。
+- OAuth 回调拒绝多 hostname、wildcard、响应参数预占和非规范 host，并按 type/URI 稳定排序；空数组合法。
 - 新版本状态只能是 DRAFT。
 
 UseCase 测试：
@@ -281,6 +292,63 @@ DRAFT 不可进入普通目录解析，也不能成为 stable 或 grey 版本。
 当前管理员检查、sequence 分配、versionLabel 唯一检查和版本插入必须处于同一事务或等价原子边界。管理员转让与版本创建并发时，旧管理员不能在转让完成后插入版本。
 
 创建时 revision 固定为 1，updatedBy 等于 createdBy，updatedAt 等于 createdAt。这三个字段由 UC-APP-003 的并发控制与最近修改审计要求反向引入。
+
+<!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
+### BR-VER-018：版本化 OAuth 回调
+
+`oauthRedirects` 是受审核的版本内容，不属于 OAuthClient，也不从 launchUrl 推导。它是 0–2 个回调组组成的非 null 数组：
+
+```text
+OAuthRedirectGroup {
+  clientType: PUBLIC_PKCE | CONFIDENTIAL_SECRET
+  redirectUris: []RedirectURI
+}
+```
+
+- 每种 clientType 至多一组；每组包含 1–10 个不重复 URI。空数组表示该 Version 不提供 OAuth/OIDC 回调。
+- URI 必须是绝对 HTTPS URL，最多 2048 UTF-8 bytes；禁止 userinfo、fragment、wildcard、IP literal、localhost，以及 [BR-REV-007](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) 固定的 IANA `2026-05-22` special-use 域名或其子域。
+- 禁止预占 OAuth/OIDC 响应参数 `code/state/iss/error/error_description/error_uri`。
+- 同一组的所有 URI 必须使用同一个规范 DNS hostname。hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。其余 URL 部分保存后按完整字符串精确匹配。
+- callback path、query 和 port 可以不同；运行时不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
+- 回调组按 clientType 固定顺序保存，组内 URI 按 Unicode code point 排序。输入顺序不表达业务含义。
+
+OAuthClient 创建时从当前批准并发布的回调组派生不可变 sector。存在该运行上下文的 client 后，后续发布由 UC-APP-007 检查同 type 回调组的 hostname；改变 hostname 需要新的 clientId。Version 草稿本身可以在 client 创建前存在，因此创建/编辑阶段不依赖 OAuthClient。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-004`
+
+<!-- 权威位置: use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007 -->
+### BR-REV-007：公网 HTTPS 预检
+
+可提交的 launchUrl 必须：
+
+- 使用 `https`，且不含 userinfo。
+- host 不是字面 IPv4/IPv6 地址。域名先按 non-transitional UTS #46 Lookup
+  processing 转为 ASCII A-label；转换失败、空 label、或移除一个表示 DNS root
+  的末尾 `.` 后仍含末尾 `.` 时不可提交。
+- 规范化后的域名不是 IANA Special-Use Domain Names registry
+  `2026-05-22` 快照中的名称或其子域。该快照包含 `localhost`、`.local`、
+  `example`、`invalid`、`test`、`onion`、`alt`、`home.arpa` 及 registry
+  中列出的其它专用名称。
+- DNS 至少解析出一个地址，且所有 A/AAAA 结果都是允许访问的公网地址。
+- 不解析到 IANA IPv4/IPv6 Special-Purpose Address registries `2025-10-09`
+  快照中的任何前缀，也不解析到 private、loopback、link-local、unspecified、
+  multicast、documentation、benchmark、CGNAT 或其它非 global-unicast 地址。
+- IPv6 结果还必须位于 IANA 当前分配为 Global Unicast 的 `2000::/3`；其它
+  IETF reserved IPv6 space 即使通用语言库把它分类为 unicast，也不能视为公网入口。
+
+以上 registry 日期是 `submit-v1` 的冻结输入，不在运行时读取。IANA registry
+变化时，必须显式更新 denylist 与测试，并分配新的 preflightPolicyVersion；不能在
+相同 policy version 下静默改变已记录审核的解释。即使 registry 把某个
+special-purpose 地址标为 globally reachable，本策略仍拒绝它，因为它不是普通公网
+Application 入口地址。
+
+本用例只做地址策略和 DNS 预检，不向目标发送 HTTP 请求，也不跟随重定向。未来若加入自动抓取或扫描，必须在每次连接及每次重定向前重新解析和校验地址，不能把本次预检当作永久 SSRF 保证。
+
+ApplicationReview 保存 preflightPolicyVersion，便于以后解释提交时使用的规则版本。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -400,6 +468,7 @@ Provider 与 Consumer 至少共同验证：
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：当前 ApplicationVersion、旧实现观察、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、迁移说明、变更记录
+- `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：目标与范围、提交结果、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、后续用例、迁移说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `platform/contracts/auth-scope-catalog-v1.md`（docs 根级共享文档）：目的与所有权、兼容性、关联文档
 
@@ -407,6 +476,7 @@ Provider 与 Consumer 至少共同验证：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-002-create-application-version.md` | 427 | `8e8bb5e13166` |
+| `use-cases/UC-APP-002-create-application-version.md` | 463 | `aed995d52573` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 509 | `f68b6f1eadb6` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 91 | `cab448326f29` |

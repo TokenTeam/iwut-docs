@@ -23,6 +23,7 @@ rpcApiMaxVersionExclusive
 requiredCapabilities
 requiredScopes
 optionalScopes
+oauthRedirects
 reviewStatus
 createdBy
 createdAt
@@ -93,6 +94,7 @@ CreateApplicationVersionCommand {
   requiredCapabilities: []string
   requiredScopes: []string
   optionalScopes: []string
+  oauthRedirects: []OAuthRedirectGroup
 }
 ```
 
@@ -111,7 +113,7 @@ applicationId、reviewStatus、sequence、versionId、createdBy、createdAt、re
 
 1. 从可信身份上下文取得 authId 和 developerStatus。
 2. 确认 developerStatus 为 `APPROVED`。
-3. 校验 versionLabel、launchUrl、RPC range、capabilities 和 scopes。
+3. 校验 versionLabel、launchUrl、RPC range、capabilities、scopes 和 oauthRedirects。
 4. 通过 ScopeCatalog port 确认所有 scope 当前允许被新版本申请；生产组装最终使用 ADR-001 定义的带本地有界缓存 adapter，其快照源调用 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)。
 5. 生成 UUIDv7 versionId，并取得 UTC createdAt；初始化 revision 为 1、updatedBy 为 createdBy、updatedAt 为 createdAt。
 6. Repository 在同一个原子操作中：
@@ -133,6 +135,7 @@ applicationId、reviewStatus、sequence、versionId、createdBy、createdAt、re
 - RPC range 非法：`InvalidRpcApiRange`。
 - capability 名称非法或重复：`InvalidRequiredCapability`。
 - requiredScopes 或 optionalScopes 包含未知、重复或交叉项：`InvalidApplicationScope`。
+- oauthRedirects 的 type、数量、URL 或 hostname 规则不满足：`InvalidOAuthRedirectConfiguration`。
 - Scope Catalog 无可用的新鲜快照：`ScopeCatalogUnavailable`，不创建版本。
 - ID 或持久化失败：内部失败，不产生部分版本。
 
@@ -208,6 +211,27 @@ Scope Catalog 的权威来源是 Auth。UC-APP-002 使用 App Center 进程内�
 
 Domain/UseCase 核心只声明 `ScopeCatalog` port，不依赖 Auth 的 HTTP/gRPC 形状。Cache adapter 通过构造参数接收 TTL、Clock 与窄的 Auth snapshot source；只有测试使用 fake/mock，生产代码不得提供硬编码 Scope 目录。真实 Auth transport 实现根级 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)，提供方行为由 [UC-AUTH-001](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) 拥有。
 
+<a id="br-ver-018"></a>
+### BR-VER-018：版本化 OAuth 回调
+
+`oauthRedirects` 是受审核的版本内容，不属于 OAuthClient，也不从 launchUrl 推导。它是 0–2 个回调组组成的非 null 数组：
+
+```text
+OAuthRedirectGroup {
+  clientType: PUBLIC_PKCE | CONFIDENTIAL_SECRET
+  redirectUris: []RedirectURI
+}
+```
+
+- 每种 clientType 至多一组；每组包含 1–10 个不重复 URI。空数组表示该 Version 不提供 OAuth/OIDC 回调。
+- URI 必须是绝对 HTTPS URL，最多 2048 UTF-8 bytes；禁止 userinfo、fragment、wildcard、IP literal、localhost，以及 [BR-REV-007](UC-APP-004-submit-application-version-review.md#br-rev-007) 固定的 IANA `2026-05-22` special-use 域名或其子域。
+- 禁止预占 OAuth/OIDC 响应参数 `code/state/iss/error/error_description/error_uri`。
+- 同一组的所有 URI 必须使用同一个规范 DNS hostname。hostname 使用 non-transitional UTS #46 Lookup 转为小写 ASCII A-label；输入必须已经是规范表示，不静默改写。其余 URL 部分保存后按完整字符串精确匹配。
+- callback path、query 和 port 可以不同；运行时不做前缀匹配。客户端必须控制回调处理，App Center 不向回调地址发起探测请求。
+- 回调组按 clientType 固定顺序保存，组内 URI 按 Unicode code point 排序。输入顺序不表达业务含义。
+
+OAuthClient 创建时从当前批准并发布的回调组派生不可变 sector。存在该运行上下文的 client 后，后续发布由 UC-APP-007 检查同 type 回调组的 hostname；改变 hostname 需要新的 clientId。Version 草稿本身可以在 client 创建前存在，因此创建/编辑阶段不依赖 OAuthClient。
+
 <a id="br-ver-008"></a>
 ### BR-VER-008：初始生命周期
 
@@ -235,6 +259,7 @@ ApplicationVersion {
   requiredCapabilities: []CapabilityName
   requiredScopes: []ScopeName
   optionalScopes: []ScopeName
+  oauthRedirects: []OAuthRedirectGroup
   reviewStatus: DRAFT
   createdBy: AuthId
   createdAt: Instant
@@ -292,6 +317,7 @@ Repository 需要区分 Application 不存在、管理员不匹配、版本标�
 | `requiredCapabilities` | 必需宿主能力 | array&lt;string&gt; | capability name；元素唯一 | no | no |
 | `requiredScopes` | 必需用户数据 scopes | array&lt;string&gt; | Auth scope name；元素唯一 | no | no |
 | `optionalScopes` | 可选用户数据 scopes | array&lt;string&gt; | Auth scope name；元素唯一 | no | no |
+| `oauthRedirects` | 按 client type 分组的 OAuth 回调 | array&lt;object&gt; | BR-VER-018；0–2 组 | no | no |
 | `reviewStatus` | 当前审核生命周期 | string enum | `DRAFT/SUBMITTED/APPROVED/REJECTED/REVOKED`；本用例只写 DRAFT | no | no |
 | `createdBy` | 创建者 Auth ID | string | opaque authId | no | no |
 | `createdAt` | 创建时间 | datetime | UTC / RFC 3339 | no | no |
@@ -304,7 +330,7 @@ Repository 需要区分 Application 不存在、管理员不匹配、版本标�
 - versionId 唯一索引。
 - `(applicationId, sequence)` 复合唯一索引。
 - `(applicationId, versionLabel)` 使用 binary/simple collation 的大小写敏感复合唯一索引。
-- 三个数组字段必须存在，空值使用 `[]`。
+- requiredCapabilities、requiredScopes、optionalScopes 和 oauthRedirects 必须存在，空值使用 `[]`。
 - reviewStatus 在本用例只能写入 `DRAFT`。
 - revision、updatedBy 和 updatedAt 必须存在；创建时分别为 1、createdBy 和 createdAt。
 
@@ -335,7 +361,11 @@ Authorization: <authenticated identity>
   "rpcApiMaxVersionExclusive": 5,
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
-  "optionalScopes": ["schedule.read"]
+  "optionalScopes": ["schedule.read"],
+  "oauthRedirects": [{
+    "clientType": "PUBLIC_PKCE",
+    "redirectUris": ["https://example.edu/oauth/callback"]
+  }]
 }
 ```
 
@@ -357,6 +387,10 @@ ETag: "1"
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
   "optionalScopes": ["schedule.read"],
+  "oauthRedirects": [{
+    "clientType": "PUBLIC_PKCE",
+    "redirectUris": ["https://example.edu/oauth/callback"]
+  }],
   "reviewStatus": "DRAFT",
   "createdBy": "auth-id-from-identity",
   "createdAt": "2026-08-23T12:00:00Z",
@@ -370,13 +404,14 @@ ETag: "1"
 
 领域测试：
 
-- versionLabel、URL、RPC range、capabilities 和 scope 集合的不变量成立。
+- versionLabel、URL、RPC range、capabilities、scope 集合和 OAuth 回调的不变量成立。
 - versionLabel 大小写敏感，`v1.0.0` 与 `V1.0.0` 可以分别创建。
 - 2048-byte URL 边界可接受，2049 bytes 被拒绝。
 - DRAFT 接受符合范围的 HTTP 私网开发 URL，不接受公网 HTTP 或非 HTTP(S) scheme。
 - 单 major 范围和多 major 范围均可表达，无上界范围被拒绝。
 - requiredScopes 与 optionalScopes 的重复或交叉项被拒绝。
 - capabilities 和 scopes 校验后以稳定字典序保存。
+- OAuth 回调拒绝多 hostname、wildcard、响应参数预占和非规范 host，并按 type/URI 稳定排序；空数组合法。
 - 新版本状态只能是 DRAFT。
 
 UseCase 测试：
@@ -411,7 +446,7 @@ Auth Scope Catalog 快照读取已经建立提供方 [UC-AUTH-001](../../auth-ce
 
 ## 迁移说明
 
-服务从未上线，不迁移旧 application_version collection，也不保留旧 `/app/create-version` 契约。旧代码只用于验证被明确 KEEP 的行为。
+既有 UC-APP-002 实现需要新 migration 为历史 `application_versions` 回填 `oauthRedirects: []`，并同步 API、Domain、Repository 和 validator 后才能声明覆盖本扩展。服务不保留旧 `/app/create-version` 契约。
 
 当前 `iwut-app-center` 已依赖 `github.com/google/uuid v1.6.0`，该版本提供 `uuid.NewV7()`，实现 UUIDv7 不需要新增 UUID 库。
 
@@ -425,3 +460,4 @@ Auth Scope Catalog 快照读取已经建立提供方 [UC-AUTH-001](../../auth-ce
 - 2026-09-20：Scope Catalog cache TTL 由 `APP_CENTER_SCOPE_CATALOG_CACHE_TTL` 配置，默认 `5m`；cache adapter 保持独立于真实 Auth transport。
 - 2026-09-20：设计进入 `ACCEPTED`；Domain、UseCase、MongoDB 持久化、Scope Catalog cache 及事务集成测试达到 `CORE_COMPLETE`，真实 Auth transport、API Transport、Composition Root 与端到端验证单独跟踪。
 - 2026-09-21：建立提供方 UC-AUTH-001 与根级 Auth Scope Catalog v1 共享契约；内部服务身份、Proto 与真实 provider 继续单独闭合。
+- 2026-09-27：增加受审核的 oauthRedirects；按 client type 分组，OAuthClient 只引用当前发布版本的回调。

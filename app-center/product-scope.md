@@ -60,7 +60,7 @@ Auth 继续拥有身份、Developer 资格、Reviewer 权限和 Scope Catalog；
 管理员分别准备两类内容：
 
 - `ApplicationProfileRevision`：面向目录展示的名称、简介和可空 icon 字符串；icon 暂不具有受控资产语义。
-- `ApplicationVersion`：入口 URL、RPC API 兼容范围、宿主能力要求和 scopes。
+- `ApplicationVersion`：入口 URL、RPC API 兼容范围、宿主能力要求、scopes，以及按 OAuth client type 分组的 redirect URIs。
 
 两类内容各自采用草稿修订和审核快照。公开资料修改不制造虚假的运行版本，运行版本发布也不隐式改变公开资料。
 
@@ -143,6 +143,7 @@ Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确�
 | Tester Management | 是 | 加入链接、加入、移除、撤销链接和 test 目标解析 |
 | Runtime Publication | 是 | 按 RPC API major 的 test、grey、stable、回退和停止分发 |
 | Catalog & Resolution | 是 | 候选应用聚合、Filter 规则分发、客户端展示过滤和服务端发布目标解析 |
+| OAuth/OIDC Application Integration | 扩展纳入 | 独立 clientId、PUBLIC/CONFIDENTIAL 类型、secret 生命周期，以及从批准 Version 解析回调和 scopes |
 | Application Creation Quota | 是 | 保留当前按 Developer 管理的可调整配额方向 |
 
 这里的“读取”包含开发者管理查询、Reviewer 待办查询和用户目录查询，但它们可以采用较短的 Query Contract，不需要全部扩写成与命令相同体量的 UC。
@@ -151,8 +152,7 @@ Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确�
 
 - 网页托管、构建、静态资源发布或 Resource Hub。
 - Expo 客户端、WebView、RPC bridge 和客户端升级机制的实现。
-- Auth consent、token 签发以及 RPC 用户数据读写的执行。
-- OAuth client registration、client secret 或第三方登录平台。
+- Auth consent、token 签发以及 RPC 用户数据读写的执行由 Auth Center 拥有；App Center 只提供 client 与应用资格事实。
 - 协作者、细粒度 Application 团队角色和多租户组织。
 - 向 App Center 上传仅用于 Filter 求值的原始用户资料，或由服务端执行客户端 Filter。
 - 推荐、排行、搜索相关性、评论、评分、收藏和社交分发。
@@ -188,4 +188,4 @@ Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确�
 5. **灰度身份输入**：首版仅支持已登录用户的确定性分桶，还是也支持未登录客户端的稳定设备标识？
 6. **Filter 规则模型**：规则可引用哪些本地用户字段、使用何种声明格式、缺失字段采取何种结果，以及规则自身如何审核和修订？
 
-这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
+这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016 以及 OAuth/OIDC 扩展 UC-APP-018/019 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
