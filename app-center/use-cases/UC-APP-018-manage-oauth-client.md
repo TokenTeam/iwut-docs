@@ -78,6 +78,7 @@ Registration 和 Credential 都不保存可由管理员自由编辑的 scope 白
 - PUBLIC 没有 secret；CONFIDENTIAL secret 只返回一次，读取永远不含明文或摘要。
 - registration CAS/no-op 与 credential CAS 相互独立；secret 轮换不改变 registrationRevision、grant 或已签发 token。
 - client 可以在没有 Version、Review 或 Publication 时登记；运行解析仍必须满足 UC-APP-019 的完整资格。
+- 与非空 OAuth 配置的发布并发时，registration 先提交则发布可成功；发布先观察到缺失则失败并允许重试。登记过程不读取或锁定 Publication/Version/hostname。
 - 禁用后重新启用保持 clientId 不变，旧 clientId 永不重新分配。
 
 ## 依赖与实现边界

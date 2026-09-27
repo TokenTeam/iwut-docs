@@ -695,7 +695,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 549 | `94d02775e6c7` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 550 | `10414447a48d` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `1c96b528f65c` |

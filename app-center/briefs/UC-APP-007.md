@@ -124,14 +124,14 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
    - 通过 LaunchURLSubmissionPolicy 重新检查公网 HTTPS URL，并取得 preflightPolicyVersion。
    - 读取该 Application 的 OAuth registration。snapshot 的 pkceRedirectUris 非空时必须已经登记 publicClientId；confidentialRedirectUris 非空时必须已经登记 confidentialClientId 及 credential。空数组允许发布，表示该 Version 暂不提供对应 OAuth 接入。
 6. 为新 Publication（若需要）和本次 History 分别生成 UUIDv7，并从 Clock 取得 changedAt。
-7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
+7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，以及步骤 5 中非空 OAuth redirect 数组所需的 registration/credential 仍存在，然后：
    - Publication 不存在时创建 revision=1、testVersionId=versionId 的记录。
    - Publication 已存在时把 testVersionId 替换为 versionId，并将 revision 增加 1。
    - 设置 createdBy/createdAt 或 updatedBy/updatedAt。
    - 插入一条与结果 publicationRevision 对应的 SET_TEST_VERSION History。
 8. 返回 Publication、History 和 changed=true。
 
-外部检查与最终写入之间可能发生审核撤销、管理员转让或其他槽位修改，因此最终事务必须重新检查 Version/Review 资格、当前 admin 和 Publication revision。
+外部检查与最终写入之间可能发生审核撤销、管理员转让、registration 建立或其他槽位修改，因此最终事务必须重新检查 Version/Review 资格、当前 admin、Publication revision 和非空 OAuth 配置所需的 identity/credential。
 
 ### 异常流程
 
@@ -384,6 +384,7 @@ Repository 集成测试：
 - approved Review、snapshot、Version status/revision 的一致性检查生效。
 - 非空 pkce/confidential 回调缺少对应稳定 identity/credential 时拒绝；空数组可以发布且对应 OAuth 运行解析失败关闭。
 - 同一稳定 clientId 可以发布 hostname 不同的新 Version，运行时只接受当前批准数组中的精确 URI。
+- registration 与发布并发时，如果 registration 先提交，发布可以在最终事务看到它并成功；如果发布事务先读取到缺失，则以 OAuthClientRegistrationRequired 失败，重试后成功。不能提交引用不存在 identity/credential 的 Publication。
 - `(applicationId, rpcApiMajor)` 和 `(publicationId, publicationRevision)` 唯一约束生效。
 - 替换后旧 Version 保持 APPROVED，历史指针仍可审计。
 
@@ -397,7 +398,7 @@ API 测试：
 
 - Application、ApplicationVersion 与 ApplicationReview 的前置行为已由 UC-APP-001 至 UC-APP-006 实现；发布从完整 APPROVED decision 和 snapshot 读取资格。UC-APP-018 落地后，发布 adapter 必须加入非空 OAuth 配置的 registration/credential 存在性查询与最终事务复查。
 - 复用现有可信 DeveloperIdentity、Auth Scope Catalog gRPC consumer/有界缓存、DNS-only URL 预检、UUIDv7/Clock 与 Wire；新能力通过自己的 ports 适配，遵守 ADR-003 的能力边界。
-- MongoDB 使用 ADR-004 要求的事务拓扑；现有隔离 replica-set 测试脚本可验证跨 Application、Version、Review、Publication、History 的事务、回滚和并发。最终事务必须以真实写入栅栏或等价机制防止读快照下的管理员转让/审核撤销竞争；不得改变 Application/Version 的业务字段或业务 revision。
+- MongoDB 使用 ADR-004 要求的事务拓扑；现有隔离 replica-set 测试脚本可验证跨 Application、Version、Review、OAuth registration/credential、Publication、History 的事务、回滚和并发。最终事务必须以真实写入栅栏或等价机制防止读快照下的管理员转让/审核撤销竞争，并在同一事务快照复查 OAuth identity/credential 存在性；不得改变 Application/Version 的业务字段或业务 revision。registration 创建只增加永久 identity，且 hostname 不进入 registration，因此不要求 APP018 与 APP007 共享 hostname/sector 写入栅栏。
 - Auth 的 MongoDB 权威 Scope Catalog 尚未交付，不阻止 App Center consumer 实现及隔离 E2E，但在权威目录和完整双服务验证闭合前，不将本 UC 标为生产依赖全部闭合的 COMPLETE。
 - 新增 Publication/History schema、API 和 consumer adapters 属于本工作包交付内容，不是要求预先实现的依赖。
 
@@ -981,7 +982,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 549 | `94d02775e6c7` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 550 | `10414447a48d` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
 | `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
