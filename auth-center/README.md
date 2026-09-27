@@ -54,6 +54,8 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 文档入口
 
+- [应用登录、Scope 授权与撤销讨论草案](design-notes/oauth-consent-lifecycle.md)：本轮优先设计方向，Catalog 写入管理后移；接入场景及协议待确认，尚未接受或分配新 UC。
+
 - [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md)：邮箱验证码登录与本机设备授权已接受；[brief](briefs/UC-AUTH-012.md)，实现集成依赖 UC011。
 - [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md)：Developer 自助申请与本人资格查询已接受；[实现 brief](briefs/UC-AUTH-013.md)。
 

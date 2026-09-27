@@ -2,6 +2,10 @@
 
 状态：`ACTIVE`
 
+## 当前设计优先级（2026-09-27）
+
+用户决定先推进应用登录、用户 scope 授权和收回，Scope Catalog 写入管理暂缓。候选用例、信任边界与待定项见 [OAuth 授权闭环讨论草案](design-notes/oauth-consent-lifecycle.md)。接入场景和具体协议尚未接受，Gateway OAUTH2 保持未启用；低频目录管理不影响先设计授权闭环。
+
 ## Scope Catalog 后续写侧
 
 ### Catalog 写入与初始装载
