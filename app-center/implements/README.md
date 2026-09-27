@@ -41,9 +41,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、严格 NFC、0011 migration、事务/指针/序号、HTTP/gRPC/Wire 与完整 backend 验收；服务 `d121d4e`、API `219419b` | —（当前后端范围） |
 | [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（015已闭合真实编辑/提交双命令竞争） |
 | [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（当前后端范围；审核决定、资料查询、前端与生产Gateway独立交付） |
-| [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `IN_PROGRESS` | [依赖检查](UC-APP-016-readiness.md)与首版策略确认、实现契约、生成 brief | Domain/事务/迁移/API/完整验收；Auth 正式资料权限授予与签发独立交付 |
+| [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | —（当前App Center后端范围；Auth资料权限授予/签发、管理查询与前端独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成。当前工作包为 UC016，设计输入为 [UC-APP-016 brief](../briefs/UC-APP-016.md)。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成。UC016 也已完成；代码仓库 AGENTS.md 保留最后交付的 [UC-APP-016 brief](../briefs/UC-APP-016.md) 与范围，当前没有新激活的实现工作包。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -219,3 +219,13 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - 真实公开 `ReplaceDraft` / `SubmitDraft` 的两种确定性竞争胜序已验证，闭合014留下的双命令测试义务；同时覆盖快照深拷贝、内容复检/内部异常区分、attempt唯一性与溢出、重复请求、管理员转让、回滚及指针保留。
 - 首轮完整回归发现两处既有迁移数量断言仍为11，修正为12后定向验证并完整重跑；首轮失败报告不作为验收证据。
 - 本批次013/014/015均为ACCEPTED/COMPLETE，各自完整backend验收通过。部署当前代码需显式执行包含0011与0012的迁移；审核决定、资料管理查询、前端和生产Gateway仍独立交付，未启动UC016。
+
+
+## 2026-09-27 UC016 完成
+
+- [依赖检查](UC-APP-016-readiness.md)与用户确认的两项固定审核检查已落实；UC016 为 ACCEPTED / COMPLETE（App Center 后端范围）。服务 `a844f08`、API `bc05993` 均已本地提交，未 push。
+- BR-PRF-023–032全部交付：独立 `app.profile.review` 权限与三类利益冲突，PENDING 一次性决定，本地不可变 `app-profile-review-v1`，Application/policy 真写栅栏，Review/Revision/资料指针原子变化，APPROVE 自动公开，REJECT 原文保留与工作位释放。包含真实双向竞争、回滚、历史重建、坏内容与结构异常区分、后续新草稿和实际生成HTTP客户端。
+- 显式 `0013_application_profile_review_decision` migration 已接入 readiness：升级 Review/Revision validator，建立正式策略；部署前需执行迁移。已提交 decision 字段保留 Value 类型和 field 10，扩充终态对象输出；新增资源化 HTTP/gRPC 决定命令。
+- 最终 `make check-auth-app` 22/22通过，报告为服务工作树 `.artifacts/verification/20260927T023242Z-hs0ev8iq/report.json`，`changed_sources=[]`。Mongo race439.604s、真实HTTP/gRPC E2E59.976s、真实Auth进程回归3.184s。报告记录提交前服务 `3a87a0f` / API `a0c158c` 的dirty来源；提交前指纹与报告完全一致，提交后逐文件内容校验保持一致。
+- 首轮全量验收发现0013 schema 使用多键无序map，造成fresh/sequential的BSON字段顺序不同；已改为有序BSON并新增递归schema及重复编码一致性测试。定向真实迁移验证后完整重跑通过，首轮失败报告不作为验收证据。独立最终审查未发现剩余问题。
+- Auth 正式 `app.profile.review` 授予/签发仍单独交付；现有真实Auth回归不证明该新增权限的生产链路已可用。资料管理查询、前端、生产Gateway与后续UC未扩展。本次验收后只记录提交和完成状态，未再改变服务/API内容。

@@ -4,7 +4,7 @@
 
 ## 当前结论
 
-UC013–015 的本地前置实现已完成。用户已确认首版策略，UC016 已 ACCEPTED；在当前 App Center consumer 范围内无未满足的实现依赖，可以生成 brief 并启动实现。
+UC013–015 的本地前置实现已完成，用户已确认首版策略。UC016 现已 ACCEPTED / COMPLETE（当前 App Center consumer 范围），服务 `a844f08`、API `bc05993`，完整 cross-service 验收22/22通过；详见[交付记录](README.md#2026-09-27-uc016-完成)。下表保留开工时的依赖边界。
 
 已确认：不可变版本 `app-profile-review-v1`，固定要求 `content-policy-reviewed` 与 `icon-content-reviewed`；icon 为空时后者确认不适用。首版始终要求两项，正式 migration 写入不可变定义。
 
@@ -30,6 +30,6 @@ UC013–015 的本地前置实现已完成。用户已确认首版策略，UC016
 - 真实 Mongo 验收覆盖并发决定、管理员转让、策略退休、公开指针冲突、事务回滚、拒绝坏内容、释放工作位后创建新草稿、revision 溢出与脱敏告警。
 - 在来源冻结后运行完整验证；API 先本地提交，再提交服务 gitlink。未获额外授权不 push，不扩展后续 UC。
 
-## 后续步骤
+## 已完成流程
 
-已更新 UC016 与共享契约并登记 ACCEPTED；接下来脚本生成 brief，切换服务 AGENTS.md 工作包，启动实现 subagent；主任务审查并运行完整验收，最后记录提交与遗留边界。
+已更新 UC016 与共享契约并登记 ACCEPTED，脚本生成 brief，切换服务 AGENTS.md 工作包并交由 subagent 实现；主任务与独立 agent 完成审查，完整验收通过后本地提交并记录遗留边界。没有激活后续 UC。
