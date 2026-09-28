@@ -99,4 +99,4 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [UC-AUTH-018：查看及收回本人应用授权](use-cases/UC-AUTH-018-revoke-application-authorization.md)。
 - [UC-AUTH-019：校验应用访问凭据并签发可信委托上下文](use-cases/UC-AUTH-019-issue-delegation-context.md)。
 
-OAuth 最新分工：Auth 唯一管理 Application 级 sector/sub，各渠道/type 共享用户标识；client 与 grant 按渠道隔离，同渠道 major 共用历史授权。版本变化不删除同意记录，访问使用当前有效交集，详见 [交付总览](design-notes/oauth-oidc-delivery-plan.md)。
+OAuth 最新分工：Auth 唯一管理 Application 级 sector/sub，各渠道/type 共享用户标识；client 与 grant 按渠道隔离，同应用同渠道的两类 client 及各 major 共用历史授权，token 仍各自绑定 client。版本变化不删除同意记录，访问使用当前有效交集，详见 [交付总览](design-notes/oauth-oidc-delivery-plan.md)。

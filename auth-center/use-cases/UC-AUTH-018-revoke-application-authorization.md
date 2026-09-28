@@ -8,7 +8,7 @@
 
 ## 输入与输出
 
-本人接口：ListOwnApplicationGrants(cursor,pageSize≤50)、RevokeOwnApplicationGrant(grantId,expectedRevision,mode=ALL|SCOPES,scopes[])。返回当前 scope/status/revision 与最小应用展示信息，不含 token。
+本人接口：ListOwnApplicationGrants(cursor,pageSize≤50)、RevokeOwnApplicationGrant(grantId,expectedRevision,mode=ALL|SCOPES,scopes[])。返回 grantId、applicationId、channel、当前 scope/status/revision 与最小应用展示信息，不含 token。
 
 应用接口：POST /revoke，token、可选 token_type_hint（access_token/refresh_token），登记 client 的认证，见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。PUBLIC 提交 client_id；confidential 使用 Basic。
 
@@ -24,28 +24,29 @@
 <a id="br-oau-015"></a>
 ### BR-OAU-015：本人查询和范围撤销
 
-本人入口仅接受有效 ACTIVE USER Session，目标从 Session 决定。列表按 client 分组展示应用、授权时间、scope 和当前状态，同一 Application 的不同 channel 以及 public/confidential client 分开显示，不能误导成已一键撤销所有接入。
+本人入口仅接受有效 ACTIVE USER Session，目标从 Session 决定。列表按 `(applicationId, channel)` 展示应用、渠道、授权时间、scope 和当前状态，同渠道的 PUBLIC/CONFIDENTIAL client 合并为一项，不同渠道分开。UI 明示撤销影响该应用该渠道的全部 client 和 major；撤销单个渠道不能表示为已撤销整个应用的所有渠道。grant 归属和唯一键遵循 [BR-OAU-002](UC-AUTH-014-authorize-application.md#br-oau-002)。
 
-允许撤回 required scope，包括 openid；应用可能不能继续运行，UI 应说明，但服务端不得强制保留。撤回 openid 等同撤销该 grant 全部；其余部分撤回保留剩余集合。App 暂时不可用时仍允许本人列表/撤销，用存储的 application/client ID 与历史展示快照标明名称可能过时；不因无法查询 App 阻止用户收回授权。
+允许撤回 required scope，包括 openid；应用可能不能继续运行，UI 应说明，但服务端不得强制保留。撤回 openid 等同撤销该 grant 全部；其余部分撤回保留剩余集合。App 暂时不可用时仍允许本人列表/撤销，用存储的 applicationId/channel 与历史展示快照标明名称可能过时；不因无法查询 App 阻止用户收回授权。
 
 <a id="br-oau-016"></a>
 ### BR-OAU-016：撤销版本和重授隔离
 
 首次全部撤销或用户显式 scope 收缩都原子递增 revision 和 revocationEpoch，并与签发/确认共用 grant 写入栅栏。全部撤销置 REVOKED、清空当前集合；记录不可变审计，保留 ID 与历史版本。expectedRevision 不匹配返回冲突及当前状态，不能用旧 UI 覆盖后来授权；同 revision 下无变化的重复操作返回当前结果，不额外递增。
 
-任何旧 token/code/family 的 grant revocationEpoch 不等于当前值即不可用，即使它仅使用保留下来的 scope。重新同意保留新的 epoch，不能复活旧代；UC014 仅新增同意引起 revision 变化不属于撤销。当前 Version 允许范围缩小只限制运行权限，不执行本用例、不删除历史 G。
+撤销范围覆盖该 grant 所属应用及渠道的所有 client、major 和版本；其他应用或渠道的 grant 不受影响。任何旧 token/code/family 的 grant revocationEpoch 不等于当前值即不可用，即使它来自另一类 client，或仅使用保留下来的 scope。重新同意保留新的 epoch，不能复活旧代；UC014 仅新增同意引起 revision 变化不属于撤销。当前 Version 允许范围缩小只限制运行权限，不执行本用例、不删除历史 G。
 
 <a id="br-oau-017"></a>
 ### BR-OAU-017：应用 token 撤销与平台登录分离
 
-客户端撤销 access token 仅撤销该条 access；撤销 refresh token 撤销整个 family 及其 access tokens。已消费 refresh 仍能识别其 family；未知、不属于调用 client 或已撤销值均按协议成功且不改变他人记录。该入口不需要原平台 Session，不接受把学生关联或 email 当 token。
+客户端撤销 access token 仅撤销该条 access；撤销 refresh token 撤销整个 family 及其 access tokens。已消费 refresh 仍能识别其 family；未知、不属于调用 client 或已撤销值均按协议成功且不改变他人记录。共享 grant 不构成跨 client 撤销 token 的权限；该入口不修改共享 G 或 grant revocationEpoch。该入口不需要原平台 Session，不接受把学生关联或 email 当 token。
 
 用户授权撤回不删除平台用户、不撤销其平台 Session，不保证第三方本地会话立即退出或删除已取得数据。应用若希望撤回整个 grant 应引导用户到本人授权管理，不把一个 token 的 revocation 偷换为全应用授权删除。
 
 ## 验收场景
 
 - 越权 grantId、错误 revision、跨用户列表拒绝；App 离线仍能撤回。
-- 部分撤回后所有旧代 token 失效，重新授权不复活；required scope 也可撤回。
+- 同应用同渠道两类 client 只显示一项授权；部分/全部撤回后两类 client、各 major 的旧 code/access/family 均失效，其他渠道不受影响；重新授权不复活旧代，required scope 也可撤回。
+- 应用撤销自己的一条 access 或一个 family，不改变共享 grant 和另一 client 的凭据；即使 grantId 相同，也不能撤销另一 client 的 token。
 - 与 code 兑换/refresh/委托签发并发，必须有明确先后顺序，无撤销后新签成功。
 - PUBLIC/CONFIDENTIAL revocation，错误 hint fallback 查询受支持类型、未知 token 幂等、外部 client 不可撤销他人 token。
 

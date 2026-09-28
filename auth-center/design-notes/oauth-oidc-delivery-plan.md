@@ -60,7 +60,7 @@ App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 A
 | --- | --- |
 | sector / OIDC sub | Auth；每 Application 一个，所有渠道/type/major 共享 |
 | registration / clientId / secret | App；按 Application＋channel 登记 PUBLIC/CONFIDENTIAL，各 major 复用 |
-| grant / 历史同意 | Auth；按 authId＋clientId 保存，因此渠道隔离、major 共享；不因版本许可减少而删除 |
+| grant / 历史同意 | Auth；按 authId＋applicationId＋channel 保存，同渠道两类 client 及各 major 共享；不因版本许可减少而删除 |
 | 本次有效权限 | Auth；token、历史同意、当前批准版本和可用目录的交集 |
 | code / token / refresh 运行选择 | channel 固定于 client，major 固定于本次凭据；Version 可在校验时重读当前值 |
 

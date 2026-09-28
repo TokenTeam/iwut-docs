@@ -23,7 +23,7 @@ POST /token，grant_type=authorization_code、code、redirect_uri；PUBLIC 表�
 <a id="br-oau-005"></a>
 ### BR-OAU-005：客户端认证与证明不可降级
 
-认证方式由稳定 client identity 决定，精确规则见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。secret 校验由 App 专用内部接口执行；Auth 必须把验证结果与本次 credentialRevision 对齐。PKCE challenge 已存在时没有 verifier/不匹配均失败；未提供 challenge 时提交 verifier 也拒绝，避免意外忽略证明。client 类型、code 绑定、nonce 和 verifier 不能由兑换请求重新指定。
+认证方式由稳定 client identity 决定，精确规则见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。secret 校验由 App 专用内部接口执行；Auth 必须把验证结果与本次 credentialRevision 对齐。PKCE challenge 已存在时没有 verifier/不匹配均失败；未提供 challenge 时提交 verifier 也拒绝，避免意外忽略证明。client 类型、code 绑定、nonce 和 verifier 不能由兑换请求重新指定。即使两个 client 共享 grant，也不能互相兑换 code；ID Token 的 aud 及新 token/family 的 client 归属仍为原 code 的 client。
 
 <a id="br-oau-006"></a>
 ### BR-OAU-006：授权码一次性兑换与重放处置
@@ -35,7 +35,7 @@ code 只能消费一次；校验失败不消费正确 code。并发兑换通过�
 <a id="br-oau-007"></a>
 ### BR-OAU-007：独立凭据与有界权限
 
-access token 记录 tokenId/digest、authId、clientId、applicationId、固定 channel/rpcApiMajor、grantId/revision（审计）/revocationEpoch、client authorizationEpoch、testerMembershipId、签发时 App 资格版本、scope、audiences、familyId、签发/到期/撤销状态。scope 来自 code 且仍为当前 grant 和应用许可的子集；audiences 只由 Auth 部署的 scope 资源映射得出。签发时 Version 用于审计和当次 code 一致性，不把 token 身份改成 Version 身份。只含 openid/email 的 token 仅可访问 UserInfo，不因此获取其它资源。
+access token 记录 tokenId/digest、authId、clientId、applicationId、固定 channel/rpcApiMajor、grantId/revision（审计）/revocationEpoch、client authorizationEpoch、testerMembershipId、签发时 App 资格版本、scope、audiences、familyId、签发/到期/撤销状态。所引用 grant 的 `(authId, applicationId, channel)` 必须与 code/token 及 App 确认的 client 归属一致，不能仅凭 grantId 或相同 sub 放行。scope 来自 code 且仍为当前 grant 和应用许可的子集；audiences 只由 Auth 部署的 scope 资源映射得出。签发时 Version 用于审计和当次 code 一致性，不把 token 身份改成 Version 身份。只含 openid/email 的 token 仅可访问 UserInfo，不因此获取其它资源。
 
 ID Token 是面向 client 的登录证据，格式和 pairwise sub 由 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md) 定义；不与 access token 复用值、用途或 verifier。用户的资料/身份关联不是默认 claims，subject 不能由客户端指定。
 
@@ -58,7 +58,8 @@ sector 在部署的稳定域名空间中分配，不随常规 issuer 配置、se
 ## 验收场景
 
 - PUBLIC S256、CONFIDENTIAL Basic、CONFIDENTIAL Basic+S256 三条正向路径产生不同 id_token/access_token。
-- 缺 secret、认证来源冲突、PKCE 降级、跨 client code、redirect 不匹配失败。
+- 缺 secret、认证来源冲突、PKCE 降级、跨 client code、redirect 不匹配失败；共享 grant 的两类 client 也不能互相兑换 code。
+- grantId 指向其他用户、应用或渠道时拒绝；另一 client 新增同意不扩大当前 code 的 scope。
 - 并发兑换仅一份凭据提交，正确重放撤销原 family；错误 client 不能撤销他人 family。
 - ID Token aud/nonce/at_hash 正确，同 Application 的 pairwise sub 跨 client/type/channel/Version 稳定且与学生关联无关。
 - secret 轮换使旧 secret 无法继续兑换，但不撤销既有 grant 与已签发 token；新 secret 可用于之后的新请求。

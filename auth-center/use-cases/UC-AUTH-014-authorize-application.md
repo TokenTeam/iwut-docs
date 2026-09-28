@@ -32,7 +32,9 @@
 
 令 D=当前批准版本 requiredScopes∪optionalScopes，R=本次请求 scopes，S=用户本次选择；必须 requiredScopes⊆R⊆D，S 包含 requiredScopes 且 S⊆R。登录必需 openid；不允许用“不选 optional”偷增其他权限。无法接受必需权限时用户仍可拒绝全部。
 
-Grant 按 `(authId,clientId)` 唯一；client 固定所属 channel，因此 TEST/GREY/STABLE 的 consent 分离，同渠道各 RPC major 共享该 client 的 grant。PUBLIC/CONFIDENTIAL 仍有独立 grant，不因拥有相同用户 sub 自动共享权限。保存历史同意集合 G=grantedScopes、revision、revocationEpoch（初始 1）和 status；运行 tuple 仅用于审计。
+Grant 的业务主键为 `(authId, applicationId, channel)`，Mongo 必须以这三个字段建立复合唯一约束；grantId 仅为稳定、不透明的引用 ID，供 token 和本人管理接口引用。authId 来自当前 Session，applicationId/channel 来自 App 确认的 client 归属，不接受客户端自行指定授权归属。同一 Application 同一 channel 的 PUBLIC/CONFIDENTIAL client 及各 RPC major 共享一个 grant；TEST/GREY/STABLE 分别保存，不因跨渠道 sub 相同而共享授权。clientId、major、Version 均不进入 grant 唯一键。保存历史同意集合 G=grantedScopes、revision、revocationEpoch（初始 1）和 status；发起 clientId 与运行 tuple 记录在交互及审计中。
+
+授权页明确展示应用和渠道，并说明本次同意可由该渠道的两类 client 复用。共享的是用户同意；每个 client 仍须分别满足自己的当前批准版本、运行资格和凭据证明，code/token/family 不跨 client 使用。
 
 首次同意保存 S；以后只展示本次尚未同意的 `S−G`，明确同意后更新为 `G∪S`。若本次 R 已包含于 G 且满足当前 D，可按 prompt 规则静默取得本次需要的 S。prompt=consent 仍展示确认，offline_access 的专用规则保持有效。不能把历史 G 全部签入 token；S 必须是当前请求与当前允许集合的子集。
 
@@ -45,7 +47,7 @@ Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 
 
 确认必须绑定当前 Session 的用户、interaction、CSRF 及展示版本；同一 interaction 只能同意或拒绝一次。code 保存用户、client、channel/rpcApiMajor、grant revision（审计）、revocationEpoch、完整 App 资格 tuple、从受审核回调集合精确匹配的 redirect URI、scope、nonce、auth_time、PKCE 和到期时间，存摘要不存原值。grant 可跨兼容 Version 延续，不允许 code 脱离其精确 tuple 使用。
 
-同意时 grant、code、interaction 状态和不可变审计同一 Mongo 事务提交；与本人撤销同一 grant 的写入栅栏串行确认。撤销后旧页面不得悄悄重授，必须刷新交互并显式确认。无效请求不改变既有 grant。
+同意时 grant、code、interaction 状态和不可变审计同一 Mongo 事务提交；同一业务主键下所有 client 的确认、签发与本人撤销共用 grant 写入栅栏。首次并发创建由复合唯一约束保证仅一条 grant；竞争失败后重新读取既有记录并执行 revision 校验，不能另建按 client 隔离的记录或覆盖已保存的同意集合。撤销后旧页面不得悄悄重授，必须刷新交互并显式确认。无效请求不改变既有 grant。
 
 <a id="br-oau-004"></a>
 ### BR-OAU-004：门户与撤销语义隔离
@@ -55,7 +57,9 @@ Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 
 ## 验收场景
 
 - 同渠道 major 1 只需 openid、major 2 需 openid/email：运行 major 1 不删除已同意 email，major 2 不重复要求同意。
-- TEST grant 不用于 GREY/STABLE；同一应用各渠道/type 的 sub 相同也不绕过 consent。
+- 同应用同渠道 PUBLIC 已同意 openid/email 后，CONFIDENTIAL 请求相同范围可按 prompt 规则复用；新增权限只确认差集，offline_access 仍须满足专用确认规则。
+- TEST grant 不用于 GREY/STABLE；同一应用跨渠道 sub 相同也不绕过 consent。
+- 两类 client 并发首次同意只产生一条 grant；冲突交互重新展示后合并新增同意，不丢失已有范围；撤销前的旧页面不能重新授予权限。
 - 增加 scope 仅更新 G/revision；旧 token 继续使用原权限，撤回则通过 revocationEpoch 使旧代失效。
 
 - public 缺 challenge、错误回调、伪造 App 版本或未批准 scope 拒绝，且不会回跳恶意 URL。

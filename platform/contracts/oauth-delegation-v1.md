@@ -40,7 +40,7 @@ Gateway 以已匹配的静态路由构造请求，Auth 根据本地清单复核 
 | iss、aud | 配置的 Auth issuer、单个目标资源 audience |
 | sub | 内部 authId，只在平台内网下游使用，不向应用返回 |
 | client_id、application_id | 已认证 token 所属 client 和应用 |
-| grant_id、grant_revision、grant_revocation_epoch | 当前用户授权、审计 revision 与撤销 epoch |
+| grant_id、grant_revision、grant_revocation_epoch | 按用户、应用及渠道共享的授权引用、审计 revision 与撤销 epoch；同渠道不同 client 可携带相同 grant_id |
 | channel、rpc_api_major、client_authorization_epoch | token 固定运行上下文及 client 状态 epoch |
 | scopes | UC-AUTH-019 计算的有效交集 E；不包含当前版本未允许的历史同意或 token 外的新增 scope |
 | route_id、policy_digest、protocol、method | 绑定本次路由/策略/协议/操作 |
@@ -48,6 +48,8 @@ Gateway 以已匹配的静态路由构造请求，Auth 根据本地清单复核 
 | iat、nbf、exp、jti | 签发时间、当前有效、最长 5 秒、独立随机 ID |
 
 exp 不晚于 access token 到期时间。无 permissions、developer_status、email、学校关联值、平台 Session 或 token 原文。Auth 检查 token 对本 audience 的许可；token 的 audience 集合由已授予 scope 的受信映射产生，客户端不能自报。
+
+client_id 始终为本次 access token 所属 client，不因 grant 共享而替换；Auth 按 [BR-OAU-018](../../auth-center/use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-018) 验证 token、grant 和 App client 归属一致。
 
 资源服务必须验证签名、固定算法/typ/kid/issuer/audience、时限和本次 method/route/policy/target_path，再以 sub 做数据归属检查，以 client_id/application_id/channel 做应用环境约束。route policy 显式配置非空 allowedChannels；首版只能启用 TEST。仅限正式渠道的路由拒绝 TEST token；允许多个渠道的共享资源仍分别检查各自 grant/E，不能因为 OIDC sub 相同绕过渠道许可。可验证委托 JWS 不等于全部业务许可。不得把委托转换成通用 USER 管理身份。只在配置明确启用的 OAuth 方法接受该 header，未知入口拒绝。
 
