@@ -42,8 +42,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（015已闭合真实编辑/提交双命令竞争） |
 | [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（当前后端范围；审核决定、资料查询、前端与生产Gateway独立交付） |
 | [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | —（当前App Center后端范围；Auth资料权限授予/签发、管理查询与前端独立交付） |
+| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前管理员管理范围；Version OAuth配置、Auth provider/secret验证、登录授权与后续渠道独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成。UC016 也已完成；代码仓库 AGENTS.md 保留最后交付的 [UC-APP-016 brief](../briefs/UC-APP-016.md) 与范围，当前没有新激活的实现工作包。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016 与 UC018 也已完成；代码仓库 AGENTS.md 保留最后交付的 [UC-APP-018 brief](../briefs/UC-APP-018.md) 与范围，当前没有新激活的实现工作包。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -234,11 +235,19 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 以下只完成设计，均未启动实现；既有实现完成记录不包含这些能力。
 
-OAuth/OIDC 设计采用三种生命周期，当前均未实现：Application＋channel 级 `ApplicationOAuthRegistration` 保存稳定 PUBLIC/CONFIDENTIAL client identity；独立 `OAuthClientCredential` 保存可轮换 secret 与 credentialRevision；`ApplicationVersionOAuthConfig` 以 `{pkceRedirectUris, confidentialRedirectUris}` 一对一依附 Version。既有 UC-APP-002/003/004/005/007 需要加入配置的 Domain/API/Mongo 与历史双空数组 migration、同事务/revision 编辑、审核 snapshot 深拷贝和校验、`app-version-review-v2`，以及发布时非空数组对应 identity/credential 的存在性检查。原有能力的 `COMPLETE/CORE_COMPLETE` 记录继续描述当时范围，不表示这些 OAuth 扩展已经实现。
+OAuth/OIDC 设计采用三种生命周期。UC018 已实现 Application＋channel 级 `ApplicationOAuthRegistration` 与独立 `OAuthClientCredential` 的管理员管理；`ApplicationVersionOAuthConfig` 仍未实现，它以 `{pkceRedirectUris, confidentialRedirectUris}` 一对一依附 Version。既有 UC-APP-002/003/004/005/007 仍需加入配置的 Domain/API/Mongo 与历史双空数组 migration、同事务/revision 编辑、审核 snapshot 深拷贝和校验、`app-version-review-v2`，以及发布时非空数组对应 identity/credential 的存在性检查。原有能力的 `COMPLETE/CORE_COMPLETE` 记录继续描述当时范围，不表示这些 OAuth 扩展已经实现。
 
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
-| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `IN_PROGRESS` | 管理 TEST 稳定 OAuth registration 与独立 credential；当前活动工作包 |
+| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 管理 TEST 稳定 OAuth registration 与独立 credential；服务 `041a929`、API `51e6572` |
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `PROPOSED` | `NOT_STARTED` | 以 clientId+channel+rpcApiMajor 为 Auth 解析 OAuth 应用授权上下文 |
 
-UC018 可在 Version OAuth 扩展之前独立落地，已完成依赖检查并激活。完成 UC018 后，按 UC002→003→004→005→007 补齐 Version 配置/审核/发布扩展，再激活 UC019；不得在 UC018 中提前开放 Auth provider 方法。
+UC018 已在 Version OAuth 扩展之前独立交付。后续按 UC002→003→004→005→007 补齐 Version 配置/审核/发布扩展，再激活 UC019；UC018 没有提前开放 Auth provider 方法。
+
+## 2026-09-28 UC018 完成
+
+- [依赖检查](UC-APP-018-readiness.md)结论已落实；UC018 为 ACCEPTED / COMPLETE（TEST渠道管理员管理范围）。服务 `041a929`、独立 API `51e6572` 均已本地提交，未 push。
+- BR-OAC-001–005 已交付：每 Application＋channel 两个稳定 identity 槽位、跨槽位全局唯一 UUIDv4 clientId、registration/credential 独立 OCC、实际状态变化递增 authorizationEpoch、PUBLIC 无 secret、CONFIDENTIAL 32字节 CSPRNG secret 一次披露及域隔离 SHA-256 摘要。管理员归属通过 Application 真写栅栏在事务内复查。
+- 显式 `0014_oauth_client_management` migration 建立 registration/credential collections、严格 validator 与唯一索引；CONFIDENTIAL identity 和 credential 原子创建。五个管理员方法均已接入资源化 HTTP/gRPC、稳定错误 reason、`Cache-Control: no-store` 与 Wire。GREY/STABLE 明确返回渠道未启用。
+- 最终 `make check-auth-app` 22/22通过，报告为服务工作树 `.artifacts/verification/20260928T070657Z-ed6ypm5s/report.json`，`changed_sources=[]`；race 1.970s、Mongo/HTTP/gRPC race 726.985s、真实Auth进程回归10.340s。报告记录提交前服务 `a844f08` 的dirty来源，冻结指纹在验收期间未变化；相同内容随后提交为 `041a929`。
+- 完整 migration/race 套件因重复验证隔离数据库已超过 Go 默认10分钟 package timeout，runner 默认调整为20分钟且保留命令行覆盖能力。UC019 provider、confidential secret验证、Version redirect/scopes、授权/token、sector/sub、前端与未来渠道均未实现。
