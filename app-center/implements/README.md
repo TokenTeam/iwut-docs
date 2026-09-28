@@ -238,5 +238,7 @@ OAuth/OIDC 设计采用三种生命周期，当前均未实现：Application＋c
 
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
-| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `PROPOSED` | `NOT_STARTED` | 管理稳定 OAuth registration 与独立 credential |
+| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `IN_PROGRESS` | 管理 TEST 稳定 OAuth registration 与独立 credential；当前活动工作包 |
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `PROPOSED` | `NOT_STARTED` | 以 clientId+channel+rpcApiMajor 为 Auth 解析 OAuth 应用授权上下文 |
+
+UC018 可在 Version OAuth 扩展之前独立落地，已完成依赖检查并激活。完成 UC018 后，按 UC002→003→004→005→007 补齐 Version 配置/审核/发布扩展，再激活 UC019；不得在 UC018 中提前开放 Auth provider 方法。

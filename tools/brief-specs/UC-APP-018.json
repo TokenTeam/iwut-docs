@@ -1,0 +1,39 @@
+{
+  "uc": "UC-APP-018",
+  "note": "Implement the TEST-only administrator OAuth client management slice: stable PUBLIC/CONFIDENTIAL identities, independent confidential credential rotation, status/authorization epoch, Mongo transactions and public HTTP/gRPC management APIs. Do not implement UC019 provider/runtime methods or Version OAuth configuration.",
+  "uc_sections": [
+    "目标与范围",
+    "输入与输出",
+    "主流程",
+    "验收场景",
+    "依赖与实现边界",
+    "API 实现契约"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": false,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/app-oauth-client-v1.md": [
+      "所有权与调用方",
+      "三种生命周期",
+      "管理接口"
+    ],
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # UC-APP-018：管理应用 OAuth Client
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -85,6 +85,42 @@ sector、sector_identifier_uri 和用户 sub 均由 Auth 管理，App 不保存�
 
 依赖既有 Application/Developer 可信身份、Mongo 事务和管理员写入栅栏。版本化 redirect 由 UC-APP-002 至 UC-APP-005 管理，UC-APP-007 发布，UC-APP-019 组合为 Auth 运行上下文。Proto/HTTP 路由仍需独立 API 工作包。
 
+本用例的 registration/credential 可以在 Version OAuth 扩展之前独立交付。当前实现只开放管理员管理接口；Auth 专用读取、secret 验证和运行上下文解析属于 UC-APP-019，不因本用例保存了摘要就提前开放。
+
+## API 实现契约
+
+独立 API 仓库新增 package `app_center.v1.oauth_client`，service 为 `OAuthClientService`。首版只接受 `TEST`；Proto enum 仍为未来渠道保留 `GREY/STABLE` 值，但 adapter 对它们返回渠道未启用，不创建数据。
+
+稳定 enum：
+
+```text
+OAuthChannel: UNSPECIFIED=0, TEST=1, GREY=2, STABLE=3
+OAuthClientType: UNSPECIFIED=0, PUBLIC_PKCE=1, CONFIDENTIAL_SECRET=2
+OAuthClientStatus: UNSPECIFIED=0, ACTIVE=1, DISABLED=2
+```
+
+`clientId` 是服务端生成的小写 UUIDv4 字符串。它是公开、不透明、区分大小写的 OAuth client identifier；输入只接受规范小写 UUIDv4，永久不重用。registrationRevision、credentialRevision 和 authorizationEpoch 均为正 int64；所有增加操作在溢出时失败并完整回滚。
+
+管理 RPC 与内部 HTTP annotation：
+
+| RPC | HTTP | 请求正文 |
+| --- | --- | --- |
+| `RegisterOAuthClient` | `POST /v1/applications/{application_id}/oauth-registrations/{channel}/clients` | `command`：type、optional expectedRegistrationRevision |
+| `GetApplicationOAuthRegistration` | `GET /v1/applications/{application_id}/oauth-registrations/{channel}` | 无 |
+| `SetOAuthClientStatus` | `PUT /v1/oauth-clients/{client_id}/status` | `command`：expectedRegistrationRevision、status |
+| `GetOAuthClientCredentialMetadata` | `GET /v1/oauth-clients/{client_id}/credential` | 无 |
+| `RotateOAuthClientSecret` | `POST /v1/oauth-clients/{client_id}/credential-rotations` | `command`：expectedCredentialRevision |
+
+`expectedRegistrationRevision` 在首次创建 registration 时必须省略；已有 registration 补登记另一 type 时必须存在且匹配。SetStatus 的 expectedRegistrationRevision 和 Rotate 的 expectedCredentialRevision 必须存在且为正数；相同状态也先校验 expected revision，再返回 no-op，revision、epoch、审计时间均不改变。
+
+`OAuthClientIdentityResource` 返回 clientId/type/status/authorizationEpoch/createdBy/createdAt/statusUpdatedBy/statusUpdatedAt。`ApplicationOAuthRegistrationResource` 返回 applicationId/channel、两个 optional identity slot、registrationRevision/createdAt/updatedAt。`OAuthClientCredentialMetadata` 只返回 clientId/credentialRevision/rotatedBy/rotatedAt，不返回摘要。CONFIDENTIAL 登记和轮换响应额外返回一次性 `clientSecret`；PUBLIC 响应不存在该字段。所有管理响应使用 `Cache-Control: no-store`，日志、错误、trace 和 metrics 不记录 secret、摘要或完整请求体。
+
+错误 reason 至少固定为：`INVALID_APPLICATION_ID`、`INVALID_OAUTH_CHANNEL`、`OAUTH_CHANNEL_NOT_ENABLED`、`INVALID_OAUTH_CLIENT_TYPE`、`INVALID_OAUTH_CLIENT_ID`、`INVALID_OAUTH_CLIENT_STATUS`、`INVALID_OAUTH_REGISTRATION_REVISION`、`INVALID_OAUTH_CREDENTIAL_REVISION`、`APPLICATION_NOT_FOUND`、`APPLICATION_ADMIN_REQUIRED`、`OAUTH_REGISTRATION_NOT_FOUND`、`OAUTH_CLIENT_ALREADY_EXISTS`、`OAUTH_CLIENT_NOT_FOUND`、`OAUTH_REGISTRATION_CHANGED`、`OAUTH_CLIENT_CREDENTIAL_NOT_FOUND`、`OAUTH_CLIENT_CREDENTIAL_CHANGED`、`OAUTH_CLIENT_STATE_INCONSISTENT` 和 `INTERNAL`，并复用既有 Developer 身份/批准 reason。非法输入映射 INVALID_ARGUMENT；未找到映射 NOT_FOUND；重复登记映射 ALREADY_EXISTS；revision 竞争映射 ABORTED；渠道未启用映射 FAILED_PRECONDITION；越权映射 PERMISSION_DENIED；存储不变量异常映射 INTERNAL。
+
+Mongo migration 建立 `application_oauth_registrations` 与 `oauth_client_credentials`。前者以 `(applicationId,channel)` 唯一，两个非空 clientId 分别具有全局唯一 sparse/partial 索引；后者以 clientId 唯一。validator 固定 slot、状态、正 revision/epoch、UTC 审计与 32-byte digest。CONFIDENTIAL 首次登记必须在同一事务同时创建 registration slot、credential 和审计；任何一步失败都不提交 identity。管理员归属通过 Application `coordinationRevision` 真写栅栏在最终事务复查。
+
+完整验收使用 `make check-auth-app`：覆盖 Domain/UseCase、Proto 生成物、HTTP/gRPC、真实 Mongo validators/indexes/事务/回滚、管理员转让竞争、双 type 并发登记、registration/credential OCC 隔离、secret 一次披露与日志脱敏。Auth 回归只证明既有身份链路未回退，不表示 UC-APP-019 provider 已实现。
+
 ## 变更记录
 
 - 2026-09-27：建立 OAuth client 管理设计。
@@ -92,3 +128,4 @@ sector、sector_identifier_uri 和用户 sub 均由 Auth 管理，App 不保存�
 - 2026-09-27：client identity 改为 Application 级稳定 registration；secret credential 与 Version 配置使用独立生命周期和 revision。
 
 - 2026-09-27：client/registration 按渠道隔离，同渠道各 major 共享；sector/sub 由 Auth 按 Application 唯一管理。
+- 2026-09-28：接受 TEST-only 管理工作包，固定 UUIDv4 clientId、公共管理 API、错误分类、Mongo 原子边界与完整验收。
