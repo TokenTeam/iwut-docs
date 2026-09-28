@@ -80,7 +80,9 @@ Grant 业务主键为 `(authId, applicationId, channel)`，具体约束由 [BR-O
 | 授权码 | 90 秒，一次性 | token endpoint |
 | access token | 15 分钟，仍逐次在线查授权 | UserInfo / Gateway |
 | ID Token | 5 分钟 | 该 client 的登录处理 |
-| refresh family | 自首次签发起 7 天绝对期限 | token endpoint；旋转不延长 |
+| refresh family | 30 天未成功刷新失效；自首次签发起最长 180 天 | token endpoint；滑动闲置期限＋固定绝对上限 |
+
+上述天数按 24 小时计算。refresh 的滑动更新、到期边界和 access token 剩余寿命截断规则唯一由 [UC-AUTH-016 / BR-OAU-010](../../auth-center/use-cases/UC-AUTH-016-refresh-application-tokens.md#br-oau-010) 定义；轮换改变 token 值，续期只移动闲置截止时间，不重置整条链的绝对上限。
 
 ID Token 使用独立 OIDC RSA 签名密钥与 JWKS（RS256，RSA 至少 2048 bit）。header 为 `alg=RS256,typ=JWT,kid=<configured key>`；claims 为 iss、sub、单值 aud=client_id、iat、exp、auth_time、nonce、at_hash。at_hash 按 OIDC RS256 的 SHA-256 左半摘要规则，从实际 access token 计算。不包含平台 Session、内部 authId、学生关联值、developer/reviewer 权限或全量资料。
 

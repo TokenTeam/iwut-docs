@@ -47,7 +47,7 @@ App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 A
 
 - 当前 App 只有 TEST/Tester 的运行规则，因此首版 OAuth 只绑定该渠道；面向所有用户的 STABLE 接入需先设计正式发布/运行资格。
 - client authorizationEpoch、Tester episode 或 grant revocationEpoch 变化使旧代失效；grant revision 仅用于 OCC/审计。Version 或 major 切换保留历史同意，资源使用当前交集，新增 scopes 才重新 consent。secret 轮换只影响后续 confidential client authentication，不撤销既有 grant/token/family。
-- refresh 严格旋转，无重试宽限；客户端须串行刷新，丢响应可能需要重新授权。
+- 后台访问沿用 offline_access 和既有刷新端点，不增加独立授权开关或任意领取 token 的接口。refresh 采用滑动闲置期限＋固定绝对上限，规则见 UC016、时长见 OAuth/OIDC v1；仍严格旋转、无重试宽限，客户端须串行刷新，丢响应可能需要重新授权。
 - sector 与 pairwise subject 由 Auth 管理，按 Application 隔离，所有渠道/type/major/hostname 共用；不同应用不因开发者相同而合并。标准 sector URI 使用 Auth 管理的每应用独立 hostname 和批准回调清单；App 不保存映射。
 - 标准门户先支持浏览器重新登录。原生已有 Session 的无感 SSO 桥、更多回调类型、更多动态资料 scopes、公开 introspection、单点登出均不在本轮。
 - [Traefik 契约](../../platform/contracts/oauth-delegation-v1.md)明确已有短期上下文及在途请求的撤销传播窗口；不承诺第三方应用会话/已取得数据同步删除。
