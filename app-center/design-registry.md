@@ -9,7 +9,7 @@
 ## 下一个可分配编号
 
 <!-- 机器可读的已废弃编号声明；由 tools/registry.py 读取，用于计算 Next ID，不得删除。 -->
-<!-- retired: UC-APP-017 BR-PRF-033 BR-PRF-034 BR-PRF-035 BR-PRF-036 BR-PRF-037 BR-PRF-038 BR-PRF-039 BR-PRF-040 -->
+<!-- retired: BR-PRF-033 BR-PRF-034 BR-PRF-035 BR-PRF-036 BR-PRF-037 BR-PRF-038 BR-PRF-039 BR-PRF-040 -->
 
 <!-- 下表由 tools/registry.py --write 生成；不要手工编辑。 -->
 
@@ -28,7 +28,7 @@
 
 Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确认没有未登记的既有定义。
 
-`UC-APP-017` 与 `BR-PRF-033`–`BR-PRF-040` 在进入实现前按产品决定直接删除：ProfileRevision 不提供服务端恢复行为。这些编号不再分配，不构成已登记设计项；它们登记在上面的 `retired` 声明中，因此不会被重新分配。
+`UC-APP-017` 在进入实现前被产品决定否决；其归档正文是依据现行规则重建的历史摘要，而非找回的原始提案。原计划分配给它的 `BR-PRF-033`–`BR-PRF-040` 没有可恢复的权威正文，继续登记在上面的 `retired` 声明中，不再分配。
 
 ## Use Cases
 
@@ -50,6 +50,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-014` | 更新应用公开资料修订草稿 | `ACCEPTED` | [UC-APP-014-update-draft-application-profile-revision.md](use-cases/UC-APP-014-update-draft-application-profile-revision.md) | — | — |
 | `UC-APP-015` | 提交应用公开资料修订审核 | `ACCEPTED` | [UC-APP-015-submit-application-profile-revision-review.md](use-cases/UC-APP-015-submit-application-profile-revision-review.md) | — | — |
 | `UC-APP-016` | 审核应用公开资料修订 | `ACCEPTED` | [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md) | — | — |
+| `UC-APP-017` | 将被拒绝的应用公开资料修订恢复为草稿 | `SUPERSEDED` | [归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md) | [UC-APP-013](use-cases/UC-APP-013-create-application-profile-revision.md)＋[UC-APP-016 / BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | 未实现；以新建独立修订取代服务端恢复。 |
 | `UC-APP-018` | 管理应用 OAuth Client | `PROPOSED` | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `PROPOSED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | OAuth/OIDC 新设计，未实现。 |
 

@@ -6,16 +6,17 @@ superseded-by). Only the derivable parts are generated or verified:
 
 * `--write`  regenerate the "下一个可分配编号" table from the register itself.
 * `--check`  verify every mechanical column (id / title / status / authoritative
-             location) still matches its source document, and that the id space
-             is closed in both directions.
+             location) still matches its active or archived source document, and
+             that the id space is closed in both directions.
 
 Why the Next ID table is generated rather than typed: it is the mechanism that
 stops a retired number from being reissued, so it must be computed from the
 register plus the explicit retired list, never from memory.
 
-Retired (never-to-be-reissued) ids are declared in the registry itself:
+Retired (never-to-be-reissued and without an authoritative document) ids are
+declared in the registry itself:
 
-    <!-- retired: UC-APP-017 BR-PRF-033 ... -->
+    <!-- retired: BR-PRF-033 ... -->
 
 Usage (run from the docs repository root):
     python3 tools/registry.py --check
@@ -184,6 +185,8 @@ def collect_facts() -> dict[str, dict]:
     documents: dict[str, dict] = {}
     for path in sorted((APP_CENTER / "use-cases").glob("UC-*.md")):
         documents[f"use-cases/{path.name}"] = scan_document(path.read_text(encoding="utf-8"))
+    for path in sorted((APP_CENTER / "archive").glob("UC-*.md")):
+        documents[f"archive/{path.name}"] = scan_document(path.read_text(encoding="utf-8"))
     for path in sorted((APP_CENTER / "adr").glob("ADR-*.md")):
         documents[f"adr/{path.name}"] = scan_document(path.read_text(encoding="utf-8"))
     return documents
