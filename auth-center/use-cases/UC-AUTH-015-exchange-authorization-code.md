@@ -35,7 +35,7 @@ code 只能消费一次；校验失败不消费正确 code。并发兑换通过�
 <a id="br-oau-007"></a>
 ### BR-OAU-007：独立凭据与有界权限
 
-access token 记录 tokenId/digest、authId、clientId、applicationId、固定 channel/rpcApiMajor、grantId/revision（审计）/revocationEpoch、client authorizationEpoch、testerMembershipId、签发时 App 资格版本、scope、audiences、familyId、签发/到期/撤销状态。所引用 grant 的 `(authId, applicationId, channel)` 必须与 code/token 及 App 确认的 client 归属一致，不能仅凭 grantId 或相同 sub 放行。scope 来自 code 且仍为当前 grant 和应用许可的子集；audiences 只由 Auth 部署的 scope 资源映射得出。签发时 Version 用于审计和当次 code 一致性，不把 token 身份改成 Version 身份。只含 openid/email 的 token 仅可访问 UserInfo，不因此获取其它资源。
+access token 记录 tokenId/digest、authId、clientId、applicationId、固定 channel/rpcApiMajor、grantId/revision（审计）/revocationEpoch、client authorizationEpoch、testerMembershipId、签发时 App 资格版本、scope、audiences、familyId、签发/到期/撤销状态。所引用 grant 的 `(authId, applicationId, channel)` 必须与 code/token 及 App 确认的 client 归属一致，不能仅凭 grantId 或相同 sub 放行。scope 来自 code 且仍为当前 grant、应用许可和 UC014 定义的当前目录集合 C 的子集；code 中任一 scope 已停用则本次兑换失败，不消费 code、不静默缩小范围或签发包含停用项的凭据。audiences 只由 Auth 部署的 scope 资源映射得出。签发时 Version 用于审计和当次 code 一致性，不把 token 身份改成 Version 身份。只含 openid/email 的 token 仅可访问 UserInfo，不因此获取其它资源。
 
 ID Token 是面向 client 的登录证据，格式和 pairwise sub 由 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md) 定义；不与 access token 复用值、用途或 verifier。用户的资料/身份关联不是默认 claims，subject 不能由客户端指定。
 
@@ -63,6 +63,7 @@ sector 在部署的稳定域名空间中分配，不随常规 issuer 配置、se
 - 并发兑换仅一份凭据提交，正确重放撤销原 family；错误 client 不能撤销他人 family。
 - ID Token aud/nonce/at_hash 正确，同 Application 的 pairwise sub 跨 client/type/channel/Version 稳定且与学生关联无关。
 - secret 轮换使旧 secret 无法继续兑换，但不撤销既有 grant 与已签发 token；新 secret 可用于之后的新请求。
+- code 签发后 scope 停用，兑换返回 invalid_grant 且不消费 code；目录不可读为依赖错误，不伪装为用户撤回。
 - 授权撤回、App 快照过期、事务/签名失败、未知提交不会多发可用凭据。
 
 ## 依赖与实现边界

@@ -652,7 +652,9 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 - 放入发布槽位：再次确认 approved snapshot 中的 scope，并把所用 catalog revision 写入 PublicationHistory；UC-APP-007 首先应用于 test 槽位。
 - consent/token/用户数据读取：Auth 必须以自己的当前规则做最终授权，不能相信 App Center 过去的校验结果。
 
-因此短暂缓存只影响开发体验，不会成为实际授权边界。
+Scope 启用状态和兼容投影按 [UC-AUTH-001 / BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) 执行：App 继续消费 requestable，Auth 自己在 OAuth 运行阶段检查当前 enabled。缓存仍可能在 TTL 内使管理操作按旧目录通过；这些结果不保证后续 OAuth 可用，也不阻止 Auth 排除已停用 scope。App 不新增独立 runtimeEnabled 状态或同步修改已批准 snapshot。
+
+因此短暂缓存不构成实际用户授权依据。
 
 ### ADR-002：ApplicationPublication 按 RPC API major 分区（`PROPOSED`）
 
@@ -831,7 +833,8 @@ message ScopeDefinition {
 - `generated_at` 必须是有效 UTC timestamp，并与 revision 绑定。
 - `scopes` 是该 revision 的完整集合；空目录编码为空 repeated field。
 - 每个 name 非空且唯一；列表按 name 的 Unicode code point 字典序排列。
-- 消费方只把 `requestable = true` 的 name 用于新申请校验；它不是最终授权结果。
+- `requestable` 固定投影 Auth 当前 `enabled`，状态定义唯一引用 [BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)。停用项仍返回，值为 false；不增加独立 runtimeEnabled 字段。
+- App 消费方继续把 `requestable = true` 的 name 用于版本申请、审核和发布规则的目录检查；它不是最终用户授权结果。Auth OAuth 路径直接检查自己的当前权威状态，不以 App 缓存或历史批准快照代替。
 - 消费方遇到未知追加字段时必须忽略，以保持向后兼容。
 
 #### 调用方身份
@@ -862,6 +865,7 @@ Provider 与 Consumer 至少共同验证：
 5. duplicate/empty name、非正 revision、无效 generatedAt 或非稳定排序不能作为成功快照。
 6. `UNAUTHENTICATED`、`PERMISSION_DENIED`、`UNAVAILABLE` 与稳定 reason 映射一致。
 7. App Center E2E 的测试 Auth Server 实现同一生成接口，不维护另一份手写 wire model。
+8. Provider 的 enabled 状态与 requestable 投影一致，启停递增 revision；完整快照保留停用项，App 的既有布尔校验无需新增状态分支。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -985,10 +989,10 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 552 | `232cd7640475` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
-| `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
+| `adr/ADR-001-scope-catalog-cache.md` | 114 | `1e3b8ddba7e4` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `0a1f73af1ac8` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
-| `platform/contracts/auth-scope-catalog-v1.md` | 91 | `cab448326f29` |
+| `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
 | `platform/contracts/trusted-service-identity-v1.md` | 88 | `3c091a708b32` |

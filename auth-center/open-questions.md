@@ -12,6 +12,10 @@
 
 UC-AUTH-001 只读取已经存在的权威目录。目录由部署种子、显式管理 UC 还是其它权威源产生仍未决定。生产实现不得把测试 fixture 或 App Center 的硬编码列表当成权威目录。
 
+### Scope 启用语义已明确
+
+2026-09-28：采用 enabled 单一权威状态，对 App 固定投影 requestable=enabled；不存在“禁止新申请但继续运行”的独立状态。规则见 [BR-SCP-004](use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)，OAuth 实际权限与历史同意恢复见 UC014–019。该设计决定已闭合；生产持久化、部署装载和相应验证仍待交付，不影响已完成的 UC-APP-018 client 管理。
+
 ### 完整 Scope 元数据
 
 首个消费方只需要 `name` 和 `requestable`。面向 consent UI、审计或数据投影所需的 display name、description、sensitivity 等字段，应由后续 Auth UC 引入；不得为了预判未来而提前加入 v1 必填字段。

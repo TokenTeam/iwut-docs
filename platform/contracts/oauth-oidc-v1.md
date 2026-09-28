@@ -50,7 +50,13 @@ PUBLIC client 不能提交 secret 冒充 confidential；CONFIDENTIAL client 不�
 
 只有按 UC-AUTH-016 获得离线授权时才增加 `refresh_token`。刷新响应保留 access_token/token_type/expires_in/scope/refresh_token，首版不重新签发 ID Token。
 
-Discovery 必须准确声明 issuer、authorization_endpoint、token_endpoint、userinfo_endpoint、jwks_uri、revocation_endpoint；`response_types_supported=[code]`、`grant_types_supported=[authorization_code,refresh_token]`、`subject_types_supported=[pairwise]`、`id_token_signing_alg_values_supported=[RS256]`、`token_endpoint_auth_methods_supported=[none,client_secret_basic]`、`code_challenge_methods_supported=[S256]`。`response_modes_supported=[query]`、`authorization_response_iss_parameter_supported=true`；revocation 同样支持 none/basic。scopes_supported 仅列出实际装载并实现的 scope；不宣称动态注册、logout、introspection 或 JWT access token profile 已实现。
+Discovery 必须准确声明 issuer、authorization_endpoint、token_endpoint、userinfo_endpoint、jwks_uri、revocation_endpoint；`response_types_supported=[code]`、`grant_types_supported=[authorization_code,refresh_token]`、`subject_types_supported=[pairwise]`、`id_token_signing_alg_values_supported=[RS256]`、`token_endpoint_auth_methods_supported=[none,client_secret_basic]`、`code_challenge_methods_supported=[S256]`。`response_modes_supported=[query]`、`authorization_response_iss_parameter_supported=true`；revocation 同样支持 none/basic。scopes_supported 仅列出实际装载、enabled=true 且已实现的 scope；不宣称动态注册、logout、introspection 或 JWT access token profile 已实现。
+
+## Scope 启用与兼容投影
+
+Scope 单一启用状态与 requestable 投影唯一由 [UC-AUTH-001 / BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) 定义；OAuth 当前目录许可集合 C 及授权/恢复边界见 [UC-AUTH-014 / BR-OAU-001、002](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md#br-oau-001)。本协议不增加 requestable 与 runtimeEnabled 两个独立开关。
+
+App 继续使用已有 requestable 字段进行版本管理检查；Auth 的 authorize、code 兑换、refresh、UserInfo 和委托签发分别遵循 UC014–019 的当前目录检查。停用不会调用用户撤销用例或抹掉历史同意。目录故障使用依赖错误，Discovery 缓存或 App 旧快照不改变运行判断。
 
 ## 授权请求与登录门户
 
@@ -58,7 +64,7 @@ Discovery 必须准确声明 issuer、authorization_endpoint、token_endpoint、
 
 Auth 在建立登录 interaction 前以 clientId、iwut_channel 和 iwut_rpc_api_major 调用 App 的 `ResolveClientRuntimeConfiguration`，从 exact-major 当前 TEST Publication 的批准 snapshot 取得 effective redirect URIs 和 scopes，并先精确匹配 redirect_uri。用户登录后再以预登录 runtime tuple 调用 `ResolveAuthorizationContext`；确认和 code 兑换时继续重查。任何 tuple 变化都不能把旧回调与新 scopes 或 Tester 资格拼接。
 
-Grant 业务主键为 `(authId, applicationId, channel)`，具体约束由 [BR-OAU-002](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md#br-oau-002) 定义。同应用同渠道的 PUBLIC/CONFIDENTIAL client 及各 major 共享历史同意；grantId 是稳定引用 ID，不以 client 或 Version 为授权身份。code、access/refresh token 和 family 仍各自绑定 client，不能跨 client 兑换、刷新或撤销；共享同意不省略各自的 client authentication/PKCE、当前版本资格或 offline_access 确认。历史同意集合 G 不因当前版本 scope 减少而删减；只有本次请求超出 G 的部分需要新增同意。实际访问使用 token、G、当前批准版本及当前可用目录的交集，UC014/016/018/019 定义唯一业务规则。revision 用于 OCC/审计，用户撤回递增共享 grant 的独立 revocationEpoch，对同应用同渠道所有 client 的旧凭据生效；新增同意不使旧 token 失效，也不自动扩大旧 token。授权交互和 code 始终绑定其创建时的精确 runtime tuple 与 redirect URI；旧 code 不能因 grant 可延续而兑换到新 Version 的回调。secret 轮换只影响之后的 confidential client authentication，不单独撤销 grant、access token 或 refresh family。
+Grant 业务主键为 `(authId, applicationId, channel)`，具体约束由 [BR-OAU-002](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md#br-oau-002) 定义。同应用同渠道的 PUBLIC/CONFIDENTIAL client 及各 major 共享历史同意；grantId 是稳定引用 ID，不以 client 或 Version 为授权身份。code、access/refresh token 和 family 仍各自绑定 client，不能跨 client 兑换、刷新或撤销；共享同意不省略各自的 client authentication/PKCE、当前版本资格或 offline_access 确认。历史同意集合 G 不因当前版本 scope 减少而删减；只有本次请求超出 G 的部分需要新增同意。实际访问使用 token、G、当前批准版本及 Auth 当前目录许可集合 C 的交集，UC014/016/018/019 定义唯一业务规则。revision 用于 OCC/审计，用户撤回递增共享 grant 的独立 revocationEpoch，对同应用同渠道所有 client 的旧凭据生效；新增同意不使旧 token 失效，也不自动扩大旧 token。授权交互和 code 始终绑定其创建时的精确 runtime tuple 与 redirect URI；旧 code 不能因 grant 可延续而兑换到新 Version 的回调。secret 轮换只影响之后的 confidential client authentication，不单独撤销 grant、access token 或 refresh family。
 
 支持 `prompt=none|login|consent`（首版单值）、非负整数 max_age。申请 offline_access 必须 prompt=consent 并实际确认，缺失时返回 invalid_request，不静默授予离线访问。无 prompt 时可复用尚有效的平台登录与既有 grant；none 不允许显示 UI，缺登录/新权限分别返回 login_required/consent_required。login/max_age 要求重新走 UC007/012 的认证，不能靠刷新门户 cookie 伪造 auth_time。nonce 写入最终 ID Token，state 原样返回。重新认证不得复用进入 prompt=login 前的同一 Session；auth_time 取 Auth 记录的实际认证时间，不接受浏览器上报。
 

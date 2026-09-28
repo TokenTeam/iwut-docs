@@ -25,20 +25,20 @@
 <a id="br-oau-001"></a>
 ### BR-OAU-001：授权来源与运行资格
 
-只接受 Auth 在线确认的 ACTIVE USER，Auth 同时确认应用当前 adminAuthId 具有 APPROVED Developer 资格。App 资格通过 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md) 获取；redirect URI 与 scopes 必须来自同一个批准 Version snapshot，不信任应用提交的版本、URL、scope 定义或批准状态。Scope Catalog 所有权继续由 UC001 决定；未知、停用或没有资源/披露映射的 scope 失败关闭。首版技术 scopes 及装载门禁见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
+只接受 Auth 在线确认的 ACTIVE USER，Auth 同时确认应用当前 adminAuthId 具有 APPROVED Developer 资格。App 资格通过 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md) 获取；redirect URI 与 scopes 必须来自同一个批准 Version snapshot，不信任应用提交的版本、URL、scope 定义或批准状态。Scope Catalog 所有权与 enabled 单状态由 [BR-SCP-004](UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) 决定；令 C 为 Auth 当前 enabled=true 且具备已交付资源访问、资料披露或协议控制处理的 scopes；offline_access 的处理由 UC016 定义，不要求为它虚构业务资源 audience。本次请求包含未知、enabled=false 或无对应处理的项时返回 invalid_scope，不展示为可授予权限，也不静默删除请求项后继续。Catalog 读取故障返回依赖不可用，不能当作停用或用户拒绝。首版技术 scopes 及装载门禁见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
 
 <a id="br-oau-002"></a>
 ### BR-OAU-002：显式同意与最小授权
 
-令 D=当前批准版本 requiredScopes∪optionalScopes，R=本次请求 scopes，S=用户本次选择；必须 requiredScopes⊆R⊆D，S 包含 requiredScopes 且 S⊆R。登录必需 openid；不允许用“不选 optional”偷增其他权限。无法接受必需权限时用户仍可拒绝全部。
+令 D=当前批准版本 requiredScopes∪optionalScopes，R=本次请求 scopes，S=用户本次选择；必须 requiredScopes⊆R⊆D∩C，S 包含 requiredScopes 且 S⊆R。登录必需 openid；不允许用“不选 optional”偷增其他权限。无法接受必需权限时用户仍可拒绝全部。
 
 Grant 的业务主键为 `(authId, applicationId, channel)`，Mongo 必须以这三个字段建立复合唯一约束；grantId 仅为稳定、不透明的引用 ID，供 token 和本人管理接口引用。authId 来自当前 Session，applicationId/channel 来自 App 确认的 client 归属，不接受客户端自行指定授权归属。同一 Application 同一 channel 的 PUBLIC/CONFIDENTIAL client 及各 RPC major 共享一个 grant；TEST/GREY/STABLE 分别保存，不因跨渠道 sub 相同而共享授权。clientId、major、Version 均不进入 grant 唯一键。保存历史同意集合 G=grantedScopes、revision、revocationEpoch（初始 1）和 status；发起 clientId 与运行 tuple 记录在交互及审计中。
 
 授权页明确展示应用和渠道，并说明本次同意可由该渠道的两类 client 复用。共享的是用户同意；每个 client 仍须分别满足自己的当前批准版本、运行资格和凭据证明，code/token/family 不跨 client 使用。
 
-首次同意保存 S；以后只展示本次尚未同意的 `S−G`，明确同意后更新为 `G∪S`。若本次 R 已包含于 G 且满足当前 D，可按 prompt 规则静默取得本次需要的 S。prompt=consent 仍展示确认，offline_access 的专用规则保持有效。不能把历史 G 全部签入 token；S 必须是当前请求与当前允许集合的子集。
+首次同意保存 S；以后只展示本次尚未同意的 `S−G`，明确同意后更新为 `G∪S`。若本次 R 已包含于 G 且满足当前 D∩C，可按 prompt 规则静默取得本次需要的 S。prompt=consent 仍展示确认，offline_access 的专用规则保持有效。不能把历史 G 全部签入 token；S 必须是当前请求与当前允许集合的子集。
 
-Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 `G∩D`，也不改变 grant 的 revision/epoch。某个 scope 未来再次由批准版本声明，只要用户未主动撤回，仍可复用原同意。未知/停用的 Catalog scope 在运行时不生效，恢复同名含义必须保持 Catalog 的稳定语义。所有资源实际权限为 `token.scopes ∩ G ∩ D ∩ 当前可用 Catalog scopes`，不满足本次路由的权限时拒绝该操作，而非因为 token 另含一个暂不可用 scope 就拒绝全部操作。
+Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 `G∩D`，也不改变 grant 的 revision/epoch。某个 scope 未来再次由批准版本声明，只要用户未主动撤回，仍可复用原同意。Catalog enabled=false 同样不删除 G 或推进 grant revision/revocationEpoch；恢复后只可在仍有效的凭据原范围、G 与当前 D 内继续使用，不能复活已过期或被用户撤销的凭据，不能自动扩大停用期间新发 token 的范围。恢复同名含义必须保持 Catalog 的稳定语义。所有资源实际权限为 `token.scopes ∩ G ∩ D ∩ C`，不满足本次路由的权限时拒绝该操作，而非因为 token 另含一个暂不可用 scope 就拒绝全部操作。
 
 新增同意递增 revision（OCC/审计），不递增 revocationEpoch，不使已签发凭据失效；旧 token 不会因此自动获得新 scope。用户显式撤回按 UC018 改变 G/status 并递增两者，旧 code/token/family 通过 epoch 失效。重新同意也不能复活已撤销代的凭据。交互提交仍比较展示时 revision，竞争时要求刷新页面，不能覆盖用户后来决定。
 
@@ -60,6 +60,8 @@ Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 
 - 同应用同渠道 PUBLIC 已同意 openid/email 后，CONFIDENTIAL 请求相同范围可按 prompt 规则复用；新增权限只确认差集，offline_access 仍须满足专用确认规则。
 - TEST grant 不用于 GREY/STABLE；同一应用跨渠道 sub 相同也不绕过 consent。
 - 两类 client 并发首次同意只产生一条 grant；冲突交互重新展示后合并新增同意，不丢失已有范围；撤销前的旧页面不能重新授予权限。
+- email 停用时，请求 email 返回 invalid_scope，已有同意不能绕过；若 email 仅是版本 optional 项，客户端改为只请求 openid 可继续。必需项停用时无法满足 requiredScopes，不静默降级。
+- 授权页展示后 scope 停用，确认时不能沿用旧页面授予或签发；目录故障按依赖失败处理。
 - 增加 scope 仅更新 G/revision；旧 token 继续使用原权限，撤回则通过 revocationEpoch 使旧代失效。
 
 - public 缺 challenge、错误回调、伪造 App 版本或未批准 scope 拒绝，且不会回跳恶意 URL。

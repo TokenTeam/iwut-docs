@@ -32,7 +32,7 @@ GetClientConfiguration 可以返回 DISABLED 元数据供 Auth 解释；VerifyCl
 
 首版 channel 只接受 `TEST`，并复用 UC-APP-012 的 exact-major TEST Publication；用户上下文还要求 ACTIVE Tester。必须存在 client 所属 applicationId 与请求 rpcApiMajor 对应的 testVersionId，Version 属于该应用且 APPROVED，并与批准 Review snapshot 完全一致；不可回退 draft、其他 major 或任意历史批准版本。
 
-redirect URIs、requiredScopes 和 optionalScopes 都从该批准 snapshot 取得。PUBLIC client 选择 `pkceRedirectUris`，CONFIDENTIAL client 选择 `confidentialRedirectUris`；对应数组为空时运行配置不可用。Auth 再查当前权威 Scope Catalog；宿主 capabilities 的完整匹配仍由 UC-APP-012 执行。
+redirect URIs、requiredScopes 和 optionalScopes 都从该批准 snapshot 取得。PUBLIC client 选择 `pkceRedirectUris`，CONFIDENTIAL client 选择 `confidentialRedirectUris`；对应数组为空时运行配置不可用。Auth 再按 UC-AUTH-001/014 检查当前权威 Scope Catalog 的 enabled。Provider 保留批准 snapshot 的 scope 原值，不按 App 缓存的 requestable 裁剪返回集合，也不把快照当成运行启用证明；宿主 capabilities 的完整匹配仍由 UC-APP-012 执行。
 
 <a id="br-oac-008"></a>
 ### BR-OAC-008：一致快照与资格版本

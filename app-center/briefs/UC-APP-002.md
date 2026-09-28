@@ -432,7 +432,8 @@ message ScopeDefinition {
 - `generated_at` 必须是有效 UTC timestamp，并与 revision 绑定。
 - `scopes` 是该 revision 的完整集合；空目录编码为空 repeated field。
 - 每个 name 非空且唯一；列表按 name 的 Unicode code point 字典序排列。
-- 消费方只把 `requestable = true` 的 name 用于新申请校验；它不是最终授权结果。
+- `requestable` 固定投影 Auth 当前 `enabled`，状态定义唯一引用 [BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)。停用项仍返回，值为 false；不增加独立 runtimeEnabled 字段。
+- App 消费方继续把 `requestable = true` 的 name 用于版本申请、审核和发布规则的目录检查；它不是最终用户授权结果。Auth OAuth 路径直接检查自己的当前权威状态，不以 App 缓存或历史批准快照代替。
 - 消费方遇到未知追加字段时必须忽略，以保持向后兼容。
 
 #### 调用方身份
@@ -463,6 +464,7 @@ Provider 与 Consumer 至少共同验证：
 5. duplicate/empty name、非正 revision、无效 generatedAt 或非稳定排序不能作为成功快照。
 6. `UNAUTHENTICATED`、`PERMISSION_DENIED`、`UNAVAILABLE` 与稳定 reason 映射一致。
 7. App Center E2E 的测试 Auth Server 实现同一生成接口，不维护另一份手写 wire model。
+8. Provider 的 enabled 状态与 requestable 投影一致，启停递增 revision；完整快照保留停用项，App 的既有布尔校验无需新增状态分支。
 
 ## 未纳入本 brief 的源小节
 
@@ -479,5 +481,5 @@ Provider 与 Consumer 至少共同验证：
 | --- | --- | --- |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
-| `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
-| `platform/contracts/auth-scope-catalog-v1.md` | 91 | `cab448326f29` |
+| `adr/ADR-001-scope-catalog-cache.md` | 114 | `1e3b8ddba7e4` |
+| `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |

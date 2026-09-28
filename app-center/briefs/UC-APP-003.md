@@ -448,4 +448,4 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 | --- | --- | --- |
 | `use-cases/UC-APP-003-update-draft-application-version.md` | 377 | `429ee4761a19` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
-| `adr/ADR-001-scope-catalog-cache.md` | 112 | `a5fe7365b96f` |
+| `adr/ADR-001-scope-catalog-cache.md` | 114 | `1e3b8ddba7e4` |

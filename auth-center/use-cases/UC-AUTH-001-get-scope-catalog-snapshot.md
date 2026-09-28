@@ -36,7 +36,7 @@ ScopeDefinition {
 }
 ```
 
-`name` 是 Auth 拥有的稳定、不透明 Scope 标识；消费方只能做精确匹配，不能从命名形式推断权限。`requestable` 只表示当前是否允许新 ApplicationVersion 申请，不代表某个用户已经授权，也不替代 Auth 在 consent/token/数据读取路径上的最终授权。
+这里的 ScopeDefinition 是跨服务读投影。`name` 是 Auth 拥有的稳定、不透明 Scope 标识；消费方只能做精确匹配，不能从命名形式推断权限。Auth 内部只保存一个权威状态 `enabled`，输出固定为 `requestable = enabled`，不保存第二个可独立修改的申请开关。App 用该投影校验 ApplicationVersion 申请；它不代表某个用户已经授权，也不替代 Auth 在 consent/token/数据读取路径上的最终授权。
 
 ## 主流程
 
@@ -64,24 +64,30 @@ Auth Center 是 Scope Catalog、ScopeDefinition 和 catalog revision 的唯一�
 
 一次成功响应必须来自同一个 catalog revision，并包含该 revision 下的全部 ScopeDefinition。响应不得混合两个 revision 的内容，不分页，也不把部分读取包装成成功。
 
-空目录返回空数组，不返回 null。快照中 Scope name 不得重复，并按 Unicode code point 字典序稳定排序。
+空目录返回空数组，不返回 null。快照中 Scope name 不得重复，并按 Unicode code point 字典序稳定排序。停用项仍保留在完整快照中，投影为 requestable=false；不能用删除条目表示停用。
 
 <a id="br-scp-003"></a>
 ### BR-SCP-003：单调 revision 与生成时间
 
-revision 是正 int64，在 Auth 内随目录语义变化严格单调增加；消费方不得把它解释为时间戳，也不得要求连续无间隙。相同 revision 必须表示相同的 ScopeDefinition 集合与 requestable 值。
+revision 是正 int64，在 Auth 内随目录语义变化严格单调增加；消费方不得把它解释为时间戳，也不得要求连续无间隙。相同 revision 必须表示相同的 ScopeDefinition 集合与 requestable 值。enabled 的实际变化必须产生新的 catalog revision 和 generatedAt，读投影与 Auth 运行检查使用同一权威状态；不允许仅改 enabled 而保持旧 revision。
 
 generatedAt 是该 revision 成为权威版本的 UTC 时间。同一 revision 的重复读取必须返回相同 generatedAt。
 
 <a id="br-scp-004"></a>
 ### BR-SCP-004：ScopeDefinition 投影
 
-首版跨服务投影只包含稳定 `name` 和 `requestable`：
+Auth 内部的 ScopeDefinition 只使用 `enabled: bool` 表达启用状态，不引入独立的 requestable、runtimeEnabled 或“只允许旧应用使用”状态。enabled 必须显式存在；权威记录缺失该字段或格式错误属于目录不可用，不能默认启用。
+
+首版跨服务投影仍只包含稳定 `name` 和 `requestable`：
 
 - name 必须非空，在同一快照内唯一，并由 Auth 原样返回。
-- requestable 为 true 时，新的 ApplicationVersion 可以申请该 Scope；为 false 时必须被新的申请拒绝。
-- requestable 不表达用户 consent、token grant 或实际数据访问授权。
+- requestable 固定由 enabled 投影，不能独立配置或写入；为 true 时允许新 ApplicationVersion 申请，为 false 时必须被新的申请拒绝。
+- enabled=false 的 scope 不进入 Auth 新授权/签发的许可集合，也不进入已有凭据的实际有效权限集合；enabled=true 仍需通过用户同意、应用许可、token 范围等检查。OAuth 各阶段的处理分别由 UC014–019 定义。
+- requestable 不表达用户 consent、token grant 或最终数据访问授权；消费方缓存不能替代 Auth 当前 enabled 的运行检查。
+- 停用不删除 scope 定义或用户历史同意，也不等同于用户撤回；恢复必须保持同名 scope 原语义，不能复用旧名称扩大数据范围。Grant 与凭据恢复边界见 [BR-OAU-002](UC-AUTH-014-authorize-application.md#br-oau-002)。
 - 其它展示、安全分类或数据投影元数据不在本 UC 中提前定义。
+
+本规则固定状态及其读投影，不增加目录写接口；生产持久化/部署装载另行交付，在线目录管理仍不在本用例范围内。
 
 <a id="br-scp-005"></a>
 ### BR-SCP-005：内部读取边界
@@ -99,7 +105,8 @@ generatedAt 是该 revision 成为权威版本的 UTC 时间。同一 revision �
 - 空目录使用空数组；重复 name 或不一致快照不能作为成功返回。
 - 返回顺序稳定，与权威存储的物理顺序无关。
 - 相同 revision 的内容和 generatedAt 稳定。
-- 目录语义变化产生更大的 revision。
+- enabled=true/false 分别投影为 requestable=true/false；停用项仍在完整快照中，没有独立申请状态。
+- enabled 缺失/损坏返回目录不可用；真实启停产生更大的 revision，不改变原 name，重复读取同一 revision 保持一致。
 - 依赖失败映射为 `ScopeCatalogUnavailable`，不返回部分或旧快照冒充成功。
 - Provider 与 Consumer 都针对同一生成 Proto 运行契约测试。
 
@@ -115,3 +122,4 @@ generatedAt 是该 revision 成为权威版本的 UTC 时间。同一 revision �
 
 - 2026-09-21：建立 Auth Center 第一个纵切片，定义完整 Scope Catalog 快照、单调 revision 和内部读取边界。
 - 2026-09-22：内部服务身份与固定 allowlist 契约闭合，设计进入 `ACCEPTED`。
+- 2026-09-28：统一为 Auth 内部 enabled 单状态，对 App 保留 requestable 兼容投影；本次不交付目录写侧或生产持久化。

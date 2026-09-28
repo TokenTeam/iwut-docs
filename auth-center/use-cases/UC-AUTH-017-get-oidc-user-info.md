@@ -43,7 +43,8 @@ UserInfo 在 Auth 本地一致检查点确认授权和读取投影；撤销提�
 - 未绑定、邮箱更换、资料 KV 伪造 email 均按权威源投影；不自动披露其他字段。
 - ID Token/Session 冒充 Bearer、跨用途 token、撤回/过期/family 撤销拒绝。
 - 同一 Application 的 subject 跨 channel/type/major/Version/redirect hostname 一致，其他 Application 不同；ID Token/UserInfo sub 完全相同。
-- token 原有 email 但当前 D 不含 email 时只返回 sub，不修改 G；D 恢复且 G 未撤回时可再次返回邮箱。
+- token 原有 email 但当前 D 不含 email 或 Catalog enabled=false 时只返回 sub，不修改 G；版本许可和目录启用恢复且凭据仍有效、G 未撤回时可再次返回邮箱。
+- openid 停用后无法满足 UserInfo 的必需权限，拒绝读取；目录不可读返回依赖故障，不能当作没有邮箱或成功返回部分数据。
 
 ## 依赖与实现边界
 

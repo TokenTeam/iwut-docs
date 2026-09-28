@@ -46,7 +46,8 @@ message ScopeDefinition {
 - `generated_at` 必须是有效 UTC timestamp，并与 revision 绑定。
 - `scopes` 是该 revision 的完整集合；空目录编码为空 repeated field。
 - 每个 name 非空且唯一；列表按 name 的 Unicode code point 字典序排列。
-- 消费方只把 `requestable = true` 的 name 用于新申请校验；它不是最终授权结果。
+- `requestable` 固定投影 Auth 当前 `enabled`，状态定义唯一引用 [BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)。停用项仍返回，值为 false；不增加独立 runtimeEnabled 字段。
+- App 消费方继续把 `requestable = true` 的 name 用于版本申请、审核和发布规则的目录检查；它不是最终用户授权结果。Auth OAuth 路径直接检查自己的当前权威状态，不以 App 缓存或历史批准快照代替。
 - 消费方遇到未知追加字段时必须忽略，以保持向后兼容。
 
 ## 调用方身份
@@ -77,9 +78,11 @@ Provider 与 Consumer 至少共同验证：
 5. duplicate/empty name、非正 revision、无效 generatedAt 或非稳定排序不能作为成功快照。
 6. `UNAUTHENTICATED`、`PERMISSION_DENIED`、`UNAVAILABLE` 与稳定 reason 映射一致。
 7. App Center E2E 的测试 Auth Server 实现同一生成接口，不维护另一份手写 wire model。
+8. Provider 的 enabled 状态与 requestable 投影一致，启停递增 revision；完整快照保留停用项，App 的既有布尔校验无需新增状态分支。
 
 ## 兼容性
 
+- 本次 enabled 单状态决定保留 `bool requestable = 2`、消息名和 full method，不要求 App 修改 Proto 或 UC-APP-018 client 管理逻辑；App 无需持久化第二份 enabled。现有“true 可申请、false 不可申请”的消费方式保持兼容，新增约束是 Auth 从唯一状态生成该投影。
 - v1 可以追加 optional 字段或新增错误 reason，但不得改变现有字段号、字段类型或 full method。
 - 删除字段时保留其 field number 和 name 为 `reserved`。
 - 改变完整快照、revision 或 requestable 的语义需要新的平台契约评审；不能只修改某一方实现。

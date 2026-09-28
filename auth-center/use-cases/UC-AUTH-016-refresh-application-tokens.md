@@ -46,9 +46,9 @@ family 采用“滑动闲置期限＋固定绝对上限”，具体时长见 [OA
 
 Refresh family 保存 authId、applicationId、clientId、grantId、原 channel/rpcApiMajor、client authorizationEpoch、Tester episode、grant revocationEpoch 和已授予的 refreshScopeCeiling F。省略 scope 使用 F；显式 scope 必须包含 openid/offline_access 且为 F 子集，越界返回 invalid_scope，不能以 grant 后来增加了 scope（包括同渠道另一 client 新增同意）为理由扩大旧 family。新权限通过 UC014/015 取得新凭据。
 
-本次拟用集合记为 Q。Auth 先通过 ResolveClientRuntimeConfiguration 读取 token 原 channel/major 的当前版本，再用返回的 registration/runtime tuple 调用 ResolveAuthorizationContext；不能把签发时旧 Version tuple 作为刷新前置值，也不能根据请求换 major/channel。必须验证 family 的 authId/applicationId/channel 与所引用共享 grant 完全一致，并验证 client 的 App 归属；共享 grant 不允许另一 client 使用该 family。确认用户、client、Tester episode 和 grant epoch 有效后，实际签发 access scopes 为 `Q∩G∩D∩当前可用 Catalog scopes`，必须仍包含 openid/offline_access，否则 invalid_grant、不签后继凭据。本次 token 响应 scope 必须如实返回实际集合。
+本次拟用集合记为 Q。Auth 先通过 ResolveClientRuntimeConfiguration 读取 token 原 channel/major 的当前版本，再用返回的 registration/runtime tuple 调用 ResolveAuthorizationContext；不能把签发时旧 Version tuple 作为刷新前置值，也不能根据请求换 major/channel。必须验证 family 的 authId/applicationId/channel 与所引用共享 grant 完全一致，并验证 client 的 App 归属；共享 grant 不允许另一 client 使用该 family。确认用户、client、Tester episode 和 grant epoch 有效后，实际签发 access scopes 为 `Q∩G∩D∩C`，C 为 UC014/BR-OAU-001 定义的 Auth 当前目录许可集合，必须仍包含 openid/offline_access，否则 invalid_grant、不签后继凭据。本次 token 响应 scope 必须如实返回实际集合。
 
-自动求交只限制本次 access token，不裁剪历史 G，也不把当前 D 写成下一代 refresh 的永久上限。下一代 refresh 保留 Q 作为 ceiling；仅客户端显式缩小 Q 才永久缩小该 family 上限。因 D 暂时缩小而未使用的、原本已同意的 scope，可在后续批准版本恢复时由 refresh 再次取得，但永远不能超过 F/G。本用例不弹 UI 或自动扩大用户同意。
+自动求交只限制本次 access token，不裁剪历史 G，也不把当前 D/C 写成下一代 refresh 的永久上限。下一代 refresh 保留 Q 作为 ceiling；仅客户端显式缩小 Q 才永久缩小该 family 上限。因 D 暂时缩小或 Catalog enabled=false 而未使用的、原本已同意的 scope，可在版本许可和目录启用恢复时由 refresh 再次取得，但永远不能超过 F/G。本用例不弹 UI 或自动扩大用户同意。
 
 grant revocationEpoch 或 client authorizationEpoch 不匹配、client 禁用、用户不可用、Tester episode 改变、family 撤销/到期均 invalid_grant。grant 仅增加权限而 revision 改变、单纯 Version/publication/credentialRevision 变化不使 family 失效。共享 grant 的撤销对同应用同渠道所有 client 的 family 生效；单个 client 的禁用或 authorizationEpoch 变化仅使该 client 的凭据失效，不修改共享 G 或撤销另一 client 的 family。CONFIDENTIAL 必须使用当前 secret。正常刷新不撤销同 family 尚未到期的 access token，family/用户撤销仍统一生效；不能覆盖旧 epoch 来恢复已撤销凭据。
 
@@ -61,7 +61,8 @@ grant revocationEpoch 或 client authorizationEpoch 不匹配、client 禁用、
 - 事务回滚不更新期限；提交成功但响应丢失仍遵循严格轮换/重放规则，不返回旧 token 的可重试副本。
 - 临近 family 截止时，新 access token 的 expires_in 相应缩短；刷新不延长已发出的 access token。
 - 客户端显式缩小 ceiling 后不能扩大，D 临时变小不裁剪 G/ceiling。
-- 当前版本移除 email，refresh 返回不含 email 的 access；原 major 后续恢复 email，可在原 ceiling/G 内恢复，不要求再次同意。
+- 当前版本移除 email 或 Catalog 停用 email，refresh 返回不含 email 的 access，不裁剪 G/ceiling；许可恢复后可在原 ceiling/G 内取得包含 email 的新 access，不要求再次同意。
+- openid 或 offline_access 停用导致缺少必需刷新权限，本次刷新失败、不消费 refresh、不续期；恢复也不能复活已过期/已撤销 family。
 - 双并发、丢响应重试、跨 client 重放、错误 secret、祖先 token 重放覆盖 family 状态与秘密保护。
 - 用户撤回、部分 scope 撤回后再授予、Tester 重加均不能恢复旧 refresh；secret 轮换要求后续使用新 secret，但不删除 family。
 

@@ -54,7 +54,9 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 - 放入发布槽位：再次确认 approved snapshot 中的 scope，并把所用 catalog revision 写入 PublicationHistory；UC-APP-007 首先应用于 test 槽位。
 - consent/token/用户数据读取：Auth 必须以自己的当前规则做最终授权，不能相信 App Center 过去的校验结果。
 
-因此短暂缓存只影响开发体验，不会成为实际授权边界。
+Scope 启用状态和兼容投影按 [UC-AUTH-001 / BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) 执行：App 继续消费 requestable，Auth 自己在 OAuth 运行阶段检查当前 enabled。缓存仍可能在 TTL 内使管理操作按旧目录通过；这些结果不保证后续 OAuth 可用，也不阻止 Auth 排除已停用 scope。App 不新增独立 runtimeEnabled 状态或同步修改已批准 snapshot。
+
+因此短暂缓存不构成实际用户授权依据。
 
 ## 为什么现在不上 RabbitMQ
 

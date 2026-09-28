@@ -177,3 +177,7 @@ UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分�
 | [UC-AUTH-017](../use-cases/UC-AUTH-017-get-oidc-user-info.md) | `PROPOSED` | `NOT_STARTED` | 读取 OIDC 用户信息 |
 | [UC-AUTH-018](../use-cases/UC-AUTH-018-revoke-application-authorization.md) | `PROPOSED` | `NOT_STARTED` | 查看及收回本人应用授权 |
 | [UC-AUTH-019](../use-cases/UC-AUTH-019-issue-delegation-context.md) | `PROPOSED` | `NOT_STARTED` | 校验应用访问凭据并签发可信委托上下文 |
+
+## 2026-09-28 Scope 单状态设计同步
+
+已确定 UC001/BR-SCP-004 的 enabled 单状态与 requestable 兼容投影，并同步 OAuth UC 的运行校验与恢复规则。仅修改设计；当前临时硬编码 provider 不因此成为生产目录。后续生产目录工作包需交付 enabled 持久化/装载、revision 一致快照及投影测试，OAuth 工作包需验证停用、恢复、旧 App 缓存和目录故障场景。App 的既有 Proto 字段与已完成 UC-APP-018 无需为此变更；版本审核/发布继续按现有 requestable 消费方式校验。

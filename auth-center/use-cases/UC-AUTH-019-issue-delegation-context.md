@@ -26,7 +26,7 @@ Gateway 服务身份只允许调用签发方法，不授予终端用户任何业
 
 有效 token 必须满足用户 ACTIVE、应用管理员 APPROVED、client ACTIVE 且 authorizationEpoch 一致、grant ACTIVE 且 revocationEpoch 一致、原 Tester episode 仍有效、token/family 未撤销未过期。所引用 grant 的 authId/applicationId/channel 必须与 token 一致，App 返回的 client 归属也必须一致；共享 grant 不替代对 token 自身 client 的资格校验。channel/major 必须取自 token，不接受外部请求改选；先解析该上下文当前 RuntimeConfiguration，再以本次新 tuple 解析用户资格，不要求旧 Version ID 与当前相同。
 
-计算 `E=token.scopes∩grantedScopes∩当前批准版本 scopes∩当前可用 Catalog scopes`。只校验本路由 requiredScopes 是否全部属于 E，并限制 audience 为 token 原 audience 与当前 E 映射的交集；不能仅因 token 含有一个当前未许可 scope 就拒绝仍获准的其他路由。委托 JWS 的 scopes 只填 E。当前未允许的 scope 不向资源服务传递，不修改 token 原集合或历史 grant。E 恢复某项曾有权限不代表扩大 token 原有权限；需要 token 原集合外的新项必须重新取得凭据。原平台 Session 是否已退出不在条件中。
+计算 `E=token.scopes∩grantedScopes∩当前批准版本 scopes∩C`，C 唯一引用 [BR-OAU-001](UC-AUTH-014-authorize-application.md#br-oau-001) 的当前目录许可集合。Auth 读取自己的 enabled 权威事实；App 的 requestable 缓存、历史审核通过或过去签发的 token 均不能覆盖当前停用。目录读取失败时不使用旧集合，也不伪装成 scope 不足。只校验本路由 requiredScopes 是否全部属于 E，并限制 audience 为 token 原 audience 与当前 E 映射的交集；不能仅因 token 含有一个当前未许可 scope 就拒绝仍获准的其他路由。委托 JWS 的 scopes 只填 E。当前未允许的 scope 不向资源服务传递，不修改 token 原集合或历史 grant。E 恢复某项曾有权限不代表扩大 token 原有权限；需要 token 原集合外的新项必须重新取得凭据。原平台 Session 是否已退出不在条件中。
 
 <a id="br-oau-019"></a>
 ### BR-OAU-019：路由许可与委托身份隔离
@@ -44,7 +44,7 @@ App 快照、委托期限及撤销传播上界按 [委托上下文契约](../../
 
 ## 验收场景
 
-- 当前版本移除 email 时，旧 token 仍可访问其 E 覆盖的其他路由，email 路由拒绝；当前版本恢复后只可恢复原 token/G 内的权限。
+- 当前版本移除 email 或 Catalog 停用 email 时，旧 token 仍可访问其 E 覆盖的其他路由，email 路由拒绝；版本许可和目录启用恢复后只可恢复仍有效的原 token/G 内权限。App 即使持有 requestable=true 的旧缓存也不能绕过 Auth。
 - TEST token 不得改用 STABLE 或其他 major 的配置；同应用同 sub 不代替 channel/client 授权。
 - 同渠道另一 client 扩大 G 不扩大旧 token 的 E；grant 归属不匹配拒绝；用户撤回共享 grant 后两类 client 均不能获得新委托，单个 client 禁用不影响另一有效 client。
 
