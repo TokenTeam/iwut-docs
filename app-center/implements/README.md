@@ -141,6 +141,7 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 ## 后续工作包依赖检查
 
 - [UC-APP-008 开工检查（2026-09-22）](UC-APP-008-readiness.md)：持久化轮换方案已做真实 MongoDB 验证；用户已接受 mock URL/env 前缀方案，编码契约和 brief 已生成，工作包已激活。
+- [UC-APP-019 开工检查（2026-09-29）](UC-APP-019-readiness.md)：数据依赖已满足；入站 Auth service identity 配置和 consent 展示投影尚需确认，确认后接受设计并生成 brief。
 
 ## 2026-09-22 UC-APP-007 交付记录
 
