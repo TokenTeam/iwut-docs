@@ -27,12 +27,12 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | Use Case | 设计状态 | 实现状态 | 已闭合 | 尚未闭合 |
 | --- | --- | --- | --- | --- |
 | [UC-APP-001](../use-cases/UC-APP-001-create-application.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、MongoDB Repository、配置注入、事务与并发集成测试、Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、本地 Wire Composition Root、真实 MongoDB 端到端测试 | — |
-| [UC-APP-002](../use-cases/UC-APP-002-create-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、Scope Catalog cache、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 MongoDB consumer E2E | Auth MongoDB 权威目录、完整双服务 E2E |
-| [UC-APP-003](../use-cases/UC-APP-003-update-draft-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、显式 migration、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 JWS 与 MongoDB consumer E2E | Auth MongoDB 权威目录、完整双服务 E2E |
-| [UC-APP-004](../use-cases/UC-APP-004-submit-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、ApplicationReview migration、事务与管理员转让并发集成测试、生成 Auth gRPC client、DNS-only 公网 HTTPS 预检、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 JWS 与 MongoDB consumer E2E | Auth MongoDB 权威目录、完整双服务 E2E |
-| [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、决定与本地不可变策略 MongoDB Repository、0005/0007 migrations、System 自动拒绝、事务与并发集成测试、trusted-identity-v1 reviewer permissions、Auth Developer Status consumer、caller-signed service JWS、Auth SYSTEM principal 延迟解析/成功缓存、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、测试 Auth Server E2E、真实 App+Auth 双服务 E2E | Auth 普通 USER provision/身份签发与 reviewer grant/revoke 实现 |
+| [UC-APP-002](../use-cases/UC-APP-002-create-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、Version 依附 OAuth 双数组配置及同事务创建、0015 migration/backfill、Scope Catalog cache、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 MongoDB consumer E2E | Auth MongoDB 权威目录、完整双服务 E2E |
+| [UC-APP-003](../use-cases/UC-APP-003-update-draft-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、OAuth 双数组完整替换/no-op/OCC 与同 revision 事务、显式 migration、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 JWS 与 MongoDB consumer E2E | Auth MongoDB 权威目录、完整双服务 E2E |
+| [UC-APP-004](../use-cases/UC-APP-004-submit-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、OAuth 回调策略复检及不可变深拷贝 snapshot、ApplicationReview migration、事务与管理员转让并发集成测试、生成 Auth gRPC client、DNS-only 公网 HTTPS 预检、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 JWS 与 MongoDB consumer E2E | Auth MongoDB 权威目录、完整双服务 E2E |
+| [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、决定与本地不可变策略 MongoDB Repository、app-version-review-v2 激活/v1 退役、批准时 OAuth 回调复检、0005/0007/0015 migrations、System 自动拒绝、事务与并发集成测试、trusted-identity-v1 reviewer permissions、Auth Developer Status consumer、caller-signed service JWS、Auth SYSTEM principal 延迟解析/成功缓存、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、测试 Auth Server E2E、真实 App+Auth 双服务 E2E | Auth 普通 USER provision/身份签发与 reviewer grant/revoke 实现 |
 | [UC-APP-006](../use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、0006 migration、MongoDB 原子 Repository、资源化 Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、Wire Composition Root、真实 MongoDB 事务/并发集成测试与端到端测试 | — |
-| [UC-APP-007](../use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、Publication/History MongoDB Repository、0008 migration、管理员与 Version/Review 事务写入栅栏、并发与回滚集成测试、复用 Auth Scope Catalog cache 与 DNS-only URL 预检、资源化 Proto、可信身份 HTTP/gRPC Transport、Wire、真实 MongoDB consumer E2E | Auth MongoDB 权威 Scope Catalog、完整双服务验证 |
+| [UC-APP-007](../use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、Publication/History MongoDB Repository、0008/0015 migrations、管理员与 Version/Review 事务写入栅栏、批准 OAuth snapshot 一致性复查、按非空双数组检查 TEST PUBLIC/CONFIDENTIAL registration 与 credential、并发与回滚集成测试、复用 Auth Scope Catalog cache 与 DNS-only URL 预检、资源化 Proto、可信身份 HTTP/gRPC Transport、Wire、真实 MongoDB consumer E2E | Auth MongoDB 权威 Scope Catalog、完整双服务验证 |
 | [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、真实 CSPRNG/SHA-256、env 可配置 mock URL、MongoDB 原子轮换与管理员栅栏、0009 migration、并发/回滚/脱敏集成测试、资源化 Proto、可信身份 HTTP/gRPC Transport、no-store、Wire、默认/自定义前缀真实 MongoDB E2E | —（当前 mock 入口后端工作包；前端及 UC-APP-009 独立交付） |
 | [UC-APP-009](../use-cases/UC-APP-009-join-application-as-tester.md) | `ACCEPTED` | `COMPLETE` | Membership Domain/UseCase、0010 migration、Application 写栅栏与事务内 ACTIVE 统计/插入、普通用户可信身份、API/Wire、并发/回滚/脱敏测试及真实 MongoDB HTTP/gRPC E2E | —（当前后端工作包；生产 Gateway 身份签发与客户端独立交付） |
 | [UC-APP-010](../use-cases/UC-APP-010-remove-application-tester.md) | `ACCEPTED` | `COMPLETE` | 精确 episode 移除、不可变审计、幂等无 Clock、共享写栅栏与人数统计、500/INTERNAL 安全告警、API/Wire、真实并发/回滚/HTTP/gRPC E2E | —（当前后端工作包；列表查询、前端与生产 Gateway 独立交付） |
@@ -44,7 +44,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | —（当前App Center后端范围；Auth资料权限授予/签发、管理查询与前端独立交付） |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前管理员管理范围；Version OAuth配置、Auth provider/secret验证、登录授权与后续渠道独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016 与 UC018 也已完成；代码仓库 AGENTS.md 保留最后交付的 [UC-APP-018 brief](../briefs/UC-APP-018.md) 与范围，当前没有新激活的实现工作包。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016 与 UC018 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。代码仓库 AGENTS.md 当前保留该 OAuth 交付工作包，待最终验收记录完成后再切换到 UC019。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -233,16 +233,14 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 ## OAuth / OIDC 后续工作包
 
-以下只完成设计，均未启动实现；既有实现完成记录不包含这些能力。
-
-OAuth/OIDC 设计采用三种生命周期。UC018 已实现 Application＋channel 级 `ApplicationOAuthRegistration` 与独立 `OAuthClientCredential` 的管理员管理；`ApplicationVersionOAuthConfig` 仍未实现，它以 `{pkceRedirectUris, confidentialRedirectUris}` 一对一依附 Version。既有 UC-APP-002/003/004/005/007 仍需加入配置的 Domain/API/Mongo 与历史双空数组 migration、同事务/revision 编辑、审核 snapshot 深拷贝和校验、`app-version-review-v2`，以及发布时非空数组对应 identity/credential 的存在性检查。原有能力的 `COMPLETE/CORE_COMPLETE` 记录继续描述当时范围，不表示这些 OAuth 扩展已经实现。
+OAuth/OIDC 设计采用三种生命周期。UC018 已实现 Application＋channel 级 `ApplicationOAuthRegistration` 与独立 `OAuthClientCredential` 的管理员管理；UC002/003/004/005/007 已实现一对一依附 Version 的 `ApplicationVersionOAuthConfig`，包括 `{pkceRedirectUris, confidentialRedirectUris}`、历史双空数组 migration、同事务/revision 编辑、审核 snapshot 深拷贝和复检、`app-version-review-v2`，以及发布时非空数组对应 identity/credential 的存在性检查。UC019 的 Auth provider 查询仍未启动。
 
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 管理 TEST 稳定 OAuth registration 与独立 credential；服务 `041a929`、API `51e6572` |
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `PROPOSED` | `NOT_STARTED` | 以 clientId+channel+rpcApiMajor 为 Auth 解析 OAuth 应用授权上下文 |
 
-UC018 已在 Version OAuth 扩展之前独立交付。后续按 UC002→003→004→005→007 补齐 Version 配置/审核/发布扩展，再激活 UC019；UC018 没有提前开放 Auth provider 方法。
+UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004→005→007 的 Version 配置/审核/发布扩展已串行闭合。下一工作包是 UC019；UC018 和本轮扩展都没有提前开放 Auth provider 方法。
 
 ## 2026-09-28 UC018 完成
 
@@ -251,3 +249,10 @@ UC018 已在 Version OAuth 扩展之前独立交付。后续按 UC002→003→00
 - 显式 `0014_oauth_client_management` migration 建立 registration/credential collections、严格 validator 与唯一索引；CONFIDENTIAL identity 和 credential 原子创建。五个管理员方法均已接入资源化 HTTP/gRPC、稳定错误 reason、`Cache-Control: no-store` 与 Wire。GREY/STABLE 明确返回渠道未启用。
 - 最终 `make check-auth-app` 22/22通过，报告为服务工作树 `.artifacts/verification/20260928T070657Z-ed6ypm5s/report.json`，`changed_sources=[]`；race 1.970s、Mongo/HTTP/gRPC race 726.985s、真实Auth进程回归10.340s。报告记录提交前服务 `a844f08` 的dirty来源，冻结指纹在验收期间未变化；相同内容随后提交为 `041a929`。
 - 完整 migration/race 套件因重复验证隔离数据库已超过 Go 默认10分钟 package timeout，runner 默认调整为20分钟且保留命令行覆盖能力。UC019 provider、confidential secret验证、Version redirect/scopes、授权/token、sector/sub、前端与未来渠道均未实现。
+
+## 2026-09-29 UC002–007 Version OAuth 扩展完成
+
+- 服务 `3397cf1`、独立 API `12bf209` 均已本地提交，未 push。UC002/003 的创建、完整替换、规范化、no-op 与 OCC 共用 Version revision；配置在独立 collection 中一对一依附 Version，并和 Version 同事务写入。
+- UC004/005 的提交和批准均显式重跑完整 OAuth redirect 策略；审核 snapshot 深拷贝并参与 Version/Review 一致性判断。`0015_version_oauth_redirects` 为历史 Version/Review 回填双空数组，退役不可变 v1 并激活含 `oauth-redirects-reviewed` 的不可变 v2。
+- UC007 在初次读取和最终提交事务中都复查批准 snapshot 与 Version 配置；PKCE 非空要求 TEST PUBLIC identity，confidential 非空要求 TEST CONFIDENTIAL identity 和 credential。空数组不要求 client，禁用 identity 不阻止发布。
+- 全量 Go 单元/架构测试、`go vet`、Wire diff 与 Proto 生成一致性已通过；真实 Mongo 定向回归通过（Mongo `169.476s`、HTTP/gRPC E2E `17.438s`）。最终交付门禁使用 `make check-auth-app`；UC019 provider、secret 验证、授权/token、sector/sub、前端及未来渠道不在本批次范围。
