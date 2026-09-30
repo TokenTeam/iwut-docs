@@ -426,6 +426,8 @@ App Center 的职责在返回 Descriptor 时结束。以下行为由其他组件
 
 testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Review 必须是完整 APPROVED decision，Version 内容必须仍等于 snapshot，且 revision 关系必须一致。
 
+ApplicationVersion 的批准与 TEST/GREY/STABLE 槽位选择解耦：批准不自动进入任何槽位，槽位也不改变 Version 审核状态。所有槽位一致地只选择已批准 Version，再执行各自的渠道资格；TEST 的额外资格包括当前已批准公开资料和运行时 Tester Membership。
+
 审核状态一致性和 revision 的既有约束分别见 [BR-REV-013](../use-cases/UC-APP-005-decide-application-version-review.md#br-rev-013) 与 [BR-REV-014](../use-cases/UC-APP-005-decide-application-version-review.md#br-rev-014)；受审核快照字段见 [BR-REV-004](../use-cases/UC-APP-004-submit-application-version-review.md#br-rev-004)。
 
 `DRAFT/SUBMITTED/REJECTED/REVOKED` 都不能进入 test 槽位。历史上曾经 APPROVED 但当前已失去资格的 Version 也不能重新设置。
@@ -695,7 +697,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 552 | `232cd7640475` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |

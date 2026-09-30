@@ -55,6 +55,8 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 负责 ApplicationVersion 从草稿内容到审核决定的完整链路，包括运行入口、RPC API 兼容范围、宿主能力和 scopes。审核决定只产生发布资格，不直接修改 test、grey 或 stable。
 
+这份发布资格与渠道无关。TEST、GREY、STABLE 都只能选择已批准 Version，但选择和运行时资格由各自的 Publication 逻辑负责。
+
 已有设计覆盖版本创建、草稿更新、提交、批准或拒绝，以及拒绝后恢复草稿。管理查询、放弃未提交草稿，以及已批准版本失去资格后的处理仍需后续设计。
 
 这项能力不决定用户实际得到哪个版本，也不保存面向目录的公开资料。
@@ -66,6 +68,8 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 - Test 结合 Tester Management 提供的资格。
 - Grey 使用服务端灰度分流结果。
 - Stable 是普通公开访问的默认目标。
+
+三个槽位在设置 Version 时一致要求同一 Application 的 APPROVED Version，再叠加各自规则。TEST 是已审核的小范围用户分发，还要求当前已批准 Public Profile；开发版 iWUT Client 直接打开任意 URL 属于客户端开发预览，不进入三个槽位，也不产生发布或 OAuth 资格。
 
 已有设计只覆盖设置 test 槽位。首版还需要 grey/stable 设置与调整、槽位清空、回退、停止分发和统一服务端解析。
 

@@ -10,7 +10,7 @@
 
 - 首次创建 `(applicationId, rpcApiMajor)` 对应的 ApplicationPublication，或更新其 testVersionId。
 - 使用 Publication revision 防止并发槽位修改互相覆盖。
-- 在实际改变槽位前重新验证批准状态、scopes 和公网 HTTPS URL。
+- 在实际改变槽位前重新验证 Version 批准状态、当前已批准公开资料、scopes 和公网 HTTPS URL。
 - 为每次实际变化追加不可变 ApplicationPublicationHistory。
 
 本用例不负责：
@@ -22,8 +22,11 @@
 - 一次修改 Version range 中的多个 rpcApiMajor。
 - 修改 ApplicationVersion 的内容、审核状态或 revision。
 - 自动发布刚审核通过的 Version。
+- 开发版 iWUT Client 直接打开任意 URL 的开发预览；该能力不创建 Publication，也不代表任何 TEST/GREY/STABLE 槽位。
 
-test 槽位可以在 tester 数量为 0 时存在；此时它只是管理员准备好的发布指针，不会因此对任何普通用户可见。
+ApplicationVersion 审核只产生与渠道无关的发布资格；TEST、GREY、STABLE 各自决定如何选择已批准 Version。三个槽位设置 Version 时都遵守“只引用同一 Application 的 APPROVED Version”，但各自还可以附加渠道资格。本用例中的 TEST 还要求应用已有当前已批准公开资料。
+
+test 槽位可以在 tester 数量为 0 时存在；此时它只是管理员准备好的发布指针，不会因此对任何普通用户可见。TEST 是面向开发者社群中普通用户的小范围受控分发，不是免审核开发模式。
 
 ## 发布边界
 
@@ -111,6 +114,7 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
 2. 确认 developerStatus 为 `APPROVED`，rpcApiMajor `>= 1`，versionId 为 UUIDv7，expectedPublicationRevision 为空或 `>= 1`。
 3. Repository 加载放置候选并确认：
    - Application 存在且当前 adminId 是调用者 authId。
+   - ApplicationProfile 存在 `currentPublishedProfileRevisionId`，且该 Revision 属于同一 Application、status=`APPROVED`、内容满足已落地的资料不变量。
    - Version 属于该 Application，reviewStatus=`APPROVED`。
    - 最新 ApplicationReview 属于该 Version，status 和 decision.outcome 都为 `APPROVED`。
    - Version 的受审核内容等于 Review.snapshot。
@@ -123,14 +127,14 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
    - 通过 LaunchURLSubmissionPolicy 重新检查公网 HTTPS URL，并取得 preflightPolicyVersion。
    - 读取该 `(applicationId, TEST)` 的 OAuth registration。snapshot 的 pkceRedirectUris 非空时必须已经登记 publicClientId；confidentialRedirectUris 非空时必须已经登记 confidentialClientId 及 credential。空数组允许发布，表示该 Version 暂不提供对应 OAuth 接入。
 6. 为新 Publication（若需要）和本次 History 分别生成 UUIDv7，并从 Clock 取得 changedAt。
-7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，以及步骤 5 中非空 OAuth redirect 数组所需的 registration/credential 仍存在，然后：
+7. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，包括当前公开资料仍指向同一 Application 的 APPROVED ProfileRevision，以及步骤 5 中非空 OAuth redirect 数组所需的 registration/credential 仍存在，然后：
    - Publication 不存在时创建 revision=1、testVersionId=versionId 的记录。
    - Publication 已存在时把 testVersionId 替换为 versionId，并将 revision 增加 1。
    - 设置 createdBy/createdAt 或 updatedBy/updatedAt。
    - 插入一条与结果 publicationRevision 对应的 SET_TEST_VERSION History。
 8. 返回 Publication、History 和 changed=true。
 
-外部检查与最终写入之间可能发生审核撤销、管理员转让、registration 建立或其他槽位修改，因此最终事务必须重新检查 Version/Review 资格、当前 admin、Publication revision 和非空 OAuth 配置所需的 identity/credential。
+外部检查与最终写入之间可能发生版本或资料审核决定、管理员转让、registration 建立或其他槽位修改，因此最终事务必须重新检查 Version/Review 资格、当前公开资料、当前 admin、Publication revision 和非空 OAuth 配置所需的 identity/credential。
 
 ## 异常流程
 
@@ -142,6 +146,8 @@ publicationId、historyId、revision、审核引用、验证版本和审计字�
 - 调用者不是当前 admin：`ApplicationAdminRequired`。
 - Version 或最新 Review 不是 APPROVED：`ApplicationVersionNotApproved`。
 - Review/Version 的内容、状态或 revision 关系不一致：`ApplicationReviewStateInconsistent`。
+- 没有当前公开资料：`ApplicationProfileRequired`。
+- 当前公开资料指针存在，但 Revision 缺失、跨 Application、不是 APPROVED 或内容违反既有不变量：`ApplicationProfileStateInconsistent`，作为内部数据不变量异常返回 500/INTERNAL。
 - Version RPC range 不覆盖 rpcApiMajor：`ApplicationVersionRpcApiIncompatible`。
 - 预期不存在但 Publication 已存在：`ApplicationPublicationAlreadyExists`。
 - 预期存在但 Publication 不存在：`ApplicationPublicationNotFound`。
@@ -183,6 +189,8 @@ reviewer 批准 Version 不会替开发者作出发布选择。管理员转让�
 
 testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Review 必须是完整 APPROVED decision，Version 内容必须仍等于 snapshot，且 revision 关系必须一致。
 
+ApplicationVersion 的批准与 TEST/GREY/STABLE 槽位选择解耦：批准不自动进入任何槽位，槽位也不改变 Version 审核状态。所有槽位一致地只选择已批准 Version，再执行各自的渠道资格；TEST 的额外资格包括当前已批准公开资料和运行时 Tester Membership。
+
 审核状态一致性和 revision 的既有约束分别见 [BR-REV-013](UC-APP-005-decide-application-version-review.md#br-rev-013) 与 [BR-REV-014](UC-APP-005-decide-application-version-review.md#br-rev-014)；受审核快照字段见 [BR-REV-004](UC-APP-004-submit-application-version-review.md#br-rev-004)。
 
 `DRAFT/SUBMITTED/REJECTED/REVOKED` 都不能进入 test 槽位。历史上曾经 APPROVED 但当前已失去资格的 Version 也不能重新设置。
@@ -198,6 +206,8 @@ redirect hostname 不是发布兼容键。新 Version 可以审核并发布不�
 
 同一个 APPROVED Version 可以同时被不同 rpcApiMajor 的 test 槽位引用，也可以在后续规则允许时同时被 test/grey/stable 引用。
 
+开发版 iWUT Client 的任意 URL 直开能力不经过 ApplicationPublication，不得被解释成 testVersionId 或绕过 Version/Profile 审核。
+
 <a id="br-pub-005"></a>
 ### BR-PUB-005：测试可见性
 
@@ -206,6 +216,7 @@ test 槽位永远不因存在而向普通用户公开。未来解析用例至少
 - 请求宿主的 rpcApiMajor 与 Publication 相同。
 - 宿主 capabilities 覆盖 Version.requiredCapabilities。
 - 当前用户具有整个 Application 下的有效 Tester Membership。
+- Application 仍有当前已批准公开资料。
 
 本用例允许没有 Tester 的 test 槽位。当前 admin 不隐式拥有测试资格，必须和其他用户一样通过有效加入链接取得 Membership。本用例不返回可直接绕过资格检查的公开入口。
 
@@ -245,7 +256,7 @@ History 是操作审计，不是 event sourcing 的权威状态；当前 Publica
 <a id="br-pub-008"></a>
 ### BR-PUB-008：发布前复检
 
-真实改变 test 槽位前，必须针对 approved Review.snapshot 重新执行 ScopeCatalog、LaunchURLSubmissionPolicy 和非空 OAuth 配置的 registration 存在性检查，并把外部策略版本写入 History。
+真实改变 test 槽位前，必须确认当前公开资料指向同一 Application 的 APPROVED ProfileRevision，并针对 approved Review.snapshot 重新执行 ScopeCatalog、LaunchURLSubmissionPolicy 和非空 OAuth 配置的 registration 存在性检查，再把外部策略版本写入 History。
 
 ScopeCatalog 使用 [ADR-001](../adr/ADR-001-scope-catalog-cache.md) 的有界缓存和失败关闭语义；LaunchURLSubmissionPolicy 复用 [BR-REV-007](UC-APP-004-submit-application-version-review.md#br-rev-007) 的公网 HTTPS/DNS 预检，不新增内容抓取。
 
@@ -257,6 +268,7 @@ ScopeCatalog 使用 [ADR-001](../adr/ADR-001-scope-catalog-cache.md) 的有界�
 以下操作必须全部成功或全部失败：
 
 - 当前 admin 和 Version/Review 发布资格复查。
+- 当前公开 ProfileRevision 的归属、APPROVED 状态和内容不变量复查。
 - 非空 OAuth 配置对应的稳定 client identity/credential 存在性复查。
 - Publication 存在性和 expected revision 检查。
 - Publication 创建或 testVersionId/revision/审计更新。
@@ -358,7 +370,7 @@ type ApplicationPublicationRepository interface {
 }
 ```
 
-`PlaceInTest` 必须重新比较 Application.adminId、Version/Review 资格、Publication 存在性/revision 和当前 testVersionId。publicationID 只在创建候选时提供，更新时必须为空。
+`PlaceInTest` 必须重新比较 Application.adminId、Version/Review 资格、当前公开 ProfileRevision、Publication 存在性/revision 和当前 testVersionId。publicationID 只在创建候选时提供，更新时必须为空。
 
 ## 数据模型
 
@@ -474,8 +486,9 @@ no-op 响应中 changed=false、history=null，并返回未改变的 Publication
 - Application、Version 或预期存在的 Publication 不存在：`404 Not Found`。
 - Publication 已存在但调用者预期不存在，或 revision 冲突：`409 Conflict`。
 - major、versionId 或 expected revision 格式非法：`400 Bad Request`。
-- Version 未批准、RPC major 不兼容或 scope/URL 不满足条件：`422 Unprocessable Content`。
+- Version 未批准、没有当前公开资料、RPC major 不兼容或 scope/URL 不满足条件：`422 Unprocessable Content`。
 - Scope Catalog 或 URL 检查依赖不可用：`503 Service Unavailable`。
+- 当前公开资料指针损坏等内部不变量异常：`500 Internal Server Error`。
 
 ## 测试与验收
 
@@ -483,6 +496,7 @@ no-op 响应中 changed=false、history=null，并返回未改变的 Publication
 
 - Publication 以 `(applicationId, rpcApiMajor)` 唯一。
 - 只有 range 覆盖指定 major 的 APPROVED Version 可以进入 test。
+- 没有当前已批准公开资料时不能创建或替换 test 槽位；损坏的资料指针按内部不变量异常处理。
 - 首次创建 revision=1，替换真实变化时递增。
 - 相同 versionId 是 no-op，不产生 History。
 - 设置槽位不改变新旧 ApplicationVersion。
@@ -503,6 +517,7 @@ Repository 集成测试：
 - 两个相同 expected revision 的并发替换最多一个成功。
 - 管理员转让、Version revoke 与设置并发时旧条件不能成功。
 - approved Review、snapshot、Version status/revision 的一致性检查生效。
+- 当前公开资料与设置并发时，事务读取一致的 Profile 指针/Revision；不能提交引用不满足公开资料资格的 TEST 槽位。
 - 非空 pkce/confidential 回调缺少对应稳定 identity/credential 时拒绝；空数组可以发布且对应 OAuth 运行解析失败关闭。
 - 同一稳定 clientId 可以发布 hostname 不同的新 Version，运行时只接受当前批准数组中的精确 URI。
 - registration 与发布并发时，如果 registration 先提交，发布可以在最终事务看到它并成功；如果发布事务先读取到缺失，则以 OAuthClientRegistrationRequired 失败，重试后成功。不能提交引用不存在 identity/credential 的 Publication。

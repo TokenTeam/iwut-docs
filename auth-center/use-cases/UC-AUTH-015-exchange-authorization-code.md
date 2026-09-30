@@ -13,7 +13,7 @@ POST /token，grant_type=authorization_code、code、redirect_uri；PUBLIC 表�
 ## 主流程
 
 1. 读取稳定 client 元数据，按登记类型校验认证；secret 验证结果必须与当前 credentialRevision 一致。PUBLIC 不存在 credentialRevision。
-2. 查 code 摘要，验证 client、code 中绑定的精确 redirect、PKCE、期限和用途；使用 code 保存的 expected runtime tuple 与 authId 重新调用 App `ResolveAuthorizationContext`，确认当前 Version 回调仍包含该精确 URI，并重新确认用户、Developer、grant revocationEpoch 及 scope。
+2. 查 code 摘要，验证 client、code 中绑定的精确 redirect、PKCE、期限和用途；使用 code 保存的 expected runtime tuple（含 profileRevisionId）与 authId 重新调用 App `ResolveAuthorizationContext`，确认当前 Version 回调仍包含该精确 URI、当前公开资料未变化，并重新确认用户、Developer、grant revocationEpoch 及 scope。
 3. 生成 opaque access token 与独立 ID Token；符合 UC-AUTH-016 时生成 refresh family。
 4. 在原子确认点消费 code，登记凭据摘要、family 和审计，检查 grant/用户写入栅栏。
 5. 仅确定提交成功后返回。客户端验证 OIDC 输出再建立自己的应用会话。
@@ -42,7 +42,7 @@ ID Token 是面向 client 的登录证据，格式和 pairwise sub 由 [OAuth/OI
 <a id="br-oau-008"></a>
 ### BR-OAU-008：签发一致性与故障关闭
 
-最终写入与 grant 撤销、family 撤销及用户可用状态检查共用 Auth 本地原子栅栏。App 外部快照只在限定时间有效，不声称跨库事务。secret 轮换导致旧 secret 认证失败、client 禁用、发布/Tester 资格变化、当前 Version 不再包含 code 绑定的精确 redirect URI，或凭据记录与快照不一致，均拒绝本次兑换。轮换不会仅凭 credentialRevision 撤销已经签发的 token/family 或稳定 grant。
+最终写入与 grant 撤销、family 撤销及用户可用状态检查共用 Auth 本地原子栅栏。App 外部快照只在限定时间有效，不声称跨库事务。secret 轮换导致旧 secret 认证失败、client 禁用、发布/Profile/Tester 资格变化、当前 Version 不再包含 code 绑定的精确 redirect URI，或凭据记录与快照不一致，均拒绝本次兑换。轮换不会仅凭 credentialRevision 撤销已经签发的 token/family 或稳定 grant。
 
 未知/过期/错误 code 及错误 verifier 统一 invalid_grant；服务故障用 temporarily_unavailable。日志、审计和 metrics 不记录任何 token、code、secret 或 verifier。
 
@@ -65,6 +65,7 @@ sector 在部署的稳定域名空间中分配，不随常规 issuer 配置、se
 - secret 轮换使旧 secret 无法继续兑换，但不撤销既有 grant 与已签发 token；新 secret 可用于之后的新请求。
 - code 签发后 scope 停用，兑换返回 invalid_grant 且不消费 code；目录不可读为依赖错误，不伪装为用户撤回。
 - 授权撤回、App 快照过期、事务/签名失败、未知提交不会多发可用凭据。
+- code 创建后当前公开 ProfileRevision 改变时兑换失败，不能以旧展示资料对应的交互继续签发。
 
 ## 依赖与实现边界
 
@@ -73,3 +74,4 @@ sector 在部署的稳定域名空间中分配，不随常规 issuer 配置、se
 ## 变更记录
 
 - 2026-09-27：code 兑换以完整 App runtime/Tester tuple 重新解析，并确认当前批准 Version 仍包含 code 绑定的精确 redirect URI。
+- 2026-09-30：App runtime tuple 纳入 profileRevisionId，code 兑换重新确认当前公开资料未变化。

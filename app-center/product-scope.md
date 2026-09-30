@@ -37,7 +37,7 @@ Server Publication ── Test/Grey/Stable 解析 ── 候选应用与启动�
 Client User Data + Filter 规则 ──────────────── 最终展示列表
 ```
 
-运行版本的审核与发布保持分离：版本审核只产生槽位发布资格，Test/Grey/Stable 变化由当前管理员发起。公开资料采用更简单的首版流程，资料审核批准后自动成为当前公开资料。公开目录资料与运行版本仍相互分离，可以独立修订和审核。Filter 与 Test/Grey/Stable 同样保持分离：前三者由服务端解析发布目标，Filter 规则由服务端保存和发送、由客户端使用本地用户信息执行。
+运行版本的审核与发布保持分离：版本审核只产生渠道无关的槽位发布资格，Test/Grey/Stable 各自选择 APPROVED Version 并执行自己的渠道规则。公开资料采用更简单的首版流程，资料审核批准后自动成为当前公开资料。公开目录资料与运行版本仍相互分离，可以独立修订和审核。Filter 与 Test/Grey/Stable 同样保持分离：前三者由服务端解析发布目标，Filter 规则由服务端保存和发送、由客户端使用本地用户信息执行。
 
 ## 参与者
 
@@ -74,9 +74,11 @@ Auth 继续拥有身份、Developer 资格、Reviewer 权限和 Scope Catalog；
 
 ### 3. 管理员进行封闭测试
 
-管理员把已批准且兼容的 ApplicationVersion 放入某个 RPC API major 的 test 槽位，并管理 Application 级 Tester 加入链接与最多 100 个 ACTIVE Tester。
+管理员在应用已有当前已批准公开资料后，把已批准且兼容的 ApplicationVersion 放入某个 RPC API major 的 test 槽位，并管理 Application 级 Tester 加入链接与最多 100 个 ACTIVE Tester。
 
 Tester 使用自己的官方客户端和实际宿主能力访问 test 版本。管理员不会自动获得测试资格；替换 test 槽位也不会移除既有 Tester。
+
+开发版 iWUT Client 可以直接打开任意 URL 供开发预览；该入口不属于 Test/Grey/Stable，不代表内容已审核，也不向正式客户端开放。
 
 ### 4. 管理员逐步发布
 

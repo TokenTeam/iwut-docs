@@ -377,5 +377,5 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-018-manage-oauth-client.md` | 131 | `724a3254b016` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
-| `platform/contracts/app-oauth-client-v1.md` | 86 | `8bd5a6caf42f` |
+| `platform/contracts/app-oauth-client-v1.md` | 88 | `6dfbdce57423` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |

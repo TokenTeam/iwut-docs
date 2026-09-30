@@ -162,9 +162,11 @@ Decision 写入后不可修改；纠错、撤销或重新审核必须产生新�
 
 ## Test Slot
 
-ApplicationPublication 指向一个兼容且 APPROVED ApplicationVersion 的测试发布槽位。它可以在 tester 为零时存在，但不会仅因存在就向普通用户公开。
+ApplicationPublication 指向一个兼容且 APPROVED ApplicationVersion 的测试发布槽位。它表示面向开发者社群中普通用户的小范围受控分发，要求应用已有当前已批准公开资料；它可以在 tester 为零时存在，但不会仅因存在就向普通用户公开。
 
 Version 进入或离开 Test Slot 不改变它的 reviewStatus，也不会停用 Version。
+
+开发版 iWUT Client 直接打开任意 URL 是客户端开发预览能力，不属于 Test Slot，不创建 Publication，也不提供 OAuth 运行资格。
 
 ## Application Tester
 

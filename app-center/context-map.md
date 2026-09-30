@@ -66,7 +66,7 @@ App Center Context
 - authId 和 developerStatus 可以由已验证的入口上下文传入 UseCase。
 - UC-APP-002 至 UC-APP-005 通过 ScopeCatalog 端口验证 scope。adapter 使用 5 分钟进程内 read-through cache，过期时同步读取 Auth；读取失败则 fail closed。提交和批准审核时保存各自依据的 Auth catalog revision。
 - UC-APP-004 与 UC-APP-005 通过 LaunchURLSubmissionPolicy 使用 DNS 解析结果执行公网 HTTPS 预检；App Center 在这些用例中不请求目标网页内容。
-- UC-APP-007 在 test 槽位真实变化前复用 ScopeCatalog 和 LaunchURLSubmissionPolicy，并记录复检版本。
+- UC-APP-007 在 test 槽位真实变化前要求当前已批准公开资料，复用 ScopeCatalog 和 LaunchURLSubmissionPolicy，并记录外部复检版本；Version 审核只产生渠道无关资格，TEST Publication 独立选择 Version。开发版客户端任意 URL 直开不属于发布槽位。
 - UC-APP-008 只使用可信 authId 与 developerStatus 检查当前管理员；Tester 加入链接、secret 哈希和生命周期由 App Center 保存，不依赖 Auth 保存邀请状态。
 - UC-APP-009 只依赖 Auth 提供可信 authId；Tester 不要求 Developer 资格，Membership、幂等关系和容量限制由 App Center 负责。
 - UC-APP-010 使用可信 developerStatus 和 authId 验证当前 admin；Membership 移除与容量释放由 App Center 原子保存，不修改 Auth 或加入链接。
@@ -78,7 +78,7 @@ App Center Context
 - UC-APP-016 使用 Auth 授予的 `app.profile.review` 和本地版本化 ProfileReviewPolicy；它原子决定 Review/Revision，批准时同时替换当前公开指针，不修改发布槽位。
 - UC-APP-016 把 REJECTED ProfileRevision 定义为终态。网页端可以读取被拒绝内容并预填 UC-APP-013 创建表单；App Center 只看到一次普通的新建草稿，不提供恢复/复制接口或保存来源关系。
 - UC-APP-018 管理 Application＋channel 级稳定 client identity、状态与独立 secret credential；redirect URI 不复制到 registration，而由当前批准并发布的 ApplicationVersion 提供。
-- UC-APP-019 向 Auth 分别提供登录前运行配置和登录后用户授权上下文；Auth 拥有 consent、code、token 和 grant。
+- UC-APP-019 向 Auth 分别提供登录前运行配置和登录后用户授权上下文；运行 tuple 包含当前 profileRevisionId，展示资料只来自当前 APPROVED ProfileRevision，没有技术名称 fallback。Auth 拥有 consent、code、token 和 grant。
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。
 

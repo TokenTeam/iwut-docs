@@ -10,7 +10,7 @@ UC-APP-019 的 App Center 数据依赖已经满足：UC-APP-018 提供稳定 reg
 
 Auth 的 MongoDB 权威 Scope Catalog 仍未交付，但不阻塞本 App provider 纵切片。UC-APP-019 按 BR-OAC-007 原样返回批准 snapshot 的 required/optional scopes，不调用 App 的 requestable cache，也不替 Auth 判断当前 enabled；Auth OAuth 用例在消费 provider 后完成最终 enabled 校验。
 
-当前尚不能把 UC-APP-019 改为 `ACCEPTED` 或生成实现 brief，因为以下两个外部契约字段会改变可执行 Proto、安全配置和兼容承诺。
+当前尚不能把 UC-APP-019 改为 `ACCEPTED` 或生成实现 brief，因为入站 service identity 会改变可执行 Proto、安全配置和兼容承诺。consent 展示投影已经确认并同步到权威文档。
 
 ## 待确认决定一：App Center 入站 service identity
 
@@ -25,25 +25,26 @@ Auth 的 MongoDB 权威 Scope Catalog 仍未交付，但不阻塞本 App provide
 
 这组入站配置与现有 `APP_CENTER_SERVICE_IDENTITY_ID/KID/AUDIENCE/PRIVATE_KEY/TTL` 的出站 signer 配置并存，前者验证 Auth→App，后者签发 App→Auth，不能共用权限来源。
 
-## 待确认决定二：consent 展示投影
+## 已确认决定二：consent 展示投影与 TEST 边界
 
-BR-OAC-009 要求只读当前已公开资料，并在没有公开资料时返回 Application 技术名称和明确 fallback 标记；共享契约尚未定义 `RuntimeConfiguration.display` 的字段。
+ApplicationVersion 审核与 TEST/GREY/STABLE 槽位选择解耦：审核只产生渠道无关发布资格，各槽位独立选择已批准 Version 并施加自己的资格规则。TEST 是已审核的小范围用户分发；开发版客户端任意 URL 直开不属于 Publication。
 
-建议固定为：
+`RuntimeConfiguration.display` 固定为：
 
 ```text
 ApplicationDisplay {
+  profileRevisionId: ApplicationProfileRevisionId
   displayName: string
   optional description: string
   optional icon: string
-  fallback: bool
 }
 ```
 
-- 有当前公开 Profile 时，三个内容字段来自该 APPROVED revision，`fallback=false`。
-- 没有 `currentPublishedProfileRevisionId` 时，`displayName=Application.name`、description/icon 缺席、`fallback=true`。
+- TEST 槽位设置与运行解析都要求当前公开 Profile；三个内容字段只来自该 APPROVED revision。
+- 没有 `currentPublishedProfileRevisionId` 时，设置 TEST 槽位或解析运行配置失败关闭，不使用 Application 技术名称。
 - Profile 指针存在但 revision 缺失、跨应用、非 APPROVED 或内容损坏属于内部不变量异常；不得退回技术名伪装成功。
 - 输出保持纯文本/不透明 icon 字符串，不增加 HTML、资产抓取或 URL 可用性检查。
+- `expectedRuntimeVersion` 纳入 profileRevisionId；登录前后或 code 兑换时资料指针变化要求重新开始或重新展示。
 
 ## 已明确、无需新增决策
 
@@ -55,6 +56,6 @@ ApplicationDisplay {
 
 ## 确认后的动作
 
-1. 同步 UC-APP-019、`app-oauth-client-v1` 与 `trusted-service-identity-v1` 的上述字段和配置。
+1. 确认并同步 UC-APP-019、`app-oauth-client-v1` 与 `trusted-service-identity-v1` 的入站 service identity 配置。
 2. 将 UC-APP-019 及共享契约改为 `ACCEPTED`，建立 `tools/brief-specs/UC-APP-019.json` 并由脚本生成 brief。
 3. 把代码仓库 `AGENTS.md` 切换到 UC-APP-019，提交文档工作包后开始串行实现和最终 `make check-auth-app` 验收。
