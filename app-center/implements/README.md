@@ -44,9 +44,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | —（当前App Center后端范围；Auth资料权限授予/签发、管理查询与前端独立交付） |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前管理员管理范围；Version OAuth配置与Auth provider已由后续工作包交付，Auth授权和后续渠道独立交付） |
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC Provider 方法、本地 service caller registry 与逐方法权限、secret revision 验证、TEST exact-major/批准 Version/Review/Profile/Tester 单 Mongo snapshot、5秒 runtime tuple、sector 回调事实并集及完整 cross-service 验收；服务 `657eccd`、API `310fc10` | —（当前 TEST 后端范围；Auth grant/code/token、Scope enabled 过滤、sector/sub 与未来渠道由 Auth/后续 UC 交付） |
-| [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `IN_PROGRESS` | stable set/replace/clear、EMPTY Publication、0016 migration 与 STABLE OAuth channel | 当前实现工作包；需完成 API、Mongo、双协议、Provider 和跨服务验收 |
+| [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major stable set/replace/clear、共享 Publication OCC、EMPTY 保留与 History、0016 migration、HTTP/gRPC、STABLE OAuth 管理及五个 Auth-only Provider 方法、完整 cross-service 验收；服务 `531f077`、API `90519af` | —（当前 App Center 后端范围；Grey、test clear、Catalog 与 Auth grant/code/token 独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 与 UC019 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。UC020 已接受并进入实现。代码仓库 AGENTS.md 必须切换到 UC020 后才能编码。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018、UC019 与 UC020 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -135,7 +135,7 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 - Auth 的 reviewer 权限签发/撤销生命周期。
 - Auth 普通 USER provision 与 trusted identity 签发。
-- Grey、Stable、Filter 和 Catalog 的后续设计。
+- Grey、test clear、Filter 和 Catalog 的后续设计。
 - CI/CD、可观测性和生产部署。
 
 它们进入对应工作包前必须有明确契约，但不能提前渗入 Application 领域模型。
@@ -242,8 +242,9 @@ OAuth/OIDC 设计采用三种生命周期。UC018 已实现 Application＋channe
 | --- | --- | --- | --- |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 管理 TEST 稳定 OAuth registration 与独立 credential；服务 `041a929`、API `51e6572` |
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC 方法、服务身份逐方法授权、单 snapshot runtime/context/redirect 解析；服务 `657eccd`、API `310fc10` |
+| [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | Stable 发布管理、共享 Publication OCC、STABLE client 与 Provider 解析；服务 `531f077`、API `90519af` |
 
-UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004→005→007 的 Version 配置/审核/发布扩展串行闭合，UC019 再开放 Auth provider 方法；各批次保持独立 API 与服务提交。
+UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004→005→007 的 Version 配置/审核/发布扩展串行闭合，UC019 开放 Auth provider 方法，UC020 在相同边界上启用 STABLE；各批次保持独立 API 与服务提交。
 
 ## 2026-09-28 UC018 完成
 
@@ -274,3 +275,12 @@ UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004�
 - client metadata 可解释 DISABLED identity；confidential secret 以恒定时间比较并绑定 expected credentialRevision。运行解析在单个只读 Mongo snapshot 中复查 registration、exact-major TEST Publication/History、APPROVED Version/Review snapshot、Version OAuth config、Application admin 与当前 APPROVED Profile；用户上下文额外绑定 ACTIVE Tester episode 和预登录 runtime tuple。快照有效期固定不超过5秒。
 - sector 清单返回当前已发布 major 的批准回调去重排序并集，按已登记 type 选择数组，DISABLED identity 不删除既有 sector 事实；App 不生成 sector/sub。测试覆盖 secret 轮换、跨渠道/major、Tester 移除、资料缺失/损坏、批准 snapshot 漂移、资料切换并发、方法权限和真实 gRPC service JWS。
 - 最终 `make check-auth-app` 22/22 通过，报告为服务工作树 `.artifacts/verification/20261003T133723Z-hhgptyx2/report.json`，`changed_sources=[]`；race `4.027s`、Mongo/HTTP/gRPC race `649.778s`、真实 Auth/App race `10.145s`。Auth grant/code/token、Scope Catalog enabled 交集、sector/sub、OIDC 标准 endpoint 和未来渠道仍由 Auth/后续工作包交付。
+
+## 2026-10-04 UC020 完成
+
+- 服务 `531f077`、独立 API `90519af` 均为本地提交，未 push。Stable 支持按 `(applicationId, rpcApiMajor)` 直接设置、替换、回退或清空 APPROVED Version；不要求先进入 Test/Grey。Test 与 Stable 共用 Publication revision，跨槽位并发只有一个命令提交。
+- Stable 设置复用 UC007 的管理员、APPROVED Review/Version snapshot、当前公开 Profile、Scope 和 URL 复检，并按 Version 的非空 OAuth 数组要求独立 STABLE PUBLIC/CONFIDENTIAL registration 与 credential。清空保留 EMPTY Publication 和追加式 CLEAR_STABLE History；存在 Grey 时拒绝清空，损坏的 Grey-without-Stable 状态失败关闭。
+- `0016_stable_publication` migration 扩展 Publication、History 与 OAuth registration schema。API 新增 Stable set/clear 双协议命令及可选 test/stable/history/provider 字段；HTTP 严格限制 query/body 形状。
+- 五个 Auth-only Provider 方法支持 STABLE。Stable 用户上下文不要求 Tester，TEST 语义保持不变；redirect facts 对当前 Test/Stable 已发布 Version 按 channel/type 聚合，禁用 identity 仍保留 sector 回调事实。STABLE 与 TEST client identity、secret、状态和 authorizationEpoch 独立。
+- 最终 `make check-auth-app` 22/22 通过，报告为服务工作树 `.artifacts/verification/20261003T181212Z-i3gxai6q/report.json`，`changed_sources=[]`；race `6.983s`、Mongo/HTTP/gRPC race `699.092s`、Auth/App race `10.193s`。报告记录提交前服务 `657eccd` 的 dirty 来源，验收期间指纹未变化，相同内容随后提交为 `531f077`。
+- Grey rollout、test clear、Catalog/普通公开运行解析、Application disable 及 Auth grant/code/token/sector/sub 不在本工作包。

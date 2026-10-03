@@ -46,21 +46,20 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 当前管理员可以按 joinLinkId 幂等执行 MANUAL 撤销；撤销立即阻止后续加入，但不影响现有 Tester。
 - App Center 根据 ACTIVE Membership、exact RPC major Publication 和 host capabilities 返回 TestLaunchDescriptor，不把授权或版本选择下放给客户端。
 - 当前管理员可以为 Application 登记长期稳定的 PUBLIC/CONFIDENTIAL clientId；identity/status 与 confidential credential 使用独立 revision，redirect URI 与 scopes 继续由 ApplicationVersion 审核和发布。Version、major 或 hostname 变化不重建 clientId。
-- Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得绑定 ACTIVE Tester episode 的授权上下文；App Center 不签发 code 或 token。
-
-[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 已接受 stable 设置、替换、清空、EMPTY Publication 和 STABLE OAuth channel；实现完成前仍不属于上述当前能力。
+- Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得 TEST 的 ACTIVE Tester episode 或公开 STABLE 的授权上下文；App Center 不签发 code 或 token。
+- 当前管理员可以直接设置、替换、回退或清空 exact-major stable 槽位；空记录、共享 Publication revision 和追加式 History 保留并发与审计事实，STABLE OAuth channel 独立于 TEST。
 
 ## 当前尚未设计或明确后置的能力
 
 - Application 管理查询、受控改名、归档、禁用和恢复；物理删除仍不是首版目标。
 - 协作者和角色。
 - 管理员转让；当前只为未来转让保留 adminId 语义。
-- ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销；Stable/Grey 发布与公开上线是下一阶段设计目标。
+- ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销；Grey 发布与公开上线仍需后续设计。
 - versionLabel 语义比较和 SemVer 校验。
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
 - Application admin 或 SysAdmin 发起的 Application 级禁用及重新启用；紧急隐藏不作为 ProfileRevision 状态。
-- Tester 主动退出、Stable/Grey 槽位管理、灰度分桶和普通用户统一运行解析。
+- Tester 主动退出、Grey 槽位管理、test clear、灰度分桶和普通用户统一运行解析。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
 - Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。
 - 兼容现有 App Center API 和 MongoDB 文档。

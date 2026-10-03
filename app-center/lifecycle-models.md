@@ -196,12 +196,11 @@ Filter rule ──────── client-side display only
 
 生命周期缺口适合按依赖顺序补齐，但暂不在本文分配 UC 编号：
 
-1. 实现已接受的 [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) stable/clear/EMPTY 与 STABLE OAuth。
-2. Publication 的 grey rollout 和 test clear。
-3. Application 归档、普通停用与平台紧急 suspension。
-4. 统一服务端启动目标解析与 Catalog Query Contract。
-5. 独立 FilterRevision 的归属、审核/发布方式和客户端求值契约。
-6. Public Profile 的普通用户对外查询契约；受控 icon 资产语义留待真实需求出现后扩展。
-7. APPROVED Version 的资格撤销及引用处置。
+1. Publication 的 grey rollout 和 test clear。
+2. Application 归档、普通停用与平台紧急 suspension。
+3. 统一服务端启动目标解析与 Catalog Query Contract。
+4. 独立 FilterRevision 的归属、审核/发布方式和客户端求值契约。
+5. Public Profile 的普通用户对外查询契约；受控 icon 资产语义留待真实需求出现后扩展。
+6. APPROVED Version 的资格撤销及引用处置。
 
 在这些边界确定前，不需要继续按顺序预写二十多个完整 UC。
