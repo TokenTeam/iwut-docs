@@ -955,7 +955,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | --- | --- | --- |
 | `iss` | string | 预登记 `serviceId` |
 | `sub` | string | 必须与 `iss` 完全相同 |
-| `aud` | string 或 string[] | 必须包含提供方 audience；Auth Center 为 `iwut-auth-center` |
+| `aud` | string 或 string[] | 必须包含提供方 audience；Auth Center 为 `iwut-auth-center`，App Center 为 `iwut-app-center` |
 | `iat` / `nbf` / `exp` | Unix 秒 | 必填；`exp > iat`、`exp > nbf`、TTL 不超过提供方上限 |
 | `jti` | string | 每次签发的非空唯一值 |
 
@@ -995,7 +995,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/auth-scope-catalog-v1.md`（docs 根级共享文档）：目的与所有权、兼容性、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
-- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：ENV 配置、契约测试要求
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：App Center 固定授权映射、ENV 配置、契约测试要求
 
 ## 溯源
 
@@ -1010,4 +1010,4 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
-| `platform/contracts/trusted-service-identity-v1.md` | 88 | `3c091a708b32` |
+| `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |

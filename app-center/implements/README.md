@@ -141,7 +141,7 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 ## 后续工作包依赖检查
 
 - [UC-APP-008 开工检查（2026-09-22）](UC-APP-008-readiness.md)：持久化轮换方案已做真实 MongoDB 验证；用户已接受 mock URL/env 前缀方案，编码契约和 brief 已生成，工作包已激活。
-- [UC-APP-019 开工检查（2026-09-29）](UC-APP-019-readiness.md)：数据依赖已满足，consent 展示投影与 TEST 边界已确认；入站 Auth service identity 配置仍需确认，随后接受设计并生成 brief。
+- [UC-APP-019 开工检查（2026-09-29，2026-10-03 确认）](UC-APP-019-readiness.md)：数据依赖、consent 展示投影、TEST 边界和入站 Auth service identity 均已确认；设计已接受并生成实现 brief。
 
 ## 2026-09-22 UC-APP-007 交付记录
 
@@ -239,7 +239,7 @@ OAuth/OIDC 设计采用三种生命周期。UC018 已实现 Application＋channe
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 管理 TEST 稳定 OAuth registration 与独立 credential；服务 `041a929`、API `51e6572` |
-| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `PROPOSED` | `NOT_STARTED` | 以 clientId+channel+rpcApiMajor 为 Auth 解析 OAuth 应用授权上下文 |
+| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `IN_PROGRESS` | 以 clientId+channel+rpcApiMajor 为 Auth 解析 OAuth 应用授权上下文；App Center 本地 caller registry 与五个原生 gRPC 权限已确认 |
 
 UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004→005→007 的 Version 配置/审核/发布扩展已串行闭合。下一工作包是 UC019；UC018 和本轮扩展都没有提前开放 Auth provider 方法。
 

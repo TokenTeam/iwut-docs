@@ -1,6 +1,6 @@
 # UC-APP-019 开工检查
 
-状态：`WAITING_FOR_DESIGN_DECISIONS`
+状态：`READY_FOR_IMPLEMENTATION`
 
 检查日期：2026-09-29
 
@@ -10,13 +10,13 @@ UC-APP-019 的 App Center 数据依赖已经满足：UC-APP-018 提供稳定 reg
 
 Auth 的 MongoDB 权威 Scope Catalog 仍未交付，但不阻塞本 App provider 纵切片。UC-APP-019 按 BR-OAC-007 原样返回批准 snapshot 的 required/optional scopes，不调用 App 的 requestable cache，也不替 Auth 判断当前 enabled；Auth OAuth 用例在消费 provider 后完成最终 enabled 校验。
 
-当前尚不能把 UC-APP-019 改为 `ACCEPTED` 或生成实现 brief，因为入站 service identity 会改变可执行 Proto、安全配置和兼容承诺。consent 展示投影已经确认并同步到权威文档。
+用户已确认建议的入站 service identity 方案。UC-APP-019、共享 provider 契约和服务身份契约已同步为可执行边界；UC-APP-019 现为 `ACCEPTED`，可以生成 brief 并开始实现。consent 展示投影已经确认并同步到权威文档。
 
-## 待确认决定一：App Center 入站 service identity
+## 已确认决定一：App Center 入站 service identity
 
 [trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md) 当前只固定了 Auth Center 作为提供方时的 caller registry 和 full method 权限。App Center 现有 `IdentityVerifier` 验证的是 Auth 签发的 USER/reviewer trusted identity；它不能替代 service identity，因为 service token 不携带 permissions，权限必须来自提供方本地 caller registry。
 
-建议采用与 Auth 对称的 App Center 入站配置：
+采用与 Auth 对称的 App Center 入站配置：
 
 - `APP_CENTER_SERVICE_CALLERS_B64`：相同 registry JSON schema，首版只登记 `iwut-auth-center` 的状态、公钥和 permissions。
 - `APP_CENTER_SERVICE_IDENTITY_MAX_TTL` 与 `APP_CENTER_SERVICE_IDENTITY_CLOCK_SKEW`：分别限制 service JWS 最大寿命与时钟偏差；默认沿用 Auth provider 的 `1m` 与 `30s`。
@@ -54,8 +54,8 @@ ApplicationDisplay {
 - `VerifyClientSecret` 对未知 client、PUBLIC、DISABLED、revision 不匹配和错误 secret 统一返回 `verified=false`，不泄漏摘要或细分失败原因。
 - UC019 只实现 App provider；Auth grant、code、token、sector/sub 和 Scope enabled 检查仍由 UC-AUTH-014 及后续用例交付。
 
-## 确认后的动作
+## 已执行与后续动作
 
-1. 确认并同步 UC-APP-019、`app-oauth-client-v1` 与 `trusted-service-identity-v1` 的入站 service identity 配置。
-2. 将 UC-APP-019 及共享契约改为 `ACCEPTED`，建立 `tools/brief-specs/UC-APP-019.json` 并由脚本生成 brief。
-3. 把代码仓库 `AGENTS.md` 切换到 UC-APP-019，提交文档工作包后开始串行实现和最终 `make check-auth-app` 验收。
+1. 已确认并同步 UC-APP-019、`app-oauth-client-v1` 与 `trusted-service-identity-v1` 的入站 service identity 配置。
+2. UC-APP-019 及共享契约已改为 `ACCEPTED`；建立 `tools/brief-specs/UC-APP-019.json` 并由脚本生成 brief。
+3. 把代码仓库 `AGENTS.md` 切换到 UC-APP-019，提交文档工作包后串行实现并执行最终 `make check-auth-app` 验收。

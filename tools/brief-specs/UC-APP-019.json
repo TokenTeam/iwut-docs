@@ -1,0 +1,39 @@
+{
+  "uc": "UC-APP-019",
+  "note": "Implement the Auth-only native gRPC OAuth provider: local service-JWS caller registry, client metadata and confidential-secret verification, consistent TEST runtime/user context snapshots, approved Profile display, and published redirect facts. Do not implement Auth grants, codes, tokens, sector/sub storage, HTTP exposure, future channels, or frontend behavior.",
+  "uc_sections": [
+    "目标与范围",
+    "输入与输出",
+    "主流程",
+    "验收场景",
+    "依赖与实现边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/app-oauth-client-v1.md": [
+      "所有权与调用方",
+      "三种生命周期",
+      "Auth 专用接口",
+      "Sector 的只读配置来源",
+      "资格变化与失败",
+      "消费点与契约验收"
+    ],
+    "platform/contracts/trusted-service-identity-v1.md": [
+      "目的与范围",
+      "传输与 JOSE",
+      "Claims",
+      "App Center 固定授权映射",
+      "ENV 配置",
+      "错误与轮换",
+      "契约测试要求"
+    ]
+  }
+}

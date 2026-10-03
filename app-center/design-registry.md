@@ -52,7 +52,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-016` | 审核应用公开资料修订 | `ACCEPTED` | [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md) | — | — |
 | `UC-APP-017` | 将被拒绝的应用公开资料修订恢复为草稿 | `SUPERSEDED` | [归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md) | [UC-APP-013](use-cases/UC-APP-013-create-application-profile-revision.md)＋[UC-APP-016 / BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | 未实现；以新建独立修订取代服务端恢复。 |
 | `UC-APP-018` | 管理应用 OAuth Client | `ACCEPTED` | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md) | — | TEST-only backend 工作包已激活；provider/runtime 属于 UC019。 |
-| `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `PROPOSED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `ACCEPTED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | OAuth/OIDC provider 实现工作包已激活。 |
 
 ## Business Rules
 

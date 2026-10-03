@@ -1,6 +1,6 @@
 # UC-APP-019：为 Auth 解析 OAuth 应用授权上下文
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -12,7 +12,7 @@
 
 ## 主流程
 
-1. 验证服务 JWS、audience 和方法级 permission。
+1. 使用 App Center 本地 caller registry 验证服务 JWS、固定 audience `iwut-app-center` 和方法级 permission；仅注册原生 gRPC，不生成 HTTP annotation。
 2. `GetClientConfiguration` 返回稳定 identity 元数据，并为 CONFIDENTIAL 返回当前 credentialRevision；`VerifyClientSecret` 只比较调用方刚读取的 expectedCredentialRevision 与当前摘要。
 3. `ResolveClientRuntimeConfiguration` 由 clientId 找到 Application 和 type，先核对请求 channel 等于登记 channel，再使用该 channel/rpcApiMajor 在单个 Mongo snapshot 中读取当前 Publication、APPROVED Version/Review 及依附 Version 的 OAuth 配置，从批准 snapshot 取得该 type 的 redirect URIs 与 scopes。该方法不需要 authId，供 Auth 在登录前校验 redirect URI。
 4. `ResolveAuthorizationContext` 在相同运行配置检查基础上读取指定用户当前 ACTIVE Tester，并校验调用方传入的 expected runtime tuple。
@@ -85,3 +85,4 @@ GetApplicationPublishedRedirects 仅向授权 Auth 服务返回单个应用当�
 
 - 2026-09-27：client/registration 按渠道隔离，同渠道各 major 共享；sector/sub 由 Auth 按 Application 唯一管理。
 - 2026-09-30：明确 Version 审核与三个发布槽位解耦；TEST 仍要求已审核 Version、当前已批准公开资料和 Tester 资格，运行 tuple 纳入 profileRevisionId 并删除技术名 fallback。
+- 2026-10-03：接受 UC019；确认 Auth→App 使用 App Center 本地 caller registry、固定 audience、短时 service JWS 与五个方法级权限，并开始 provider 实现。
