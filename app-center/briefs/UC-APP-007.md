@@ -625,7 +625,7 @@ createdBy、createdAt、submittedBy 和 submittedAt 都不因审核决定改变�
 
 ## 架构决定（仅本次需要的章节）
 
-### ADR-001：Scope Catalog 权威来源与缓存（`PROPOSED`）
+### ADR-001：Scope Catalog 权威来源与缓存（`ACCEPTED`）
 
 #### 权威来源
 
@@ -671,7 +671,7 @@ Scope 启用状态和兼容投影按 [UC-AUTH-001 / BR-SCP-004](../../auth-cente
 
 因此短暂缓存不构成实际用户授权依据。
 
-### ADR-002：ApplicationPublication 按 RPC API major 分区（`PROPOSED`）
+### ADR-002：ApplicationPublication 按 RPC API major 分区（`ACCEPTED`）
 
 #### 决定
 
@@ -1004,8 +1004,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
-| `adr/ADR-001-scope-catalog-cache.md` | 114 | `1e3b8ddba7e4` |
-| `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `0a1f73af1ac8` |
+| `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
+| `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |

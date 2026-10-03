@@ -518,7 +518,7 @@ OAuthRedirectConfiguration {
 
 ## 架构决定（仅本次需要的章节）
 
-### ADR-001：Scope Catalog 权威来源与缓存（`PROPOSED`）
+### ADR-001：Scope Catalog 权威来源与缓存（`ACCEPTED`）
 
 #### 权威来源
 
@@ -764,7 +764,7 @@ Provider 与 Consumer 至少共同验证：
 | --- | --- | --- |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
-| `adr/ADR-001-scope-catalog-cache.md` | 114 | `1e3b8ddba7e4` |
+| `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |

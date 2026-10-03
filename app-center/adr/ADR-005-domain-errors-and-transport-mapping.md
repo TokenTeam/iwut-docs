@@ -1,6 +1,6 @@
 # ADR-005：领域错误与 Transport 映射
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 日期：2026-09-19
 

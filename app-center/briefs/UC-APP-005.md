@@ -617,7 +617,7 @@ OAuthRedirectConfiguration {
 
 ## 架构决定（仅本次需要的章节）
 
-### ADR-001：Scope Catalog 权威来源与缓存（`PROPOSED`）
+### ADR-001：Scope Catalog 权威来源与缓存（`ACCEPTED`）
 
 #### 权威来源
 
@@ -1099,7 +1099,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | --- | --- | --- |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 618 | `7a595b829792` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
-| `adr/ADR-001-scope-catalog-cache.md` | 114 | `1e3b8ddba7e4` |
+| `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-developer-status-v1.md` | 91 | `24ff16ab6589` |

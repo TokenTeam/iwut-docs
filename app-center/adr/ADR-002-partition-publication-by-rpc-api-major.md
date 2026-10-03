@@ -1,6 +1,6 @@
 # ADR-002：ApplicationPublication 按 RPC API major 分区
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 日期：2026-09-15
 

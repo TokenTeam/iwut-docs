@@ -1,6 +1,6 @@
 # ADR-004：MongoDB 事务与 Schema 管理
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 日期：2026-09-19
 

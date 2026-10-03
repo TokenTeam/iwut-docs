@@ -89,7 +89,7 @@ Port 方法使用业务语言并表达所需原子边界，不先建立 `Save/Ge
 
 自动化检查只维护依赖和物理结构，不推断业务语义，也不取代 BR 测试和评审。确有新依赖方向需求时，必须先修改本 ADR，再在同一变更中调整架构测试；不得通过删除、跳过或弱化测试绕过边界。
 
-### ADR-004：MongoDB 事务与 Schema 管理（`PROPOSED`）
+### ADR-004：MongoDB 事务与 Schema 管理（`ACCEPTED`）
 
 #### 决定
 
@@ -131,7 +131,7 @@ MongoDB 集成测试使用真实、支持事务的隔离数据库。测试环境
 
 内存 fake 只用于 Domain/UseCase 单元测试，不能证明事务或索引语义。
 
-### ADR-005：领域错误与 Transport 映射（`PROPOSED`）
+### ADR-005：领域错误与 Transport 映射（`ACCEPTED`）
 
 #### 决定
 
@@ -188,5 +188,5 @@ Transport adapter 在一个集中映射表中把领域错误转换为：
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `4cb59593e39d` |
-| `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `084c3d26d483` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
+| `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

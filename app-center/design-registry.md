@@ -253,11 +253,11 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 
 | ID | 标题 | 状态 | 权威位置 | 替代项 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| `ADR-001` | Scope Catalog 权威来源与缓存 | `PROPOSED` | [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md) | — | — |
-| `ADR-002` | ApplicationPublication 按 RPC API major 分区 | `PROPOSED` | [ADR-002-partition-publication-by-rpc-api-major.md](adr/ADR-002-partition-publication-by-rpc-api-major.md) | — | — |
+| `ADR-001` | Scope Catalog 权威来源与缓存 | `ACCEPTED` | [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md) | — | App Center 已实现有界缓存、失败关闭和 revision 对账。 |
+| `ADR-002` | ApplicationPublication 按 RPC API major 分区 | `ACCEPTED` | [ADR-002-partition-publication-by-rpc-api-major.md](adr/ADR-002-partition-publication-by-rpc-api-major.md) | — | UC-APP-007/012/019 已按该分区实现并验证。 |
 | `ADR-003` | Go package 与依赖边界 | `ACCEPTED` | [ADR-003-go-package-and-dependency-boundaries.md](adr/ADR-003-go-package-and-dependency-boundaries.md) | — | 代码仓库根目录的 architecture test 自动执行核心边界。 |
-| `ADR-004` | MongoDB 事务与 Schema 管理 | `PROPOSED` | [ADR-004-mongodb-transactions-and-schema-management.md](adr/ADR-004-mongodb-transactions-and-schema-management.md) | — | — |
-| `ADR-005` | 领域错误与 Transport 映射 | `PROPOSED` | [ADR-005-domain-errors-and-transport-mapping.md](adr/ADR-005-domain-errors-and-transport-mapping.md) | — | — |
+| `ADR-004` | MongoDB 事务与 Schema 管理 | `ACCEPTED` | [ADR-004-mongodb-transactions-and-schema-management.md](adr/ADR-004-mongodb-transactions-and-schema-management.md) | — | 显式 migration、事务重试与真实副本集验证已成为实现基线。 |
+| `ADR-005` | 领域错误与 Transport 映射 | `ACCEPTED` | [ADR-005-domain-errors-and-transport-mapping.md](adr/ADR-005-domain-errors-and-transport-mapping.md) | — | 稳定 reason 与 HTTP/gRPC 映射已在现有纵切片统一使用。 |
 | `ADR-006` | Proto v1 与独立 API 仓库协作 | `ACCEPTED` | [ADR-006-proto-v1-and-api-repository.md](adr/ADR-006-proto-v1-and-api-repository.md) | — | — |
 
 ## 注册表维护规则

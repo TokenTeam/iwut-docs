@@ -144,7 +144,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md) | 普通用户公开资料查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
 | Catalog & Resolution | `UC-APP-012` 的 test-only 解析 | 候选列表、详情、统一解析、Filter 规则契约 |
-| OAuth Client Integration | `UC-APP-018`–`UC-APP-019` | API/持久化、Auth 联调与 OAuth/OIDC 端到端验证 |
+| OAuth Client Integration | `UC-APP-018`–`UC-APP-019` | TEST 后端、API、Auth-only provider 与跨服务验证已完成；GREY/STABLE channel 随对应发布资格用例启用 |
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。
 

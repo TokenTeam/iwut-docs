@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义十六个纵切片：
+当前已经定义十八个活跃纵切片；UC-APP-017 已被否决并归档：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -24,6 +24,8 @@
 - `UC-APP-014`：当前管理员以乐观并发控制完整替换 DRAFT ApplicationProfileRevision。
 - `UC-APP-015`：当前管理员提交 DRAFT ProfileRevision，创建独立 PENDING ProfileReview 快照并迁移为 SUBMITTED。
 - `UC-APP-016`：无利益冲突的资料 reviewer 批准或拒绝 ProfileReview；批准后自动成为当前公开资料。
+- `UC-APP-018`：当前管理员管理 Application＋channel 级稳定 OAuth client identity 与 confidential credential。
+- `UC-APP-019`：App Center 通过 Auth-only 原生 gRPC 提供 OAuth client、运行配置、用户资格和批准回调事实。
 
 本轮 Application 只有四个业务字段：
 
@@ -73,6 +75,9 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-014-update-draft-application-profile-revision.md](use-cases/UC-APP-014-update-draft-application-profile-revision.md)：完整替换 DRAFT ApplicationProfileRevision。
 - [UC-APP-015-submit-application-profile-revision-review.md](use-cases/UC-APP-015-submit-application-profile-revision-review.md)：提交 DRAFT ProfileRevision 并创建 PENDING ProfileReview snapshot。
 - [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md)：批准或拒绝 PENDING ProfileReview，批准后自动公开。
+- [UC-APP-017 归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md)：被否决的资料恢复提案；现行规则改为新建独立修订。
+- [UC-APP-018-manage-oauth-client.md](use-cases/UC-APP-018-manage-oauth-client.md)：管理稳定 OAuth client identity、状态和 confidential credential。
+- [UC-APP-019-resolve-oauth-authorization-context.md](use-cases/UC-APP-019-resolve-oauth-authorization-context.md)：为 Auth 提供 OAuth client 与当前 TEST 运行上下文。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：管理员转让的后续用例方向。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。
@@ -82,15 +87,8 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [ADR-005-domain-errors-and-transport-mapping.md](adr/ADR-005-domain-errors-and-transport-mapping.md)：协议无关领域错误及 HTTP/gRPC 映射。
 - [ADR-006-proto-v1-and-api-repository.md](adr/ADR-006-proto-v1-and-api-repository.md)：Proto v1 命名空间与独立 API 仓库协作方式。
 
-## 当前已接受与待评审
+## 当前已接受与实现覆盖
 
-UC-APP-001 和 UC-APP-002 已进入 `ACCEPTED`，其业务设计是当前实现的权威依据；二者的实现覆盖均为 `CORE_COMPLETE`，不表示 Transport、进程组装与端到端链路已经完成。UC-APP-003 至 UC-APP-016 仍处于 `PROPOSED`。
+UC-APP-001 至 UC-APP-016、UC-APP-018 和 UC-APP-019 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：除 UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS` 外，其余活跃 UC 的当前后端工作包均为 `COMPLETE`。
 
-后续用例可以修改当前模型，不维持尚未对外承诺的兼容性。
-
-## OAuth / OIDC 设计（2026-09-27，PROPOSED）
-
-整体顺序、现有能力和交付门禁见 [OAuth/OIDC 工作包总览](../auth-center/design-notes/oauth-oidc-delivery-plan.md)。以下条目尚未接受或实现，不改变已启用接口。
-
-- [UC-APP-018：管理应用 OAuth Client](use-cases/UC-APP-018-manage-oauth-client.md)。
-- [UC-APP-019：为 Auth 解析 OAuth 应用授权上下文](use-cases/UC-APP-019-resolve-oauth-authorization-context.md)。
+OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有；GREY/STABLE channel 需随对应发布资格用例另行启用。

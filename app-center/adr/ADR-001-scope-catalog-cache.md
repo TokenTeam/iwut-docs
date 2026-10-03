@@ -1,6 +1,6 @@
 # ADR-001：Scope Catalog 权威来源与缓存
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 日期：2026-09-15
 

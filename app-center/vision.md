@@ -6,7 +6,7 @@
 
 App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户端在后续用例中发现和使用这些应用。
 
-本阶段不尝试一次定义完整应用平台；前十六个用例验证应用管理与封闭测试闭环，UC-APP-018/019 继续定义 OAuth/OIDC 接入边界：
+本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018/019 定义 OAuth/OIDC 的 TEST 接入边界：
 
 > 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；版本批准只产生渠道无关的发布资格，已有当前公开资料的应用可以把已批准版本放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope、公开展示资料和 Tester 资格快照。
 
@@ -48,17 +48,17 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 当前管理员可以为 Application 登记长期稳定的 PUBLIC/CONFIDENTIAL clientId；identity/status 与 confidential credential 使用独立 revision，redirect URI 与 scopes 继续由 ApplicationVersion 审核和发布。Version、major 或 hostname 变化不重建 clientId。
 - Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得绑定 ACTIVE Tester episode 的授权上下文；App Center 不签发 code 或 token。
 
-## 当前非目标
+## 当前尚未设计或明确后置的能力
 
-- 查询、更新或删除应用。
+- Application 管理查询、受控改名、归档、禁用和恢复；物理删除仍不是首版目标。
 - 协作者和角色。
 - 管理员转让；当前只为未来转让保留 adminId 语义。
-- ApplicationVersion 的审核撤回、决定推翻、grey/stable 发布和公开上线。
+- ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销；Stable/Grey 发布与公开上线是下一阶段设计目标。
 - versionLabel 语义比较和 SemVer 校验。
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
 - Application admin 或 SysAdmin 发起的 Application 级禁用及重新启用；紧急隐藏不作为 ProfileRevision 状态。
-- Tester 主动退出、grey/stable 槽位和灰度分桶。
+- Tester 主动退出、Stable/Grey 槽位管理、灰度分桶和普通用户统一运行解析。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
 - Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。
 - 兼容现有 App Center API 和 MongoDB 文档。

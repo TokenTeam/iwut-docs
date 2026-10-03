@@ -400,7 +400,7 @@ OAuthRedirectConfiguration {
 
 ## 架构决定（仅本次需要的章节）
 
-### ADR-001：Scope Catalog 权威来源与缓存（`PROPOSED`）
+### ADR-001：Scope Catalog 权威来源与缓存（`ACCEPTED`）
 
 #### 权威来源
 
@@ -448,4 +448,4 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 | --- | --- | --- |
 | `use-cases/UC-APP-003-update-draft-application-version.md` | 377 | `429ee4761a19` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
-| `adr/ADR-001-scope-catalog-cache.md` | 114 | `1e3b8ddba7e4` |
+| `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
