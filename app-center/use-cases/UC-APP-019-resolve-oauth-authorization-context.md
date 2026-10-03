@@ -86,3 +86,4 @@ GetApplicationPublishedRedirects 仅向授权 Auth 服务返回单个应用当�
 - 2026-09-27：client/registration 按渠道隔离，同渠道各 major 共享；sector/sub 由 Auth 按 Application 唯一管理。
 - 2026-09-30：明确 Version 审核与三个发布槽位解耦；TEST 仍要求已审核 Version、当前已批准公开资料和 Tester 资格，运行 tuple 纳入 profileRevisionId 并删除技术名 fallback。
 - 2026-10-03：接受 UC019；确认 Auth→App 使用 App Center 本地 caller registry、固定 audience、短时 service JWS 与五个方法级权限，并开始 provider 实现。
+- 2026-10-03：完成 App Center TEST 范围 provider 实现与完整 cross-service 验收；实现状态和提交证据见 `implements/README.md`。

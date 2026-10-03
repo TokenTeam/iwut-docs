@@ -349,7 +349,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 88 | `45eb46f1ff39` |
+| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `db23eb70ec0e` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-oauth-client-v1.md` | 88 | `bb275737b743` |
 | `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |

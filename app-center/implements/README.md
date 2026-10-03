@@ -42,9 +42,10 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（015已闭合真实编辑/提交双命令竞争） |
 | [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（当前后端范围；审核决定、资料查询、前端与生产Gateway独立交付） |
 | [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | —（当前App Center后端范围；Auth资料权限授予/签发、管理查询与前端独立交付） |
-| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前管理员管理范围；Version OAuth配置、Auth provider/secret验证、登录授权与后续渠道独立交付） |
+| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前管理员管理范围；Version OAuth配置与Auth provider已由后续工作包交付，Auth授权和后续渠道独立交付） |
+| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC Provider 方法、本地 service caller registry 与逐方法权限、secret revision 验证、TEST exact-major/批准 Version/Review/Profile/Tester 单 Mongo snapshot、5秒 runtime tuple、sector 回调事实并集及完整 cross-service 验收；服务 `657eccd`、API `310fc10` | —（当前 TEST 后端范围；Auth grant/code/token、Scope enabled 过滤、sector/sub 与未来渠道由 Auth/后续 UC 交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016 与 UC018 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。代码仓库 AGENTS.md 当前保留该 OAuth 交付工作包，待最终验收记录完成后再切换到 UC019。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 与 UC019 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。代码仓库 AGENTS.md 当前保留 UC019 已完成工作包，下一实现任务开始前必须先切换声明。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -234,14 +235,14 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 ## OAuth / OIDC 后续工作包
 
-OAuth/OIDC 设计采用三种生命周期。UC018 已实现 Application＋channel 级 `ApplicationOAuthRegistration` 与独立 `OAuthClientCredential` 的管理员管理；UC002/003/004/005/007 已实现一对一依附 Version 的 `ApplicationVersionOAuthConfig`，包括 `{pkceRedirectUris, confidentialRedirectUris}`、历史双空数组 migration、同事务/revision 编辑、审核 snapshot 深拷贝和复检、`app-version-review-v2`，以及发布时非空数组对应 identity/credential 的存在性检查。UC019 的 Auth provider 查询仍未启动。
+OAuth/OIDC 设计采用三种生命周期。UC018 已实现 Application＋channel 级 `ApplicationOAuthRegistration` 与独立 `OAuthClientCredential` 的管理员管理；UC002/003/004/005/007 已实现一对一依附 Version 的 `ApplicationVersionOAuthConfig`，包括 `{pkceRedirectUris, confidentialRedirectUris}`、历史双空数组 migration、同事务/revision 编辑、审核 snapshot 深拷贝和复检、`app-version-review-v2`，以及发布时非空数组对应 identity/credential 的存在性检查。UC019 已实现 Auth 专用 provider 查询与服务身份边界。
 
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 管理 TEST 稳定 OAuth registration 与独立 credential；服务 `041a929`、API `51e6572` |
-| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `IN_PROGRESS` | 以 clientId+channel+rpcApiMajor 为 Auth 解析 OAuth 应用授权上下文；App Center 本地 caller registry 与五个原生 gRPC 权限已确认 |
+| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC 方法、服务身份逐方法授权、单 snapshot runtime/context/redirect 解析；服务 `657eccd`、API `310fc10` |
 
-UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004→005→007 的 Version 配置/审核/发布扩展已串行闭合。下一工作包是 UC019；UC018 和本轮扩展都没有提前开放 Auth provider 方法。
+UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004→005→007 的 Version 配置/审核/发布扩展串行闭合，UC019 再开放 Auth provider 方法；各批次保持独立 API 与服务提交。
 
 ## 2026-09-28 UC018 完成
 
@@ -264,3 +265,11 @@ UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004�
 - 缺少资料投影或当前公开指针固定返回 `ApplicationProfileRequired`（HTTP 422 / gRPC FAILED_PRECONDITION）；损坏指针、缺失目标、非 APPROVED 或内容不变量异常固定返回 `ApplicationProfileStateInconsistent`（HTTP 500 / gRPC INTERNAL），日志只记录稳定 reason。
 - 复用 Application `coordinationRevision` 真写栅栏串行化资料审核批准和 TEST 槽位设置；真实 MongoDB 测试覆盖外部检查后的资料移除/损坏、资料指针替换竞争、回滚与 publication/history 唯一提交。E2E 先验证无公开资料被拒绝，再完成资料审核并发布。
 - 最终 `make check-auth-app` 22/22 通过，报告为服务工作树 `.artifacts/verification/20261003T083148Z-98c6cmj7/report.json`，`changed_sources=[]`；Mongo/HTTP/gRPC race `629.019s`，真实 Auth/App 回归 `10.192s`。
+
+## 2026-10-03 UC019 完成
+
+- 服务 `657eccd`、独立 API `310fc10` 均为本地提交，未 push。API 新增无 HTTP annotation 的 `OAuthClientProviderService` 五个方法及稳定错误 reason；服务只在原生 gRPC 注册 Provider。
+- `APP_CENTER_SERVICE_CALLERS_B64` 启动时严格解析并预加载至少 2048-bit RSA 公钥；固定 audience `iwut-app-center`、默认最大 TTL `1m`、时钟偏差 `30s`，按五个 `app.oauth.*` permission 精确授权。错误 audience、USER identity、缺失凭据、disabled caller、未知 key 和权限不足均失败关闭。
+- client metadata 可解释 DISABLED identity；confidential secret 以恒定时间比较并绑定 expected credentialRevision。运行解析在单个只读 Mongo snapshot 中复查 registration、exact-major TEST Publication/History、APPROVED Version/Review snapshot、Version OAuth config、Application admin 与当前 APPROVED Profile；用户上下文额外绑定 ACTIVE Tester episode 和预登录 runtime tuple。快照有效期固定不超过5秒。
+- sector 清单返回当前已发布 major 的批准回调去重排序并集，按已登记 type 选择数组，DISABLED identity 不删除既有 sector 事实；App 不生成 sector/sub。测试覆盖 secret 轮换、跨渠道/major、Tester 移除、资料缺失/损坏、批准 snapshot 漂移、资料切换并发、方法权限和真实 gRPC service JWS。
+- 最终 `make check-auth-app` 22/22 通过，报告为服务工作树 `.artifacts/verification/20261003T133723Z-hhgptyx2/report.json`，`changed_sources=[]`；race `4.027s`、Mongo/HTTP/gRPC race `649.778s`、真实 Auth/App race `10.145s`。Auth grant/code/token、Scope Catalog enabled 交集、sector/sub、OIDC 标准 endpoint 和未来渠道仍由 Auth/后续工作包交付。
