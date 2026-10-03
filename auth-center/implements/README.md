@@ -18,7 +18,7 @@
 | [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 最小投影（含两项审核权限）、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo、真实 App verifier/双审核入口与 Gateway SESSION 验收 | 新增业务路由和生产部署继续独立验收 |
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
 | [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
-| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `IN_PROGRESS` | Auth 68046e7/API 9bcddc3；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计、真实 Mongo/Wire/HTTP/gRPC 与实际 App Center 联合验收 | developerHandle 修正：唯一归属、历史账号补设、审计索引升级及测试；原实现已完成，新增要求待交付 |
+| [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 3587ba7/API b7d9b6c；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计；developerHandle 全局唯一占用、禁止改名/转让/释放、历史 APPROVED 首次补设、审计索引升级、Mongo 并发/损坏数据/迁移与实际 App 联调验收 | Gateway 与客户端独立交付，生产入口及恢复就绪声明默认关闭 |
 
 ## 实现边界
 
@@ -164,6 +164,18 @@ UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分�
 用户要求为 Developer 增加自取公开 ID。UC013 保持 ACCEPTED，增加 BR-DEV-011/012 及共享协议字段，重新生成 brief；实现从原 COMPLETE 回到 IN_PROGRESS。修正基线为 Auth 68046e7/API 9bcddc3，要求原子唯一占用、同名幂等、禁止改名及历史 APPROVED 一次补设，不改变 App UUID、adminId 或 JWS，也不在此交付公开名称路由。
 
 `implement_uc013` 已确认恢复工作，按文档提交 `68f4626` 在原 Auth/API 分支修正。要求完成 check、race、真实 Mongo 并发/故障/索引升级、生产 HTTP/gRPC 与实际 App 回归；新增 handle 能力尚未声明实现完成。
+
+## 2026-10-03 UC013 开发者 ID 完成状态补记
+
+前节 IN_PROGRESS 是修正开始时的历史记录。developerHandle 修正已由 Auth
+`3587ba78496bd46d2d6cb76ac64bfb28d579b8d2` 完成，固定 API
+`b7d9b6c8c860cc9d813f97023016c8e83ccebbea`；该提交是本次核对时 Auth HEAD
+`be75692` 的祖先。顶部状态现补正为 COMPLETE，属于文档漏记，没有新增实现工作。
+
+核对代码与测试确认：全局唯一归属、已有名称不可修改/转让/释放、历史 APPROVED 首次补设、
+审计复合唯一索引升级，以及并发竞争、损坏归属、迁移冲突/回滚和实际 App 联调均已覆盖。
+本轮 OAuth 的全量 Mongo 回归也已覆盖这些既有测试；此次仅修正文档，不重复运行后端测试。
+后端完成仍不表示客户端、Gateway 或生产入口已交付。
 
 ## OAuth / OIDC 后续工作包
 
