@@ -88,6 +88,8 @@ ApplicationReviewPermissions {
 }
 ```
 
+HTTP 路径字段绑定：两个新请求和旧 GetReviewerPermissionRequest 的 subject_auth_id 显式设置 `json_name = "subject_auth_id"`，与路径占位符一致，避免生成的 Kratos HTTP 客户端填空路径或额外发送 query。两个 GET 均无 JSON 请求体；旧 ManageReviewerPermissionRequest 及所有响应 JSON 名称保持不变。新写请求若在正文重复提供 subject，使用 subject_auth_id，最终仍以路径为准。
+
 两个新方法均返回 ApplicationReviewPermissions。Manage 的 optional expected_revision 必须有值；GET 无请求体、无 query。HTTP 新写入口是 `PUT /v1/users/{subject_auth_id}/application-review-permissions/{permission}`，读入口是 `GET /v1/users/{subject_auth_id}/application-review-permissions`。写正文仅需 action、expectedRevision、reason；路径绑定 subject_auth_id 和 permission，覆盖正文中的同名字段，不接受正文替换路径中的目标。采用标准 ProtoJSON 与 `body: "*"`，不另建 envelope；实际生成 HTTP 客户端必须参与验收。
 
 旧 ManageReviewerPermission/GetReviewerPermission 的完整 RPC 名、HTTP `/v1/users/{subject_auth_id}/reviewer-permission`、请求/响应字段号、ReviewerPermissionAction 和错误 reason 保持不变。旧 Manage 只适配到 permission=app.version.review；旧响应的 reviewer 只表示版本审核权限。不能给旧请求增加改变语义的可选 permission，更不能把旧 GRANT 扩大为同时授予两项。

@@ -444,5 +444,5 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 | --- | --- | --- |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `use-cases/UC-AUTH-006-create-user.md` | 277 | `783f832c5407` |
-| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 166 | `559a3c5c23f5` |
+| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 168 | `bff1cb174151` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |

@@ -121,6 +121,8 @@ ApplicationReviewPermissions {
 }
 ```
 
+HTTP 路径字段绑定：两个新请求和旧 GetReviewerPermissionRequest 的 subject_auth_id 显式设置 `json_name = "subject_auth_id"`，与路径占位符一致，避免生成的 Kratos HTTP 客户端填空路径或额外发送 query。两个 GET 均无 JSON 请求体；旧 ManageReviewerPermissionRequest 及所有响应 JSON 名称保持不变。新写请求若在正文重复提供 subject，使用 subject_auth_id，最终仍以路径为准。
+
 两个新方法均返回 ApplicationReviewPermissions。Manage 的 optional expected_revision 必须有值；GET 无请求体、无 query。HTTP 新写入口是 `PUT /v1/users/{subject_auth_id}/application-review-permissions/{permission}`，读入口是 `GET /v1/users/{subject_auth_id}/application-review-permissions`。写正文仅需 action、expectedRevision、reason；路径绑定 subject_auth_id 和 permission，覆盖正文中的同名字段，不接受正文替换路径中的目标。采用标准 ProtoJSON 与 `body: "*"`，不另建 envelope；实际生成 HTTP 客户端必须参与验收。
 
 旧 ManageReviewerPermission/GetReviewerPermission 的完整 RPC 名、HTTP `/v1/users/{subject_auth_id}/reviewer-permission`、请求/响应字段号、ReviewerPermissionAction 和错误 reason 保持不变。旧 Manage 只适配到 permission=app.version.review；旧响应的 reviewer 只表示版本审核权限。不能给旧请求增加改变语义的可选 permission，更不能把旧 GRANT 扩大为同时授予两项。
@@ -248,7 +250,7 @@ UC013 追加两个必需有效 Session 的 DIRECT 路由，字段与认证约定
 
 DeveloperApplicationService package 为 `auth_center.v1.developer_application`，由默认关闭的 AUTH_DEVELOPER_APPLICATION_ENABLED 控制。Apply body 必须包含 developerHandle（例如 `{"developerHandle":"alice"}`）；GetOwn 无 body；均拒绝 query。DIRECT 保留 Session，不提前交换 Developer JWS。部署恢复就绪声明见 UC013，不由客户端提供。
 
-ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，四个管理/查询方法均由 Auth 校验 auth.reviewer.manage；路由 SESSION 身份本身不授予管理权。旧 reviewer-permission 路由继续只操作版本审核权限；新路由的目标 allowlist、消息字段和兼容规则唯一见 [UC004 API 扩展与兼容](../use-cases/UC-AUTH-004-manage-reviewer-permission.md#api-扩展与兼容)。新路由属于 2026-10-03 设计扩展，Auth/API/Gateway 实现与联合验收前不得标记已启用。
+ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，四个管理/查询方法均由 Auth 校验 auth.reviewer.manage；路由 SESSION 身份本身不授予管理权。旧 reviewer-permission 路由继续只操作版本审核权限；新路由的目标 allowlist、消息字段和兼容规则唯一见 [UC004 API 扩展与兼容](../use-cases/UC-AUTH-004-manage-reviewer-permission.md#api-扩展与兼容)。新路由属于 2026-10-03 扩展，Auth/API/Gateway 实现与联合验收已完成，见 [交付记录](../implements/README.md#2026-10-03-uc004010-应用审核权限扩展)；生产部署仍沿用下述用户入口开关。
 
 AuthenticationService package 为 `auth_center.v1.authentication`；UserProfileService package
 为 `auth_center.v1.user_profile`。DIRECT 不代表无鉴权：各方法继续遵守设备证明、token 定向
@@ -335,7 +337,7 @@ IssuedUserIdentity {
 
 #### 应用审核权限投影
 
-用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 app.profile.review 与 app.version.review；管理权限不因此下发给 App。两项权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 独立授予/撤销，不增加 JWS claim 或新的签发 RPC。2026-10-03 扩展需更新 Auth 投影实现并进行真实 App 验签/审核回归，不能把已有 UC010 验收视为 profile 权限链路已交付。
+用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 app.profile.review 与 app.version.review；管理权限不因此下发给 App。两项权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 独立授予/撤销，不增加 JWS claim 或新的签发 RPC。2026-10-03 扩展已完成 Auth 投影与真实 App 双审核入口验收，证据见 [实现记录](../implements/README.md#2026-10-03-uc004010-应用审核权限扩展)。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -451,7 +453,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 166 | `559a3c5c23f5` |
-| `platform/contracts/auth-center-api-routing.md` | 100 | `15eab2c11ec5` |
-| `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `05a2b771dccc` |
+| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 168 | `bff1cb174151` |
+| `platform/contracts/auth-center-api-routing.md` | 100 | `1ca39b5e9bc5` |
+| `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |

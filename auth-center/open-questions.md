@@ -79,4 +79,4 @@ sector 与 sub 由 Auth 按 Application 保存，不由 App 保存；渠道/type
 
 ## 应用审核权限扩展（2026-10-03）
 
-UC004 已接受管理 app.profile.review 与 app.version.review 两项独立权限，UC010 同步扩充 App audience 投影，沿用 auth.reviewer.manage 作为管理入口权限。设计见 [UC004](use-cases/UC-AUTH-004-manage-reviewer-permission.md)；新增 Auth/API/Gateway 实现及真实 App 回归尚未开始。TEST/OAuth 要求当前已批准公开资料，因此生产闭环还依赖该权限可被正常授予、签发和消费；不能用手工修改 Mongo 或自造用户 JWS 替代。
+UC004 已接受管理 app.profile.review 与 app.version.review 两项独立权限，UC010 同步扩充 App audience 投影，沿用 auth.reviewer.manage 作为管理入口权限。设计见 [UC004](use-cases/UC-AUTH-004-manage-reviewer-permission.md)；新增 Auth/API/Gateway 实现及真实 App 回归已完成，证据见 [实现记录](implements/README.md#2026-10-03-uc004010-应用审核权限扩展)。TEST/OAuth 的权限授予与签发依赖已闭合；OAuth 自身仍按独立工作包交付，生产环境仍需显式授予相关人员权限。

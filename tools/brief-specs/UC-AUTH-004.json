@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-004",
-  "note": "Accepted design extension; implementation not started. Extend application review permission management to independently grant/revoke app.profile.review and app.version.review. Add explicit-permission management and combined query while retaining version-only legacy APIs. Reuse one permission revision, immutable audit and UC010 authentication fence. Coordinate the UC010 App-audience projection and real App/Gateway verification; do not implement generic permission management or OAuth grants.",
+  "note": "Accepted design extension; delivered with verification recorded in auth-center/implements/README.md. Extend application review permission management to independently grant/revoke app.profile.review and app.version.review. Add explicit-permission management and combined query while retaining version-only legacy APIs. Reuse one permission revision, immutable audit and UC010 authentication fence. Coordinate the UC010 App-audience projection and real App/Gateway verification; do not implement generic permission management or OAuth grants.",
   "uc_sections": [
     "目标与范围",
     "参与者与 bootstrap",

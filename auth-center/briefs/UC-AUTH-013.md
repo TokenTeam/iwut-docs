@@ -422,6 +422,6 @@ UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 142 | `cd886b322836` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 201 | `e2692ee1e896` |
-| `platform/contracts/auth-center-api-routing.md` | 100 | `15eab2c11ec5` |
+| `platform/contracts/auth-center-api-routing.md` | 100 | `1ca39b5e9bc5` |
 | `platform/contracts/auth-developer-application-v1.md` | 58 | `83ce98a96c34` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |

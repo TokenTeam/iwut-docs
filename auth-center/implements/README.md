@@ -9,13 +9,13 @@
 | [UC-AUTH-001](../use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) | `ACCEPTED` | `IN_PROGRESS` | 独立 API Proto 与生成代码、Domain/Port/UseCase、临时硬编码 catalog adapter、Kratos 原生 gRPC transport、goforj/wire Composition Root、service JWS/固定 allowlist、未认证 provider E2E、真实 App+Auth 双服务 E2E | MongoDB 权威目录 |
 | [UC-AUTH-002](../use-cases/UC-AUTH-002-batch-get-developer-statuses.md) | `ACCEPTED` | `COMPLETE` | 权威设计、共享契约、独立 API Proto 与生成代码、Domain/Port/UseCase、MongoDB Repository 与唯一索引、Kratos 原生 gRPC Transport、service JWS/固定 allowlist、真实 MongoDB provider E2E、App Center consumer adapter、真实 App+Auth 双服务 E2E | — |
 | [UC-AUTH-003](../use-cases/UC-AUTH-003-resolve-system-principal.md) | `ACCEPTED` | `COMPLETE` | 独立 API Proto、启动时幂等 Mongo provision、purpose partial unique index、Domain/Port/UseCase、受 service identity 与 purpose allowlist 保护的原生 gRPC、App Center 延迟解析与成功缓存、provider E2E | — |
-| [UC-AUTH-004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) | `ACCEPTED` | `CORE_COMPLETE` | 原 app.version.review 授予/撤销与状态查询、HTTP/gRPC、当前管理员权限复核、权限 revision CAS、原子不可变审计、全局一次性 bootstrap、防复活标记、与 UC010 共用事务栅栏、Gateway SESSION 三协议联调 | 2026-10-03 两项审核权限扩展 NOT_STARTED：新命令/查询、旧 API 兼容、profile 授予与 UC010 投影、Gateway 路由及联合验收 |
+| [UC-AUTH-004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) | `ACCEPTED` | `COMPLETE` | 两项独立审核权限的授予/撤销与组合查询、旧 API 版本权限语义兼容、HTTP/gRPC、当前管理员复核、共享 revision CAS、原子不可变审计、全局一次性 bootstrap、UC010 事务协调、真实 App 双审核权限隔离与 Gateway SESSION 三协议验收 | 未部署到生产；不自动授予历史用户 profile 权限 |
 | [UC-AUTH-005](../use-cases/UC-AUTH-005-edit-own-user-profile.md) | `ACCEPTED` | `CORE_COMPLETE` | 独立 Proto、配置字段目录、Domain/Port/UseCase、Mongo 内嵌资料 CAS、严格 oneof 解码、可信用户 JWS、HTTP/JSON 与原生 gRPC、生产 Wire 与真实 Mongo E2E；注册初始化空资料 | 生产实际字段清单、既有 USER 数据迁移、Gateway 接入与客户端确认交互 |
 | [UC-AUTH-006](../use-cases/UC-AUTH-006-create-user.md) | `ACCEPTED` | `CORE_COMPLETE` | 真实 P-256 验证、必填关联声明、独立 Proto、原子注册、关联认证加密/HMAC、启动前离线轮换与幂等重跑、全量核验、限额、生产 Wire/Mongo/HTTP/gRPC E2E | 正式事务部署上的维护窗口验收；客户端、Gateway 独立交付 |
 | [UC-AUTH-007](../use-cases/UC-AUTH-007-login.md) | `ACCEPTED` | `CORE_COMPLETE` | 真实设备登录、严格编码、Session 在线检查、固定寿命配置、10 会话精确 LRU、有界限流、事务栅栏、HTTP/gRPC/生产 Wire/Mongo 并发与故障测试 | Gateway 的 Session-to-JWS 编排与客户端接入；物理清理暂以保留记录处理 |
 | [UC-AUTH-008](../use-cases/UC-AUTH-008-revoke-own-session.md) | `ACCEPTED` | `COMPLETE` | token 定向幂等撤销、专用载体、精确鉴权例外、首次 revokedAt、保守保留记录、真实 Mongo 故障/未知提交测试与生产 HTTP/gRPC E2E | —（Gateway 与客户端退出编排独立交付） |
 | [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) | `ACCEPTED` | `COMPLETE` | 有效 Session 授权及事务内复核、本人目标隔离、首次撤销记录、公钥归属保留、引用 Session 即时拒绝、并发登录/撤销及生产 HTTP/gRPC E2E | —（客户端编排独立交付） |
-| [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 能力投影、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo 测试、实际 App verifier 兼容验证 | 2026-10-03 app.profile.review 投影与双权限并发/真实 App 验收 NOT_STARTED；Gateway 联合入口验收独立交付 |
+| [UC-AUTH-010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | `ACCEPTED` | `CORE_COMPLETE` | 固定 identity RPC、双重认证、独立 RSA signer、audience 最小投影（含两项审核权限）、Mongo 当前状态事务确认及无缓存、caller audience 配置、生产 Wire/gRPC/Mongo、真实 App verifier/双审核入口与 Gateway SESSION 验收 | 新增业务路由和生产部署继续独立验收 |
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
 | [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
 | [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `IN_PROGRESS` | Auth 68046e7/API 9bcddc3；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计、真实 Mongo/Wire/HTTP/gRPC 与实际 App Center 联合验收 | developerHandle 修正：唯一归属、历史账号补设、审计索引升级及测试；原实现已完成，新增要求待交付 |
@@ -184,4 +184,13 @@ UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分�
 
 ## 2026-10-03 UC004/010 应用审核权限扩展
 
-UC004 更名为“管理用户的应用审核权限”，设计继续 ACCEPTED。既有版本审核管理实现保留；扩展的 profile/version 显式单项命令、组合查询和 UC010 双权限投影尚未启动，工作包不因生成 brief 自动进入 IN_PROGRESS。新旧接口共用权限集合、revision、审计及事务栅栏，历史用户不自动获得 profile 权限。交付须同时覆盖 Auth/API、Gateway 精确路由及真实 App 两类审核权限隔离；旧完成记录只证明当时范围。
+UC004 扩展已完成，设计继续 ACCEPTED。Auth `dc6acb1`（auth-center/v1）固定 API `649fc30`，Gateway `6b3f0d9`（gateway/v1）固定等价 API `758c426`；全部为本地提交，未 push/部署。实现新增单项权限命令、双项一致快照查询、旧接口兼容及 UC010 双权限投影，新旧入口共用集合、revision、审计及事务栅栏，历史用户不自动获得 profile 权限。
+
+验收通过：
+
+- Auth `make check`、`make test-race`、`APP_CENTER_SOURCE_DIR=/tmp/iwut-app-review-fixture make test-mongo`；真实 Mongo 副本集覆盖跨权限并发 CAS、审计回滚、未知提交以及两项撤销与签发竞争。
+- 生产 Wire/HTTP/gRPC、生成 HTTP 客户端、无效 permission/严格 JSON/缺失 revision、旧接口撤销保留另一权限、查询不泄露其它能力。
+- 跨服务测试使用 App 已提交版本 `f0ffd06` / API `88f182d` 的独立快照，运行真实 App 进程和 verifier；Auth 正常授权并签发后验证零项/profile-only/version-only/两项组合。允许的审核入口对不存在的合法 review ID 返回 404，权限不符返回 403，证明能力门禁独立；不将该检查解释为真实业务审核成功。
+- Gateway `make check`、`make protocol-e2e`，经固定 Traefik、真实 Auth/Mongo 测试 HTTP、原生 gRPC 和 gRPC-Web，包含 Session 身份、伪造头清理、路径覆盖、独立授予及新旧 API 混用。
+
+实现同时修复生成查询客户端的 subject 路径绑定，具体 `json_name` 约定见 UC004。App 工作树当时有其它任务进行中的修改，验收未修改该工作树，也不涵盖尚未提交的 OAuth provider 能力。

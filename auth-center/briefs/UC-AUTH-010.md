@@ -289,7 +289,7 @@ Gateway 消费签发结果后不得把 identity_jws 暴露给终端或加入业�
 
 #### 应用审核权限投影
 
-用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 app.profile.review 与 app.version.review；管理权限不因此下发给 App。两项权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 独立授予/撤销，不增加 JWS claim 或新的签发 RPC。2026-10-03 扩展需更新 Auth 投影实现并进行真实 App 验签/审核回归，不能把已有 UC010 验收视为 profile 权限链路已交付。
+用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 app.profile.review 与 app.version.review；管理权限不因此下发给 App。两项权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 独立授予/撤销，不增加 JWS claim 或新的签发 RPC。2026-10-03 扩展已完成 Auth 投影与真实 App 双审核入口验收，证据见 [实现记录](../implements/README.md#2026-10-03-uc004010-应用审核权限扩展)。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -522,6 +522,6 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 151 | `98d2b3e33077` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
-| `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `05a2b771dccc` |
+| `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
 | `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |
