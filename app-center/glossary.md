@@ -158,13 +158,13 @@ Decision 写入后不可修改；纠错、撤销或重新审核必须产生新�
 
 某个 Application 在一个明确 rpcApiMajor 下的当前发布槽位状态。它与 ApplicationVersion 的审核生命周期分离，并拥有自己的 revision 和修改审计。
 
-当前已定义 Test 与 Stable 槽位；UC-APP-021 提议在同一 Publication 中加入 GreyRollout。全部槽位共享 revision 和追加式审计。
+当前已定义 Test、Grey 与 Stable 槽位。全部槽位共享 revision 和追加式审计。
 
 ## Grey Rollout
 
-UC-APP-021 提议的 exact-major 灰度运行配置，包含 rolloutId、目标 ApplicationVersion、万分比 exposureBasisPoints 和只在服务端保存的 cohortSeed。它必须依附 Stable 基线，只对可信已登录 authId 做确定性分桶；连续 rollout 内比例调整和 Version 替换不改变 cohort，Clear 后重新建立会产生新 cohort。
+UC-APP-021 定义的 exact-major 灰度运行配置，包含 rolloutId、目标 ApplicationVersion、万分比 exposureBasisPoints 和只在服务端保存的 cohortSeed。它必须依附 Stable 基线，只对可信已登录 authId 做确定性分桶；连续 rollout 内比例调整和 Version 替换不改变 cohort，Clear 后重新建立会产生新 cohort。
 
-Grey Rollout 不是 Version 审核状态、Tester 资格或客户端 Filter。该术语当前属于 `PROPOSED` 设计。
+Grey Rollout 不是 Version 审核状态、Tester 资格或客户端 Filter。
 
 ## Test Slot
 

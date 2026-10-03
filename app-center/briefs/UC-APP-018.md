@@ -269,7 +269,7 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 
 #### 所有权与调用方
 
-App Center 持有 Application＋channel 级稳定 client identity、confidential credential，以及依附 ApplicationVersion 的受审核 redirect URI 和 scopes。Auth 不保存另一份可独立修改的 client 注册表。管理规则见 [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md)，可信读取规则见 [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md)，协议见 [OAuth OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
+App Center 持有 Application＋channel 级稳定 client identity、confidential credential，以及依附 ApplicationVersion 的受审核 redirect URI 和 scopes。Auth 不保存另一份可独立修改的 client 注册表。管理规则见 [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md)，可信读取规则见 [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md)，STABLE/GREY 渠道扩展分别见 [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) 与 [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md)，协议见 [OAuth OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
 
 管理接口接受 SESSION 转换后的 [trusted identity](../../platform/contracts/trusted-identity-v1.md) USER 身份。内部接口只接受 Auth 的 [service identity](../../platform/contracts/trusted-service-identity-v1.md)，audience 固定为 `iwut-app-center`，权限来自 App Center 本地 caller registry；逐方法授权，不经过公网、HTTP 或 gRPC-Web，也不把 client secret 当服务间凭据。
 
@@ -367,7 +367,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-018`（use-cases/UC-APP-018-manage-oauth-client.md）：变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：Auth 专用接口、Sector 的只读配置来源、资格变化与失败、STABLE 扩展、消费点与契约验收
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：Auth 专用接口、Sector 的只读配置来源、资格变化与失败、STABLE 扩展、GREY 扩展、消费点与契约验收
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
 
 ## 溯源
@@ -377,5 +377,5 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-018-manage-oauth-client.md` | 131 | `498d8f688d7f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
-| `platform/contracts/app-oauth-client-v1.md` | 92 | `3c74314974c5` |
+| `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |

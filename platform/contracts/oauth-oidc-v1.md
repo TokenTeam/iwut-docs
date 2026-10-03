@@ -6,7 +6,7 @@
 
 提供 Authorization Code Flow，用 OIDC ID Token 表达应用登录结果，用独立的 opaque access token 表达委托访问。Auth 拥有登录、consent、grant 和 token；App 拥有 client 身份/secret，以及 ApplicationVersion 中受审核的 redirect URI 和 scopes；Traefik/Gateway 执行入口鉴权，资源服务执行业务授权。
 
-相关业务规则由 [UC-AUTH-014](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../../auth-center/use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md)/[019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](oauth-delegation-v1.md)。
+相关业务规则由 [UC-AUTH-014](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../../auth-center/use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) 至 [021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](oauth-delegation-v1.md)。
 
 ## 客户端配置
 
@@ -19,7 +19,7 @@
 
 PUBLIC client 不能提交 secret 冒充 confidential；CONFIDENTIAL client 不能省略 secret 降级为 public。无 PKCE 的 confidential OIDC 客户端必须依照下述 nonce 检查，在验证 ID Token 前不得建立应用会话或使用返回的 token。
 
-每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；首版只启用 TEST，其他渠道等待运行资格设计与实现。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
+每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；App Center 已交付 TEST/STABLE，并由 UC-APP-021 接受 GREY 运行资格与接入语义。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
 
 ## 公网端点与响应
 
@@ -60,9 +60,9 @@ App 继续使用已有 requestable 字段进行版本管理检查；Auth 的 aut
 
 ## 授权请求与登录门户
 
-必填 `response_type=code`、client_id、精确 redirect_uri、含 `openid` 的 scope、state、nonce，以及产品扩展参数 `iwut_channel=TEST`、正整数 `iwut_rpc_api_major`；PUBLIC 额外必填 code_challenge/code_challenge_method。channel 必须精确等于 client 登记渠道；major 只选择该渠道 App Center 的权威 Publication，不能覆盖 Version、回调或 scope。两者绑定到 code/token/family，后续资源请求、UserInfo 或 refresh 不接受改选。客户端每次新建至少 32 随机字节的 state、nonce；服务端接受 43–128 字符的 base64url 值，不把 nonce 当用户身份。PKCE verifier 为 RFC 7636 规定的 43–128 个 unreserved ASCII 字符；challenge 为 SHA-256 后无 padding 的 base64url，固定 43 字符。
+必填 `response_type=code`、client_id、精确 redirect_uri、含 `openid` 的 scope、state、nonce，以及产品扩展参数 `iwut_channel=TEST|GREY|STABLE`、正整数 `iwut_rpc_api_major`；PUBLIC 额外必填 code_challenge/code_challenge_method。channel 必须精确等于 client 登记渠道；major 只选择该渠道 App Center 的权威 Publication，不能覆盖 Version、回调或 scope。两者绑定到 code/token/family，后续资源请求、UserInfo 或 refresh 不接受改选。客户端每次新建至少 32 随机字节的 state、nonce；服务端接受 43–128 字符的 base64url 值，不把 nonce 当用户身份。PKCE verifier 为 RFC 7636 规定的 43–128 个 unreserved ASCII 字符；challenge 为 SHA-256 后无 padding 的 base64url，固定 43 字符。
 
-Auth 在建立登录 interaction 前以 clientId、iwut_channel 和 iwut_rpc_api_major 调用 App 的 `ResolveClientRuntimeConfiguration`，从 exact-major 当前 TEST Publication 的批准 Version snapshot 取得 effective redirect URIs 和 scopes，并从当前已批准 ProfileRevision 取得展示资料，再先精确匹配 redirect_uri。runtime tuple 包含 versionId、publicationRevision、profileRevisionId 和 adminAuthId；用户登录后以该 tuple 调用 `ResolveAuthorizationContext`，确认和 code 兑换时继续重查。任何 tuple 变化都不能把旧回调或展示资料与新 scopes、Profile 或 Tester 资格拼接。
+Auth 在建立登录 interaction 前以 clientId、iwut_channel 和 iwut_rpc_api_major 调用 App 的 `ResolveClientRuntimeConfiguration`，从 exact-major 当前渠道 Publication 的批准 Version snapshot 取得 effective redirect URIs 和 scopes，并从当前已批准 ProfileRevision 取得展示资料，再先精确匹配 redirect_uri。runtime tuple 包含 versionId、publicationRevision、profileRevisionId 和 adminAuthId；用户登录后以该 tuple 调用 `ResolveAuthorizationContext`，确认和 code 兑换时继续重查。任何 tuple 变化都不能把旧回调或展示资料与新 scopes、Profile、Tester 或 Grey cohort 资格拼接。
 
 Grant 业务主键为 `(authId, applicationId, channel)`，具体约束由 [BR-OAU-002](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md#br-oau-002) 定义。同应用同渠道的 PUBLIC/CONFIDENTIAL client 及各 major 共享历史同意；grantId 是稳定引用 ID，不以 client 或 Version 为授权身份。code、access/refresh token 和 family 仍各自绑定 client，不能跨 client 兑换、刷新或撤销；共享同意不省略各自的 client authentication/PKCE、当前版本资格或 offline_access 确认。历史同意集合 G 不因当前版本 scope 减少而删减；只有本次请求超出 G 的部分需要新增同意。实际访问使用 token、G、当前批准版本及 Auth 当前目录许可集合 C 的交集，UC014/016/018/019 定义唯一业务规则。revision 用于 OCC/审计，用户撤回递增共享 grant 的独立 revocationEpoch，对同应用同渠道所有 client 的旧凭据生效；新增同意不使旧 token 失效，也不自动扩大旧 token。授权交互和 code 始终绑定其创建时的精确 runtime tuple 与 redirect URI；旧 code 不能因 grant 可延续而兑换到新 Version 的回调。secret 轮换只影响之后的 confidential client authentication，不单独撤销 grant、access token 或 refresh family。
 

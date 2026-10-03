@@ -129,7 +129,7 @@ ApplicationPublication
   history: ApplicationPublicationHistory[]
 ```
 
-testVersionId 的规则由 UC-APP-007 定义；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 已接受可空 stableVersionId、保留 EMPTY Publication 和 stable History/OAuth 语义。[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 提议把 GreyRollout 定义为稳定身份、目标 Version、万分比和内部 cohortSeed 的组合。分区依据见 [BR-PUB-002](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-002)，共同发布资格见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)。
+testVersionId 的规则由 UC-APP-007 定义；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 已接受可空 stableVersionId、保留 EMPTY Publication 和 stable History/OAuth 语义。[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受把 GreyRollout 定义为稳定身份、目标 Version、万分比和内部 cohortSeed 的组合。分区依据见 [BR-PUB-002](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-002)，共同发布资格见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)。
 
 ApplicationPublicationHistory 是不可修改的操作审计记录，不是 event-sourcing 的权威状态；当前槽位仍由 ApplicationPublication 表达，参见 [BR-PUB-007](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-007)。
 
@@ -190,7 +190,7 @@ Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生�
 | ProfileContent | 一版完整资料内容；未来可以加入受控 IconAssetId |
 | ApplicationProfileReviewSnapshot | 一次资料审核读取的不可变完整内容 |
 | PublicationRevision | 一个 RPC major 下全部槽位共享的乐观并发版本 |
-| GreyRollout | UC-APP-021 提议的 rolloutId、grey Version、万分比与内部稳定 cohortSeed 组合 |
+| GreyRollout | UC-APP-021 定义的 rolloutId、grey Version、万分比与内部稳定 cohortSeed 组合 |
 | TesterJoinTokenHash | Tester 加入 secret 的不可逆校验值 |
 | FilterRule | 服务端保存和分发、客户端使用本地用户信息求值的规则；结构尚未确定 |
 

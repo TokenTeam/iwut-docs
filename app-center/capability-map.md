@@ -71,7 +71,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 三个槽位在设置 Version 时一致要求同一 Application 的 APPROVED Version，再叠加各自规则。TEST 是已审核的小范围用户分发，还要求当前已批准 Public Profile；开发版 iWUT Client 直接打开任意 URL 属于客户端开发预览，不进入三个槽位，也不产生发布或 OAuth 资格。
 
-已有权威设计覆盖设置 test 槽位；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 已接受 stable 设置、替换、清空、回退语义和 EMPTY Publication。[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已提出 Stable 基线、确定性 cohort、比例调整、清空和 GREY OAuth。首版还需要完成该提案的评审与实现，以及 test 清空、Application 级停止分发和统一服务端解析。
+已有权威设计覆盖设置 test 槽位；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 已接受 stable 设置、替换、清空、回退语义和 EMPTY Publication。[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受 Stable 基线、确定性 cohort、比例调整、清空和 GREY OAuth。首版还需要完成 UC021 实现，以及 test 清空、Application 级停止分发和统一服务端解析。
 
 Runtime Publication 不读取客户端本地用户字段，也不执行 Filter。
 
@@ -140,11 +140,11 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | --- | --- | --- |
 | Application Ownership | `UC-APP-001` | 管理查询、改名、归档、Application 级禁用；转让与禁用是否纳入首版 |
 | Version Review | `UC-APP-002`–`UC-APP-006` | 查询、草稿放弃、批准资格撤销或紧急处置 |
-| Runtime Publication | `UC-APP-007`、`UC-APP-020`；`UC-APP-021`（PROPOSED） | UC021 评审/实现、test 清空、Application 级停止分发、统一解析 |
+| Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021` | UC021 实现、test 清空、Application 级停止分发、统一解析 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md) | 普通用户公开资料查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
 | Catalog & Resolution | `UC-APP-012` 的 test-only 解析 | 候选列表、详情、统一解析、Filter 规则契约 |
-| OAuth Client Integration | `UC-APP-018`–`UC-APP-020`；`UC-APP-021`（PROPOSED） | TEST/STABLE 后端、API、Auth-only provider 与跨服务验证已完成；GREY activation 等待 UC021 评审/实现 |
+| OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE 后端、API、Auth-only provider 与跨服务验证已完成；GREY activation 等待 UC021 实现 |
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。
 

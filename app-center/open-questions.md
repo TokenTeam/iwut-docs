@@ -49,5 +49,5 @@
 - Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。
 - Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
 - 管理员日常停止某个渠道使用 clear；平台紧急处置使用后续 Application 级 suspension/disable，不销毁原槽位配置。
-- [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已提出 Grey 首版只面向已登录用户、要求 Stable 基线、使用万分比和 per-rollout CSPRNG seed 的 HMAC 确定性分桶；该提案仍待接受。
+- [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受 Grey 首版只面向已登录用户、要求 Stable 基线、使用万分比和 per-rollout CSPRNG seed 的 HMAC 确定性分桶。
 - Filter 使用独立 ApplicationFilterRevision 方向，避免把规则塞进 Application 或强制与 Profile 同步修订；规则语言和审核策略仍待定义。

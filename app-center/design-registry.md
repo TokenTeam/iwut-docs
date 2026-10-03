@@ -54,7 +54,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-018` | 管理应用 OAuth Client | `ACCEPTED` | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md) | — | TEST-only 管理后端已完成；provider/runtime 由 UC019 完成。 |
 | `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `ACCEPTED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | Auth-only 原生 gRPC provider 已完成；实现证据见 `implements/README.md`。 |
 | `UC-APP-020` | 管理稳定发布槽位 | `ACCEPTED` | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) | — | Stable set/replace/clear、EMPTY Publication 与 STABLE OAuth channel 已完成；实现证据见 `implements/README.md`。 |
-| `UC-APP-021` | 管理灰度发布 | `PROPOSED` | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) | — | Stable 基线、确定性 cohort、比例调整、清空与 GREY OAuth 的设计提案；尚未实现。 |
+| `UC-APP-021` | 管理灰度发布 | `ACCEPTED` | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) | — | Stable 基线、确定性 cohort、比例调整、清空与 GREY OAuth 已接受，进入实现。 |
 
 ## Business Rules
 
@@ -270,7 +270,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-OAC-010` | 登录前回调校验与两阶段一致性 | Authorization / Consistency | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-010) | — | — |
 | `BR-OAC-011` | Auth sector 的回调事实来源 | Boundary / Query | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-011) | — | App 只返回批准回调事实。 |
 | `BR-OAC-012` | STABLE OAuth channel 激活 | Boundary / Authorization | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012) | — | UC020 接受后扩展 UC018/019 的现有模型，不建立第二套 registration。 |
-| `BR-OAC-013` | GREY OAuth channel 与 cohort 资格 | Boundary / Authorization | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-oac-013) | — | UC021 接受后扩展 UC018/019 的现有模型，并由 Provider 重算用户 cohort。 |
+| `BR-OAC-013` | GREY OAuth channel 与 cohort 资格 | Boundary / Authorization | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-oac-013) | — | 扩展 UC018/019 的现有模型，并由 Provider 重算用户 cohort。 |
 
 
 ## Architecture Decision Records

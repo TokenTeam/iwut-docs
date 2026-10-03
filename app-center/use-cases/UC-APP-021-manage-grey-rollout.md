@@ -1,6 +1,6 @@
 # UC-APP-021：管理灰度发布
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -336,7 +336,7 @@ Mongo migration 预留为 `0017_grey_rollout`：
 - 需要 CSPRNG、HMAC-SHA-256、固定编码测试向量和 migration `0017_grey_rollout`。
 - 需要同步独立 API 仓库与 App OAuth provider 跨服务契约，并以真实 MongoDB 和 App/Auth E2E 验证。
 - 统一启动解析、Catalog、Filter、test clear、Application disable、Auth grant/code/token/sector/sub 和前端不属于本工作包。
-- UC 进入 `ACCEPTED` 并生成 brief 前不得开始实现。
+- 实现必须使用生成 brief，并保持 API 子模块先提交、服务随后更新 gitlink 的交付顺序。
 
 ## 后续设计顺序
 
@@ -349,3 +349,4 @@ Mongo migration 预留为 `0017_grey_rollout`：
 ## 变更记录
 
 - 2026-10-04：建立 UC-APP-021 提案；定义 Stable 基线、万分比分流、连续 rollout cohort、按风险方向复检和 GREY OAuth 扩展。
+- 2026-10-04：设计获接受，进入实现；不改变分桶、cohort 生命周期或按风险方向复检语义。

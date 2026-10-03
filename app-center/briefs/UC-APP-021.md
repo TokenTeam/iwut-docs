@@ -1,6 +1,6 @@
 <!-- GENERATED FILE — DO NOT EDIT. Regenerate with: -->
-<!-- python3 tools/gen_brief.py UC-APP-020 --spec tools/brief-specs/UC-APP-020.json -->
-# Brief — UC-APP-020：管理稳定发布槽位
+<!-- python3 tools/gen_brief.py UC-APP-021 --spec tools/brief-specs/UC-APP-021.json -->
+# Brief — UC-APP-021：管理灰度发布
 
 > **非权威派生制品。** 本文由脚本从 `docs/app-center/` 与 spec 显式选择的 `docs/` 共享文档抽取，只用于给本次工作包提供输入。
 > 与源文件冲突时，一律以 §溯源 中列出的源文件为准；不要手工编辑本文，也不要把它当作第二权威。
@@ -9,10 +9,10 @@
 
 | 项 | 值 |
 | --- | --- |
-| Use Case | `UC-APP-020` 管理稳定发布槽位 |
+| Use Case | `UC-APP-021` 管理灰度发布 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
-| 本 UC 权威 BR | `BR-OAC-012`，`BR-PUB-011`–`BR-PUB-019`（9 条） |
-| 外部引用 BR | — |
+| 本 UC 权威 BR | `BR-OAC-013`，`BR-PUB-020`–`BR-PUB-030`（11 条） |
+| 外部引用 BR | `BR-PUB-016`、`BR-PUB-017`（来自 `UC-APP-020`） |
 | ADR | `ADR-001`、`ADR-002`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/app-oauth-client-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -37,39 +37,39 @@
 
 ### 目标与范围
 
-> developerStatus 为 `APPROVED` 的 Application 当前管理员，在一个明确的 rpcApiMajor 分区中设置、替换或清空 stable 发布槽位，使普通用户后续能够通过统一运行解析取得一个经过审核的默认启动目标。
+> developerStatus 为 `APPROVED` 的 Application 当前管理员，在一个已有 stable 基线的 rpcApiMajor 分区中建立、调整、替换或清空 Grey rollout，使已登录用户能够被服务端稳定地分入 Grey 或 Stable。
 
 本用例负责：
 
-- 为既有或新建的 `(applicationId, rpcApiMajor)` ApplicationPublication 设置或替换 `stableVersionId`。
-- 清空 `stableVersionId`，并在所有槽位为空时保留 Publication 身份、revision 与历史。
-- 复用 Publication 共享 revision，防止 test、未来 grey 与 stable 操作静默覆盖。
-- 在真实设置前重新验证 Version、Review、当前公开资料、scope、launch URL 及 STABLE OAuth registration。
-- 为每次真实变化追加不可变 ApplicationPublicationHistory。
-- 激活 Application＋STABLE channel 的 PUBLIC/CONFIDENTIAL OAuth client 管理和 Auth provider 解析。
+- 在既有 `(applicationId, rpcApiMajor)` ApplicationPublication 中建立 GreyRollout。
+- 用一个命令调整暴露比例或替换 Grey Version。
+- 在连续 rollout 内保持稳定 cohort，避免比例或补丁版本变化造成用户无意义洗牌。
+- 清空 GreyRollout，并保留 Stable、Publication revision 和追加式 History。
+- 定义跨实现一致的已登录用户确定性分桶算法。
+- 复用 Publication 共享 revision、批准事实、当前公开资料、Scope、URL 和 OAuth 检查。
+- 激活 Application＋GREY channel 的 OAuth client 管理及 Auth provider 资格验证。
 
 本用例不负责：
 
-- 配置或调整 grey rollout。
-- 统一执行 `test > grey > stable` 的用户运行目标解析。
-- 返回普通用户目录或应用详情。
-- 定义 FilterRule。
-- 归档、禁用或平台紧急暂停整个 Application。
-- 清空 test 槽位。
-- 撤销 ApplicationVersion 的 APPROVED 资格。
-- 自动把已批准 Version 从 test 或 grey 提升到 stable。
+- 实现普通目录、应用详情或统一 `test > grey > stable` 启动解析接口。
+- 为匿名用户执行 Grey 分桶；匿名用户只能使用 Stable。
+- 清空 test 或 stable 槽位。
+- 自动把 Grey Version 提升到 Stable，或在提升后自动清空 Grey。
+- 定义 Application 归档、平台 suspension、FilterRule 或 Version 资格撤销。
+- 收集实验指标、转化率或客户端遥测。
+- 允许客户端自报 Grey 命中结果。
 
-稳定发布不要求目标 Version 曾经进入 test 或 grey。Test、Grey、Stable 是三个独立槽位；常见的逐步发布顺序是产品操作路径，不是服务端强制状态机。
+Grey 是服务端运行目标选择，不是新的 ApplicationVersion 状态，也不是访问权限或客户端 Filter。Grey 必须以同一分区的 Stable 为回退基线，但 Grey Version 不要求曾经进入 Test。
 
 ### 已确认的设计选择
 
-1. stable 与 test 一样按 `(applicationId, rpcApiMajor)` 分区，并共享同一个 Publication revision。
-2. 设置或替换 stable 使用已批准 Version；不要求存在 test/grey 历史。
-3. 清空是管理员的日常停止公开分发手段。平台紧急处置和 Application 级禁用由后续独立用例定义。
-4. 回退不建立新状态；管理员把 stable 重新设置为一个当前仍具资格的历史 Version，即构成一次可审计回退。
-5. Publication 在全部槽位为空时仍保留，不删除身份、revision 或历史。
-6. 未来只允许在已有 stable 基线时建立 grey；存在 grey rollout 时不能清空 stable。
-7. STABLE 使用独立于 TEST/GREY 的 OAuth registration 和 credential，但同一 Application 的 sector/sub 仍只由 Auth 按 Application 管理。
+1. GreyRollout 按 `(applicationId, rpcApiMajor)` 保存于 ApplicationPublication，并与 Test、Stable 共用 Publication revision。
+2. 暴露比例使用万分比 `exposureBasisPoints`，有效范围为 `1..10000`；停止灰度使用显式 Clear，不用比例 0 表达。
+3. 只对可信的已登录 `authId` 分桶。相同 rollout、相同 authId 的结果在服务端实例、请求和设备之间一致。
+4. 首次建立 rollout 时生成 32 字节 CSPRNG `cohortSeed` 和 UUIDv7 `rolloutId`。二者在比例调整和 Grey Version 替换时保持不变；Clear 后再次建立时重新生成。
+5. 扩大暴露、首次建立和替换 Version 必须做完整发布复检；缩小暴露和 Clear 是风险收敛操作，不依赖外部 Scope/URL 服务。
+6. Grey 可以暂时与 Stable 指向同一 Version。这允许先设置 Stable、再 Clear Grey 的两步提升，不建立隐式原子 Promote 行为。
+7. GREY 使用独立于 TEST/STABLE 的 OAuth registration、credential 和 Auth grant；同一 Application 的 sector/sub 仍由 Auth 按 Application 管理。
 
 ### 输入与身份
 
@@ -80,19 +80,20 @@ applicationId: ApplicationId
 rpcApiMajor: int32
 ```
 
-设置或替换命令：
+建立、调整或替换命令：
 
 ```text
-SetStablePublicationCommand {
+SetGreyRolloutCommand {
   versionId: ApplicationVersionId
-  expectedPublicationRevision: optional int64
+  exposureBasisPoints: int32  // 1..10000
+  expectedPublicationRevision: int64
 }
 ```
 
 清空命令：
 
 ```text
-ClearStablePublicationCommand {
+ClearGreyRolloutCommand {
   expectedPublicationRevision: int64
 }
 ```
@@ -106,63 +107,80 @@ DeveloperIdentity {
 }
 ```
 
-设置命令中 `expectedPublicationRevision=null` 表示预期 Publication 尚不存在，只允许创建；正整数表示预期记录存在且 revision 精确匹配。清空只能操作已存在 Publication，因此 expected revision 必须为正整数。
+Grey 必须依附已有 Stable，因此两个命令的 expected revision 均为必填正整数。请求不能指定 publicationId、rolloutId、cohortSeed、historyId、审核引用、外部策略版本、审计字段、OAuth clientId 或结果 revision。
 
-请求不能指定 publicationId、historyId、审核引用、外部策略版本、审计字段、OAuth clientId 或结果 revision。
+### 建立、调整或替换主流程
 
-### 设置或替换主流程
+1. 从可信身份取得 authId 和 developerStatus，校验 developerStatus=`APPROVED`、rpcApiMajor `>= 1`、versionId 为 UUIDv7、exposureBasisPoints 在 `1..10000`，expected revision 为正整数。
+2. 加载 Application，确认调用者是当前 admin；再加载 ApplicationPublication，确认它属于目标 Application/major、revision 精确匹配且 stableVersionId 非空。记录损坏的 Grey-without-Stable 状态属于内部不变量异常。
+3. 若当前 GreyRollout 的 versionId 和 exposureBasisPoints 已与命令相同，返回当前 Publication、`changed=false`、`history=null`；不调用外部服务，不读取 Clock、IDGenerator 或随机源。
+4. 把真实变化分类为：
+   - `START`：当前没有 GreyRollout。
+   - `INCREASE`：Version 相同，新比例更大。
+   - `DECREASE`：Version 相同，新比例更小。
+   - `REPLACE`：Version 改变；比例可以同时改变。
+5. `START`、`INCREASE` 和 `REPLACE` 完整验证：
+   - Application 仍存在且管理关系未改变。
+   - 当前公开 Profile 指向同一 Application 的有效 APPROVED ProfileRevision。
+   - 目标 Version 属于该 Application、覆盖 rpcApiMajor，并保持完整 APPROVED Review/snapshot 一致性。
+   - 按 Review snapshot 重新执行 ScopeCatalog 与 LaunchURLSubmissionPolicy。
+   - Version 的 PKCE/confidential redirects 非空时，分别存在 GREY PUBLIC/CONFIDENTIAL registration；CONFIDENTIAL 还存在 credential。
+6. `DECREASE` 只读取本地权威数据并验证当前管理员、Publication revision、Stable/Grey 状态，不调用 ScopeCatalog、URL 预检或 OAuth 外部依赖。
+7. `START` 生成 rolloutId、32 字节 cohortSeed、historyId 和 changedAt。其他变化保留当前 rolloutId/cohortSeed，只生成 historyId 和 changedAt。
+8. 在同一事务中取得 Application 写栅栏并重复相应检查，然后：
+   - 写入新的 GreyRollout。
+   - 共享 Publication revision 增加 1，更新 updatedBy/updatedAt。
+   - 按变化类型追加一条不可变 History。
+9. 返回 `changed=true`、完整 Publication 和本次 History。cohortSeed 不进入响应、日志、错误或普通追踪属性。
 
-1. 从可信身份取得 authId 和 developerStatus，校验 developerStatus=`APPROVED`、rpcApiMajor `>= 1`、versionId 为 UUIDv7，以及 expected revision 语义合法。
-2. 加载候选并确认：
-   - Application 存在，调用者是当前 admin。
-   - 当前公开 Profile 指向同一 Application 的 APPROVED ProfileRevision，内容满足既有不变量。
-   - Version 属于该 Application、状态为 APPROVED、RPC range 覆盖 rpcApiMajor。
-   - 最新 ApplicationReview 具有完整 APPROVED decision，Version 内容、revision 与 snapshot 一致。
-   - Publication 的存在性和 revision 符合请求预期。
-3. 如果现有 stableVersionId 已等于目标 versionId，返回当前 Publication、changed=false、history=null；不执行外部复检，不读取 Clock 或 IDGenerator。
-4. 针对批准 snapshot：
-   - 通过 ScopeCatalog 确认 scopes 当前仍可申请并取得 catalog revision。
-   - 通过 LaunchURLSubmissionPolicy 重新执行公网 HTTPS/DNS 预检并取得 policy version。
-   - 读取 `(applicationId, STABLE)` OAuth registration；pkce redirect 非空要求 PUBLIC identity，confidential redirect 非空要求 CONFIDENTIAL identity 及 credential。空数组允许发布。
-5. 为首次创建所需的 Publication 和本次 History 生成 UUIDv7，并取得 changedAt。
-6. Repository 在同一事务中通过 Application、Version/Review、Profile、OAuth registration/credential 与 Publication 写入栅栏重新确认上述事实，然后：
-   - Publication 不存在时创建 revision=1、stableVersionId=目标 Version、test/grey 为空的记录。
-   - Publication 已存在时只替换 stableVersionId，并把共享 revision 增加 1。
-   - 插入 `SET_STABLE_VERSION` History，记录旧/新 Version、批准 Review 和外部复检版本。
-7. 返回 Publication、History 和 changed=true。
+`REPLACE` 即使同时降低比例，仍按引入新运行内容处理，必须完成全部复检。目标 Version 与 Stable 相同时不报错，也不隐式 Clear Grey。
 
 ### 清空主流程
 
-1. 校验可信 DeveloperIdentity、rpcApiMajor 和正的 expectedPublicationRevision。
-2. 在一致读取中确认 Application 当前管理员、Publication 归属和 revision。
-3. 若 stableVersionId 已为空且 greyRollout 也为空，返回当前 Publication、changed=false、history=null；不读取 Clock 或 IDGenerator。若 stable 为空但 grey 非空，属于持久化不变量损坏，返回 `ApplicationPublicationStateInconsistent`。
-4. 若 stableVersionId 非空且 greyRollout 非空，返回 `StablePublicationRequiredByGrey`。清空不能制造只有 grey、没有 stable 的运行配置。
-5. 生成 historyId 和 changedAt，在同一事务中重新取得 Application 写栅栏、复查管理员、Publication revision、stableVersionId 和 greyRollout，然后：
-   - 把 stableVersionId 设为空。
-   - shared revision 增加 1，更新审计。
-   - 插入 `CLEAR_STABLE_VERSION` History，保存 previousVersionId；newVersionId、approvedReviewId 和外部策略版本为空。
-6. 即使 test 和 grey 也为空，保留 Publication 记录，返回 changed=true。
+1. 校验可信身份、路径和 expected revision。
+2. 加载 Application 并确认调用者是当前 admin，再加载已有 Publication 并确认 revision 匹配。Publication 不存在时返回 NotFound。
+3. 若 stableVersionId 为空且 GreyRollout 非空，返回内部不变量异常；若 stableVersionId 存在且 GreyRollout 已为空，返回当前 Publication、`changed=false`、`history=null`，不读取 Clock 或 IDGenerator。
+4. 生成 historyId 和 changedAt，在同一事务中取得 Application 写栅栏，复查管理员、Publication revision、Stable/Grey 指针，然后：
+   - 清空 GreyRollout。
+   - 共享 revision 增加 1，更新 updatedBy/updatedAt。
+   - 追加 `CLEAR_GREY_ROLLOUT` History。
+5. 返回 `changed=true`。Stable 和 Test 均不改变；不调用 ScopeCatalog、URL 预检或 OAuth 外部依赖。
 
-清空不要求重新检查旧 Version、Review、Profile、scope、launch URL 或 OAuth registration，因为该操作只减少公开可用性。清空不删除 STABLE OAuth registration、clientId、credential、Auth grant 或审计事实；后续运行解析因没有 stable 指针而失败关闭，Auth 自行依据其 token/grant 规则处理既有凭据。
+Clear 后旧 rolloutId/cohortSeed 不得复用。后续 Set 创建新的 rollout 和 cohort。
+
+### 确定性分桶
+
+分桶输入只能使用服务端取得的可信 authId，不能使用请求正文、设备 ID、IP、cookie、clientId、Tester Membership 或可由应用选择的字段。
+
+规范算法 `grey-bucket-v1`：
+
+```text
+auth = exact UTF-8 bytes of trusted authId
+message = ASCII("iwut-grey-v1") || 0x00 || uint32be(len(auth)) || auth
+digest = HMAC-SHA-256(key=cohortSeed, message=message)
+bucket = uint64be(digest[0:8]) mod 10000
+matched = bucket < exposureBasisPoints
+```
+
+authId 长度按 UTF-8 byte count 编码，不做大小写转换或 Unicode normalization。实现必须使用相同的无符号大端解释和取模方式，并提供跨实现固定测试向量。
+
+在同一 rollout 内提高比例具有单调性：已经命中的用户不会因为比例增加而退出；降低比例只移除 bucket 较高的用户。替换 Grey Version 不改变 cohort。Clear 后新 rollout 使用新 seed，不承诺与旧 cohort 的关系。
+
+cohortSeed 是内部随机材料，不是用户凭证，但不得通过管理员 API、Auth provider、日志、指标 label 或客户端响应披露。它保存在当前 GreyRollout，并在首次 SET History 的内部持久化事实中保留，以支持历史资格审计；普通 History API 不返回该字段。
 
 ### 异常流程
 
 - 缺少身份：`DeveloperIdentityRequired`。
 - developerStatus 不是 APPROVED：`DeveloperApprovalRequired`。
-- rpcApiMajor、versionId 或 expected revision 非法：对应稳定输入错误。
-- Application、Version 或预期存在的 Publication 不存在：对应 NotFound；跨 Application 关系也按 NotFound 处理。
+- rpcApiMajor、versionId、exposureBasisPoints 或 expected revision 非法：对应稳定输入错误。
+- Application、Version 或 Publication 不存在：对应 NotFound；跨 Application 关系也按 NotFound 处理。
 - 调用者不是当前管理员：`ApplicationAdminRequired`。
-- Version/Review 未批准或失去资格：`ApplicationVersionNotApproved`。
-- Review、Version 或 snapshot 关系损坏：`ApplicationReviewStateInconsistent`。
-- 没有当前公开资料：`ApplicationProfileRequired`。
-- 公开资料指针或内容损坏：`ApplicationProfileStateInconsistent`，映射 500/INTERNAL。
-- Version 不覆盖 rpcApiMajor：`ApplicationVersionRpcApiIncompatible`。
-- Publication 存在性或 revision 与预期不符：既有 Publication 冲突错误。
-- scope、URL 或其依赖检查失败：复用 UC-APP-007 的对应错误。
-- 非空 redirect 数组缺少 STABLE 对应 identity/credential：`OAuthClientRegistrationRequired`。
-- grey 仍存在时清空 stable：`StablePublicationRequiredByGrey`。
-- stable 为空但 grey 非空，或 Publication 字段组合违反 action/state 不变量：`ApplicationPublicationStateInconsistent`，映射 500/INTERNAL。
-- revision 溢出、ID/Clock/存储失败或数据不变量损坏：内部失败；不得留下部分指针或 History。
+- 没有 stable 基线：`GreyStableBaselineRequired`，映射 HTTP 422 / gRPC FAILED_PRECONDITION。
+- Version/Review 未批准、snapshot 损坏、Profile 缺失/损坏、RPC major 不兼容：复用 UC007/020 的对应错误。
+- START、INCREASE 或 REPLACE 的 Scope、URL 或 OAuth 复检失败：复用既有错误；GREY registration 不能由 TEST/STABLE 替代。
+- Publication revision 不匹配：既有 Publication conflict。
+- Grey-without-Stable、rolloutId/seed/比例字段组合损坏：`ApplicationPublicationStateInconsistent`，映射 HTTP 500 / gRPC INTERNAL。
+- 随机源、HMAC、ID、Clock、存储、revision 溢出或事务失败：内部失败；不得留下部分 Rollout、History 或 revision。
 
 ### 最小领域模型变化
 
@@ -172,7 +190,12 @@ ApplicationPublication {
   applicationId
   rpcApiMajor
   testVersionId?
-  greyRollout?       // 后续 UC 定义；当前必须为空
+  greyRollout? {
+    rolloutId
+    versionId
+    exposureBasisPoints
+    cohortSeed       // internal only
+  }
   stableVersionId?
   revision
   createdBy / createdAt
@@ -180,15 +203,13 @@ ApplicationPublication {
 }
 ```
 
-`testVersionId` 从存储层必填改为可空，因为 stable 可以首次创建 Publication，清空后也允许 EMPTY。该变化不改变 UC-APP-007 的设置语义：UC007 成功后 testVersionId 必然非空。
-
-History action 扩展为 `SET_TEST_VERSION | SET_STABLE_VERSION | CLEAR_STABLE_VERSION`。previous/new/Review/外部策略字段的条件必填关系由 action 决定。
+不建立独立 GreyRollout 聚合或按用户保存分桶结果。当前 Publication 是运行配置权威；History 用于审计，不作为事件溯源状态。
 
 ### API 草图
 
 ```text
-PUT    /v1/applications/{applicationId}/publications/{rpcApiMajor}/stable-slot
-DELETE /v1/applications/{applicationId}/publications/{rpcApiMajor}/stable-slot
+PUT    /v1/applications/{applicationId}/publications/{rpcApiMajor}/grey-rollout
+DELETE /v1/applications/{applicationId}/publications/{rpcApiMajor}/grey-rollout
 ```
 
 PUT body：
@@ -196,155 +217,165 @@ PUT body：
 ```json
 {
   "versionId": "version-uuid",
-  "expectedPublicationRevision": 3
+  "exposureBasisPoints": 500,
+  "expectedPublicationRevision": 7
 }
 ```
 
-DELETE 使用 `If-Match` 或等价显式字段表达 expectedPublicationRevision；不得依赖客户端最后写入胜出。创建返回 201，替换、清空和 no-op 返回 200。响应返回 changed、当前完整 Publication 和可空 History。
+DELETE 只通过 query 传递 `expected_publication_revision`，不接收 body。两个响应复用 `{ changed, publication, history? }`。
 
-独立 API 仓库继续使用 package `app_center.v1.application_publication` 和既有 `ApplicationPublication` service，新增：
-
-```text
-SetApprovedVersionInStableSlot
-  PUT /v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot
-  body: command
-
-ClearStableSlot
-  DELETE /v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot
-  query: expected_publication_revision
-```
-
-`SetApprovedVersionInStableSlotRequest` 包含路径字段和 `SetApprovedVersionInStableSlotCommand { version_id, optional expected_publication_revision }`。`ClearStableSlotRequest` 直接包含路径字段和必填正整数 `expected_publication_revision`；HTTP 不接收 body，gRPC 使用同一字段。
-
-两个响应复用 `{ changed, publication, history? }` 结构。为表达 stable-only 和 EMPTY：
-
-- `ApplicationPublicationResource.test_version_id` 保持 field 4，但改为 `optional string`。
-- 新增 `optional string stable_version_id = 10`。
-- History 的 `new_version_id`、`approved_review_id`、`scope_catalog_revision`、`preflight_policy_version` 保持既有 field number 并改为 optional；SET action 必填，CLEAR action 为空。
-- OAuth Provider 的 `AuthorizationContext.tester_membership_id` 保持 field 3 并改为 optional；TEST 必填，STABLE 为空。
-
-新增 publication error reason：
+独立 API 仓库继续使用 `app_center.v1.application_publication.ApplicationPublicationService`，新增：
 
 ```text
-ERROR_REASON_STABLE_PUBLICATION_REQUIRED_BY_GREY = 23
-ERROR_REASON_APPLICATION_PUBLICATION_STATE_INCONSISTENT = 24
+SetGreyRollout
+ClearGreyRollout
 ```
 
-前者映射 `FAILED_PRECONDITION / 422`；后者映射 `INTERNAL / 500`。其余错误继续复用 UC007 已有稳定 reason。HTTP 请求不能通过 query 覆盖 PUT command；DELETE 只允许三个已声明字段。
+`ApplicationPublicationResource` 新增可空 `GreyRolloutResource grey_rollout`；资源只返回 rolloutId、versionId 和 exposureBasisPoints，不返回 cohortSeed。History 资源增加 Grey action 及可空 previous/new exposure、rolloutId 字段；内部 seed 不进入 Proto。
 
-Mongo migration 固定为 `0016_stable_publication`：
+Application Publication error reason 追加：
 
-- `application_publications` 增加可空 stableVersionId，并把 testVersionId 改为可空；允许 test-only、stable-only、二者同时存在和 EMPTY，当前不允许写 greyRollout。
-- `application_publication_history` 接受三个 action，并按 action 校验条件必填字段；历史 SET_TEST 记录不重写。
-- `application_oauth_registrations` channel validator 从仅 TEST 扩展为 TEST/STABLE；GREY 继续拒绝。
-- migration ledger、fresh install、0015→0016 顺序升级、重复执行和回滚测试必须覆盖这些变化。
+```text
+ERROR_REASON_GREY_STABLE_BASELINE_REQUIRED = 25
+```
 
-不得改变既有 UC007 test API 的命令语义；它只是开始返回带 presence 的完整 Publication/History 资源。
+非法比例复用稳定 INVALID_ARGUMENT reason；Grey user 未命中在 OAuth provider 面复用 `ERROR_REASON_OAUTH_CLIENT_RUNTIME_UNAVAILABLE`，不建立可用于探测 bucket 的公开 reason。
+
+Mongo migration 预留为 `0017_grey_rollout`：
+
+- `application_publications` 接受完整 GreyRollout，并强制 `greyRollout => stableVersionId`。
+- `application_publication_history` 接受五个 Grey action 及条件字段；既有 Test/Stable History 不重写。
+- `application_oauth_registrations` channel validator 从 TEST/STABLE 扩展为 TEST/GREY/STABLE。
+- migration ledger、fresh、0016→0017、重复执行、回滚和非法部分 rollout 均须验证。
 
 ### 验收场景
 
-- 可以用 APPROVED、exact-major 兼容且有当前公开资料的 Version 直接建立 stable，无需 test/grey 历史。
-- stable-only Publication 可以首次创建；testVersionId 为空且 stableVersionId 非空。
-- 替换 stable 增加共享 revision 并保留旧 Version/Review；设置相同 Version 为 no-op。
-- 清空 stable 保留 Publication；所有槽位为空时形成 EMPTY 记录，后续 set 使用其正 revision。
-- 存在 grey 时不能清空 stable；无 grey 时 test 不阻止清空。
-- 把槽位设置回历史 Version 仍重新执行当前资格复检并写普通 SET History。
-- 当前公开资料缺失时不能 set，但可以 clear；损坏资料指针 set 返回 INTERNAL。
-- 非空 PKCE/confidential redirects 分别要求 STABLE PUBLIC/CONFIDENTIAL registration；TEST registration 不能代替。
-- STABLE registration 与 TEST 完全隔离，clientId 稳定且 major/Version 变化不重建。
-- STABLE provider 对普通有效用户不要求 Tester；TEST provider 行为不变。
-- stable set/clear 与 test 修改共享 revision，两个相同 expected revision 的并发命令最多一个提交。
-- clear stable 与 Auth 解析/授权并发时结果具有明确先后：旧 snapshot 先完成可以形成在途结果，clear 先提交则后续解析失败；App 不返回跨 revision 混合上下文。
-- 管理员转让、Profile 切换、Version 资格变化和 registration 建立竞争均有明确先后结果。
-- 事务回滚不留下孤立 History、部分指针或半创建 OAuth credential。
-- Proto field presence 能区分 stable-only、test-only 和 EMPTY；DELETE 的 expected revision 缺失、零或 query 重复均拒绝。
-- 0016 对 fresh、sequential 和重复 migration 产生相同 validator/index 结果；既有 SET_TEST History 保持可读。
+- 没有 Stable 或 Publication 不存在时不能建立 Grey。
+- 可以对 APPROVED、exact-major Version 建立 1、500 或 10000 basis points 的 Grey；比例 0 和 10001 被拒绝。
+- 首次 Set 生成 rolloutId/seed；响应和日志不含 seed。
+- 相同 Version/比例是无外部调用、无 Clock/随机源的 no-op。
+- 5%→20% 保留 rolloutId/seed，原 5% 用户仍命中；20%→5% 只移除高 bucket 用户。
+- 替换 Grey Version 保留 cohort；即使同时降低比例也执行完整复检。
+- 降低比例和 Clear 在 Scope/URL/OAuth 外部依赖不可用时仍可成功。
+- Clear 保留 Stable、Test、Publication 与历史；再次 Set 生成新 rolloutId/seed。
+- 相同 authId 在不同实例和设备上命中一致；固定跨实现向量验证 UTF-8、长度前缀、大端和取模。
+- 匿名请求不做 Grey 分桶；客户端自报 bucket 或 channel 不能改变服务端结果。
+- GREY registration/clientId/credential 与 TEST/STABLE 隔离，major 和 Version 变化不重建 clientId。
+- 非 Grey 用户直接使用 GREY client 时，Auth provider 返回统一 runtime unavailable；Grey 用户可取得无 Tester Membership 的上下文。
+- PublishedRedirectSnapshot 纳入当前 Grey Version，Clear 后不再纳入；DISABLED identity 仍按既有 sector 规则保留已发布回调事实。
+- Grey 与 Test/Stable 命令使用相同 expected revision，并发命令最多一个提交。
+- 设置 Stable 为 Grey Version 不自动 Clear Grey；显式 Clear 后所有用户使用 Stable channel。
+- 管理员转让、Profile 切换、Version 资格变化、registration 建立和 Auth 解析竞争都有明确先后结果。
+- 事务回滚不留下部分 rollout、孤立 History 或错误 revision。
+- 0017 migration 对 fresh、sequential 和重复运行产生相同 validator/index 结果。
 
 ### 依赖与实现边界
 
-- 复用 UC-APP-007 的 Publication 聚合、History、批准事实复查、ScopeCatalog、LaunchURLSubmissionPolicy、Profile gate、Application 写栅栏和事务模型。
-- 复用 UC-APP-018/019 的 registration/credential 与 Auth-only provider；实现时扩展渠道 allowlist，不建立第二套 OAuth 模型。
-- 需要显式 migration 放宽历史 Publication 的 testVersionId 必填约束、增加 stableVersionId 与新的 History action/条件 validator；历史记录不重写。
-- 需要同步修改独立 API 子模块和 [App OAuth provider 契约](../../platform/contracts/app-oauth-client-v1.md)，并做真实 App/Auth 跨服务验证。
-- Catalog、统一启动解析、Application disable、Grey rollout 和 Filter 不属于本工作包；stable 指针可以先存在，但普通用户入口只有在后续查询契约完成后才形成产品闭环。
+- 依赖已完成的 UC-APP-007/020 Publication、共享 OCC/History、Application 写栅栏、Profile gate、ScopeCatalog 和 URL policy。
+- 依赖 UC-APP-018/019 的 channel registration、credential 和 Auth-only provider；只扩展 GREY allowlist 与运行资格，不建立第二套 OAuth 模型。
+- 需要 CSPRNG、HMAC-SHA-256、固定编码测试向量和 migration `0017_grey_rollout`。
+- 需要同步独立 API 仓库与 App OAuth provider 跨服务契约，并以真实 MongoDB 和 App/Auth E2E 验证。
+- 统一启动解析、Catalog、Filter、test clear、Application disable、Auth grant/code/token/sector/sub 和前端不属于本工作包。
+- 实现必须使用生成 brief，并保持 API 子模块先提交、服务随后更新 gitlink 的交付顺序。
 
-## 业务规则（UC-APP-020 权威正文）
+## 业务规则（UC-APP-021 权威正文）
 
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012 -->
-### BR-OAC-012：STABLE OAuth channel 激活
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-oac-013 -->
+### BR-OAC-013：GREY OAuth channel 与 cohort 资格
 
-UC-APP-020 被接受后，UC-APP-018 的五个管理员方法必须接受 channel=`STABLE`，并继续以 `(applicationId, channel)` 隔离 registration、clientId、status、authorizationEpoch 和 confidential credential。STABLE 与 TEST clientId 不共享，但都映射到同一 Application；Auth grant 继续以 `(authId, applicationId, channel)` 隔离。
+UC-APP-021 被接受后，UC-APP-018 的五个管理员方法接受 channel=`GREY`，继续以 `(applicationId, channel)` 隔离 registration、clientId、status、authorizationEpoch 和 confidential credential。GREY client 不能由 TEST/STABLE client 代替。
 
-UC-APP-019 的五个 Auth-only provider 方法必须支持 STABLE：
+UC-APP-019 的五个 Auth-only provider 方法支持 GREY：
 
-- runtime 使用 exact-major stableVersionId，不读取 test 或未来 grey。
-- Auth 仍负责确认当前用户有效并提供可信 authId；App 的 authorization context 不要求 Tester Membership。共享契约中的 testerMembershipId 改为按渠道可空：TEST 必填，STABLE 为空。
-- redirect/scopes/display 与 TEST 一样来自同一个批准 Version/Review/Profile snapshot。
-- PublishedRedirectSnapshot 纳入已发布 STABLE major 的批准回调；仍忽略历史、草稿和未登记 type。
-- 没有 stable、client channel 不匹配、Version/Profile 不一致或 client DISABLED 时失败关闭。
+- runtime 精确读取请求 rpcApiMajor 的 GreyRollout Version，不读取 Test/Stable 作为替代。
+- user authorization context 使用可信 authId 重新执行 `grey-bucket-v1`；未命中当前 cohort 时返回统一 runtime unavailable，不暴露 bucket/seed。
+- GREY 与 STABLE 一样不要求 Tester Membership，testerMembershipId 为空。
+- redirect/scopes/display 来自当前 Grey Version 的批准 Review/Profile snapshot；PublishedRedirectSnapshot 纳入当前已发布 Grey Version 的批准回调。
+- runtime tuple 继续绑定 Publication revision；比例、目标或 Clear 改变后，旧 tuple 不能生成新授权上下文。
 
-App 仍不保存 sector/sub，不签发 code/token。STABLE provider 扩展继续仅开放原生 gRPC，并复用现有五个方法级 service permission。
+App 不生成 sector/sub，不签发 code/token。默认的 `test > grey > stable` 路由由后续统一解析契约负责；provider 只验证调用方明确请求的 GREY client 在当前用户和 runtime tuple 下是否有资格。
 
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-011 -->
-### BR-PUB-011：Stable 管理权限
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-020 -->
+### BR-PUB-020：Grey 管理权限与 Stable 基线
 
-设置、替换和清空 stable 的操作者必须具有可信 `APPROVED` Developer 身份，并在最终事务中仍是 Application 当前 admin。管理员转让先提交后，旧管理员不能改变 stable；发布操作先提交则形成一条完整审计事实。
+只有 developerStatus=`APPROVED` 的当前 Application admin 可以管理 GreyRollout。Set 和 Clear 都要求目标 exact-major Publication 已存在且 stableVersionId 非空；Grey 不能单独形成普通公开入口。存在 Grey 时 [BR-PUB-017](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-017) 继续禁止清空 Stable。
 
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-012 -->
-### BR-PUB-012：Stable 发布资格与直接发布
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-021 -->
+### BR-PUB-021：Grey rollout 身份与比例
 
-stableVersionId 只能引用同一 Application、覆盖当前 rpcApiMajor 且当前仍具有完整 APPROVED Review/snapshot 一致性的 Version。设置时还必须存在当前已批准公开资料。
-
-Version 不需要曾进入 test 或 grey。设置 stable 不修改 Version 审核状态，不修改 test/grey，也不自动形成目录响应。一个 APPROVED Version 可以同时被多个 major 和多个槽位引用。
-
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-013 -->
-### BR-PUB-013：公开默认目标边界
-
-stable 是普通用户的默认发布目标，但本用例只保存权威指针。Application 进入公开候选目录还必须由后续 Catalog/Resolver 在同一查询语义中确认当前公开 Profile、Application 可用状态、exact-major Publication、Version 资格和 host capabilities。
-
-没有 stable 的 Application 不进入普通公开候选集。TEST-only Application 后续只进入“我参与的测试”入口，不混入普通目录；Filter 只能影响客户端展示，不能代替 stable 资格或服务端授权。
-
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-014 -->
-### BR-PUB-014：共享乐观并发与 no-op
-
-test、grey、stable 和 clear 操作共享 Publication revision。首次由 set stable 创建时 revision=1；每次真实变化增加 1；revision 不匹配时不自动覆盖。目标已生效或 stable 已为空时是 no-op，不增加 revision、不写 History、不改变审计时间。
-
-首次 set 必须预期不存在；已有记录上的 set/clear 必须携带精确正 revision。空 Publication 仍是“已存在”，后续设置必须使用它的当前 revision，不能再次用 null 创建。
-
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-015 -->
-### BR-PUB-015：Stable PublicationHistory
-
-每次真实设置/替换追加：
+一个 ApplicationPublication 同时至多有一个 GreyRollout：
 
 ```text
-SET_STABLE_VERSION {
-  previousVersionId?
-  newVersionId
-  approvedReviewId
-  scopeCatalogRevision
-  preflightPolicyVersion
-  changedBy
-  changedAt
-  publicationRevision
+GreyRollout {
+  rolloutId: UUIDv7
+  versionId: ApplicationVersionId
+  exposureBasisPoints: 1..10000
+  cohortSeed: 32 random bytes
 }
 ```
 
-每次真实清空追加：
+比例 0 不表示对象状态；停止分流必须执行 Clear。10000 表示所有参与 Grey 分桶的已登录用户都命中，但 Stable 仍必须存在作为持久化基线和非 Grey/匿名回退目标。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-022 -->
+### BR-PUB-022：Grey Version 发布资格
+
+Grey Version 必须属于同一 Application、覆盖当前 rpcApiMajor，并保持完整 APPROVED Review/snapshot 一致性；Application 必须存在当前有效的 APPROVED ProfileRevision。Version 不要求曾进入 Test，也可以与 Stable 指向同一 Version。设置 Grey 不改变 Version 状态、Stable 或 Test。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-023 -->
+### BR-PUB-023：确定性已登录用户分桶
+
+Grey 只对可信已登录 authId 使用 `grey-bucket-v1` 计算。客户端不得自报 bucket、seed 或命中结果。相同 rollout/authId 的结果必须稳定；比例提高保持 cohort 单调扩张。匿名用户不参与分桶，由后续统一解析直接使用 Stable。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-024 -->
+### BR-PUB-024：cohort 生命周期与最小披露
+
+START 创建新的 rolloutId/cohortSeed；INCREASE、DECREASE 和 REPLACE 保留二者；Clear 结束该 rollout，后续 START 不得复用。cohortSeed 只能存在于内部当前状态和首次 SET 的内部审计事实，不通过任何外部资源、日志或指标披露。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-025 -->
+### BR-PUB-025：共享 OCC、变化分类与 no-op
+
+Grey 与 Test/Stable 共用 Publication revision。所有 Grey 命令要求正 expected revision 精确匹配；真实变化只增加一次 revision。相同 Version 和比例是 no-op。Set 必须分类为 START、INCREASE、DECREASE 或 REPLACE，以决定 seed 生命周期、History action 和外部复检强度。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-026 -->
+### BR-PUB-026：Grey PublicationHistory
+
+真实变化追加一个不可变 History，action 为：
 
 ```text
-CLEAR_STABLE_VERSION {
-  previousVersionId
-  newVersionId: null
-  approvedReviewId: null
-  scopeCatalogRevision: null
-  preflightPolicyVersion: null
-  changedBy
-  changedAt
-  publicationRevision
-}
+SET_GREY_ROLLOUT
+INCREASE_GREY_EXPOSURE
+DECREASE_GREY_EXPOSURE
+REPLACE_GREY_VERSION
+CLEAR_GREY_ROLLOUT
 ```
 
-History 不可修改，是操作审计而非当前状态来源。把 stable 设置为一个历史 Version 就是回退；History 仍使用 `SET_STABLE_VERSION`，previous/new 指针足以表达结果，不增加 `ROLLBACK` 状态。
+History 保存 rolloutId、previous/new Version、previous/new exposure、changedBy/changedAt 和提交后的 publicationRevision。START、INCREASE 和 REPLACE 还保存 approvedReviewId、scopeCatalogRevision、preflightPolicyVersion；DECREASE/CLEAR 不伪造外部复检事实。使用独立的 INCREASE/DECREASE action，使持久化 validator 不需要比较两个数值才能判断外部事实是否必填。首次 SET 的内部持久化事实保存 cohortSeed，普通 API 永不返回。no-op 不写 History。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-027 -->
+### BR-PUB-027：按风险方向复检
+
+START、INCREASE、REPLACE 会新增用户或运行内容，必须按 [BR-PUB-016](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-016) 同等强度复查 Profile、Version/Review/snapshot、Scope、URL 和 GREY OAuth registration/credential。DECREASE 与 Clear 只收敛风险，不依赖外部检查；外部依赖故障不能阻止管理员降低或停止 Grey。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-028 -->
+### BR-PUB-028：清空与损坏状态
+
+Clear 只移除 GreyRollout，保留 Stable、Test、Publication 和历史。Publication 存在且 Grey 已空是 no-op；Publication 不存在是 NotFound。任何 Grey-without-Stable 或不完整 rollout 字段组合都是内部不变量异常，不以自动修复掩盖数据损坏。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-029 -->
+### BR-PUB-029：Grey 变化原子性
+
+最终事务必须取得 Application 写栅栏，复查当前管理员、Publication revision、Stable/Grey 状态，并按变化类型复查资格来源；Rollout、revision、审计和 History 必须一起提交。与 Test/Stable 修改、管理员转让、Profile 切换、Version 资格变化或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序。
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-030 -->
+### BR-PUB-030：不隐式提升或扩散
+
+Grey Set/Clear 不修改其他 rpcApiMajor、Test、Stable、Version 状态、Tester Membership 或 FilterRule。设置 Stable 为当前 Grey Version 不自动 Clear Grey；管理员随后显式 Clear 即完成两步提升。批量发布和原子 Promote 需要独立设计。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-020`
 
 <!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-016 -->
 ### BR-PUB-016：设置前复检与 STABLE OAuth
@@ -359,18 +390,6 @@ STABLE identity 可以在 Publication 之前登记。client 为 DISABLED 不阻�
 清空 stable 只移除 stable 指针，不删除 Publication。test 可以继续存在；未来 grey 必须以 stable 为基线，因此 greyRollout 非空时拒绝清空 stable。管理员应先清空 grey，再清空 stable。
 
 清空不删除 OAuth identity、credential、grant、Version、Review、Profile 或历史。全部槽位为空时 Publication 进入 EMPTY 形态并保留 revision，使后续并发和审计连续。
-
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-018 -->
-### BR-PUB-018：Stable 变化原子性
-
-设置事务必须原子复查当前 admin、Version/Review/snapshot、Profile、STABLE registration/credential、Publication revision，并同时提交指针、revision、审计和 History。清空事务原子复查当前 admin、Publication revision、stable/grey 指针，并同时提交清空与 History。
-
-与 test 修改、未来 grey 修改、管理员转让、审核资格撤销、Profile 切换或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序；失败不能留下部分状态。
-
-<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-019 -->
-### BR-PUB-019：不隐式扩散
-
-Stable set/clear 不得修改其他 rpcApiMajor、test/grey、Version 状态、Profile、Tester Membership 或 FilterRule，也不触发批量发布。一个 range 覆盖多个 major 时仍需逐 major 操作。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -642,6 +661,12 @@ App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 
 
 [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) 沿用同一组五个 provider 方法：STABLE runtime 精确读取 stableVersionId，用户上下文不要求 Tester Membership，testerMembershipId 按渠道为 TEST 必填/STABLE 为空，批准回调进入 sector 并集；管理面启用独立 `(applicationId, STABLE)` registration/credential。TEST 语义保持不变，STABLE client 不能代替 TEST client，Auth grant 继续按 `(authId, applicationId, channel)` 隔离。
 
+#### GREY 扩展
+
+[UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) 沿用同一组五个 provider 方法：GREY runtime 精确读取 exact-major GreyRollout 的 versionId；用户上下文使用 Publication 内部 cohortSeed 对可信 authId 重算 `grey-bucket-v1`，未命中时返回统一 runtime unavailable，不能披露 bucket 或 seed。GREY 不要求 Tester Membership，testerMembershipId 为空；批准回调进入 sector 并集。管理面启用独立 `(applicationId, GREY)` registration/credential，Auth grant 继续按 `(authId, applicationId, channel)` 隔离。
+
+比例、目标 Version 或 Clear 都改变共享 publicationRevision，因此登录前 runtime tuple 不能跨 rollout 变化继续使用。Provider 不负责 `test > grey > stable` 默认路由；后续统一解析先选择 channel，Provider 再验证明确的 GREY client 和用户 cohort。
+
 #### 消费点与契约验收
 
 Auth 在授权入口先解析 RuntimeConfiguration 并精确校验 redirect URI；登录后、用户确认和 code 兑换重新解析用户上下文。refresh、UserInfo 和每次委托签发按 OAuth/OIDC v1 的当前资格规则验证。confidential secret 只在 token/revoke 操作验证。
@@ -804,12 +829,12 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：后续设计顺序、变更记录
+- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：后续设计顺序、变更记录
+- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-002`（adr/ADR-002-partition-publication-by-rpc-api-major.md）：背景、为什么不使用 platform/target、考虑过的替代方案、结果、关联用例、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：GREY 扩展
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
 - `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射
 
@@ -817,6 +842,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
+| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `e8650715ef24` |
 | `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |

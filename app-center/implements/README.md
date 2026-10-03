@@ -45,7 +45,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前管理员管理范围；Version OAuth配置与Auth provider已由后续工作包交付，Auth授权和后续渠道独立交付） |
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC Provider 方法、本地 service caller registry 与逐方法权限、secret revision 验证、TEST exact-major/批准 Version/Review/Profile/Tester 单 Mongo snapshot、5秒 runtime tuple、sector 回调事实并集及完整 cross-service 验收；服务 `657eccd`、API `310fc10` | —（当前 TEST 后端范围；Auth grant/code/token、Scope enabled 过滤、sector/sub 与未来渠道由 Auth/后续 UC 交付） |
 | [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major stable set/replace/clear、共享 Publication OCC、EMPTY 保留与 History、0016 migration、HTTP/gRPC、STABLE OAuth 管理及五个 Auth-only Provider 方法、完整 cross-service 验收；服务 `531f077`、API `90519af` | —（当前 App Center 后端范围；Grey、test clear、Catalog 与 Auth grant/code/token 独立交付） |
-| [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `PROPOSED` | `NOT_STARTED` | — | 设计评审与接受；随后生成 brief 并实现 Grey rollout、0017 migration、GREY OAuth 与跨服务验收 |
+| [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `ACCEPTED` | `IN_PROGRESS` | Stable 基线、确定性 cohort、比例调整/替换/清空、按风险方向复检及 GREY OAuth 的权威设计 | 当前实现工作包；需完成 brief、API、0017 migration、双协议、Provider 和跨服务验收 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018、UC019 与 UC020 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -136,7 +136,7 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 
 - Auth 的 reviewer 权限签发/撤销生命周期。
 - Auth 普通 USER provision 与 trusted identity 签发。
-- UC-APP-021 Grey rollout 的评审与实现，以及 test clear、Filter 和 Catalog 的后续设计。
+- UC-APP-021 Grey rollout 的实现，以及 test clear、Filter 和 Catalog 的后续设计。
 - CI/CD、可观测性和生产部署。
 
 它们进入对应工作包前必须有明确契约，但不能提前渗入 Application 领域模型。

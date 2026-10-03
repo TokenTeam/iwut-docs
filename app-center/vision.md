@@ -54,7 +54,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - Application 管理查询、受控改名、归档、禁用和恢复；物理删除仍不是首版目标。
 - 协作者和角色。
 - 管理员转让；当前只为未来转让保留 adminId 语义。
-- ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销；Grey 发布已有 UC-APP-021 提案但尚未接受或实现。
+- ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销；Grey 发布已有已接受的 UC-APP-021，当前正在实现。
 - versionLabel 语义比较和 SemVer 校验。
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。

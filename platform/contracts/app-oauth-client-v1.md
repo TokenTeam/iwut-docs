@@ -4,7 +4,7 @@
 
 ## 所有权与调用方
 
-App Center 持有 Application＋channel 级稳定 client identity、confidential credential，以及依附 ApplicationVersion 的受审核 redirect URI 和 scopes。Auth 不保存另一份可独立修改的 client 注册表。管理规则见 [UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md)，可信读取规则见 [UC-APP-019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md)，协议见 [OAuth OIDC v1](oauth-oidc-v1.md)。
+App Center 持有 Application＋channel 级稳定 client identity、confidential credential，以及依附 ApplicationVersion 的受审核 redirect URI 和 scopes。Auth 不保存另一份可独立修改的 client 注册表。管理规则见 [UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md)，可信读取规则见 [UC-APP-019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md)，STABLE/GREY 渠道扩展分别见 [UC-APP-020](../../app-center/use-cases/UC-APP-020-manage-stable-publication-slot.md) 与 [UC-APP-021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md)，协议见 [OAuth OIDC v1](oauth-oidc-v1.md)。
 
 管理接口接受 SESSION 转换后的 [trusted identity](trusted-identity-v1.md) USER 身份。内部接口只接受 Auth 的 [service identity](trusted-service-identity-v1.md)，audience 固定为 `iwut-app-center`，权限来自 App Center 本地 caller registry；逐方法授权，不经过公网、HTTP 或 gRPC-Web，也不把 client secret 当服务间凭据。
 
@@ -59,9 +59,9 @@ secret 为 32 随机字节的 base64url 无 padding 字符串。App 仅存 `SHA-
 
 `ApplicationDisplay` 包含 profileRevisionId、displayName、可空 description 和可空 icon。全部内容来自 `currentPublishedProfileRevisionId` 指向的同一 Application、APPROVED ProfileRevision；不提供 Application 技术名称 fallback，也不返回 HTML。运行 tuple 中的 profileRevisionId 即 `display.profileRevisionId`，不在 RuntimeConfiguration 顶层重复保存。
 
-`AuthorizationContext` 包含完整 RuntimeConfiguration，加 authId 和 testerMembershipId。`expectedRuntimeVersion` 为 `(versionId, publicationRevision, profileRevisionId, adminAuthId)`；expectedRegistrationRevision 独立传递。App 必须以一个 Mongo snapshot 同时比较预期 tuple、读取运行配置、当前公开资料和 Tester 资格。
+`AuthorizationContext` 包含完整 RuntimeConfiguration，加 authId 和可空 testerMembershipId。TEST 必须返回当前 ACTIVE Tester episode；STABLE/GREY 为空。`expectedRuntimeVersion` 为 `(versionId, publicationRevision, profileRevisionId, adminAuthId)`；expectedRegistrationRevision 独立传递。App 必须以一个 Mongo snapshot 同时比较预期 tuple、读取运行配置、当前公开资料和渠道用户资格。
 
-redirectUris 来自批准 snapshot：PUBLIC 读取 pkceRedirectUris，CONFIDENTIAL 读取 confidentialRedirectUris；对应数组必须非空。requiredScopes/optionalScopes 来自同一 snapshot，不按 App 的 requestable 缓存过滤；Auth 根据 [Scope Catalog 契约](auth-scope-catalog-v1.md) 对应的当前权威 enabled 和 OAuth UC 执行最终授权。前端不能指定 versionId、redirect URI、scope、adminAuthId 或“已审核”标记；channel 必须与 client 登记值完全相等，rpcApiMajor 只选择该渠道的权威 Publication；不能把 TEST client 当成 STABLE client。
+redirectUris 来自批准 snapshot：PUBLIC 读取 pkceRedirectUris，CONFIDENTIAL 读取 confidentialRedirectUris；对应数组必须非空。requiredScopes/optionalScopes 来自同一 snapshot，不按 App 的 requestable 缓存过滤；Auth 根据 [Scope Catalog 契约](auth-scope-catalog-v1.md) 对应的当前权威 enabled 和 OAuth UC 执行最终授权。前端不能指定 versionId、redirect URI、scope、adminAuthId 或“已审核”标记；channel 必须与 client 登记值完全相等，rpcApiMajor 只选择该渠道的权威 Publication；TEST/GREY/STABLE client 不能互相替代。
 
 所有返回字段取自同一个 Mongo snapshot；observedAt 为建立 snapshot 的时刻，validUntil 不晚于 observedAt+5 秒。Auth 每个安全边界重新读取，不缓存延长。登录前后 registrationRevision 和 runtime tuple 必须一致；Profile 批准后当前公开指针发生变化也必须重新开始或重新展示。credentialRevision 只约束一次 secret 验证，不进入 runtime tuple。
 
@@ -77,13 +77,19 @@ Auth 用此快照提供标准 sector URI 的 JSON 清单。准备 OIDC 注册元
 
 ## 资格变化与失败
 
-client 不可用、对应回调数组为空、无 exact-major 渠道 Publication、无当前已批准公开资料或批准记录不一致均不可授权；TEST 还要求 ACTIVE Tester。当前支持 channel=`TEST/STABLE`，GREY 尚未启用。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
+client 不可用、对应回调数组为空、无 exact-major 渠道 Publication、无当前已批准公开资料或批准记录不一致均不可授权；TEST 还要求 ACTIVE Tester，GREY 还要求可信 authId 命中当前 rollout cohort。设计支持 channel=`TEST/GREY/STABLE`；GREY 随 UC-APP-021 工作包交付。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
 
-App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。未来灰度发布必须先定义运行资格，再扩展 channel。
+App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。
 
 ## STABLE 扩展
 
 [UC-APP-020](../../app-center/use-cases/UC-APP-020-manage-stable-publication-slot.md) 沿用同一组五个 provider 方法：STABLE runtime 精确读取 stableVersionId，用户上下文不要求 Tester Membership，testerMembershipId 按渠道为 TEST 必填/STABLE 为空，批准回调进入 sector 并集；管理面启用独立 `(applicationId, STABLE)` registration/credential。TEST 语义保持不变，STABLE client 不能代替 TEST client，Auth grant 继续按 `(authId, applicationId, channel)` 隔离。
+
+## GREY 扩展
+
+[UC-APP-021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 沿用同一组五个 provider 方法：GREY runtime 精确读取 exact-major GreyRollout 的 versionId；用户上下文使用 Publication 内部 cohortSeed 对可信 authId 重算 `grey-bucket-v1`，未命中时返回统一 runtime unavailable，不能披露 bucket 或 seed。GREY 不要求 Tester Membership，testerMembershipId 为空；批准回调进入 sector 并集。管理面启用独立 `(applicationId, GREY)` registration/credential，Auth grant 继续按 `(authId, applicationId, channel)` 隔离。
+
+比例、目标 Version 或 Clear 都改变共享 publicationRevision，因此登录前 runtime tuple 不能跨 rollout 变化继续使用。Provider 不负责 `test > grey > stable` 默认路由；后续统一解析先选择 channel，Provider 再验证明确的 GREY client 和用户 cohort。
 
 ## 消费点与契约验收
 

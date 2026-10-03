@@ -110,7 +110,7 @@ App 快照、委托期限及撤销传播上界按 [委托上下文契约](../../
 
 #### 所有权与调用方
 
-App Center 持有 Application＋channel 级稳定 client identity、confidential credential，以及依附 ApplicationVersion 的受审核 redirect URI 和 scopes。Auth 不保存另一份可独立修改的 client 注册表。管理规则见 [UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md)，可信读取规则见 [UC-APP-019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md)，协议见 [OAuth OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
+App Center 持有 Application＋channel 级稳定 client identity、confidential credential，以及依附 ApplicationVersion 的受审核 redirect URI 和 scopes。Auth 不保存另一份可独立修改的 client 注册表。管理规则见 [UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md)，可信读取规则见 [UC-APP-019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md)，STABLE/GREY 渠道扩展分别见 [UC-APP-020](../../app-center/use-cases/UC-APP-020-manage-stable-publication-slot.md) 与 [UC-APP-021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md)，协议见 [OAuth OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
 
 管理接口接受 SESSION 转换后的 [trusted identity](../../platform/contracts/trusted-identity-v1.md) USER 身份。内部接口只接受 Auth 的 [service identity](../../platform/contracts/trusted-service-identity-v1.md)，audience 固定为 `iwut-app-center`，权限来自 App Center 本地 caller registry；逐方法授权，不经过公网、HTTP 或 gRPC-Web，也不把 client secret 当服务间凭据。
 
@@ -165,9 +165,9 @@ secret 为 32 随机字节的 base64url 无 padding 字符串。App 仅存 `SHA-
 
 `ApplicationDisplay` 包含 profileRevisionId、displayName、可空 description 和可空 icon。全部内容来自 `currentPublishedProfileRevisionId` 指向的同一 Application、APPROVED ProfileRevision；不提供 Application 技术名称 fallback，也不返回 HTML。运行 tuple 中的 profileRevisionId 即 `display.profileRevisionId`，不在 RuntimeConfiguration 顶层重复保存。
 
-`AuthorizationContext` 包含完整 RuntimeConfiguration，加 authId 和 testerMembershipId。`expectedRuntimeVersion` 为 `(versionId, publicationRevision, profileRevisionId, adminAuthId)`；expectedRegistrationRevision 独立传递。App 必须以一个 Mongo snapshot 同时比较预期 tuple、读取运行配置、当前公开资料和 Tester 资格。
+`AuthorizationContext` 包含完整 RuntimeConfiguration，加 authId 和可空 testerMembershipId。TEST 必须返回当前 ACTIVE Tester episode；STABLE/GREY 为空。`expectedRuntimeVersion` 为 `(versionId, publicationRevision, profileRevisionId, adminAuthId)`；expectedRegistrationRevision 独立传递。App 必须以一个 Mongo snapshot 同时比较预期 tuple、读取运行配置、当前公开资料和渠道用户资格。
 
-redirectUris 来自批准 snapshot：PUBLIC 读取 pkceRedirectUris，CONFIDENTIAL 读取 confidentialRedirectUris；对应数组必须非空。requiredScopes/optionalScopes 来自同一 snapshot，不按 App 的 requestable 缓存过滤；Auth 根据 [Scope Catalog 契约](../../platform/contracts/auth-scope-catalog-v1.md) 对应的当前权威 enabled 和 OAuth UC 执行最终授权。前端不能指定 versionId、redirect URI、scope、adminAuthId 或“已审核”标记；channel 必须与 client 登记值完全相等，rpcApiMajor 只选择该渠道的权威 Publication；不能把 TEST client 当成 STABLE client。
+redirectUris 来自批准 snapshot：PUBLIC 读取 pkceRedirectUris，CONFIDENTIAL 读取 confidentialRedirectUris；对应数组必须非空。requiredScopes/optionalScopes 来自同一 snapshot，不按 App 的 requestable 缓存过滤；Auth 根据 [Scope Catalog 契约](../../platform/contracts/auth-scope-catalog-v1.md) 对应的当前权威 enabled 和 OAuth UC 执行最终授权。前端不能指定 versionId、redirect URI、scope、adminAuthId 或“已审核”标记；channel 必须与 client 登记值完全相等，rpcApiMajor 只选择该渠道的权威 Publication；TEST/GREY/STABLE client 不能互相替代。
 
 所有返回字段取自同一个 Mongo snapshot；observedAt 为建立 snapshot 的时刻，validUntil 不晚于 observedAt+5 秒。Auth 每个安全边界重新读取，不缓存延长。登录前后 registrationRevision 和 runtime tuple 必须一致；Profile 批准后当前公开指针发生变化也必须重新开始或重新展示。credentialRevision 只约束一次 secret 验证，不进入 runtime tuple。
 
@@ -183,9 +183,9 @@ Auth 用此快照提供标准 sector URI 的 JSON 清单。准备 OIDC 注册元
 
 #### 资格变化与失败
 
-client 不可用、对应回调数组为空、无 exact-major 渠道 Publication、无当前已批准公开资料或批准记录不一致均不可授权；TEST 还要求 ACTIVE Tester。当前支持 channel=`TEST/STABLE`，GREY 尚未启用。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
+client 不可用、对应回调数组为空、无 exact-major 渠道 Publication、无当前已批准公开资料或批准记录不一致均不可授权；TEST 还要求 ACTIVE Tester，GREY 还要求可信 authId 命中当前 rollout cohort。设计支持 channel=`TEST/GREY/STABLE`；GREY 随 UC-APP-021 工作包交付。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
 
-App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。未来灰度发布必须先定义运行资格，再扩展 channel。
+App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。
 
 #### 消费点与契约验收
 
@@ -388,7 +388,7 @@ token 校验不依赖原登录 Session 继续存在；用户退出平台 Session
 
 提供 Authorization Code Flow，用 OIDC ID Token 表达应用登录结果，用独立的 opaque access token 表达委托访问。Auth 拥有登录、consent、grant 和 token；App 拥有 client 身份/secret，以及 ApplicationVersion 中受审核的 redirect URI 和 scopes；Traefik/Gateway 执行入口鉴权，资源服务执行业务授权。
 
-相关业务规则由 [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md)/[019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](../../platform/contracts/app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](../../platform/contracts/oauth-delegation-v1.md)。
+相关业务规则由 [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) 至 [021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](../../platform/contracts/app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](../../platform/contracts/oauth-delegation-v1.md)。
 
 #### 客户端配置
 
@@ -401,7 +401,7 @@ token 校验不依赖原登录 Session 继续存在；用户退出平台 Session
 
 PUBLIC client 不能提交 secret 冒充 confidential；CONFIDENTIAL client 不能省略 secret 降级为 public。无 PKCE 的 confidential OIDC 客户端必须依照下述 nonce 检查，在验证 ID Token 前不得建立应用会话或使用返回的 token。
 
-每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；首版只启用 TEST，其他渠道等待运行资格设计与实现。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
+每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；App Center 已交付 TEST/STABLE，并由 UC-APP-021 接受 GREY 运行资格与接入语义。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
 
 #### 公网端点与响应
 
@@ -442,9 +442,9 @@ App 继续使用已有 requestable 字段进行版本管理检查；Auth 的 aut
 
 #### 授权请求与登录门户
 
-必填 `response_type=code`、client_id、精确 redirect_uri、含 `openid` 的 scope、state、nonce，以及产品扩展参数 `iwut_channel=TEST`、正整数 `iwut_rpc_api_major`；PUBLIC 额外必填 code_challenge/code_challenge_method。channel 必须精确等于 client 登记渠道；major 只选择该渠道 App Center 的权威 Publication，不能覆盖 Version、回调或 scope。两者绑定到 code/token/family，后续资源请求、UserInfo 或 refresh 不接受改选。客户端每次新建至少 32 随机字节的 state、nonce；服务端接受 43–128 字符的 base64url 值，不把 nonce 当用户身份。PKCE verifier 为 RFC 7636 规定的 43–128 个 unreserved ASCII 字符；challenge 为 SHA-256 后无 padding 的 base64url，固定 43 字符。
+必填 `response_type=code`、client_id、精确 redirect_uri、含 `openid` 的 scope、state、nonce，以及产品扩展参数 `iwut_channel=TEST|GREY|STABLE`、正整数 `iwut_rpc_api_major`；PUBLIC 额外必填 code_challenge/code_challenge_method。channel 必须精确等于 client 登记渠道；major 只选择该渠道 App Center 的权威 Publication，不能覆盖 Version、回调或 scope。两者绑定到 code/token/family，后续资源请求、UserInfo 或 refresh 不接受改选。客户端每次新建至少 32 随机字节的 state、nonce；服务端接受 43–128 字符的 base64url 值，不把 nonce 当用户身份。PKCE verifier 为 RFC 7636 规定的 43–128 个 unreserved ASCII 字符；challenge 为 SHA-256 后无 padding 的 base64url，固定 43 字符。
 
-Auth 在建立登录 interaction 前以 clientId、iwut_channel 和 iwut_rpc_api_major 调用 App 的 `ResolveClientRuntimeConfiguration`，从 exact-major 当前 TEST Publication 的批准 Version snapshot 取得 effective redirect URIs 和 scopes，并从当前已批准 ProfileRevision 取得展示资料，再先精确匹配 redirect_uri。runtime tuple 包含 versionId、publicationRevision、profileRevisionId 和 adminAuthId；用户登录后以该 tuple 调用 `ResolveAuthorizationContext`，确认和 code 兑换时继续重查。任何 tuple 变化都不能把旧回调或展示资料与新 scopes、Profile 或 Tester 资格拼接。
+Auth 在建立登录 interaction 前以 clientId、iwut_channel 和 iwut_rpc_api_major 调用 App 的 `ResolveClientRuntimeConfiguration`，从 exact-major 当前渠道 Publication 的批准 Version snapshot 取得 effective redirect URIs 和 scopes，并从当前已批准 ProfileRevision 取得展示资料，再先精确匹配 redirect_uri。runtime tuple 包含 versionId、publicationRevision、profileRevisionId 和 adminAuthId；用户登录后以该 tuple 调用 `ResolveAuthorizationContext`，确认和 code 兑换时继续重查。任何 tuple 变化都不能把旧回调或展示资料与新 scopes、Profile、Tester 或 Grey cohort 资格拼接。
 
 Grant 业务主键为 `(authId, applicationId, channel)`，具体约束由 [BR-OAU-002](../use-cases/UC-AUTH-014-authorize-application.md#br-oau-002) 定义。同应用同渠道的 PUBLIC/CONFIDENTIAL client 及各 major 共享历史同意；grantId 是稳定引用 ID，不以 client 或 Version 为授权身份。code、access/refresh token 和 family 仍各自绑定 client，不能跨 client 兑换、刷新或撤销；共享同意不省略各自的 client authentication/PKCE、当前版本资格或 offline_access 确认。历史同意集合 G 不因当前版本 scope 减少而删减；只有本次请求超出 G 的部分需要新增同意。实际访问使用 token、G、当前批准版本及 Auth 当前目录许可集合 C 的交集，UC014/016/018/019 定义唯一业务规则。revision 用于 OCC/审计，用户撤回递增共享 grant 的独立 revocationEpoch，对同应用同渠道所有 client 的旧凭据生效；新增同意不使旧 token 失效，也不自动扩大旧 token。授权交互和 code 始终绑定其创建时的精确 runtime tuple 与 redirect URI；旧 code 不能因 grant 可延续而兑换到新 Version 的回调。secret 轮换只影响之后的 confidential client authentication，不单独撤销 grant、access token 或 refresh family。
 
@@ -567,7 +567,7 @@ Auth 启用非空业务路由时，部署须明确声明资源委托验证已就
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-014`（use-cases/UC-AUTH-014-authorize-application.md）：目标与范围、输入与输出、主流程、验收场景、依赖与实现边界、变更记录
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：STABLE 扩展
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：STABLE 扩展、GREY 扩展
 
 ## 溯源
 
@@ -575,8 +575,8 @@ Auth 启用非空业务路由时，部署须明确声明资源委托验证已就
 | --- | --- | --- |
 | `use-cases/UC-AUTH-019-issue-delegation-context.md` | 58 | `527d0d603a53` |
 | `use-cases/UC-AUTH-014-authorize-application.md` | 82 | `c765b2032121` |
-| `platform/contracts/app-oauth-client-v1.md` | 92 | `3c74314974c5` |
+| `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `402d9ac717e8` |
-| `platform/contracts/oauth-oidc-v1.md` | 134 | `eca89ec773a1` |
+| `platform/contracts/oauth-oidc-v1.md` | 134 | `75ce3b6eab4f` |
 | `platform/contracts/oauth-route-policy-v1.md` | 48 | `37b8991795a9` |
