@@ -26,6 +26,8 @@ UC004–009 的 HTTP 绑定由 Auth 后端实现。Gateway 的路由与认证编
 | GET | `/v1/user-profile-schema` | UserProfileService/GetProfileEditingSchema | SESSION | 200 |
 | PUT | `/v1/users/{subject_auth_id}/reviewer-permission` | ReviewerPermissionService/ManageReviewerPermission | SESSION | 200 |
 | GET | `/v1/users/{subject_auth_id}/reviewer-permission` | ReviewerPermissionService/GetReviewerPermission | SESSION | 200 |
+| PUT | `/v1/users/{subject_auth_id}/application-review-permissions/{permission}` | ReviewerPermissionService/ManageApplicationReviewPermission | SESSION | 200 |
+| GET | `/v1/users/{subject_auth_id}/application-review-permissions` | ReviewerPermissionService/GetApplicationReviewPermissions | SESSION | 200 |
 
 UC011 追加三个 DIRECT 路由，完整字段及 Session 例外见 [邮箱设置与注册协议](auth-email-binding-v1.md)：
 
@@ -55,7 +57,7 @@ UC013 追加两个必需有效 Session 的 DIRECT 路由，字段与认证约定
 
 DeveloperApplicationService package 为 `auth_center.v1.developer_application`，由默认关闭的 AUTH_DEVELOPER_APPLICATION_ENABLED 控制。Apply body 必须包含 developerHandle（例如 `{"developerHandle":"alice"}`）；GetOwn 无 body；均拒绝 query。DIRECT 保留 Session，不提前交换 Developer JWS。部署恢复就绪声明见 UC013，不由客户端提供。
 
-ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，管理接口还须由 Auth 校验 `auth.reviewer.manage`；路由 SESSION 身份本身不授予管理权。
+ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，四个管理/查询方法均由 Auth 校验 auth.reviewer.manage；路由 SESSION 身份本身不授予管理权。旧 reviewer-permission 路由继续只操作版本审核权限；新路由的目标 allowlist、消息字段和兼容规则唯一见 [UC004 API 扩展与兼容](../../auth-center/use-cases/UC-AUTH-004-manage-reviewer-permission.md#api-扩展与兼容)。新路由属于 2026-10-03 设计扩展，Auth/API/Gateway 实现与联合验收前不得标记已启用。
 
 AuthenticationService package 为 `auth_center.v1.authentication`；UserProfileService package
 为 `auth_center.v1.user_profile`。DIRECT 不代表无鉴权：各方法继续遵守设备证明、token 定向
@@ -69,7 +71,7 @@ Scope Catalog、UC002 内部批量 Developer 状态查询、SYSTEM principal 查
 
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
-- Reviewer 管理的 `subject_auth_id` 由路径绑定，覆盖消息体中同名值。
+- 审核权限管理的 subject_auth_id 由路径绑定，新写方法还绑定 permission，覆盖消息体中同名值。旧方法不接受新增 permission 字段；新字段取值及错误规则见 UC004。
 - 普通设备注册/登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
   邮箱 Complete 消息体为 code 和条件必需的 registrationProof，路径 operation_id 同样覆盖体中值。
   凭据撤销的 `credential_id` 仅来自路径。GET/DELETE 不带请求体。
@@ -93,6 +95,6 @@ Scope Catalog、UC002 内部批量 Developer 状态查询、SYSTEM principal 查
 `AUTH_USER_ENDPOINTS_ENABLED=false` 时不注册上述 HTTP 用户路由，与 gRPC 开关一致。
 TLS 与公网可达性由部署和 Gateway 决定，监听 HTTP 不代表公网入口已经交付。
 
-验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法与两个 Reviewer 管理方法、
+验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法、两个旧 Reviewer 管理方法与两个新增应用审核权限方法、
 生成客户端、当前用户隔离、重复/替代身份头拒绝、严格 JSON、资料 CAS、撤销幂等性及内部 RPC
 不暴露为 HTTP。保留原生 gRPC 回归测试。

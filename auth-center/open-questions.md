@@ -76,3 +76,7 @@ UC-AUTH-006 至 009 已 ACCEPTED；设备证明、学号规范化和散列、Ses
 ## OAuth 身份与授权分组已明确
 
 sector 与 sub 由 Auth 按 Application 保存，不由 App 保存；渠道/type/major 共用该身份分组。client/credential 和用户授权按渠道隔离，major 共用历史授权，版本变化不自动删减历史同意。具体规则与标准 sector URI 见 [OAuth/OIDC v1](../platform/contracts/oauth-oidc-v1.md)，当前仍待整体用例接受与实现。
+
+## 应用审核权限扩展（2026-10-03）
+
+UC004 已接受管理 app.profile.review 与 app.version.review 两项独立权限，UC010 同步扩充 App audience 投影，沿用 auth.reviewer.manage 作为管理入口权限。设计见 [UC004](use-cases/UC-AUTH-004-manage-reviewer-permission.md)；新增 Auth/API/Gateway 实现及真实 App 回归尚未开始。TEST/OAuth 要求当前已批准公开资料，因此生产闭环还依赖该权限可被正常授予、签发和消费；不能用手工修改 Mongo 或自造用户 JWS 替代。

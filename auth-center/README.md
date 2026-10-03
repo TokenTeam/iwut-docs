@@ -12,7 +12,7 @@
 - `UC-AUTH-001`：授权的内部服务读取 Auth 权威的 Scope Catalog 完整快照。
 - `UC-AUTH-002`：授权的内部服务按 Auth ID 批量读取当前 Developer 状态。
 - `UC-AUTH-003`：授权的内部服务解析指定 purpose 的 SYSTEM 主体。
-- `UC-AUTH-004`：平台管理员管理 Reviewer 权限。
+- `UC-AUTH-004`：平台管理员独立管理应用公开资料与应用版本审核权限。
 - `UC-AUTH-005`：普通用户显式设置/删除自己的资料，以当前账号状态与资料版本原子确认。
 - `UC-AUTH-006`：客户端已有本地学校账号，提交必需的学生关联声明，通过设备凭据显式创建正式 USER 和首次 Session。
 - `UC-AUTH-007`：设备凭据登录、服务端 Session、在线检查，以及每账号 10 条有效会话的 LRU 管理。
@@ -81,7 +81,7 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [UC-AUTH-001](use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md)：读取 Scope Catalog 快照。
 - [UC-AUTH-002](use-cases/UC-AUTH-002-batch-get-developer-statuses.md)：批量读取 Developer 状态。
 - [UC-AUTH-003](use-cases/UC-AUTH-003-resolve-system-principal.md)：解析 System Principal。
-- [UC-AUTH-004](use-cases/UC-AUTH-004-manage-reviewer-permission.md)：管理 Reviewer 权限。
+- [UC-AUTH-004](use-cases/UC-AUTH-004-manage-reviewer-permission.md)：管理用户的应用审核权限。
 
 ## 状态
 

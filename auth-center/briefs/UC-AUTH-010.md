@@ -91,6 +91,8 @@ IssuedUserIdentity {
 - Auth 后端验收使用扮演 Gateway 的测试调用方执行真实服务身份 RSA 签名，连接生产 Wire、原生 gRPC、真实 Mongo 和用户 signer，并使用实际目标 verifier 验签；不能用 fake verifier 替代。Gateway/Traefik 的真实转发调用链在 UC-GW-001 联合验收，不阻塞本工作包。
 - Session 与服务身份任一缺失/伪造都拒绝；未授权 audience、SYSTEM/disabled USER、错误 key 和畸形记录拒绝。
 - 普通 USER 无 Developer 状态仍成功；不同 audience 的权限交集正确，客户端无法覆盖 claims。
+- 两项应用审核权限的零项/profile-only/version-only/两项组合均用真实签发和 App verifier 验证；向 Auth audience 不泄露它们，向 App 不泄露管理权限。
+- 分别与 UC004 两项权限的授予/撤销竞争，撤销先提交后新签发不能包含该项；另一项独立保留，不能只对旧 version 权限执行过滤或撤销协调。
 - 与 UC008/009、权限/Developer 修改并发时满足 BR-IDN-004；修改提交后开始的新签发不会读取旧能力。
 - 签名失败和事务失败不提交 lastUsedAt、不返回候选身份；未知提交结果不声称成功，重试重新检查。
 - Session 近到期截断 exp；签发后撤销不宣称已签 token 即时消失；签名公钥轮换覆盖有效 token 窗口及容差。
@@ -119,10 +121,12 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
-| `iwut-app-center` | `app.version.review` | 有合法非 null 状态时携带 |
+| `iwut-app-center` | `app.profile.review`、`app.version.review` | 有合法非 null 状态时携带 |
 | `iwut-auth-center` | `auth.reviewer.manage` | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](../use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
+
+两项应用审核权限均来自 UC004 的独立显式 grant；不能从管理权限、Developer 状态或另一项审核权限推导。向 App 签发时保留精确值并稳定排序，只拥有其中一项时只签该项；不向 App 披露 auth.reviewer.manage，不向 Auth audience 披露应用审核权限。
 
 这只是允许 token 携带哪些能力，不表示调用者已获准执行目标业务。UC004 等后端继续检查其必需权限。新业务权限可扩充明确的服务端投影目录，不开放客户端自选权限，也不自动透传未知权限。不携带学生资料、关联 token、关联组、Session token 或私钥。首版不增加 role claim。
 
@@ -280,8 +284,12 @@ Gateway 消费签发结果后不得把 identity_jws 暴露给终端或加入业�
 
 - 终端不能经 Gateway 访问 ScopeCatalog、DeveloperStatusDirectory、SystemPrincipalDirectory 或签发 RPC；这些是服务到服务方法。不得仅凭 `/auth-center` 前缀自动开放。
 - 本契约不改变 UC008 的幂等匿名 token 定向撤销例外，或 UC009 的有效 Session 授权；这两条 Gateway 路由均走 DIRECT，由 Auth 自己验证。
-- Auth 用户资料及未来 UC004 管理入口走 SESSION，得到 audience=`iwut-auth-center` 的用户 JWS；不能因目标是 Auth 而递归触发签发。
+- Auth 用户资料及 UC004 新旧管理入口均走 SESSION，得到 audience=`iwut-auth-center` 的用户 JWS；不能因目标是 Auth 而递归触发签发。
 - Gateway 只为外部用户请求编排身份。服务到服务调用继续使用独立 service JWS，不能借用某位用户的 Session。
+
+#### 应用审核权限投影
+
+用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 app.profile.review 与 app.version.review；管理权限不因此下发给 App。两项权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 独立授予/撤销，不增加 JWS claim 或新的签发 RPC。2026-10-03 扩展需更新 Auth 投影实现并进行真实 App 验签/审核回归，不能把已有 UC010 验收视为 profile 权限链路已交付。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -499,10 +507,10 @@ Auth Center 必须提供 `AUTH_CENTER_SERVICE_CALLERS_B64`：以下 JSON UTF-8 b
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 136 | `bf30266c7c29` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 142 | `cd886b322836` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 151 | `98d2b3e33077` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
-| `platform/contracts/auth-session-identity-issuance-v1.md` | 79 | `94ff92abf91d` |
+| `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `05a2b771dccc` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
 | `platform/contracts/trusted-service-identity-v1.md` | 88 | `3c091a708b32` |

@@ -1,12 +1,13 @@
 {
   "uc": "UC-AUTH-004",
-  "note": "Accepted Reviewer permission management work package. USER registration, Session-to-JWS issuance and Gateway SESSION routing now exist. Implement audited grant/revoke and protected state query, explicit one-time administrator bootstrap, HTTP/gRPC transport and real Mongo/Wire verification. Join the UC010 authentication transaction fence so mutations and issuance serialize. Preserve unified server.go and the canonical independent API Go module. No Developer lifecycle, generic role management or Redis.",
+  "note": "Accepted design extension; implementation not started. Extend application review permission management to independently grant/revoke app.profile.review and app.version.review. Add explicit-permission management and combined query while retaining version-only legacy APIs. Reuse one permission revision, immutable audit and UC010 authentication fence. Coordinate the UC010 App-audience projection and real App/Gateway verification; do not implement generic permission management or OAuth grants.",
   "uc_sections": [
     "目标与范围",
     "参与者与 bootstrap",
     "输入与主流程",
-    "读取 Reviewer 权限状态",
+    "读取应用审核权限状态",
     "实现约定",
+    "API 扩展与兼容",
     "数据模型",
     "API 与实现依赖",
     "错误语义",
@@ -28,7 +29,8 @@
     "platform/contracts/auth-session-identity-issuance-v1.md": [
       "内部 RPC",
       "签名与验签配置",
-      "与现有契约的衔接"
+      "与现有契约的衔接",
+      "应用审核权限投影"
     ],
     "platform/contracts/auth-center-api-routing.md": [
       "路由边界",

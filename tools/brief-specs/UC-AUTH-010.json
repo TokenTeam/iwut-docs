@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-010",
-  "note": "Accepted Auth backend work package. USER/Session/revocation and service identity foundations exist. Implement the real signer, transactional identity snapshot, internal RPC, caller audience configuration and production Wire E2E. Gateway/Traefik delivery is separate; no Redis, identity cache, OAuth2 or reviewer-management implementation.",
+  "note": "Accepted identity issuance design with the 2026-10-03 application review permission projection extension pending implementation. Preserve the existing signer, Session checks and caller audience policy. Add app.profile.review alongside app.version.review, coordinate with UC004 shared permission-revision mutations, and verify independent grant/revoke using real App verifiers. No OAuth2, Redis or generic permission passthrough.",
   "uc_sections": [
     "目标与范围",
     "参与者与前置条件",
@@ -19,7 +19,8 @@
       "服务授权扩展",
       "签名与验签配置",
       "请求与凭据流向",
-      "与现有契约的衔接"
+      "与现有契约的衔接",
+      "应用审核权限投影"
     ],
     "platform/contracts/trusted-identity-v1.md": [
       "目的与范围",

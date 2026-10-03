@@ -50,6 +50,10 @@ IssuedUserIdentity {
 
 当前实现不识别此新增 permission/字段；在 UC010 实现前不能将示例作为可运行配置。Gateway 的服务身份签名私钥与 Auth 的用户身份签名私钥必须不同；服务身份的 audience 固定为提供方 `iwut-auth-center`，请求 body 中的 audience 是要签发给业务服务的用户身份 audience，两者含义不同。
 
+## 应用审核权限投影
+
+用户能力投影唯一遵循 [UC010 / BR-IDN-002](../../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 app.profile.review 与 app.version.review；管理权限不因此下发给 App。两项权限由 [UC004](../../auth-center/use-cases/UC-AUTH-004-manage-reviewer-permission.md) 独立授予/撤销，不增加 JWS claim 或新的签发 RPC。2026-10-03 扩展需更新 Auth 投影实现并进行真实 App 验签/审核回归，不能把已有 UC010 验收视为 profile 权限链路已交付。
+
 ## 签名与验签配置
 
 签发入口使用显式开关 `AUTH_IDENTITY_ISSUANCE_ENABLED`（默认 false）。开启要求现有 `AUTH_USER_ENDPOINTS_ENABLED=true`，且下述 signer 配置完整有效；关闭时不注册签发 RPC，不要求私钥，也不影响已有服务和用户接口。不得因为开关开启而放宽原有鉴权。
@@ -75,5 +79,5 @@ Gateway 消费签发结果后不得把 identity_jws 暴露给终端或加入业�
 
 - 终端不能经 Gateway 访问 ScopeCatalog、DeveloperStatusDirectory、SystemPrincipalDirectory 或签发 RPC；这些是服务到服务方法。不得仅凭 `/auth-center` 前缀自动开放。
 - 本契约不改变 UC008 的幂等匿名 token 定向撤销例外，或 UC009 的有效 Session 授权；这两条 Gateway 路由均走 DIRECT，由 Auth 自己验证。
-- Auth 用户资料及未来 UC004 管理入口走 SESSION，得到 audience=`iwut-auth-center` 的用户 JWS；不能因目标是 Auth 而递归触发签发。
+- Auth 用户资料及 UC004 新旧管理入口均走 SESSION，得到 audience=`iwut-auth-center` 的用户 JWS；不能因目标是 Auth 而递归触发签发。
 - Gateway 只为外部用户请求编排身份。服务到服务调用继续使用独立 service JWS，不能借用某位用户的 Session。

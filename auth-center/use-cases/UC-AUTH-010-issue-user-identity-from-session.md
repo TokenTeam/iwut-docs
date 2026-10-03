@@ -56,10 +56,12 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
-| `iwut-app-center` | `app.version.review` | 有合法非 null 状态时携带 |
+| `iwut-app-center` | `app.profile.review`、`app.version.review` | 有合法非 null 状态时携带 |
 | `iwut-auth-center` | `auth.reviewer.manage` | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
+
+两项应用审核权限均来自 UC004 的独立显式 grant；不能从管理权限、Developer 状态或另一项审核权限推导。向 App 签发时保留精确值并稳定排序，只拥有其中一项时只签该项；不向 App 披露 auth.reviewer.manage，不向 Auth audience 披露应用审核权限。
 
 这只是允许 token 携带哪些能力，不表示调用者已获准执行目标业务。UC004 等后端继续检查其必需权限。新业务权限可扩充明确的服务端投影目录，不开放客户端自选权限，也不自动透传未知权限。不携带学生资料、关联 token、关联组、Session token 或私钥。首版不增加 role claim。
 
@@ -113,6 +115,8 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 - Auth 后端验收使用扮演 Gateway 的测试调用方执行真实服务身份 RSA 签名，连接生产 Wire、原生 gRPC、真实 Mongo 和用户 signer，并使用实际目标 verifier 验签；不能用 fake verifier 替代。Gateway/Traefik 的真实转发调用链在 UC-GW-001 联合验收，不阻塞本工作包。
 - Session 与服务身份任一缺失/伪造都拒绝；未授权 audience、SYSTEM/disabled USER、错误 key 和畸形记录拒绝。
 - 普通 USER 无 Developer 状态仍成功；不同 audience 的权限交集正确，客户端无法覆盖 claims。
+- 两项应用审核权限的零项/profile-only/version-only/两项组合均用真实签发和 App verifier 验证；向 Auth audience 不泄露它们，向 App 不泄露管理权限。
+- 分别与 UC004 两项权限的授予/撤销竞争，撤销先提交后新签发不能包含该项；另一项独立保留，不能只对旧 version 权限执行过滤或撤销协调。
 - 与 UC008/009、权限/Developer 修改并发时满足 BR-IDN-004；修改提交后开始的新签发不会读取旧能力。
 - 签名失败和事务失败不提交 lastUsedAt、不返回候选身份；未知提交结果不声称成功，重试重新检查。
 - Session 近到期截断 exp；签发后撤销不宣称已签 token 即时消失；签名公钥轮换覆盖有效 token 窗口及容差。
@@ -134,3 +138,5 @@ UC004 的授权命令与 bootstrap、Developer 状态修改、OAuth2 委托权�
 - 2026-09-23：依赖核验通过，接受 Auth 后端工作包；UC006–009 和 service JWS 基础已具备，Gateway 联合验收独立推进；确认首版不使用 Redis。
 
 - 2026-09-23：提出 Session 到可信身份签发用例；服务双重认证、最小 audience 投影、每请求在线确认，首版不引入 Redis。
+
+- 2026-10-03：App audience 增加 app.profile.review 精确投影，与 UC004 两项权限的独立管理和并发验收同步；新增能力尚待实现。

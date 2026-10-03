@@ -302,7 +302,7 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
-- Reviewer 管理的 `subject_auth_id` 由路径绑定，覆盖消息体中同名值。
+- 审核权限管理的 subject_auth_id 由路径绑定，新写方法还绑定 permission，覆盖消息体中同名值。旧方法不接受新增 permission 字段；新字段取值及错误规则见 UC004。
 - 普通设备注册/登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
   邮箱 Complete 消息体为 code 和条件必需的 registrationProof，路径 operation_id 同样覆盖体中值。
   凭据撤销的 `credential_id` 仅来自路径。GET/DELETE 不带请求体。
@@ -326,7 +326,7 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 `AUTH_USER_ENDPOINTS_ENABLED=false` 时不注册上述 HTTP 用户路由，与 gRPC 开关一致。
 TLS 与公网可达性由部署和 Gateway 决定，监听 HTTP 不代表公网入口已经交付。
 
-验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法与两个 Reviewer 管理方法、
+验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法、两个旧 Reviewer 管理方法与两个新增应用审核权限方法、
 生成客户端、当前用户隔离、重复/替代身份头拒绝、严格 JSON、资料 CAS、撤销幂等性及内部 RPC
 不暴露为 HTTP。保留原生 gRPC 回归测试。
 
@@ -419,9 +419,9 @@ UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 
 | `use-cases/UC-AUTH-013-apply-for-developer.md` | 201 | `e1eadd262acc` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 151 | `98d2b3e33077` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 277 | `fe77d446d400` |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 136 | `bf30266c7c29` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 142 | `cd886b322836` |
 | `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 201 | `e2692ee1e896` |
-| `platform/contracts/auth-center-api-routing.md` | 98 | `16d54ce2c703` |
+| `platform/contracts/auth-center-api-routing.md` | 100 | `15eab2c11ec5` |
 | `platform/contracts/auth-developer-application-v1.md` | 58 | `83ce98a96c34` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |

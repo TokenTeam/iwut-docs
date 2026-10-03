@@ -82,3 +82,7 @@ Gateway `7ac853a` 固定 API `3912b55`，新增 Reviewer 管理与查询两条 S
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
 | [UC-GW-002](../use-cases/UC-GW-002-authenticate-oauth-and-forward.md) | `PROPOSED` | `NOT_STARTED` | 应用委托请求鉴权与转发 |
+
+## 2026-10-03 应用审核权限路由扩展待交付
+
+[UC-AUTH-004](../../auth-center/use-cases/UC-AUTH-004-manage-reviewer-permission.md) 新增两个显式应用审核权限方法，映射见 [Auth 路由契约](../../platform/contracts/auth-center-api-routing.md)。Gateway 需追加静态 HTTP/原生 gRPC/gRPC-Web SESSION 路由，目标 audience 仍为 iwut-auth-center，旧 reviewer-permission 路由保持版本权限语义。该增量为 NOT_STARTED，既有 UC-GW-001/UC004 完成记录不覆盖新入口。
