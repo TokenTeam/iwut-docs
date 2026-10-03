@@ -527,13 +527,14 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：STABLE 扩展提案
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-015-exchange-authorization-code.md` | 77 | `f671ba6d8944` |
-| `platform/contracts/app-oauth-client-v1.md` | 88 | `bb275737b743` |
+| `platform/contracts/app-oauth-client-v1.md` | 92 | `8f6b5efc7149` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `402d9ac717e8` |
 | `platform/contracts/oauth-oidc-v1.md` | 134 | `eca89ec773a1` |

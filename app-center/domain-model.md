@@ -129,7 +129,7 @@ ApplicationPublication
   history: ApplicationPublicationHistory[]
 ```
 
-当前只有 testVersionId 已有权威规则。分区依据见 [BR-PUB-002](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-002)，Version 发布资格见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)。GreyRollout 和 stableVersionId 是首版目标模型，具体字段与行为等待后续 UC。
+当前只有 testVersionId 已有已接受的权威规则。分区依据见 [BR-PUB-002](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-002)，Version 发布资格见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)。[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 已提出可空 stableVersionId、保留 EMPTY Publication 和 stable History/OAuth 语义，但仍为 PROPOSED；GreyRollout 等待后续 UC。
 
 ApplicationPublicationHistory 是不可修改的操作审计记录，不是 event-sourcing 的权威状态；当前槽位仍由 ApplicationPublication 表达，参见 [BR-PUB-007](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-007)。
 

@@ -48,6 +48,8 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 当前管理员可以为 Application 登记长期稳定的 PUBLIC/CONFIDENTIAL clientId；identity/status 与 confidential credential 使用独立 revision，redirect URI 与 scopes 继续由 ApplicationVersion 审核和发布。Version、major 或 hostname 变化不重建 clientId。
 - Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得绑定 ACTIVE Tester episode 的授权上下文；App Center 不签发 code 或 token。
 
+[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 已开始设计 stable 设置、替换、清空、EMPTY Publication 和 STABLE OAuth channel；它仍为 `PROPOSED`，因此尚不属于上述当前能力。
+
 ## 当前尚未设计或明确后置的能力
 
 - Application 管理查询、受控改名、归档、禁用和恢复；物理删除仍不是首版目标。

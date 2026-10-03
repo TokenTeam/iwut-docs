@@ -43,3 +43,11 @@
 - UC-APP-005 批准时发现当前 admin 或 submittedBy 已暂停，由注入的 System Auth ID 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
 
 在对应新用例出现前，不为了回答这些问题提前扩充领域模型。
+
+## 已确认的后续设计方向
+
+- Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。
+- Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
+- 管理员日常停止某个渠道使用 clear；平台紧急处置使用后续 Application 级 suspension/disable，不销毁原槽位配置。
+- Grey 首版只面向已登录用户做确定性分桶，并且必须存在 Stable 基线；具体哈希输入、seed 与比例语义由 Grey UC 定义。
+- Filter 使用独立 ApplicationFilterRevision 方向，避免把规则塞进 Application 或强制与 Profile 同步修订；规则语言和审核策略仍待定义。

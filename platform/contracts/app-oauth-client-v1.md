@@ -81,6 +81,10 @@ client 不可用、对应回调数组为空、非 ACTIVE Tester、无 exact-majo
 
 App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。未来 STABLE/灰度发布必须先定义公开运行资格，再扩展 channel。
 
+## STABLE 扩展提案
+
+[UC-APP-020](../../app-center/use-cases/UC-APP-020-manage-stable-publication-slot.md) 当前为 `PROPOSED`，因此本节不是已启用接口。提案接受后沿用同一组五个 provider 方法：STABLE runtime 精确读取 stableVersionId，用户上下文不要求 Tester Membership，testerMembershipId 按渠道改为 TEST 必填/STABLE 为空，批准回调进入 sector 并集；管理面启用独立 `(applicationId, STABLE)` registration/credential。TEST 语义保持不变，STABLE client 不能代替 TEST client，Auth grant 继续按 `(authId, applicationId, channel)` 隔离。
+
 ## 消费点与契约验收
 
 Auth 在授权入口先解析 RuntimeConfiguration 并精确校验 redirect URI；登录后、用户确认和 code 兑换重新解析用户上下文。refresh、UserInfo 和每次委托签发按 OAuth/OIDC v1 的当前资格规则验证。confidential secret 只在 token/revoke 操作验证。

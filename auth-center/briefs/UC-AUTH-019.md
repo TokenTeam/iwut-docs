@@ -567,6 +567,7 @@ Auth 启用非空业务路由时，部署须明确声明资源委托验证已就
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-014`（use-cases/UC-AUTH-014-authorize-application.md）：目标与范围、输入与输出、主流程、验收场景、依赖与实现边界、变更记录
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：STABLE 扩展提案
 
 ## 溯源
 
@@ -574,7 +575,7 @@ Auth 启用非空业务路由时，部署须明确声明资源委托验证已就
 | --- | --- | --- |
 | `use-cases/UC-AUTH-019-issue-delegation-context.md` | 58 | `527d0d603a53` |
 | `use-cases/UC-AUTH-014-authorize-application.md` | 82 | `c765b2032121` |
-| `platform/contracts/app-oauth-client-v1.md` | 88 | `bb275737b743` |
+| `platform/contracts/app-oauth-client-v1.md` | 92 | `8f6b5efc7149` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `402d9ac717e8` |
 | `platform/contracts/oauth-oidc-v1.md` | 134 | `eca89ec773a1` |

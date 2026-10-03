@@ -342,7 +342,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 
 - `UC-APP-019`（use-cases/UC-APP-019-resolve-oauth-authorization-context.md）：变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口、STABLE 扩展提案
 - `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射
 
 ## 溯源
@@ -351,5 +351,5 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 | --- | --- | --- |
 | `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `db23eb70ec0e` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
-| `platform/contracts/app-oauth-client-v1.md` | 88 | `bb275737b743` |
+| `platform/contracts/app-oauth-client-v1.md` | 92 | `8f6b5efc7149` |
 | `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |

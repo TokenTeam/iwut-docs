@@ -367,7 +367,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-018`（use-cases/UC-APP-018-manage-oauth-client.md）：变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：Auth 专用接口、Sector 的只读配置来源、资格变化与失败、消费点与契约验收
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：Auth 专用接口、Sector 的只读配置来源、资格变化与失败、STABLE 扩展提案、消费点与契约验收
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
 
 ## 溯源
@@ -377,5 +377,5 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-018-manage-oauth-client.md` | 131 | `724a3254b016` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
-| `platform/contracts/app-oauth-client-v1.md` | 88 | `bb275737b743` |
+| `platform/contracts/app-oauth-client-v1.md` | 92 | `8f6b5efc7149` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
