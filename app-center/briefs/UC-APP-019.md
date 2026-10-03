@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-019` 为 Auth 解析 OAuth 应用授权上下文 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAC-006`–`BR-OAC-011`（6 条） |
-| 外部引用 BR | `BR-OAC-012`（来自 `UC-APP-020`） |
+| 外部引用 BR | `BR-OAC-012`、`BR-OAC-013`（来自 `UC-APP-020`、`UC-APP-021`） |
 | ADR | `ADR-006` |
 | 平台共享 | `platform/contracts/app-oauth-client-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -37,7 +37,7 @@
 
 ### 目标与范围
 
-向 Auth 提供稳定 OAuth client 元数据、confidential secret 验证、用户登录前可验证的当前运行配置，以及特定用户的授权资格快照。当前实现以 TEST 为基础，[UC-APP-020 / BR-OAC-012](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 在同一接口上增加 STABLE。Auth 不依赖客户端上报的 redirect URI、scope、Version 或批准状态；App Center 不签发用户 token。
+向 Auth 提供稳定 OAuth client 元数据、confidential secret 验证、用户登录前可验证的当前运行配置，以及特定用户的授权资格快照。当前实现以 TEST 为基础，[UC-APP-020 / BR-OAC-012](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 在同一接口上增加 STABLE，[UC-APP-021 / BR-OAC-013](../use-cases/UC-APP-021-manage-grey-rollout.md#br-oac-013) 增加 GREY 和服务端 cohort 复算。Auth 不依赖客户端上报的 redirect URI、scope、Version、批准状态或 Grey 命中结果；App Center 不签发用户 token。
 
 ### 输入与输出
 
@@ -130,6 +130,23 @@ UC-APP-019 的五个 Auth-only provider 方法必须支持 STABLE：
 - 没有 stable、client channel 不匹配、Version/Profile 不一致或 client DISABLED 时失败关闭。
 
 App 仍不保存 sector/sub，不签发 code/token。STABLE provider 扩展继续仅开放原生 gRPC，并复用现有五个方法级 service permission。
+
+### 来自 `UC-APP-021`
+
+<!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-oac-013 -->
+### BR-OAC-013：GREY OAuth channel 与 cohort 资格
+
+UC-APP-021 被接受后，UC-APP-018 的五个管理员方法接受 channel=`GREY`，继续以 `(applicationId, channel)` 隔离 registration、clientId、status、authorizationEpoch 和 confidential credential。GREY client 不能由 TEST/STABLE client 代替。
+
+UC-APP-019 的五个 Auth-only provider 方法支持 GREY：
+
+- runtime 精确读取请求 rpcApiMajor 的 GreyRollout Version，不读取 Test/Stable 作为替代。
+- user authorization context 使用可信 authId 重新执行 `grey-bucket-v1`；未命中当前 cohort 时返回统一 runtime unavailable，不暴露 bucket/seed。
+- GREY 与 STABLE 一样不要求 Tester Membership，testerMembershipId 为空。
+- redirect/scopes/display 来自当前 Grey Version 的批准 Review/Profile snapshot；PublishedRedirectSnapshot 纳入当前已发布 Grey Version 的批准回调。
+- runtime tuple 继续绑定 Publication revision；比例、目标或 Clear 改变后，旧 tuple 不能生成新授权上下文。
+
+App 不生成 sector/sub，不签发 code/token。默认的 `test > grey > stable` 路由由后续统一解析契约负责；provider 只验证调用方明确请求的 GREY client 在当前用户和 runtime tuple 下是否有资格。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -363,6 +380,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 
 - `UC-APP-019`（use-cases/UC-APP-019-resolve-oauth-authorization-context.md）：变更记录
 - `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
+- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：目标与范围、已确认的设计选择、输入与身份、建立、调整或替换主流程、清空主流程、确定性分桶、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口、STABLE 扩展、GREY 扩展
 - `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射
@@ -371,8 +389,9 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `c0467b7005fa` |
+| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `a50377983f49` |
 | `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
+| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `e8650715ef24` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |

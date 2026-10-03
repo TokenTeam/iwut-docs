@@ -48,7 +48,7 @@ clientId 与 Application 同寿命，固定归属一个 channel，不包含 rpcA
 
 `ApplicationOAuthRegistration` 以 `(applicationId, channel)` 为唯一身份，保存两种可选 client identity 的 clientId、状态和 registrationRevision。`ApplicationVersionOAuthConfig` 依附于 Version，保存该 Version 的 `pkceRedirectUris` 与 `confidentialRedirectUris`，不复制到 registration。
 
-channel 在登记后不可变。TEST 已由本用例首批交付，[UC-APP-020 / BR-OAC-012](UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 接受后启用 STABLE；GREY 仍须等待相应发布/运行资格用例，不能借其他渠道代用。client identity 可以在首个 Version 或 Publication 之前创建；创建时不读取发布槽、redirect URI 或 scopes。hostname 迁移通过新 Version 的受审核 redirect 配置完成，不创建新 clientId，也不修改 registration。运行时由 UC-APP-019 及其后续渠道规则使用调用方明确给出的 channel 和 rpcApiMajor 选择当前 Publication。
+channel 在登记后不可变。TEST 已由本用例首批交付，[UC-APP-020 / BR-OAC-012](UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 启用 STABLE，[UC-APP-021 / BR-OAC-013](UC-APP-021-manage-grey-rollout.md#br-oac-013) 启用 GREY；三个渠道不能彼此代用。client identity 可以在首个 Version 或 Publication 之前创建；创建时不读取发布槽、redirect URI 或 scopes。hostname 迁移通过新 Version 的受审核 redirect 配置完成，不创建新 clientId，也不修改 registration。运行时由 UC-APP-019 及其后续渠道规则使用调用方明确给出的 channel 和 rpcApiMajor 选择当前 Publication。
 
 <a id="br-oac-003"></a>
 ### BR-OAC-003：高熵 secret 与一次披露
@@ -89,7 +89,7 @@ sector、sector_identifier_uri 和用户 sub 均由 Auth 管理，App 不保存�
 
 ## API 实现契约
 
-独立 API 仓库 package 为 `app_center.v1.oauth_client`，service 为 `OAuthClientService`。UC-APP-020 完成后接受 `TEST/STABLE`；`GREY` 仍返回渠道未启用，不创建数据。
+独立 API 仓库 package 为 `app_center.v1.oauth_client`，service 为 `OAuthClientService`。UC-APP-020/021 完成后接受 `TEST/GREY/STABLE`。
 
 稳定 enum：
 

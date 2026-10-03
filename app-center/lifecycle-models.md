@@ -127,7 +127,7 @@ every real change
 | 阶段 | 含义 | 当前状态 |
 | --- | --- | --- |
 | ABSENT | 该 Application 与 RPC major 尚无 Publication | 已由首次设置 test 的预期 revision 语义间接定义 |
-| CONFIGURED | 至少一个槽位存在 | Test/Stable 已实现；Grey 由 UC-APP-021 已接受并进入实现 |
+| CONFIGURED | 至少一个槽位存在 | Test/Stable/Grey 已实现 |
 | EMPTY | Publication 保留 revision 与历史，但所有槽位为空 | UC-APP-020 已接受由 clear stable 形成并保留空记录 |
 | SUSPENDED | 平台临时停止该分区分发，但保留槽位 | 候选方案；尚未决定是否需要独立状态 |
 
@@ -138,8 +138,8 @@ every real change
 | 行为 | 影响 | 当前或目标 |
 | --- | --- | --- |
 | Set/Replace Test | 只改变 testVersionId | 当前已有设置/替换；clear 待设计 |
-| Set/Adjust/Replace Grey | 设置目标 Version、万分比与稳定 cohort | UC-APP-021 已接受 |
-| Clear Grey | 停止灰度选择，保留 stable | UC-APP-021 已接受 |
+| Set/Adjust/Replace Grey | 设置目标 Version、万分比与稳定 cohort | UC-APP-021 已实现 |
+| Clear Grey | 停止灰度选择，保留 stable | UC-APP-021 已实现 |
 | Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 已接受；允许直接设置，不强制先经过 test/grey |
 | Clear Stable | 停止普通公开访问；test 可以继续，grey 存在时拒绝 | UC-APP-020 已接受 |
 | Roll Back | 将某一槽位重新指向仍具资格的历史 Version | UC-APP-020 已确认 stable 回退是普通受审计 replace |
@@ -163,7 +163,7 @@ else:
     unavailable
 ```
 
-第一条 test-only 路径已有 [BR-RUN-001](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-001) 至 [BR-RUN-005](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-005) 支持。Grey 分桶输入、比例单位、seed 生命周期和 rollout 调整语义尚待定义。
+第一条 test-only 路径已有 [BR-RUN-001](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-001) 至 [BR-RUN-005](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-005) 支持。Grey 分桶输入、比例单位、seed 生命周期和 rollout 调整语义已由 UC-APP-021 实现；统一三槽解析接口仍待设计。
 
 普通用户目录还需要当前已发布 Profile。Filter 不参与上述服务端槽位解析：服务端随候选 Application 返回 Filter 规则，客户端使用本地用户信息决定最终展示。
 
@@ -196,7 +196,7 @@ Filter rule ──────── client-side display only
 
 生命周期缺口适合按依赖顺序补齐，但暂不在本文分配 UC 编号：
 
-1. 实现 [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md)，随后设计 test clear。
+1. 设计 test clear。
 2. Application 归档、普通停用与平台紧急 suspension。
 3. 统一服务端启动目标解析与 Catalog Query Contract。
 4. 独立 FilterRevision 的归属、审核/发布方式和客户端求值契约。

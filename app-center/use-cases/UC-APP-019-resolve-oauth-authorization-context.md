@@ -4,7 +4,7 @@
 
 ## 目标与范围
 
-向 Auth 提供稳定 OAuth client 元数据、confidential secret 验证、用户登录前可验证的当前运行配置，以及特定用户的授权资格快照。当前实现以 TEST 为基础，[UC-APP-020 / BR-OAC-012](UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 在同一接口上增加 STABLE。Auth 不依赖客户端上报的 redirect URI、scope、Version 或批准状态；App Center 不签发用户 token。
+向 Auth 提供稳定 OAuth client 元数据、confidential secret 验证、用户登录前可验证的当前运行配置，以及特定用户的授权资格快照。当前实现以 TEST 为基础，[UC-APP-020 / BR-OAC-012](UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 在同一接口上增加 STABLE，[UC-APP-021 / BR-OAC-013](UC-APP-021-manage-grey-rollout.md#br-oac-013) 增加 GREY 和服务端 cohort 复算。Auth 不依赖客户端上报的 redirect URI、scope、Version、批准状态或 Grey 命中结果；App Center 不签发用户 token。
 
 ## 输入与输出
 

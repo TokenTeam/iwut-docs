@@ -187,9 +187,8 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 2. **Test-only 查询契约**：已确定不混入普通公开目录，而进入独立的“我参与的测试”入口；仍需定义分页、移除后的可见性和无兼容 test 时的结果。
 3. **管理员转让**：它是首版 Ownership 的必要能力，还是进入首版后的下一阶段治理能力？
 4. **受控图标资产**：当前 icon 只是可空不透明字符串；何时升级为受控资产、由谁拥有并如何迁移，等待真实需求后决定，不阻塞首版资料审核。
-5. **灰度分桶交付**：[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受可信 authId、HMAC-SHA-256、per-rollout seed、万分比及目标替换保持 cohort 的完整规则；仍需完成实现。
-6. **Filter 规则模型**：已确定采用独立 ApplicationFilterRevision 方向；仍需确定规则可引用哪些本地用户字段、声明格式、缺失字段结果和审核策略。
+5. **Filter 规则模型**：已确定采用独立 ApplicationFilterRevision 方向；仍需确定规则可引用哪些本地用户字段、声明格式、缺失字段结果和审核策略。
 
-这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016、OAuth/OIDC 扩展 UC-APP-018/019 以及 Stable UC-APP-020 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
+这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016、OAuth/OIDC 扩展 UC-APP-018/019 以及 Stable/Grey UC-APP-020/021 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
 
 OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。
