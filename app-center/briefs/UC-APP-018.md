@@ -85,7 +85,7 @@ secret 轮换：
 
 ### API 实现契约
 
-独立 API 仓库新增 package `app_center.v1.oauth_client`，service 为 `OAuthClientService`。首版只接受 `TEST`；Proto enum 仍为未来渠道保留 `GREY/STABLE` 值，但 adapter 对它们返回渠道未启用，不创建数据。
+独立 API 仓库 package 为 `app_center.v1.oauth_client`，service 为 `OAuthClientService`。UC-APP-020 完成后接受 `TEST/STABLE`；`GREY` 仍返回渠道未启用，不创建数据。
 
 稳定 enum：
 
@@ -131,7 +131,7 @@ clientId 与 Application 同寿命，固定归属一个 channel，不包含 rpcA
 
 `ApplicationOAuthRegistration` 以 `(applicationId, channel)` 为唯一身份，保存两种可选 client identity 的 clientId、状态和 registrationRevision。`ApplicationVersionOAuthConfig` 依附于 Version，保存该 Version 的 `pkceRedirectUris` 与 `confidentialRedirectUris`，不复制到 registration。
 
-channel 在登记后不可变；首版仅启用 TEST，GREY/STABLE 的登记和使用必须等待相应发布/运行资格用例，不能借其他渠道代用。client identity 可以在首个 Version 或 Publication 之前创建；创建时不读取发布槽、redirect URI 或 scopes。hostname 迁移通过新 Version 的受审核 redirect 配置完成，不创建新 clientId，也不修改 registration。运行时由 UC-APP-019 使用调用方明确给出的 channel 和 rpcApiMajor 选择当前 Publication。
+channel 在登记后不可变。TEST 已由本用例首批交付，[UC-APP-020 / BR-OAC-012](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 接受后启用 STABLE；GREY 仍须等待相应发布/运行资格用例，不能借其他渠道代用。client identity 可以在首个 Version 或 Publication 之前创建；创建时不读取发布槽、redirect URI 或 scopes。hostname 迁移通过新 Version 的受审核 redirect 配置完成，不创建新 clientId，也不修改 registration。运行时由 UC-APP-019 及其后续渠道规则使用调用方明确给出的 channel 和 rpcApiMajor 选择当前 Publication。
 
 <!-- 权威位置: use-cases/UC-APP-018-manage-oauth-client.md#br-oac-003 -->
 ### BR-OAC-003：高熵 secret 与一次披露
@@ -367,15 +367,15 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-018`（use-cases/UC-APP-018-manage-oauth-client.md）：变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：Auth 专用接口、Sector 的只读配置来源、资格变化与失败、STABLE 扩展提案、消费点与契约验收
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：Auth 专用接口、Sector 的只读配置来源、资格变化与失败、STABLE 扩展、消费点与契约验收
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-018-manage-oauth-client.md` | 131 | `724a3254b016` |
+| `use-cases/UC-APP-018-manage-oauth-client.md` | 131 | `498d8f688d7f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
-| `platform/contracts/app-oauth-client-v1.md` | 92 | `8f6b5efc7149` |
+| `platform/contracts/app-oauth-client-v1.md` | 92 | `3c74314974c5` |
 | `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |

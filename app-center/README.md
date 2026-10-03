@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义十九个活跃纵切片；UC-APP-017 已被否决并归档，其中 UC-APP-020 仍为设计提案：
+当前已经定义十九个活跃纵切片；UC-APP-017 已被否决并归档，UC-APP-020 已接受并进入实现：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -79,7 +79,7 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-017 归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md)：被否决的资料恢复提案；现行规则改为新建独立修订。
 - [UC-APP-018-manage-oauth-client.md](use-cases/UC-APP-018-manage-oauth-client.md)：管理稳定 OAuth client identity、状态和 confidential credential。
 - [UC-APP-019-resolve-oauth-authorization-context.md](use-cases/UC-APP-019-resolve-oauth-authorization-context.md)：为 Auth 提供 OAuth client 与当前 TEST 运行上下文。
-- [UC-APP-020-manage-stable-publication-slot.md](use-cases/UC-APP-020-manage-stable-publication-slot.md)：管理 stable 槽位和 STABLE OAuth channel 的提案。
+- [UC-APP-020-manage-stable-publication-slot.md](use-cases/UC-APP-020-manage-stable-publication-slot.md)：管理 stable 槽位并启用 STABLE OAuth channel。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：管理员转让的后续用例方向。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。
@@ -91,6 +91,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 和 UC-APP-019 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`；UC-APP-020 为 `PROPOSED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：除 UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS` 外，其余已接受活跃 UC 的当前后端工作包均为 `COMPLETE`。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-020 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-020 当前为 `IN_PROGRESS`；UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；其余已接受活跃 UC 的当前后端工作包均为 `COMPLETE`。
 
 OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有；GREY/STABLE channel 需随对应发布资格用例另行启用。

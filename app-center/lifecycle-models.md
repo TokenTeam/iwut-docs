@@ -128,7 +128,7 @@ every real change
 | --- | --- | --- |
 | ABSENT | 该 Application 与 RPC major 尚无 Publication | 已由首次设置 test 的预期 revision 语义间接定义 |
 | CONFIGURED | 至少一个槽位存在 | 当前只定义 testVersionId 存在的情况 |
-| EMPTY | Publication 保留 revision 与历史，但所有槽位为空 | UC-APP-020 已提出由 clear stable 形成并保留空记录，尚未接受 |
+| EMPTY | Publication 保留 revision 与历史，但所有槽位为空 | UC-APP-020 已接受由 clear stable 形成并保留空记录 |
 | SUSPENDED | 平台临时停止该分区分发，但保留槽位 | 候选方案；尚未决定是否需要独立状态 |
 
 首版需要在两种停止分发模型中作出选择：清空相关槽位，或者增加独立 SUSPENDED 状态。前者模型更小但恢复需要重新设置指针；后者恢复更直接，但增加权限、原因、期限和解析规则。
@@ -140,9 +140,9 @@ every real change
 | Set/Replace Test | 只改变 testVersionId | 当前已有设置/替换；clear 待设计 |
 | Set/Adjust Grey | 设置 greyVersionId、比例与稳定分桶参数 | 目标 |
 | Clear Grey | 停止灰度选择，保留 stable | 目标 |
-| Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 提案；允许直接设置，不强制先经过 test/grey |
-| Clear Stable | 停止普通公开访问；test 可以继续，grey 存在时拒绝 | UC-APP-020 提案 |
-| Roll Back | 将某一槽位重新指向仍具资格的历史 Version | UC-APP-020 提案确认 stable 回退是普通受审计 replace |
+| Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 已接受；允许直接设置，不强制先经过 test/grey |
+| Clear Stable | 停止普通公开访问；test 可以继续，grey 存在时拒绝 | UC-APP-020 已接受 |
+| Roll Back | 将某一槽位重新指向仍具资格的历史 Version | UC-APP-020 已确认 stable 回退是普通受审计 replace |
 
 所有槽位继续引用同一 Application、兼容当前 rpcApiMajor 且具有发布资格的 Version。当前 test 资格规则见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)；grey/stable 是否增加更严格检查由后续 UC 决定。
 
@@ -196,7 +196,7 @@ Filter rule ──────── client-side display only
 
 生命周期缺口适合按依赖顺序补齐，但暂不在本文分配 UC 编号：
 
-1. 评审 [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 的 stable/clear/EMPTY 与 STABLE OAuth 提案。
+1. 实现已接受的 [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) stable/clear/EMPTY 与 STABLE OAuth。
 2. Publication 的 grey rollout 和 test clear。
 3. Application 归档、普通停用与平台紧急 suspension。
 4. 统一服务端启动目标解析与 Catalog Query Contract。

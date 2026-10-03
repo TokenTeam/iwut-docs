@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-019` 为 Auth 解析 OAuth 应用授权上下文 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAC-006`–`BR-OAC-011`（6 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-OAC-012`（来自 `UC-APP-020`） |
 | ADR | `ADR-006` |
 | 平台共享 | `platform/contracts/app-oauth-client-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -37,7 +37,7 @@
 
 ### 目标与范围
 
-向 Auth 提供稳定 OAuth client 元数据、confidential secret 验证、用户登录前可验证的当前运行配置，以及特定用户的授权资格快照。Auth 不依赖客户端上报的 redirect URI、scope、Version 或批准状态；App Center 不签发用户 token。
+向 Auth 提供稳定 OAuth client 元数据、confidential secret 验证、用户登录前可验证的当前运行配置，以及特定用户的授权资格快照。当前实现以 TEST 为基础，[UC-APP-020 / BR-OAC-012](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012) 在同一接口上增加 STABLE。Auth 不依赖客户端上报的 redirect URI、scope、Version 或批准状态；App Center 不签发用户 token。
 
 ### 输入与输出
 
@@ -109,6 +109,27 @@ Auth 必须先调用 `ResolveClientRuntimeConfiguration`，并在发起登录或
 ### BR-OAC-011：Auth sector 的回调事实来源
 
 GetApplicationPublishedRedirects 仅向授权 Auth 服务返回单个应用当前批准且已发布回调的快照并集，具体字段与快照比较见共享契约。App 不生成 sector、不保存用户 sub；同一应用所有渠道/type 可归入一个 sector，但查询成功不授予任何用户运行资格。清单不含草稿或未发布历史版本，故障不得用空清单伪装成功。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-020`
+
+<!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012 -->
+### BR-OAC-012：STABLE OAuth channel 激活
+
+UC-APP-020 被接受后，UC-APP-018 的五个管理员方法必须接受 channel=`STABLE`，并继续以 `(applicationId, channel)` 隔离 registration、clientId、status、authorizationEpoch 和 confidential credential。STABLE 与 TEST clientId 不共享，但都映射到同一 Application；Auth grant 继续以 `(authId, applicationId, channel)` 隔离。
+
+UC-APP-019 的五个 Auth-only provider 方法必须支持 STABLE：
+
+- runtime 使用 exact-major stableVersionId，不读取 test 或未来 grey。
+- Auth 仍负责确认当前用户有效并提供可信 authId；App 的 authorization context 不要求 Tester Membership。共享契约中的 testerMembershipId 改为按渠道可空：TEST 必填，STABLE 为空。
+- redirect/scopes/display 与 TEST 一样来自同一个批准 Version/Review/Profile snapshot。
+- PublishedRedirectSnapshot 纳入已发布 STABLE major 的批准回调；仍忽略历史、草稿和未登记 type。
+- 没有 stable、client channel 不匹配、Version/Profile 不一致或 client DISABLED 时失败关闭。
+
+App 仍不保存 sector/sub，不签发 code/token。STABLE provider 扩展继续仅开放原生 gRPC，并复用现有五个方法级 service permission。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -228,9 +249,9 @@ Auth 用此快照提供标准 sector URI 的 JSON 清单。准备 OIDC 注册元
 
 #### 资格变化与失败
 
-client 不可用、对应回调数组为空、非 ACTIVE Tester、无 exact-major Publication、无当前已批准公开资料或批准记录不一致均不可授权。首版只支持 channel=`TEST`。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
+client 不可用、对应回调数组为空、无 exact-major 渠道 Publication、无当前已批准公开资料或批准记录不一致均不可授权；TEST 还要求 ACTIVE Tester。当前支持 channel=`TEST/STABLE`，GREY 尚未启用。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
 
-App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。未来 STABLE/灰度发布必须先定义公开运行资格，再扩展 channel。
+App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。未来灰度发布必须先定义运行资格，再扩展 channel。
 
 #### 消费点与契约验收
 
@@ -341,15 +362,17 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-019`（use-cases/UC-APP-019-resolve-oauth-authorization-context.md）：变更记录
+- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口、STABLE 扩展提案
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口、STABLE 扩展
 - `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `db23eb70ec0e` |
+| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `c0467b7005fa` |
+| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
-| `platform/contracts/app-oauth-client-v1.md` | 92 | `8f6b5efc7149` |
+| `platform/contracts/app-oauth-client-v1.md` | 92 | `3c74314974c5` |
 | `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |

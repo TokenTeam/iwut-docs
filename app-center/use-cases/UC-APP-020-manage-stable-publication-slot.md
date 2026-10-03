@@ -1,6 +1,6 @@
 # UC-APP-020：管理稳定发布槽位
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -273,7 +273,44 @@ PUT body：
 
 DELETE 使用 `If-Match` 或等价显式字段表达 expectedPublicationRevision；不得依赖客户端最后写入胜出。创建返回 201，替换、清空和 no-op 返回 200。响应返回 changed、当前完整 Publication 和可空 History。
 
-具体 Proto package、HTTP annotation、错误 reason 和 Mongo migration 在进入 `ACCEPTED` 前补齐；不得改变既有 UC007 API 的 test 语义。
+独立 API 仓库继续使用 package `app_center.v1.application_publication` 和既有 `ApplicationPublication` service，新增：
+
+```text
+SetApprovedVersionInStableSlot
+  PUT /v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot
+  body: command
+
+ClearStableSlot
+  DELETE /v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot
+  query: expected_publication_revision
+```
+
+`SetApprovedVersionInStableSlotRequest` 包含路径字段和 `SetApprovedVersionInStableSlotCommand { version_id, optional expected_publication_revision }`。`ClearStableSlotRequest` 直接包含路径字段和必填正整数 `expected_publication_revision`；HTTP 不接收 body，gRPC 使用同一字段。
+
+两个响应复用 `{ changed, publication, history? }` 结构。为表达 stable-only 和 EMPTY：
+
+- `ApplicationPublicationResource.test_version_id` 保持 field 4，但改为 `optional string`。
+- 新增 `optional string stable_version_id = 10`。
+- History 的 `new_version_id`、`approved_review_id`、`scope_catalog_revision`、`preflight_policy_version` 保持既有 field number 并改为 optional；SET action 必填，CLEAR action 为空。
+- OAuth Provider 的 `AuthorizationContext.tester_membership_id` 保持 field 3 并改为 optional；TEST 必填，STABLE 为空。
+
+新增 publication error reason：
+
+```text
+ERROR_REASON_STABLE_PUBLICATION_REQUIRED_BY_GREY = 23
+ERROR_REASON_APPLICATION_PUBLICATION_STATE_INCONSISTENT = 24
+```
+
+前者映射 `FAILED_PRECONDITION / 422`；后者映射 `INTERNAL / 500`。其余错误继续复用 UC007 已有稳定 reason。HTTP 请求不能通过 query 覆盖 PUT command；DELETE 只允许三个已声明字段。
+
+Mongo migration 固定为 `0016_stable_publication`：
+
+- `application_publications` 增加可空 stableVersionId，并把 testVersionId 改为可空；允许 test-only、stable-only、二者同时存在和 EMPTY，当前不允许写 greyRollout。
+- `application_publication_history` 接受三个 action，并按 action 校验条件必填字段；历史 SET_TEST 记录不重写。
+- `application_oauth_registrations` channel validator 从仅 TEST 扩展为 TEST/STABLE；GREY 继续拒绝。
+- migration ledger、fresh install、0015→0016 顺序升级、重复执行和回滚测试必须覆盖这些变化。
+
+不得改变既有 UC007 test API 的命令语义；它只是开始返回带 presence 的完整 Publication/History 资源。
 
 ## 验收场景
 
@@ -291,6 +328,8 @@ DELETE 使用 `If-Match` 或等价显式字段表达 expectedPublicationRevision
 - clear stable 与 Auth 解析/授权并发时结果具有明确先后：旧 snapshot 先完成可以形成在途结果，clear 先提交则后续解析失败；App 不返回跨 revision 混合上下文。
 - 管理员转让、Profile 切换、Version 资格变化和 registration 建立竞争均有明确先后结果。
 - 事务回滚不留下孤立 History、部分指针或半创建 OAuth credential。
+- Proto field presence 能区分 stable-only、test-only 和 EMPTY；DELETE 的 expected revision 缺失、零或 query 重复均拒绝。
+- 0016 对 fresh、sequential 和重复 migration 产生相同 validator/index 结果；既有 SET_TEST History 保持可读。
 
 ## 依赖与实现边界
 
@@ -311,3 +350,4 @@ DELETE 使用 `If-Match` 或等价显式字段表达 expectedPublicationRevision
 ## 变更记录
 
 - 2026-10-04：建立 UC-APP-020 提案；定义 stable set/replace/clear、EMPTY Publication、直接稳定发布和 STABLE OAuth channel 激活方向。
+- 2026-10-04：接受设计；固定 API/field presence、错误映射、0016 migration、STABLE provider 与完整验收边界，允许开始实现。

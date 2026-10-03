@@ -229,9 +229,9 @@ Auth 用此快照提供标准 sector URI 的 JSON 清单。准备 OIDC 注册元
 
 #### 资格变化与失败
 
-client 不可用、对应回调数组为空、非 ACTIVE Tester、无 exact-major Publication、无当前已批准公开资料或批准记录不一致均不可授权。首版只支持 channel=`TEST`。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
+client 不可用、对应回调数组为空、无 exact-major 渠道 Publication、无当前已批准公开资料或批准记录不一致均不可授权；TEST 还要求 ACTIVE Tester。当前支持 channel=`TEST/STABLE`，GREY 尚未启用。正常缺少运行资格面向 Auth 返回统一 `FAILED_PRECONDITION`，受控诊断字段可区分内部原因；公开资料指针存在但目标缺失、跨应用、非 APPROVED 或内容损坏返回 `INTERNAL`。非法输入为 `INVALID_ARGUMENT`；服务身份失败为 `UNAUTHENTICATED/PERMISSION_DENIED`；存储或超时为 `UNAVAILABLE`。Auth 不用旧成功快照或 Application 技术名称兜底。
 
-App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。未来 STABLE/灰度发布必须先定义公开运行资格，再扩展 channel。
+App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 状态。未来灰度发布必须先定义运行资格，再扩展 channel。
 
 #### 消费点与契约验收
 
@@ -567,7 +567,7 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 
 - `UC-AUTH-015`（use-cases/UC-AUTH-015-exchange-authorization-code.md）：目标与范围、输入与输出、主流程、验收场景、依赖与实现边界、变更记录
 - `UC-AUTH-001`（use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md）：目标与范围、调用者与输入、输出、主流程、异常流程、API 契约、测试与验收、非目标、变更记录
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：STABLE 扩展提案
+- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：STABLE 扩展
 
 ## 溯源
 
@@ -576,7 +576,7 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 | `use-cases/UC-AUTH-014-authorize-application.md` | 82 | `c765b2032121` |
 | `use-cases/UC-AUTH-015-exchange-authorization-code.md` | 77 | `f671ba6d8944` |
 | `use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md` | 125 | `ba56267a4891` |
-| `platform/contracts/app-oauth-client-v1.md` | 92 | `8f6b5efc7149` |
+| `platform/contracts/app-oauth-client-v1.md` | 92 | `3c74314974c5` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `402d9ac717e8` |
 | `platform/contracts/oauth-oidc-v1.md` | 134 | `eca89ec773a1` |

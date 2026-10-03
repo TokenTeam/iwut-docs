@@ -85,7 +85,7 @@ Tester 使用自己的官方客户端和实际宿主能力访问 test 版本。�
 测试通过后，管理员可以在同一 RPC API major 分区内配置 grey，再提升为 stable。发布过程保留槽位历史和乐观并发语义，并提供以下产品能力：
 
 - 调整或停止 grey 分流。
-- 依据 [UC-APP-020 提案](use-cases/UC-APP-020-manage-stable-publication-slot.md)把 stable 指向另一个已批准版本。
+- 依据 [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md)把 stable 指向另一个已批准版本。
 - 回退到历史上仍具发布资格的版本。
 - 清空或紧急停止某个发布槽位的分发。
 

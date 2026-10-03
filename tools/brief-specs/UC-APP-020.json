@@ -1,0 +1,66 @@
+{
+  "uc": "UC-APP-020",
+  "note": "Implement stable publication set/replace/clear, retained EMPTY publications, shared publication OCC/history, STABLE OAuth registration and Auth-provider resolution. Reuse UC007/018/019 boundaries; do not implement Grey, test clear, Catalog, Filter, Application disable, Auth grants/tokens, or frontend behavior.",
+  "uc_sections": [
+    "目标与范围",
+    "已确认的设计选择",
+    "输入与身份",
+    "设置或替换主流程",
+    "清空主流程",
+    "异常流程",
+    "最小领域模型变化",
+    "API 草图",
+    "验收场景",
+    "依赖与实现边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-001": [
+      "决定/权威来源",
+      "决定/第一阶段缓存",
+      "决定/多阶段校验"
+    ],
+    "ADR-002": [
+      "决定",
+      "适用边界"
+    ],
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/app-oauth-client-v1.md": [
+      "所有权与调用方",
+      "三种生命周期",
+      "管理接口",
+      "Auth 专用接口",
+      "Sector 的只读配置来源",
+      "资格变化与失败",
+      "STABLE 扩展",
+      "消费点与契约验收"
+    ],
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/trusted-service-identity-v1.md": [
+      "目的与范围",
+      "传输与 JOSE",
+      "Claims",
+      "App Center 固定授权映射",
+      "ENV 配置",
+      "错误与轮换",
+      "契约测试要求"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

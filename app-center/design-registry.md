@@ -53,7 +53,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-017` | 将被拒绝的应用公开资料修订恢复为草稿 | `SUPERSEDED` | [归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md) | [UC-APP-013](use-cases/UC-APP-013-create-application-profile-revision.md)＋[UC-APP-016 / BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | 未实现；以新建独立修订取代服务端恢复。 |
 | `UC-APP-018` | 管理应用 OAuth Client | `ACCEPTED` | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md) | — | TEST-only 管理后端已完成；provider/runtime 由 UC019 完成。 |
 | `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `ACCEPTED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | Auth-only 原生 gRPC provider 已完成；实现证据见 `implements/README.md`。 |
-| `UC-APP-020` | 管理稳定发布槽位 | `PROPOSED` | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) | — | Stable set/replace/clear、EMPTY Publication 与 STABLE OAuth channel 的设计提案。 |
+| `UC-APP-020` | 管理稳定发布槽位 | `ACCEPTED` | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) | — | Stable set/replace/clear、EMPTY Publication 与 STABLE OAuth channel 已接受，进入实现。 |
 
 ## Business Rules
 
