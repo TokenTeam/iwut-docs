@@ -120,14 +120,14 @@ every real change
   append PublicationHistory
 ```
 
-当前权威设计只覆盖 `test: EMPTY/VersionId -> VersionId`；clear、grey 和 stable 都属于目标模型。现有规则已经确定槽位共享 Publication revision，并且设置 test 不自动改变其他槽位，参见 [BR-PUB-006](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-006) 与 [BR-PUB-010](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-010)。
+当前权威设计已覆盖设置 Test 和 Stable 的设置/替换/清空；[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 提出 Grey 的 set/adjust/replace/clear。槽位共享 Publication revision，并且一个槽位的命令不自动改变其他槽位，参见 [BR-PUB-006](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-006)、[BR-PUB-019](use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-019) 与提案 [BR-PUB-030](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-030)。
 
 ### Publication 记录生命周期
 
 | 阶段 | 含义 | 当前状态 |
 | --- | --- | --- |
 | ABSENT | 该 Application 与 RPC major 尚无 Publication | 已由首次设置 test 的预期 revision 语义间接定义 |
-| CONFIGURED | 至少一个槽位存在 | 当前只定义 testVersionId 存在的情况 |
+| CONFIGURED | 至少一个槽位存在 | Test/Stable 已实现；Grey 由 UC-APP-021 提案定义 |
 | EMPTY | Publication 保留 revision 与历史，但所有槽位为空 | UC-APP-020 已接受由 clear stable 形成并保留空记录 |
 | SUSPENDED | 平台临时停止该分区分发，但保留槽位 | 候选方案；尚未决定是否需要独立状态 |
 
@@ -138,15 +138,15 @@ every real change
 | 行为 | 影响 | 当前或目标 |
 | --- | --- | --- |
 | Set/Replace Test | 只改变 testVersionId | 当前已有设置/替换；clear 待设计 |
-| Set/Adjust Grey | 设置 greyVersionId、比例与稳定分桶参数 | 目标 |
-| Clear Grey | 停止灰度选择，保留 stable | 目标 |
+| Set/Adjust/Replace Grey | 设置目标 Version、万分比与稳定 cohort | UC-APP-021 提案 |
+| Clear Grey | 停止灰度选择，保留 stable | UC-APP-021 提案 |
 | Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 已接受；允许直接设置，不强制先经过 test/grey |
 | Clear Stable | 停止普通公开访问；test 可以继续，grey 存在时拒绝 | UC-APP-020 已接受 |
 | Roll Back | 将某一槽位重新指向仍具资格的历史 Version | UC-APP-020 已确认 stable 回退是普通受审计 replace |
 
-所有槽位继续引用同一 Application、兼容当前 rpcApiMajor 且具有发布资格的 Version。当前 test 资格规则见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)；grey/stable 是否增加更严格检查由后续 UC 决定。
+所有槽位继续引用同一 Application、兼容当前 rpcApiMajor 且具有发布资格的 Version。Test 资格规则见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)，Stable 见 [BR-PUB-012](use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-012)，Grey 提案见 [BR-PUB-022](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-022)。
 
-“Test → Grey → Stable”描述常见发布旅程，不表示数据库中的自动状态推进。现有 [BR-PUB-010](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-010) 已排除 test 设置自动扩散；未来是否要求 Version 曾经进入 test 才能设置 grey/stable，需要由发布政策明确。
+“Test → Grey → Stable”描述常见发布旅程，不表示数据库中的自动状态推进。Stable 和 Grey 都不要求目标 Version 曾进入 Test；各槽位命令不做隐式提升。
 
 ### 服务端解析
 
@@ -196,7 +196,7 @@ Filter rule ──────── client-side display only
 
 生命周期缺口适合按依赖顺序补齐，但暂不在本文分配 UC 编号：
 
-1. Publication 的 grey rollout 和 test clear。
+1. 评审并实现 [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md)，随后设计 test clear。
 2. Application 归档、普通停用与平台紧急 suspension。
 3. 统一服务端启动目标解析与 Catalog Query Contract。
 4. 独立 FilterRevision 的归属、审核/发布方式和客户端求值契约。

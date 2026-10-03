@@ -133,7 +133,7 @@ Filter 的产品定位是客户端发现和展示机制，而不是安全边界�
 
 首版 Filter 规则表达什么用户信息、采用怎样的声明格式、缺少字段时如何求值，以及规则属于 Application、ApplicationProfileRevision 还是独立修订对象，尚待后续 Capability Map 和领域模型确定。这里先确认服务端持有规则、客户端执行规则这一职责边界。
 
-Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确定性百分比分桶；具体哈希输入、seed 生命周期和比例变更语义尚未在本文确定。
+Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 提议只对可信已登录 authId 使用 per-rollout seed 的 HMAC 确定性万分比分桶；同一连续 rollout 调整比例或替换目标时保持 cohort，Clear 后重新分组。该提案进入 `ACCEPTED` 前仍不是实现依据。
 
 ## 首版能力范围
 
@@ -187,9 +187,9 @@ Grey 与 Filter 不共享求值机制。Grey 的最小方向仍是服务端确�
 2. **Test-only 查询契约**：已确定不混入普通公开目录，而进入独立的“我参与的测试”入口；仍需定义分页、移除后的可见性和无兼容 test 时的结果。
 3. **管理员转让**：它是首版 Ownership 的必要能力，还是进入首版后的下一阶段治理能力？
 4. **受控图标资产**：当前 icon 只是可空不透明字符串；何时升级为受控资产、由谁拥有并如何迁移，等待真实需求后决定，不阻塞首版资料审核。
-5. **灰度分桶细节**：首版已确定只支持已登录用户的确定性分桶，并要求 stable 基线；仍需确定哈希输入、密钥、seed 生命周期、比例单位和目标替换语义。
+5. **灰度分桶交付**：[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已提出可信 authId、HMAC-SHA-256、per-rollout seed、万分比及目标替换保持 cohort 的完整规则；仍需完成设计接受和实现。
 6. **Filter 规则模型**：已确定采用独立 ApplicationFilterRevision 方向；仍需确定规则可引用哪些本地用户字段、声明格式、缺失字段结果和审核策略。
 
-这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016 以及 OAuth/OIDC 扩展 UC-APP-018/019 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
+这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016、OAuth/OIDC 扩展 UC-APP-018/019 以及 Stable UC-APP-020 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
 
 OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

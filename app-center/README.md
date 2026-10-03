@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义十九个活跃纵切片；UC-APP-017 已被否决并归档，UC-APP-020 已完成当前后端工作包：
+当前已经定义二十个活跃纵切片；UC-APP-017 已被否决并归档，UC-APP-021 已形成 Grey rollout 设计提案：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -27,6 +27,7 @@
 - `UC-APP-018`：当前管理员管理 Application＋channel 级稳定 OAuth client identity 与 confidential credential。
 - `UC-APP-019`：App Center 通过 Auth-only 原生 gRPC 提供 OAuth client、运行配置、用户资格和批准回调事实。
 - `UC-APP-020`：当前管理员设置、替换或清空 exact-major stable 槽位，并启用 STABLE OAuth channel。
+- `UC-APP-021`：当前管理员在 Stable 基线上建立、调整、替换或清空确定性 Grey rollout。
 
 本轮 Application 只有四个业务字段：
 
@@ -43,7 +44,7 @@ createdAt
 
 面向用户公开的资料由独立且需要审核的 ApplicationProfileRevision 表达，不属于 Application 创建字段。UC-APP-013 已建立 displayName、可空 description 和可空不透明 icon 字符串；受控资产能力留待以后显式扩展。
 
-UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术计数器，并为每个 Version 建立一对一依附的 ApplicationVersionOAuthConfig，但不增加 Application 业务字段。UC-APP-003 为 ApplicationVersion 增加 revision、updatedBy 和 updatedAt，并让依附 OAuth 配置共用该 revision。UC-APP-004 新增 ApplicationReview，UC-APP-005 为其增加一次性 decision，UC-APP-006 为被拒绝 Review 增加一次性 draftRestoration。UC-APP-007 新增按 RPC major 分区的 ApplicationPublication 与追加式 History。UC-APP-008 新增 Application 级 TesterJoinLink，UC-APP-009 新增最多 100 个 ACTIVE Tester 的 ApplicationTesterMembership，UC-APP-010 完成 Membership 的移除终态，UC-APP-011 完成加入链接的 MANUAL 撤销终态。UC-APP-012 只读组合这些事实并返回 TestLaunchDescriptor。UC-APP-013 新增 ApplicationProfileRevision，并为 Application 持久化投影增加 nextProfileRevisionSequence 技术计数器；同一 Application 的 DRAFT 或 SUBMITTED 共享唯一工作修订位。UC-APP-014 完成资料草稿的完整替换和乐观并发语义；UC-APP-015 新增独立 ApplicationProfileReview snapshot，并把资料草稿迁移为 SUBMITTED；UC-APP-016 定义独立资料审核权限、一次性 decision、批准后自动公开和 REJECTED 终态，并在决定时释放工作位。UC-APP-018/019 设计 Application＋channel 级稳定 OAuth registration、独立 credential 和按发布上下文解析 Version 配置。这些用例仍不改变 Application 的四个业务字段。
+UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术计数器，并为每个 Version 建立一对一依附的 ApplicationVersionOAuthConfig，但不增加 Application 业务字段。UC-APP-003 为 ApplicationVersion 增加 revision、updatedBy 和 updatedAt，并让依附 OAuth 配置共用该 revision。UC-APP-004 新增 ApplicationReview，UC-APP-005 为其增加一次性 decision，UC-APP-006 为被拒绝 Review 增加一次性 draftRestoration。UC-APP-007 新增按 RPC major 分区的 ApplicationPublication 与追加式 History。UC-APP-008 新增 Application 级 TesterJoinLink，UC-APP-009 新增最多 100 个 ACTIVE Tester 的 ApplicationTesterMembership，UC-APP-010 完成 Membership 的移除终态，UC-APP-011 完成加入链接的 MANUAL 撤销终态。UC-APP-012 只读组合这些事实并返回 TestLaunchDescriptor。UC-APP-013 新增 ApplicationProfileRevision，并为 Application 持久化投影增加 nextProfileRevisionSequence 技术计数器；同一 Application 的 DRAFT 或 SUBMITTED 共享唯一工作修订位。UC-APP-014 完成资料草稿的完整替换和乐观并发语义；UC-APP-015 新增独立 ApplicationProfileReview snapshot，并把资料草稿迁移为 SUBMITTED；UC-APP-016 定义独立资料审核权限、一次性 decision、批准后自动公开和 REJECTED 终态，并在决定时释放工作位。UC-APP-018/019 设计 Application＋channel 级稳定 OAuth registration、独立 credential 和按发布上下文解析 Version 配置；UC-APP-020/021 在 Publication 内增加 Stable 和 Grey 运行配置。这些用例仍不改变 Application 的四个业务字段。
 
 ## 文档入口
 
@@ -80,6 +81,7 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-018-manage-oauth-client.md](use-cases/UC-APP-018-manage-oauth-client.md)：管理稳定 OAuth client identity、状态和 confidential credential。
 - [UC-APP-019-resolve-oauth-authorization-context.md](use-cases/UC-APP-019-resolve-oauth-authorization-context.md)：为 Auth 提供 OAuth client 与当前 TEST 运行上下文。
 - [UC-APP-020-manage-stable-publication-slot.md](use-cases/UC-APP-020-manage-stable-publication-slot.md)：管理 stable 槽位并启用 STABLE OAuth channel。
+- [UC-APP-021-manage-grey-rollout.md](use-cases/UC-APP-021-manage-grey-rollout.md)：管理 Stable 基线上的确定性 Grey rollout。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：管理员转让的后续用例方向。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。
@@ -91,6 +93,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-020 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；其余已接受活跃 UC 的当前后端工作包均为 `COMPLETE`。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-020 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`；UC-APP-021 为 `PROPOSED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；其余已接受活跃 UC 的当前后端工作包均为 `COMPLETE`，UC-APP-021 尚未开始实现。
 
-OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有；TEST/STABLE channel 已启用，GREY 需随对应发布资格用例另行启用。
+OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付，UC-APP-020 已启用 STABLE。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有；GREY activation 由 UC-APP-021 提案定义，尚未成为实现依据。

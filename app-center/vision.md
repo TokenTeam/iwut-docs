@@ -54,12 +54,12 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - Application 管理查询、受控改名、归档、禁用和恢复；物理删除仍不是首版目标。
 - 协作者和角色。
 - 管理员转让；当前只为未来转让保留 adminId 语义。
-- ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销；Grey 发布与公开上线仍需后续设计。
+- ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销；Grey 发布已有 UC-APP-021 提案但尚未接受或实现。
 - versionLabel 语义比较和 SemVer 校验。
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
 - Application admin 或 SysAdmin 发起的 Application 级禁用及重新启用；紧急隐藏不作为 ProfileRevision 状态。
-- Tester 主动退出、Grey 槽位管理、test clear、灰度分桶和普通用户统一运行解析。
+- Tester 主动退出、UC-APP-021 Grey rollout 实现、test clear 和普通用户统一运行解析。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
 - Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。
 - 兼容现有 App Center API 和 MongoDB 文档。
