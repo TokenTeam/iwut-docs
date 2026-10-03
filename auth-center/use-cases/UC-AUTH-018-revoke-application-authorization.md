@@ -1,6 +1,6 @@
 # UC-AUTH-018：查看及收回本人应用授权
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -53,3 +53,9 @@
 ## 依赖与实现边界
 
 依赖平台 Session 与 UC014 grant 模型；和 UC015/016/019 一起实现撤销栅栏。本人 API 的 Proto/HTTP annotation 在 API 仓库固定，必须走有效 Session，不能错误地标为匿名标准端点。
+
+## 实施接口
+
+生成 API：`auth_center.v1.oauth_grant.OAuthGrantService`。`ListOwnApplicationGrants` 对应 `POST /v1/users/me/application-grants:list`；`RevokeOwnApplicationGrant` 对应 `POST /v1/users/me/application-grants/{grant_id}:revoke`。列表 pageSize 缺省 20、最大 50，cursor 为上页最后一项的稳定 grantId，服务端校验属于本人并按 applicationId/channel 继续。列表无在线 App 依赖。
+
+expectedRevision 必须显式出现；ALL 不得同时提交 scopes，SCOPES 必须提供非空唯一列表。revision 冲突返回 HTTP 409 / gRPC ABORTED，reason=`OAUTH_GRANT_REVISION_CONFLICT`，metadata.currentGrant 含当前 grantId/revision/status/scopes。错误主体采用既有管理 API 格式，不套用标准 /revoke 的 OAuth JSON。其它本人接口错误为 OAUTH_INVALID_REQUEST、OAUTH_LOGIN_REQUIRED、OAUTH_NOT_FOUND、OAUTH_TEMPORARILY_UNAVAILABLE。Proto 的 grant_id 路径字段使用相同 json_name 以保持生成 HTTP 客户端路径绑定。

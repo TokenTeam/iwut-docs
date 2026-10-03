@@ -37,12 +37,12 @@
 | `UC-AUTH-011` | 设置并激活邮箱 | `ACCEPTED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 无 Session 验证后创建账号，有效 Session 绑定/更换；已有账号邮箱登录独立交付。 |
 | `UC-AUTH-012` | 使用邮箱登录 | `ACCEPTED` | [UC-AUTH-012-login-with-email.md](use-cases/UC-AUTH-012-login-with-email.md) | — | 邮箱验证码授权本机设备，回到原账号并建立 Session；不自动注册。 |
 | `UC-AUTH-013` | 申请 Developer | `ACCEPTED` | [UC-AUTH-013-apply-for-developer.md](use-cases/UC-AUTH-013-apply-for-developer.md) | — | 当前激活邮箱及可用邮箱登录为前提，自助开通 APPROVED；不增加人工资格审核。 |
-| `UC-AUTH-014` | 用户确认应用授权并签发授权码 | `PROPOSED` | [UC-AUTH-014](use-cases/UC-AUTH-014-authorize-application.md) | — | OAuth/OIDC 新设计，未实现。 |
-| `UC-AUTH-015` | 兑换授权码并签发 OIDC 凭据 | `PROPOSED` | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md) | — | OAuth/OIDC 新设计，未实现。 |
-| `UC-AUTH-016` | 刷新应用访问凭据 | `PROPOSED` | [UC-AUTH-016](use-cases/UC-AUTH-016-refresh-application-tokens.md) | — | OAuth/OIDC 新设计，未实现。 |
-| `UC-AUTH-017` | 读取 OIDC 用户信息 | `PROPOSED` | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md) | — | OAuth/OIDC 新设计，未实现。 |
-| `UC-AUTH-018` | 查看及收回本人应用授权 | `PROPOSED` | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md) | — | OAuth/OIDC 新设计，未实现。 |
-| `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `PROPOSED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-014` | 用户确认应用授权并签发授权码 | `ACCEPTED` | [UC-AUTH-014](use-cases/UC-AUTH-014-authorize-application.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-015` | 兑换授权码并签发 OIDC 凭据 | `ACCEPTED` | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-016` | 刷新应用访问凭据 | `ACCEPTED` | [UC-AUTH-016](use-cases/UC-AUTH-016-refresh-application-tokens.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-017` | 读取 OIDC 用户信息 | `ACCEPTED` | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-018` | 查看及收回本人应用授权 | `ACCEPTED` | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `ACCEPTED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
 
 ## Business Rules
 

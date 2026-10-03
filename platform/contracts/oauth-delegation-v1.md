@@ -20,6 +20,8 @@ Traefik 阶段完成入口检查，但 token 真伪、grant、scope 的权威判
 
 ## Auth 签发 RPC
 
+可执行 route manifest、规范摘要字节与本地时钟观测格式见 [OAuth route policy v1](oauth-route-policy-v1.md)。
+
 唯一新内部方法为 `/auth_center.v1.oauth_delegation.OAuthDelegationService/IssueDelegationContext`。仅 native gRPC/TLS，调用者必须是授权 Gateway service principal，permission=`auth.oauth.delegation.issue`，audience 为 Auth，metadata：
 
 - `authorization: Bearer <Gateway service JWS>`；按既有 service identity 验证。

@@ -1,6 +1,6 @@
 # UC-AUTH-015：兑换授权码并签发 OIDC 凭据
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 

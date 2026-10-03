@@ -6,7 +6,7 @@
 
 | Use Case | 设计状态 | 实现状态 | 已闭合 | 尚未闭合 |
 | --- | --- | --- | --- | --- |
-| [UC-AUTH-001](../use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) | `ACCEPTED` | `IN_PROGRESS` | 独立 API Proto 与生成代码、Domain/Port/UseCase、临时硬编码 catalog adapter、Kratos 原生 gRPC transport、goforj/wire Composition Root、service JWS/固定 allowlist、未认证 provider E2E、真实 App+Auth 双服务 E2E | MongoDB 权威目录 |
+| [UC-AUTH-001](../use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) | `ACCEPTED` | `COMPLETE` | 独立 API、Domain/Port/UseCase、原生 gRPC、service JWS；显式 OAuth manifest 下使用 Mongo 权威目录、完整快照 revision、幂等启动装载、enabled/requestable 投影，与 OAuth 共用同一目录 | 未配置 manifest 的旧开发模式仍使用临时硬编码目录；线上目录编辑后台不在本 UC 范围 |
 | [UC-AUTH-002](../use-cases/UC-AUTH-002-batch-get-developer-statuses.md) | `ACCEPTED` | `COMPLETE` | 权威设计、共享契约、独立 API Proto 与生成代码、Domain/Port/UseCase、MongoDB Repository 与唯一索引、Kratos 原生 gRPC Transport、service JWS/固定 allowlist、真实 MongoDB provider E2E、App Center consumer adapter、真实 App+Auth 双服务 E2E | — |
 | [UC-AUTH-003](../use-cases/UC-AUTH-003-resolve-system-principal.md) | `ACCEPTED` | `COMPLETE` | 独立 API Proto、启动时幂等 Mongo provision、purpose partial unique index、Domain/Port/UseCase、受 service identity 与 purpose allowlist 保护的原生 gRPC、App Center 延迟解析与成功缓存、provider E2E | — |
 | [UC-AUTH-004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) | `ACCEPTED` | `COMPLETE` | 两项独立审核权限的授予/撤销与组合查询、旧 API 版本权限语义兼容、HTTP/gRPC、当前管理员复核、共享 revision CAS、原子不可变审计、全局一次性 bootstrap、UC010 事务协调、真实 App 双审核权限隔离与 Gateway SESSION 三协议验收 | 未部署到生产；不自动授予历史用户 profile 权限 |
@@ -24,7 +24,7 @@
 
 - 不在旧 Auth Center 代码中直接追加一个临时 JSON 接口。
 - 不把 App Center 测试 fixture、cache 或硬编码 Scope 列表提升为 Auth 权威数据。
-- 当前 `internal/adapter/catalog` 硬编码实现只用于启动纵切和 E2E；它不是 BR-SCP-001 所指的生产权威目录，必须由 Auth 自有 MongoDB adapter 替换。
+- 显式 OAuth manifest 启动路径已绑定 Auth 自有 MongoDB Catalog；`internal/adapter/catalog` 仅保留为未配置 manifest 时的开发兼容路径，不能作为生产权威目录。
 - Provider E2E 使用生产 Composition Root、真实 Kratos gRPC listener 和生成 client，不使用进程内假 Server。
 - UC-AUTH-002 使用 Auth 自有 MongoDB `auth_principals` repository；测试 fixture 只能
   建立输入记录，不能替代生产 repository。
@@ -167,16 +167,16 @@ UC005/006/007/010 的核心实现及产品/部署边界继续按顶部表格分�
 
 ## OAuth / OIDC 后续工作包
 
-以下只完成设计，均未启动实现；既有实现完成记录不包含这些能力。
+App019 已交付；以下设计已接受，Auth 后端已按 UC014→019 顺序实现。验收与上线边界见下方本轮交付记录。
 
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
-| [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) | `PROPOSED` | `NOT_STARTED` | 用户确认应用授权并签发授权码 |
-| [UC-AUTH-015](../use-cases/UC-AUTH-015-exchange-authorization-code.md) | `PROPOSED` | `NOT_STARTED` | 兑换授权码并签发 OIDC 凭据 |
-| [UC-AUTH-016](../use-cases/UC-AUTH-016-refresh-application-tokens.md) | `PROPOSED` | `NOT_STARTED` | 刷新应用访问凭据 |
-| [UC-AUTH-017](../use-cases/UC-AUTH-017-get-oidc-user-info.md) | `PROPOSED` | `NOT_STARTED` | 读取 OIDC 用户信息 |
-| [UC-AUTH-018](../use-cases/UC-AUTH-018-revoke-application-authorization.md) | `PROPOSED` | `NOT_STARTED` | 查看及收回本人应用授权 |
-| [UC-AUTH-019](../use-cases/UC-AUTH-019-issue-delegation-context.md) | `PROPOSED` | `NOT_STARTED` | 校验应用访问凭据并签发可信委托上下文 |
+| [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) | `ACCEPTED` | `CORE_COMPLETE` | 用户确认应用授权并签发授权码 |
+| [UC-AUTH-015](../use-cases/UC-AUTH-015-exchange-authorization-code.md) | `ACCEPTED` | `COMPLETE` | 兑换授权码并签发 OIDC 凭据 |
+| [UC-AUTH-016](../use-cases/UC-AUTH-016-refresh-application-tokens.md) | `ACCEPTED` | `COMPLETE` | 刷新应用访问凭据 |
+| [UC-AUTH-017](../use-cases/UC-AUTH-017-get-oidc-user-info.md) | `ACCEPTED` | `COMPLETE` | 读取 OIDC 用户信息 |
+| [UC-AUTH-018](../use-cases/UC-AUTH-018-revoke-application-authorization.md) | `ACCEPTED` | `COMPLETE` | 查看及收回本人应用授权 |
+| [UC-AUTH-019](../use-cases/UC-AUTH-019-issue-delegation-context.md) | `ACCEPTED` | `CORE_COMPLETE` | 校验应用访问凭据并签发可信委托上下文 |
 
 ## 2026-09-28 Scope 单状态设计同步
 
@@ -194,3 +194,27 @@ UC004 扩展已完成，设计继续 ACCEPTED。Auth `dc6acb1`（auth-center/v1�
 - Gateway `make check`、`make protocol-e2e`，经固定 Traefik、真实 Auth/Mongo 测试 HTTP、原生 gRPC 和 gRPC-Web，包含 Session 身份、伪造头清理、路径覆盖、独立授予及新旧 API 混用。
 
 实现同时修复生成查询客户端的 subject 路径绑定，具体 `json_name` 约定见 UC004。App 工作树当时有其它任务进行中的修改，验收未修改该工作树，也不涵盖尚未提交的 OAuth provider 能力。
+
+## 2026-10-03 UC014–019 后端交付
+
+Auth `be75692`（`auth-center/v1`）固定独立 API `d187bee`，在主实现工作树完成；全部仅本地提交，未 push/部署。App019 联调基线为实际 App `657eccd` / API `310fc10`。六个 UC 均保持 ACCEPTED，brief 由脚本生成。
+
+- UC014：真实 App 当前运行配置、Mongo 权威 Catalog、Session 同源门户桥、最小 consent 页面、共享 grant 和一次性 code；同渠道两类 client/各 major 共用历史授权。官方登录页面与公网接入仍独立交付，因此整体为 CORE_COMPLETE。
+- UC015：PUBLIC_PKCE/S256、CONFIDENTIAL_SECRET/Basic（可叠加 PKCE），独立 RS256 ID Token、JWKS/discovery、opaque access token、每 Application 稳定 sector/subject 和 Auth 静态注册映射。code 消费、family 与审计原子提交。
+- UC016：opaque refresh 单次旋转、重放整 family 撤销，30 天闲置期限/180 天绝对上限；显式 scope 上限与当前有效交集分离，停用恢复不会扩张用户主动缩小的上限。
+- UC017：标准 UserInfo 仅返回 pairwise sub 与当前已验证、已授权邮箱；每次读取当前 App、USER、grant 和 Catalog，不复用 ID Token 为资源访问凭据。
+- UC018：本人 Session 列表、部分/全部撤销及标准 token revoke；权限撤销推进 epoch，旧凭据不因后续重新同意而恢复。平台 Session 退出与第三方 family 独立。
+- UC019：内部原生 gRPC 在线校验、route/caller/audience 策略、受信时钟健康检查、最长 5 秒专用 delegation JWS。Gateway/Traefik 和资源服务验证器未在本轮实现，因此整体为 CORE_COMPLETE。
+
+验收均通过：
+
+- `make check`：格式、构建、单元/契约测试、vet、Wire/Proto 一致性；`make test-race`。
+- `MONGODB_INTEGRATION_PORT=27059 make test-mongo`：真实副本集全包回归，Mongo 包约 127 秒；既有设备、邮箱、Developer、审核权限和 Session 流程保持通过。同步更新实际 App 测试调用方注册表，并修正旧邮箱/注册竞争测试对注册领域预期错误的断言。
+- `MONGODB_INTEGRATION_PORT=27059 ./scripts/test-mongo-integration.sh -race -run TestOAuth`：真实数据库 OAuth 并发/故障验收及生产 Wire HTTP/gRPC。覆盖 code/refresh 竞争和重放、grant epoch、陈旧 consent、Catalog 停用恢复、App 运行版本变化、事务回滚与未知提交不返回凭据、token 记录归属/撤销状态损坏时拒绝。
+- 实际 App 进程通过 API 创建/审核/发布应用与版本、注册两类 OAuth client、加入 TEST；Auth 经真实 App019 provider 完成授权、兑换、刷新、UserInfo、委托和撤销。独立 `coreos/go-oidc` 客户端验证 discovery/JWKS/ID Token；测试额外校验 nonce、audience、issuer、at_hash。
+- App URL 校验依赖在隔离测试构建中使用确定性公共 DNS resolver（Go build overlay）；未改 App 源码/系统 DNS。测试 HTTPS issuer 通过专用测试 transport 映射至本机 Auth listener，不替代生产 TLS/Traefik 验收。
+- brief 漂移、registry 和 30 项文档工具测试通过。临时 Mongo 容器已清理。
+
+UC001 的生产 Catalog 缺口同时闭合：配置 OAuth manifest 时绑定 Mongo 持久化完整快照，并复用既有 provider RPC；未配置时的硬编码兼容路径仍仅限开发。没有新增在线目录管理后台。
+
+运行配置及接入说明见 [OAuth runtime](../design-notes/oauth-runtime-implementation.md)。`publicEnabled` 默认关闭，启用还需官方登录门户与 Gateway 的明确交付声明。资源 scope/委托还需资源验证器与策略及时钟观测配置。当前仍仅支持已设计的 TEST 渠道；以上 COMPLETE 只指 Auth/API 后端能力，不代表完成公网 OIDC 认证、GREY/STABLE 或资源业务交付。

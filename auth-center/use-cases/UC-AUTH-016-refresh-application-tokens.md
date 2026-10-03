@@ -1,6 +1,6 @@
 # UC-AUTH-016：刷新应用访问凭据
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 

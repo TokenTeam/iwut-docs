@@ -1,6 +1,6 @@
 # UC-AUTH-017：读取 OIDC 用户信息
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 

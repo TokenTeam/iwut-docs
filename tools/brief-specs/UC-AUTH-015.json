@@ -1,0 +1,57 @@
+{
+  "uc": "UC-AUTH-015",
+  "note": "Implement sequentially after App019 provider delivery. Share current Catalog, global Auth transaction fence and revocation epoch across OAuth use cases. Auth/API delivery only; public enablement requires separately validated portal, Gateway and resources. No Redis or cross-service atomicity claims.",
+  "uc_sections": [
+    "目标与范围",
+    "输入与输出",
+    "主流程",
+    "业务规则",
+    "验收场景",
+    "依赖与实现边界",
+    "变更记录"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/oauth-oidc-v1.md": [
+      "范围与职责",
+      "客户端配置",
+      "公网端点与响应",
+      "Scope 启用与兼容投影",
+      "授权请求与登录门户",
+      "凭据与身份格式",
+      "标准 sector 注册与回调清单",
+      "错误、CORS 与限额",
+      "交付依赖与验收",
+      "标准依据"
+    ],
+    "platform/contracts/oauth-delegation-v1.md": [
+      "链路与身份隔离",
+      "Auth 签发 RPC",
+      "委托 JWS",
+      "Traefik HTTP 契约",
+      "错误与协议适配",
+      "撤销与时钟边界",
+      "验收与启用门禁"
+    ],
+    "platform/contracts/app-oauth-client-v1.md": [
+      "所有权与调用方",
+      "三种生命周期",
+      "管理接口",
+      "Auth 专用接口",
+      "Sector 的只读配置来源",
+      "资格变化与失败",
+      "消费点与契约验收"
+    ],
+    "platform/contracts/auth-scope-catalog-v1.md": [
+      "目的与所有权",
+      "gRPC 方法",
+      "快照语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求",
+      "兼容性",
+      "关联文档"
+    ]
+  }
+}

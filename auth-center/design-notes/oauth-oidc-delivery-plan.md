@@ -1,6 +1,6 @@
 # OAuth / OIDC 工作包与交付顺序
 
-状态：`PROPOSED` — 2026-09-27；导航与实施顺序，不是业务规则的第二权威。
+状态：`ACTIVE` — 2026-10-03；导航与实施顺序，不是业务规则的第二权威。
 
 ## 这轮确定的方向
 
@@ -23,7 +23,7 @@
 | [UC-AUTH-019](../use-cases/UC-AUTH-019-issue-delegation-context.md) | 在线 token 检查与可信委托签发 | AUTH015/018、APP019、资源策略 |
 | [UC-GW-002](../../gateway/use-cases/UC-GW-002-authenticate-oauth-and-forward.md) | 标准 OIDC 路由、OAuth 入口与三协议转发 | AUTH019、资源服务委托验证器 |
 
-新列出的 OAuth/OIDC UC 均为 PROPOSED / NOT_STARTED；ApplicationVersion OAuth 扩展修改了既有 ACCEPTED UC 的设计，但实现同样尚未开始。既有完成记录不覆盖这些扩展。接受工作包时必须把依赖的跨系统契约一同纳入，避免各自猜测消息与身份格式。
+2026-10-03：App019 及其 OAuth Version 前置扩展已交付；Auth014–019 已接受且 Auth 后端实现已交付，具体验收状态见 [implements/README](../implements/README.md)。Gateway 与资源工作包仍单独交付。接受工作包时必须把依赖的跨系统契约一同纳入，避免各自猜测消息与身份格式。
 
 ## App Center 需要交付的接口
 
@@ -52,11 +52,11 @@ App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 A
 - 标准门户先支持浏览器重新登录。原生已有 Session 的无感 SSO 桥、更多回调类型、更多动态资料 scopes、公开 introspection、单点登出均不在本轮。
 - [Traefik 契约](../../platform/contracts/oauth-delegation-v1.md)明确已有短期上下文及在途请求的撤销传播窗口；不承诺第三方应用会话/已取得数据同步删除。
 
-这些是本轮具体建议，不是用户已经逐条接受的决定。后续可以调整 PROPOSED 文档后再生成 brief；已有 SESSION/身份契约保持其原有权威性。
+Auth014–019 的设计取舍已随实施请求接受并生成 brief；已有 SESSION/身份契约保持其原有权威性。
 
 ## Scope 启用决定（2026-09-28）
 
-采用 UC001/BR-SCP-004 的 enabled 单状态和 requestable 兼容投影；App 既有接口及 UC-APP-018 管理模型保持兼容。该决定已明确，不属于待选择的双开关方案。Auth 生产目录仍需实现单状态持久化/装载与一致快照，OAuth 工作包落实 UC014–019 的当前目录检查及停用/恢复验收；本次文档更新不表示这些实现已交付。
+采用 UC001/BR-SCP-004 的 enabled 单状态和 requestable 兼容投影；App 既有接口及 UC-APP-018 管理模型保持兼容。该决定已明确，不属于待选择的双开关方案。Auth OAuth manifest 路径现已实现 Mongo 单状态持久化/装载与一致快照，并在 UC014–019 执行当前目录检查；无 manifest 的开发模式仍保留旧硬编码 provider。目录停用/恢复的验收见实现记录。
 
 ## 本轮确认的分离边界
 
@@ -68,4 +68,6 @@ App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 A
 | 本次有效权限 | Auth；token、历史同意、当前批准版本和可用目录的交集 |
 | code / token / refresh 运行选择 | channel 固定于 client，major 固定于本次凭据；Version 可在校验时重读当前值 |
 
-UC015 包含 sector 首次原子建立和稳定 sub；APP019 增加批准回调并集查询；Gateway 增加受控 sector URI 的只读路由。新契约仍为 PROPOSED，本轮更新不标记为已实现或开启 GREY/STABLE。
+UC015 包含 sector 首次原子建立和稳定 sub；APP019 增加批准回调并集查询；Gateway 增加受控 sector URI 的只读路由。Auth 后端部分已交付；共享契约的 Gateway/资源落地仍独立验收，不因此开启 GREY/STABLE。
+
+实施接入与默认关闭门禁见 [OAuth runtime](oauth-runtime-implementation.md)。
