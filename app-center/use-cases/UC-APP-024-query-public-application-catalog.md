@@ -1,6 +1,6 @@
 # UC-APP-024：查询普通 Application Catalog 列表与详情
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -334,4 +334,5 @@ Proto 可以复用 `app_center.v1.runtime_resolution.LaunchTargetDescriptor` 和
 
 ## 变更记录
 
+- 2026-10-04：接受首版设计；确认 Stable-backed 普通候选、普通目录中 TEST 目标仍分发 Filter、ApplicationId keyset、整页不变量失败关闭和有界短页策略，进入 brief 与后端实现。
 - 2026-10-04：建立 UC-APP-024 提案；定义 Stable-backed 普通列表/详情、公开 Profile、UC023 唯一目标、Filter 分发、keyset 分页与批量快照边界。

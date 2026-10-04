@@ -1,0 +1,32 @@
+{
+  "uc": "UC-APP-024",
+  "note": "Implement the Stable-backed public Application Catalog list and detail queries. Combine the current approved public Profile, UC023 exact-major unified launch target and current Application Filter in one read snapshot. Preserve optional trusted identity, client-side Filter evaluation, test-only exclusion, keyset pagination, whole-query invariant failure, bounded short pages, batch Mongo access, HTTP/gRPC and backend acceptance. Do not implement test-only listings, Filter evaluation, search/ranking, OAuth discovery, Application disable/suspension, frontend behavior or tokens.",
+  "uc_sections": [
+    "目标与范围",
+    "已有依赖与组合边界",
+    "输入与身份",
+    "普通公开候选资格",
+    "目标解析与 Filter 组合",
+    "公开结果模型",
+    "列表、排序与分页",
+    "列表主流程",
+    "详情主流程",
+    "错误与部分结果",
+    "最小查询模型与持久化影响",
+    "API 草图",
+    "验收场景",
+    "依赖检查与待确认设计选择"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-003": ["决定", "Port 所有权", "自动化约束"],
+    "ADR-004": ["决定", "测试环境"],
+    "ADR-005": ["决定", "隐私与存在性隐藏"],
+    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": ["目的与范围", "传输载体", "Claims", "错误边界"],
+    "platform/contracts/app-center-api-routing.md": ["路由映射", "gRPC-Web 终止", "契约测试要求"]
+  }
+}

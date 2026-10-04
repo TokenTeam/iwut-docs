@@ -214,7 +214,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 
 CatalogResolver 是跨聚合的只读组合服务。它读取 Application、已发布 Profile、TesterAccess、ApplicationPublication 和 ApplicationVersion，为每个候选 Application 产生唯一服务端启动目标，并附带 FilterRule。[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 把单 Application 的 `TEST > GREY > STABLE` 选择收敛为可被列表与详情复用的统一解析端口。
 
-[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 提议以兼容 Stable 作为普通公开候选基线，在同一只读页面或详情快照中组合当前公开 Profile、UC023 目标和当前 Filter。它不成为这些事实的新权威来源，也不保存客户端 Filter 求值结果或物化 Catalog item。
+[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 以兼容 Stable 作为普通公开候选基线，在同一只读页面或详情快照中组合当前公开 Profile、UC023 目标和当前 Filter。它不成为这些事实的新权威来源，也不保存客户端 Filter 求值结果或物化 Catalog item。
 
 ### ReviewPolicyProvider 与发布资格检查
 

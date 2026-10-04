@@ -114,7 +114,7 @@ grey 只覆盖已公开应用中一部分用户的版本选择，不单独让一
 
 任何候选版本不兼容当前 RPC API major 或缺少宿主能力时，该候选不会被返回；服务端不会跨 RPC API major 猜测回退版本。
 
-客户端收到候选结果后，使用本地已有的用户信息执行每个 Application 携带的 Filter 规则。只有规则结果允许展示的 Application 才进入最终用户列表。原始用户信息不会为了执行 Filter 而上传到 App Center，App Center 也不计算或保存 Filter 的用户级命中结果。[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 正在具体化列表、详情、分页和批量快照语义。
+客户端收到候选结果后，使用本地已有的用户信息执行每个 Application 携带的 Filter 规则。只有规则结果允许展示的 Application 才进入最终用户列表。原始用户信息不会为了执行 Filter 而上传到 App Center，App Center 也不计算或保存 Filter 的用户级命中结果。[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 已确定列表、详情、分页和批量快照语义。
 
 ## Filter 的首版边界
 
