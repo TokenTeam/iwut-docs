@@ -6,9 +6,9 @@
 
 App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户端在后续用例中发现和使用这些应用。
 
-本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018/019 定义 OAuth/OIDC 的 TEST 接入边界：
+本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018 至 UC-APP-022 扩展 OAuth/OIDC、Stable、Grey 和 Filter 能力，UC-APP-023 提议统一运行目标解析：
 
-> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；版本批准只产生渠道无关的发布资格，已有当前公开资料的应用可以把已批准版本放入隔离的测试发布槽位，Tester 通过加入链接获得资格，App Center 为其解析经过授权且兼容的 test 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope、公开展示资料和 Tester 资格快照。
+> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；版本批准只产生渠道无关的发布资格，已有当前公开资料的应用可以把已批准版本放入 Test 或 Stable，并在 Stable 基线上配置 Grey；Tester 通过加入链接获得 Test 资格，App Center 提议为匿名或已认证用户统一解析兼容的 Test、Grey 或 Stable 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope、公开展示资料和用户资格快照。
 
 ## 当前用户
 
@@ -48,6 +48,8 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 当前管理员可以为 Application 登记长期稳定的 PUBLIC/CONFIDENTIAL clientId；identity/status 与 confidential credential 使用独立 revision，redirect URI 与 scopes 继续由 ApplicationVersion 审核和发布。Version、major 或 hostname 变化不重建 clientId。
 - Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得 TEST 的 ACTIVE Tester episode 或公开 STABLE 的授权上下文；App Center 不签发 code 或 token。
 - 当前管理员可以直接设置、替换、回退或清空 exact-major stable 槽位；空记录、共享 Publication revision 和追加式 History 保留并发与审计事实，STABLE OAuth channel 独立于 TEST。
+- 当前管理员可以在 Stable 基线上管理确定性 Grey rollout，并用 Application 级 Filter 控制 Stable 与 Grey 的客户端展示范围。
+- UC-APP-023 提议由 App Center 对单个 Application 按 Test、Grey、Stable 顺序返回唯一 LaunchTargetDescriptor；匿名用户只考虑 Stable，已认证用户的 Test 和 Grey 资格由服务端判定。
 
 ## 当前尚未设计或明确后置的能力
 
@@ -59,7 +61,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
 - Application admin 或 SysAdmin 发起的 Application 级禁用及重新启用；紧急隐藏不作为 ProfileRevision 状态。
-- Tester 主动退出、test clear 和普通用户统一运行解析。
+- Tester 主动退出、test clear，以及普通 Catalog 列表/详情和“我参与的测试”入口。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
 - Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。
 - 兼容现有 App Center API 和 MongoDB 文档。
@@ -87,6 +89,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 移除保留 REMOVED episode 和审计，不撤销加入链接；存在有效链接时管理界面仅提示该用户仍可再次加入。
 - 显式撤销链接保留 REVOKED/MANUAL 审计，不创建替代链接、不移除 Tester，也不建立黑名单。
 - test 启动解析是只读服务端查询，不回退其他 RPC major/grey/stable，不在启动热路径同步访问 Auth Scope Catalog 或 launchUrl。
+- 统一启动解析保持 exact-major，在兼容候选缺失时按 Test、Grey、Stable 降级；持久化指针、批准快照或兼容范围不变量损坏时失败关闭，不把损坏掩盖成正常降级。
 - 新建 ProfileRevision 是完整且非公开的 DRAFT；displayName/description/icon 与 Application、ApplicationVersion 分离，同一 Application 同时至多有一份 DRAFT 或 SUBMITTED 工作修订，见 [BR-PRF-006](use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006)。
 - 只有 DRAFT ProfileRevision 可以完整替换；expectedRevision、当前管理员和状态检查与真实修改原子完成，no-op 不制造审计变化。
 - 提交资料审核会冻结 displayName/description/icon 快照，并与 ProfileRevision 的 `DRAFT -> SUBMITTED`、revision 和审计更新原子提交；当前公开资料保持不变，工作修订位继续被占用。

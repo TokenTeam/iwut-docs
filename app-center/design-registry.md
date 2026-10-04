@@ -15,14 +15,14 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-023` |
+| Use Case / App Center | `UC-APP-024` |
 | Business Rule / Application | `BR-APP-008` |
 | Business Rule / Application Profile | `BR-PRF-041` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
 | Business Rule / Review | `BR-REV-029` |
 | Business Rule / Publication | `BR-PUB-031` |
 | Business Rule / Tester | `BR-TST-037` |
-| Business Rule / Runtime Resolution | `BR-RUN-011` |
+| Business Rule / Runtime Resolution | `BR-RUN-021` |
 | Business Rule / OAuth Client | `BR-OAC-014` |
 | Business Rule / Application Filter | `BR-FLT-011` |
 | Architecture Decision | `ADR-007` |
@@ -57,6 +57,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-020` | 管理稳定发布槽位 | `ACCEPTED` | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) | — | Stable set/replace/clear、EMPTY Publication 与 STABLE OAuth channel 已完成；实现证据见 `implements/README.md`。 |
 | `UC-APP-021` | 管理灰度发布 | `ACCEPTED` | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) | — | Stable 基线、确定性 cohort、比例调整、清空与 GREY OAuth 已实现；见 implements。 |
 | `UC-APP-022` | 管理 Application Filter | `ACCEPTED` | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) | — | 无审核的 Application 级不可变 Revision、类型化规则和客户端求值契约；后端管理纵切片已交付。 |
+| `UC-APP-023` | 解析 Application 的统一启动目标 | `PROPOSED` | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) | — | 统一 Test/Grey/Stable 单 Application 解析；后续 Catalog 列表与详情复用。 |
 
 ## Business Rules
 
@@ -255,6 +256,16 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-RUN-008` | 只读且不做同步外部复检 | Boundary / Availability | [UC-APP-012](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-008) | — | — |
 | `BR-RUN-009` | 敏感信息与缓存 | Security / Privacy | [UC-APP-012](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-009) | — | — |
 | `BR-RUN-010` | 客户端与相邻上下文边界 | Boundary | [UC-APP-012](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-010) | — | — |
+| `BR-RUN-011` | 可信可选身份与匿名语义 | Identity / Security | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-011) | — | — |
+| `BR-RUN-012` | Exact-major 与统一快照 | Resolution / Consistency | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-012) | — | — |
+| `BR-RUN-013` | 兼容 Test 优先 | Resolution / Authorization | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-013) | — | — |
+| `BR-RUN-014` | 服务端 Grey 选择 | Resolution / Privacy | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-014) | — | — |
+| `BR-RUN-015` | Stable 公开回退 | Resolution / Boundary | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-015) | — | — |
+| `BR-RUN-016` | 能力回退与不变量失败关闭 | Compatibility / Invariant | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-016) | — | — |
+| `BR-RUN-017` | 唯一目标与最小披露 | Query Result / Privacy | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-017) | — | — |
+| `BR-RUN-018` | 只读热路径 | Boundary / Availability | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-018) | — | — |
+| `BR-RUN-019` | 并发快照语义 | Consistency / Concurrency | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-019) | — | — |
+| `BR-RUN-020` | Catalog 复用与边界 | Boundary / Reuse | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-020) | — | — |
 
 ### OAuth Client (`BR-OAC`)
 
