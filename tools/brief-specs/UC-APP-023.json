@@ -1,0 +1,39 @@
+{
+  "uc": "UC-APP-023",
+  "note": "Implement a read-only, single-Application unified launch resolver with exact-major TEST > GREY > STABLE selection, optional trusted identity, deterministic server-side Grey cohorts, capability fallback, invariant fail-closed behavior, one minimal descriptor, MongoDB snapshot consistency, HTTP/gRPC and backend acceptance. Preserve UC012 strict Test-only behavior. Do not implement Catalog list/detail, Filter delivery/evaluation, OAuth client discovery, test clear, Application disable/suspension, frontend launch, sessions or tokens.",
+  "uc_sections": [
+    "目标与范围",
+    "已有依赖与扩展边界",
+    "输入与身份",
+    "统一选择算法",
+    "回退与损坏状态",
+    "主流程",
+    "结果",
+    "异常流程",
+    "最小查询模型",
+    "API 草图",
+    "验收场景",
+    "依赖与实现边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-003": ["决定", "Port 所有权", "自动化约束"],
+    "ADR-004": ["决定", "测试环境"],
+    "ADR-005": ["决定", "隐私与存在性隐藏"],
+    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

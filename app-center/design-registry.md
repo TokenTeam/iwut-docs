@@ -57,7 +57,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-020` | 管理稳定发布槽位 | `ACCEPTED` | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) | — | Stable set/replace/clear、EMPTY Publication 与 STABLE OAuth channel 已完成；实现证据见 `implements/README.md`。 |
 | `UC-APP-021` | 管理灰度发布 | `ACCEPTED` | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) | — | Stable 基线、确定性 cohort、比例调整、清空与 GREY OAuth 已实现；见 implements。 |
 | `UC-APP-022` | 管理 Application Filter | `ACCEPTED` | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) | — | 无审核的 Application 级不可变 Revision、类型化规则和客户端求值契约；后端管理纵切片已交付。 |
-| `UC-APP-023` | 解析 Application 的统一启动目标 | `PROPOSED` | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) | — | 统一 Test/Grey/Stable 单 Application 解析；后续 Catalog 列表与详情复用。 |
+| `UC-APP-023` | 解析 Application 的统一启动目标 | `ACCEPTED` | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) | — | 统一 Test/Grey/Stable 单 Application 解析；后续 Catalog 列表与详情复用。 |
 
 ## Business Rules
 

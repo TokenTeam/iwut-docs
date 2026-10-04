@@ -6,9 +6,9 @@
 
 App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户端在后续用例中发现和使用这些应用。
 
-本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018 至 UC-APP-022 扩展 OAuth/OIDC、Stable、Grey 和 Filter 能力，UC-APP-023 提议统一运行目标解析：
+本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018 至 UC-APP-022 扩展 OAuth/OIDC、Stable、Grey 和 Filter 能力，UC-APP-023 定义统一运行目标解析：
 
-> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；版本批准只产生渠道无关的发布资格，已有当前公开资料的应用可以把已批准版本放入 Test 或 Stable，并在 Stable 基线上配置 Grey；Tester 通过加入链接获得 Test 资格，App Center 提议为匿名或已认证用户统一解析兼容的 Test、Grey 或 Stable 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope、公开展示资料和用户资格快照。
+> 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；版本批准只产生渠道无关的发布资格，已有当前公开资料的应用可以把已批准版本放入 Test 或 Stable，并在 Stable 基线上配置 Grey；Tester 通过加入链接获得 Test 资格，App Center 为匿名或已认证用户统一解析兼容的 Test、Grey 或 Stable 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope、公开展示资料和用户资格快照。
 
 ## 当前用户
 
@@ -49,7 +49,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - Auth 可以在登录前取得用户无关的当前运行配置，在登录后取得 TEST 的 ACTIVE Tester episode 或公开 STABLE 的授权上下文；App Center 不签发 code 或 token。
 - 当前管理员可以直接设置、替换、回退或清空 exact-major stable 槽位；空记录、共享 Publication revision 和追加式 History 保留并发与审计事实，STABLE OAuth channel 独立于 TEST。
 - 当前管理员可以在 Stable 基线上管理确定性 Grey rollout，并用 Application 级 Filter 控制 Stable 与 Grey 的客户端展示范围。
-- UC-APP-023 提议由 App Center 对单个 Application 按 Test、Grey、Stable 顺序返回唯一 LaunchTargetDescriptor；匿名用户只考虑 Stable，已认证用户的 Test 和 Grey 资格由服务端判定。
+- UC-APP-023 由 App Center 对单个 Application 按 Test、Grey、Stable 顺序返回唯一 LaunchTargetDescriptor；匿名用户只考虑 Stable，已认证用户的 Test 和 Grey 资格由服务端判定。
 
 ## 当前尚未设计或明确后置的能力
 

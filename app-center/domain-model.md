@@ -212,7 +212,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 
 ### CatalogResolver
 
-CatalogResolver 是跨聚合的只读组合服务。它读取 Application、已发布 Profile、TesterAccess、ApplicationPublication 和 ApplicationVersion，为每个候选 Application 产生唯一服务端启动目标，并附带 FilterRule。[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 提议把单 Application 的 `TEST > GREY > STABLE` 选择收敛为可被列表与详情复用的统一解析端口。
+CatalogResolver 是跨聚合的只读组合服务。它读取 Application、已发布 Profile、TesterAccess、ApplicationPublication 和 ApplicationVersion，为每个候选 Application 产生唯一服务端启动目标，并附带 FilterRule。[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 把单 Application 的 `TEST > GREY > STABLE` 选择收敛为可被列表与详情复用的统一解析端口。
 
 它不成为这些事实的新权威来源，也不保存客户端 Filter 求值结果。现有 TestLaunchDescriptor 是这个方向的第一个窄查询模型；规则见 [BR-RUN-001](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-001) 至 [BR-RUN-010](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-010)。
 

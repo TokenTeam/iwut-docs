@@ -104,7 +104,7 @@ Tester 使用自己的官方客户端和实际宿主能力访问 test 版本。�
 
 grey 只覆盖已公开应用中一部分用户的版本选择，不单独让一个没有 stable 的 Application 对普通用户公开。Tester 的 test 访问资格独立于 ordinary catalog；是否把“只有 test、尚无 stable”的应用也放入候选结果，列为本文件末尾的待定产品选择。
 
-服务端为候选 Application 解析一个可启动版本，而不是把所有 Version 和槽位交给客户端自行选择。[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已建立该统一解析提案，优先级方向为：
+服务端为候选 Application 解析一个可启动版本，而不是把所有 Version 和槽位交给客户端自行选择。[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已确定统一解析规则，优先级为：
 
 ```text
 显式 Tester 且存在兼容 test → test

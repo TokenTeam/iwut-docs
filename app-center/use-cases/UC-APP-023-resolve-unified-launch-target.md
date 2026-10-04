@@ -1,6 +1,6 @@
 # UC-APP-023：解析 Application 的统一启动目标
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -301,4 +301,5 @@ Cache-Control: private, no-store
 
 ## 变更记录
 
+- 2026-10-04：设计接受；进入 brief 生成与后端实现。
 - 2026-10-04：建立 UC-APP-023 提案；统一 Test/Grey/Stable 单 Application 解析，并固定可选可信身份、能力回退、损坏状态失败关闭及 Catalog 复用边界。
