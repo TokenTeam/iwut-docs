@@ -106,7 +106,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 服务端产物是“候选 Application + 已解析启动目标 + Filter 规则”，不是客户端最终展示列表。客户端使用本地用户信息执行 Filter 后形成最终列表；App Center 不接收这些本地字段，也不保存用户级 Filter 求值结果。
 
-[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已完成单 Application 的统一发布目标解析，固定 `TEST > GREY > STABLE`、匿名 Stable、能力回退与损坏状态失败关闭。首版还需要候选列表、详情和 Filter 规则分发契约；这些聚合读取优先写成较短的 Query Contract，不复制命令 UC 或统一解析规则。
+[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已完成单 Application 的统一发布目标解析，固定 `TEST > GREY > STABLE`、匿名 Stable、能力回退与损坏状态失败关闭。[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 正在设计 Stable-backed 普通候选列表与详情，组合公开 Profile、唯一启动目标和 Filter；test-only Application 继续使用后续独立入口。
 
 ### OAuth Client Integration
 
@@ -143,7 +143,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023` | test 清空、Application 级停止分发 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md) | 普通用户公开资料查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
-| Catalog & Resolution | `UC-APP-012` 的 test-only 解析、`UC-APP-022` 的 Filter 管理契约、`UC-APP-023` 的统一解析 | 候选列表、详情及 Filter 分发 |
+| Catalog & Resolution | `UC-APP-012` 的 test-only 解析、`UC-APP-022` 的 Filter 管理契约、`UC-APP-023` 的统一解析、`UC-APP-024` 的普通列表/详情提案 | UC024 待接受和实现；“我参与的测试”独立入口 |
 | OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 与跨服务验证已完成；Auth grant/code/token 继续独立交付 |
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。

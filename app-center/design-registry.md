@@ -15,7 +15,7 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-024` |
+| Use Case / App Center | `UC-APP-025` |
 | Business Rule / Application | `BR-APP-008` |
 | Business Rule / Application Profile | `BR-PRF-041` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
@@ -23,6 +23,7 @@
 | Business Rule / Publication | `BR-PUB-031` |
 | Business Rule / Tester | `BR-TST-037` |
 | Business Rule / Runtime Resolution | `BR-RUN-021` |
+| Business Rule / Application Catalog | `BR-CAT-011` |
 | Business Rule / OAuth Client | `BR-OAC-014` |
 | Business Rule / Application Filter | `BR-FLT-011` |
 | Architecture Decision | `ADR-007` |
@@ -58,6 +59,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-021` | 管理灰度发布 | `ACCEPTED` | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) | — | Stable 基线、确定性 cohort、比例调整、清空与 GREY OAuth 已实现；见 implements。 |
 | `UC-APP-022` | 管理 Application Filter | `ACCEPTED` | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) | — | 无审核的 Application 级不可变 Revision、类型化规则和客户端求值契约；后端管理纵切片已交付。 |
 | `UC-APP-023` | 解析 Application 的统一启动目标 | `ACCEPTED` | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) | — | 统一 Test/Grey/Stable 单 Application 解析；后续 Catalog 列表与详情复用。 |
+| `UC-APP-024` | 查询普通 Application Catalog 列表与详情 | `PROPOSED` | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) | — | Stable-backed 普通目录，组合公开 Profile、UC023 唯一目标与 Filter。 |
 
 ## Business Rules
 
@@ -266,6 +268,21 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-RUN-018` | 只读热路径 | Boundary / Availability | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-018) | — | — |
 | `BR-RUN-019` | 并发快照语义 | Consistency / Concurrency | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-019) | — | — |
 | `BR-RUN-020` | Catalog 复用与边界 | Boundary / Reuse | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-020) | — | — |
+
+### Application Catalog (`BR-CAT`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-CAT-001` | Stable 支撑的普通公开候选 | Eligibility / Boundary | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-001) | — | — |
+| `BR-CAT-002` | 可信可选身份 | Identity / Security | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-002) | — | — |
+| `BR-CAT-003` | 复用唯一运行解析 | Resolution / Reuse | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-003) | — | — |
+| `BR-CAT-004` | 最小公开 Profile | Query Result / Privacy | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-004) | — | — |
+| `BR-CAT-005` | Filter 分发与客户端求值 | Boundary / Privacy | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-005) | — | — |
+| `BR-CAT-006` | 列表与详情同一投影 | Query Contract | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-006) | — | — |
+| `BR-CAT-007` | 稳定 keyset 分页 | Pagination / Consistency | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-007) | — | — |
+| `BR-CAT-008` | 一致快照与失败关闭 | Consistency / Invariant | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-008) | — | — |
+| `BR-CAT-009` | 批量只读热路径 | Performance / Boundary | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-009) | — | — |
+| `BR-CAT-010` | 最小披露与私有缓存 | Privacy / Caching | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-010) | — | — |
 
 ### OAuth Client (`BR-OAC`)
 

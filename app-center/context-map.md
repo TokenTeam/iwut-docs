@@ -74,6 +74,7 @@ App Center Context
 - UC-APP-011 使用可信 developerStatus 和 authId 验证当前 admin；MANUAL 撤销由 App Center 保存，不修改 Membership、发布状态或 Auth。
 - UC-APP-012 使用 Auth 提供的可信 authId，但不读取 developerStatus；App Center 根据自己的 Membership、Publication 和 Version 返回 TestLaunchDescriptor，不调用 Auth consent/token 接口。
 - UC-APP-023 接受可选的可信身份：匿名调用只考虑 Stable；有效已认证身份按 Test、Grey、Stable 顺序解析；无效凭证失败而不降级为匿名。该查询只读组合 App Center 已有事实，不同步调用 Auth、Scope Catalog 或目标 URL。
+- UC-APP-024 沿用同一可选可信身份和运行输入，批量组合 Stable-backed 普通公开候选、当前公开 Profile、UC023 唯一目标与 Filter；Filter 在官方客户端使用本地用户资料求值，App Center 不读取这些字段。
 - UC-APP-013 使用可信 developerStatus 和 authId 验证当前 admin；公开资料草稿完全由 App Center 保存，不修改 Auth 或 ApplicationVersion。
 - UC-APP-014 复用同一身份边界，以 expectedRevision 原子更新 App Center 自己的 DRAFT ProfileRevision，不调用外部目录或资产服务。
 - UC-APP-015 复用同一身份边界，重新验证现有资料字段，在本地原子边界创建独立 PENDING ProfileReview 并把 ProfileRevision 迁移为 SUBMITTED；工作修订指针继续占用，因此不能创建并行 DRAFT。icon 不触发资产服务或外部内容检查。

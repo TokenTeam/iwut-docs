@@ -48,6 +48,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `ACCEPTED` | `COMPLETE` | Stable-backed Grey set/adjust/replace/clear、固定 HMAC cohort、共享 Publication OCC/History、0017 migration、双协议、GREY OAuth 与 Provider cohort 复算、完整 cross-service 验收；服务 `d8369b1`、API `59436f1` | —（当前 Grey 管理与 Auth provider 范围；统一 test>grey>stable 解析、Catalog、test clear 与 Auth grant/token 独立交付） |
 | [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | API、0018 migration、Domain/UseCase、双协议和完整后端验收已交付 |
 | [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（当前单 Application 解析范围；候选列表、详情、Filter 分发与前端独立交付） |
+| [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `PROPOSED` | `NOT_STARTED` | Stable-backed 普通列表/详情，组合公开 Profile、UC023 唯一目标和当前 Filter | 接受设计、生成 brief、API、Catalog batch query、0019 索引 migration 与完整后端验收 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC023 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
