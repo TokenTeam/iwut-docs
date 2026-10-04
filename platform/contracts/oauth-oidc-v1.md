@@ -19,7 +19,7 @@
 
 PUBLIC client 不能提交 secret 冒充 confidential；CONFIDENTIAL client 不能省略 secret 降级为 public。无 PKCE 的 confidential OIDC 客户端必须依照下述 nonce 检查，在验证 ID Token 前不得建立应用会话或使用返回的 token。
 
-每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；App Center 已交付 TEST/STABLE，并由 UC-APP-021 接受 GREY 运行资格与接入语义。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
+每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；App Center 已通过 UC-APP-019/020/021 交付 TEST/STABLE/GREY provider，Auth 按 UC014 的渠道资格规则消费。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
 
 ## 公网端点与响应
 

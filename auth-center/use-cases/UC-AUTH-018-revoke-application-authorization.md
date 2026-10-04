@@ -44,6 +44,8 @@
 
 ## 验收场景
 
+- 本人列表分别显示 TEST/GREY/STABLE grant；撤销任一渠道不修改另两渠道的 grant/family，pairwise sub 相同不扩大撤销范围。
+
 - 越权 grantId、错误 revision、跨用户列表拒绝；App 离线仍能撤回。
 - 同应用同渠道两类 client 只显示一项授权；部分/全部撤回后两类 client、各 major 的旧 code/access/family 均失效，其他渠道不受影响；重新授权不复活旧代，required scope 也可撤回。
 - 应用撤销自己的一条 access 或一个 family，不改变共享 grant 和另一 client 的凭据；即使 grantId 相同，也不能撤销另一 client 的 token。

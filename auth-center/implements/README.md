@@ -230,3 +230,10 @@ Auth `be75692`（`auth-center/v1`）固定独立 API `d187bee`，在主实现工
 UC001 的生产 Catalog 缺口同时闭合：配置 OAuth manifest 时绑定 Mongo 持久化完整快照，并复用既有 provider RPC；未配置时的硬编码兼容路径仍仅限开发。没有新增在线目录管理后台。
 
 运行配置及接入说明见 [OAuth runtime](../design-notes/oauth-runtime-implementation.md)。`publicEnabled` 默认关闭，启用还需官方登录门户与 Gateway 的明确交付声明。资源 scope/委托还需资源验证器与策略及时钟观测配置。当前仍仅支持已设计的 TEST 渠道；以上 COMPLETE 只指 Auth/API 后端能力，不代表完成公网 OIDC 认证、GREY/STABLE 或资源业务交付。
+
+## 2026-10-04 OAuth 多渠道扩展启动
+
+App UC020/021 已交付，Auth UC014–019 的 TEST-only 实现现在扩展为 TEST/STABLE/GREY。
+设计与 brief 已同步：按渠道检查 Tester/当前发布/cohort，跨渠道隔离 grant 和凭据，
+共享 Application sector/sub，支持批准回调并集和多渠道 route policy。
+当前扩展状态为 IN_PROGRESS；原 TEST 完成记录保留，待真实 App 三渠道联调后补记完成。

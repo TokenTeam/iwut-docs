@@ -36,4 +36,6 @@ UC018 的生成 Proto 同时提供 HTTP/原生 gRPC。列表/撤销只接受单�
 
 UC019 原生内部 gRPC 使用独立服务权限和 route/audience 注册表；未配置路由没有可签发的资源目标。非空路由还要求受信时钟监控文件，协议见 route policy。对外 OAUTH2/OIDC_HTTP 路由、真实 Traefik 三协议转发、资源服务的 delegation 验签与数据归属仍是 UC-GW-002/资源工作包。
 
-测试通过只能证明所覆盖的 Auth/API 与真实 App provider 行为；不宣称 OpenID Certification，也不将官方登录前端、移动端 SSO、STABLE/GREY 接入、公开 introspection 或单点登出列为本轮交付。
+多渠道工作包沿用同一配置和存储集合，支持 TEST/STABLE/GREY；仅 TEST 保存非空 Tester episode，另外两渠道为空。旧 TEST 记录无需重写。App 回调并集包含三渠道，sector/sub 保持原映射。route.allowedChannels 可显式启用三渠道的非空子集，新增渠道后须同步 Gateway 策略摘要。
+
+测试通过只能证明所覆盖的 Auth/API 与真实 App provider 行为；不宣称 OpenID Certification，也不将官方登录前端、移动端 SSO、公开 introspection 或单点登出列为本轮交付。

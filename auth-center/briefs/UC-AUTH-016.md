@@ -52,6 +52,7 @@ POST /token，grant_type=refresh_token、refresh_token、可选 scope，client �
 
 ### 验收场景
 
+- STABLE/GREY 正常刷新；清空/停止/未命中时拒绝且不消费，资格恢复后仅未过期未撤销的原凭据可恢复；不自动切换渠道。
 - 没有明确 offline_access 同意不返回 refresh；停用该能力时 discovery 同步收缩。
 - 同渠道另一 client 新增同意不扩大原 family ceiling；用户撤回共享授权使两类 client 的旧 family 均失效，禁用单个 client 不撤销另一 client 的 family。
 - 正常旋转同时延长闲置截止时间，但不延长绝对期限；按协议首版时长，第 20 天刷新后闲置截止为第 50 天，持续有效至第 179 天时，刷新后最多到第 180 天。
@@ -95,13 +96,15 @@ family 采用“滑动闲置期限＋固定绝对上限”，具体时长见 [OA
 <!-- 权威位置: use-cases/UC-AUTH-016-refresh-application-tokens.md#br-oau-011 -->
 ### BR-OAU-011：刷新不得扩权或复活
 
-Refresh family 保存 authId、applicationId、clientId、grantId、原 channel/rpcApiMajor、client authorizationEpoch、Tester episode、grant revocationEpoch 和已授予的 refreshScopeCeiling F。省略 scope 使用 F；显式 scope 必须包含 openid/offline_access 且为 F 子集，越界返回 invalid_scope，不能以 grant 后来增加了 scope（包括同渠道另一 client 新增同意）为理由扩大旧 family。新权限通过 UC014/015 取得新凭据。
+Refresh family 保存 authId、applicationId、clientId、grantId、原 channel/rpcApiMajor、client authorizationEpoch、仅 TEST 的 Tester episode、grant revocationEpoch 和已授予的 refreshScopeCeiling F。省略 scope 使用 F；显式 scope 必须包含 openid/offline_access 且为 F 子集，越界返回 invalid_scope，不能以 grant 后来增加了 scope（包括同渠道另一 client 新增同意）为理由扩大旧 family。新权限通过 UC014/015 取得新凭据。
 
-本次拟用集合记为 Q。Auth 先通过 ResolveClientRuntimeConfiguration 读取 token 原 channel/major 的当前版本，再用返回的 registration/runtime tuple 调用 ResolveAuthorizationContext；不能把签发时旧 Version tuple 作为刷新前置值，也不能根据请求换 major/channel。必须验证 family 的 authId/applicationId/channel 与所引用共享 grant 完全一致，并验证 client 的 App 归属；共享 grant 不允许另一 client 使用该 family。确认用户、client、Tester episode 和 grant epoch 有效后，实际签发 access scopes 为 `Q∩G∩D∩C`，C 为 UC014/BR-OAU-001 定义的 Auth 当前目录许可集合，必须仍包含 openid/offline_access，否则 invalid_grant、不签后继凭据。本次 token 响应 scope 必须如实返回实际集合。
+本次拟用集合记为 Q。Auth 先通过 ResolveClientRuntimeConfiguration 读取 token 原 channel/major 的当前版本，再用返回的 registration/runtime tuple 调用 ResolveAuthorizationContext；不能把签发时旧 Version tuple 作为刷新前置值，也不能根据请求换 major/channel。必须验证 family 的 authId/applicationId/channel 与所引用共享 grant 完全一致，并验证 client 的 App 归属；共享 grant 不允许另一 client 使用该 family。确认用户、client、原渠道当前资格（TEST 另校验同一 Tester episode）和 grant epoch 有效后，实际签发 access scopes 为 `Q∩G∩D∩C`，C 为 UC014/BR-OAU-001 定义的 Auth 当前目录许可集合，必须仍包含 openid/offline_access，否则 invalid_grant、不签后继凭据。本次 token 响应 scope 必须如实返回实际集合。
 
 自动求交只限制本次 access token，不裁剪历史 G，也不把当前 D/C 写成下一代 refresh 的永久上限。下一代 refresh 保留 Q 作为 ceiling；仅客户端显式缩小 Q 才永久缩小该 family 上限。因 D 暂时缩小或 Catalog enabled=false 而未使用的、原本已同意的 scope，可在版本许可和目录启用恢复时由 refresh 再次取得，但永远不能超过 F/G。本用例不弹 UI 或自动扩大用户同意。
 
 grant revocationEpoch 或 client authorizationEpoch 不匹配、client 禁用、用户不可用、Tester episode 改变、family 撤销/到期均 invalid_grant。grant 仅增加权限而 revision 改变、单纯 Version/publication/credentialRevision 变化不使 family 失效。共享 grant 的撤销对同应用同渠道所有 client 的 family 生效；单个 client 的禁用或 authorizationEpoch 变化仅使该 client 的凭据失效，不修改共享 G 或撤销另一 client 的 family。CONFIDENTIAL 必须使用当前 secret。正常刷新不撤销同 family 尚未到期的 access token，family/用户撤销仍统一生效；不能覆盖旧 epoch 来恢复已撤销凭据。
+
+STABLE/GREY 的当前资格按 UC014/BR-OAU-001 重新查询。STABLE 清空、GREY 缩量导致未命中或 rollout 停止时，本次刷新 invalid_grant，不消费 refresh、不续期、不切换 STABLE。发布或 cohort 变化本身不推进 Auth grant/client epoch，也不新增持久撤销状态；以后资格恢复，尚未过期、未消费且未被撤销的原凭据可按原 channel/major 和 scope 上限再次校验。GREY 不绑定 Tester episode，也不绑定 rolloutId；App 不向 Auth 提供 cohort seed/rollout 身份。到期、重放或显式撤销依旧不可恢复。
 
 ## 外部引用的业务规则
 
@@ -113,6 +116,8 @@ grant revocationEpoch 或 client authorizationEpoch 不匹配、client 禁用、
 ### BR-OAU-001：授权来源与运行资格
 
 只接受 Auth 在线确认的 ACTIVE USER，Auth 同时确认应用当前 adminAuthId 具有 APPROVED Developer 资格。App 资格通过 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md) 获取；redirect URI 与 scopes 必须来自同一个批准 Version snapshot，展示资料必须来自当前已批准 ProfileRevision，不信任应用提交的版本、URL、scope、展示值或批准状态。Scope Catalog 所有权与 enabled 单状态由 [BR-SCP-004](../use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) 决定；令 C 为 Auth 当前 enabled=true 且具备已交付资源访问、资料披露或协议控制处理的 scopes；offline_access 的处理由 UC016 定义，不要求为它虚构业务资源 audience。本次请求包含未知、enabled=false 或无对应处理的项时返回 invalid_scope，不展示为可授予权限，也不静默删除请求项后继续。Catalog 读取故障返回依赖不可用，不能当作停用或用户拒绝。首版技术 scopes 及装载门禁见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
+
+渠道资格统一使用 App 的 UC-APP-019/020/021 provider：TEST 要求当前 ACTIVE Tester episode；STABLE 要求原 exact-major 的正式发布可用，不要求 Tester；GREY 要求原 exact-major 的当前 rollout 可用且可信 authId 命中当前 cohort。testerMembershipId 仅 TEST 必填，STABLE/GREY 必须为空，未知渠道或字段组合异常失败关闭。Auth 不计算 cohort、不接收客户端自报命中结果，也不使用客户端 Application Filter 作为授权边界。应用启动的 TEST > GREY > STABLE 选择属于 App/客户端；OAuth 始终验证明确的 client/channel，不自动换渠道或 major。
 
 ## 平台共享契约（按 spec 显式抽取）
 
@@ -205,6 +210,16 @@ App 不回调 Auth；Auth 自行检查当前用户及 adminAuthId 的 Developer 
 Auth 在授权入口先解析 RuntimeConfiguration 并精确校验 redirect URI；登录后、用户确认和 code 兑换重新解析用户上下文。refresh、UserInfo 和每次委托签发按 OAuth/OIDC v1 的当前资格规则验证。confidential secret 只在 token/revoke 操作验证。
 
 双方至少测试：每种 type 的 clientId 稳定；metadata 无 redirect/secret；一次 secret 返回；registration 与 credential revision 并发隔离；跨应用管理员；runtime tuple 混合；同 clientId 跨 Version/major 选择；伪造 Version/scopes/redirect；非法 redirect 不跳转；Tester 移除后重加；发布槽位变化；公开资料切换和损坏指针；hostname 迁移；快照过期；服务 permission；Auth→App 故障时零签发。
+
+#### STABLE 扩展
+
+[UC-APP-020](../../app-center/use-cases/UC-APP-020-manage-stable-publication-slot.md) 沿用同一组五个 provider 方法：STABLE runtime 精确读取 stableVersionId，用户上下文不要求 Tester Membership，testerMembershipId 按渠道为 TEST 必填/STABLE 为空，批准回调进入 sector 并集；管理面启用独立 `(applicationId, STABLE)` registration/credential。TEST 语义保持不变，STABLE client 不能代替 TEST client，Auth grant 继续按 `(authId, applicationId, channel)` 隔离。
+
+#### GREY 扩展
+
+[UC-APP-021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 沿用同一组五个 provider 方法：GREY runtime 精确读取 exact-major GreyRollout 的 versionId；用户上下文使用 Publication 内部 cohortSeed 对可信 authId 重算 `grey-bucket-v1`，未命中时返回统一 runtime unavailable，不能披露 bucket 或 seed。GREY 不要求 Tester Membership，testerMembershipId 为空；批准回调进入 sector 并集。管理面启用独立 `(applicationId, GREY)` registration/credential，Auth grant 继续按 `(authId, applicationId, channel)` 隔离。
+
+比例、目标 Version 或 Clear 都改变共享 publicationRevision，因此登录前 runtime tuple 不能跨 rollout 变化继续使用。Provider 不负责 `test > grey > stable` 默认路由；后续统一解析先选择 channel，Provider 再验证明确的 GREY client 和用户 cohort。
 
 ### `platform/contracts/auth-scope-catalog-v1.md`：Auth Scope Catalog v1 跨服务契约
 
@@ -352,7 +367,7 @@ exp 不晚于 access token 到期时间。无 permissions、developer_status、e
 
 client_id 始终为本次 access token 所属 client，不因 grant 共享而替换；Auth 按 [BR-OAU-018](../use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-018) 验证 token、grant 和 App client 归属一致。
 
-资源服务必须验证签名、固定算法/typ/kid/issuer/audience、时限和本次 method/route/policy/target_path，再以 sub 做数据归属检查，以 client_id/application_id/channel 做应用环境约束。route policy 显式配置非空 allowedChannels；首版只能启用 TEST。仅限正式渠道的路由拒绝 TEST token；允许多个渠道的共享资源仍分别检查各自 grant/E，不能因为 OIDC sub 相同绕过渠道许可。可验证委托 JWS 不等于全部业务许可。不得把委托转换成通用 USER 管理身份。只在配置明确启用的 OAuth 方法接受该 header，未知入口拒绝。
+资源服务必须验证签名、固定算法/typ/kid/issuer/audience、时限和本次 method/route/policy/target_path，再以 sub 做数据归属检查，以 client_id/application_id/channel 做应用环境约束。route policy 显式配置非空 allowedChannels，允许 TEST/GREY/STABLE 的唯一子集；未知或重复项拒绝。仅限正式渠道的路由拒绝 TEST token；允许多个渠道的共享资源仍分别检查各自 grant/E，不能因为 OIDC sub 相同绕过渠道许可。可验证委托 JWS 不等于全部业务许可。不得把委托转换成通用 USER 管理身份。只在配置明确启用的 OAuth 方法接受该 header，未知入口拒绝。
 
 HTTP path 必须经过路由生成器规定的单次解析和固定重写；拒绝非法 percent encoding、编码斜线/反斜线、dot segment 和无法唯一匹配的路径。Gateway 签发请求与后端收到的 escaped path 必须字节相等；查询参数不作为路径签名的一部分，业务仍验证其中的资源 ID/过滤条件，不能把 query 当授权范围来源。
 
@@ -414,7 +429,7 @@ token 校验不依赖原登录 Session 继续存在；用户退出平台 Session
 
 PUBLIC client 不能提交 secret 冒充 confidential；CONFIDENTIAL client 不能省略 secret 降级为 public。无 PKCE 的 confidential OIDC 客户端必须依照下述 nonce 检查，在验证 ID Token 前不得建立应用会话或使用返回的 token。
 
-每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；App Center 已交付 TEST/STABLE，并由 UC-APP-021 接受 GREY 运行资格与接入语义。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
+每个 Application 每渠道（TEST/GREY/STABLE）分别登记稳定 PUBLIC/CONFIDENTIAL clientId 和 confidential secret；clientId 固定 channel，不绑定 RPC major、Version 或 hostname。不同渠道不得互用 client、grant、code、access/refresh token；App Center 已通过 UC-APP-019/020/021 交付 TEST/STABLE/GREY provider，Auth 按 UC014 的渠道资格规则消费。redirect URI 不保存在 client registration 中，而在当前批准并发布的 ApplicationVersion 中以 `pkceRedirectUris/confidentialRedirectUris` 表达。切换 Version 可以改变完整 URI，包括 hostname，而不重建 clientId。PUBLIC 与 CONFIDENTIAL 可以同时受支持，但使用两个 clientId，分别执行各自不可降级的安全规则。
 
 #### 公网端点与响应
 
@@ -533,15 +548,14 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-014`（use-cases/UC-AUTH-014-authorize-application.md）：目标与范围、输入与输出、主流程、验收场景、依赖与实现边界、变更记录
-- `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：STABLE 扩展、GREY 扩展
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-016-refresh-application-tokens.md` | 71 | `452406db2f69` |
-| `use-cases/UC-AUTH-014-authorize-application.md` | 82 | `c765b2032121` |
+| `use-cases/UC-AUTH-016-refresh-application-tokens.md` | 74 | `b07646c72216` |
+| `use-cases/UC-AUTH-014-authorize-application.md` | 85 | `c922e8a628b2` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
-| `platform/contracts/oauth-delegation-v1.md` | 97 | `402d9ac717e8` |
-| `platform/contracts/oauth-oidc-v1.md` | 134 | `75ce3b6eab4f` |
+| `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |
+| `platform/contracts/oauth-oidc-v1.md` | 134 | `b08d5fc257b6` |

@@ -41,7 +41,9 @@
       "Auth 专用接口",
       "Sector 的只读配置来源",
       "资格变化与失败",
-      "消费点与契约验收"
+      "消费点与契约验收",
+      "STABLE 扩展",
+      "GREY 扩展"
     ],
     "platform/contracts/auth-scope-catalog-v1.md": [
       "目的与所有权",

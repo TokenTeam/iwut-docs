@@ -39,6 +39,7 @@ UserInfo 在 Auth 本地一致检查点确认授权和读取投影；撤销提�
 
 ## 验收场景
 
+- 三渠道均遵循 UC019 的当前资格判断；STABLE 清空或 GREY 未命中/停止后拒绝读取，资格恢复按 UC016 的原凭据边界处理。
 - openid-only 只返回 sub；email 获批且用户同意后才返回当前激活邮箱。
 - 未绑定、邮箱更换、资料 KV 伪造 email 均按权威源投影；不自动披露其他字段。
 - ID Token/Session 冒充 Bearer、跨用途 token、撤回/过期/family 撤销拒绝。

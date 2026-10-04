@@ -35,14 +35,14 @@ code 只能消费一次；校验失败不消费正确 code。并发兑换通过�
 <a id="br-oau-007"></a>
 ### BR-OAU-007：独立凭据与有界权限
 
-access token 记录 tokenId/digest、authId、clientId、applicationId、固定 channel/rpcApiMajor、grantId/revision（审计）/revocationEpoch、client authorizationEpoch、testerMembershipId、签发时 App 资格版本、scope、audiences、familyId、签发/到期/撤销状态。所引用 grant 的 `(authId, applicationId, channel)` 必须与 code/token 及 App 确认的 client 归属一致，不能仅凭 grantId 或相同 sub 放行。scope 来自 code 且仍为当前 grant、应用许可和 UC014 定义的当前目录集合 C 的子集；code 中任一 scope 已停用则本次兑换失败，不消费 code、不静默缩小范围或签发包含停用项的凭据。audiences 只由 Auth 部署的 scope 资源映射得出。签发时 Version 用于审计和当次 code 一致性，不把 token 身份改成 Version 身份。只含 openid/email 的 token 仅可访问 UserInfo，不因此获取其它资源。
+access token 记录 tokenId/digest、authId、clientId、applicationId、固定 channel/rpcApiMajor、grantId/revision（审计）/revocationEpoch、client authorizationEpoch、testerMembershipId（TEST 必填，STABLE/GREY 为空）、签发时 App 资格版本、scope、audiences、familyId、签发/到期/撤销状态。所引用 grant 的 `(authId, applicationId, channel)` 必须与 code/token 及 App 确认的 client 归属一致，不能仅凭 grantId 或相同 sub 放行。scope 来自 code 且仍为当前 grant、应用许可和 UC014 定义的当前目录集合 C 的子集；code 中任一 scope 已停用则本次兑换失败，不消费 code、不静默缩小范围或签发包含停用项的凭据。audiences 只由 Auth 部署的 scope 资源映射得出。签发时 Version 用于审计和当次 code 一致性，不把 token 身份改成 Version 身份。只含 openid/email 的 token 仅可访问 UserInfo，不因此获取其它资源。
 
 ID Token 是面向 client 的登录证据，格式和 pairwise sub 由 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md) 定义；不与 access token 复用值、用途或 verifier。用户的资料/身份关联不是默认 claims，subject 不能由客户端指定。
 
 <a id="br-oau-008"></a>
 ### BR-OAU-008：签发一致性与故障关闭
 
-最终写入与 grant 撤销、family 撤销及用户可用状态检查共用 Auth 本地原子栅栏。App 外部快照只在限定时间有效，不声称跨库事务。secret 轮换导致旧 secret 认证失败、client 禁用、发布/Profile/Tester 资格变化、当前 Version 不再包含 code 绑定的精确 redirect URI，或凭据记录与快照不一致，均拒绝本次兑换。轮换不会仅凭 credentialRevision 撤销已经签发的 token/family 或稳定 grant。
+最终写入与 grant 撤销、family 撤销及用户可用状态检查共用 Auth 本地原子栅栏。App 外部快照只在限定时间有效，不声称跨库事务。secret 轮换导致旧 secret 认证失败、client 禁用、发布/Profile/渠道用户资格变化、当前 Version 不再包含 code 绑定的精确 redirect URI，或凭据记录与快照不一致，均拒绝本次兑换。轮换不会仅凭 credentialRevision 撤销已经签发的 token/family 或稳定 grant。
 
 未知/过期/错误 code 及错误 verifier 统一 invalid_grant；服务故障用 temporarily_unavailable。日志、审计和 metrics 不记录任何 token、code、secret 或 verifier。
 
@@ -66,6 +66,8 @@ sector 在部署的稳定域名空间中分配，不随常规 issuer 配置、se
 - code 签发后 scope 停用，兑换返回 invalid_grant 且不消费 code；目录不可读为依赖错误，不伪装为用户撤回。
 - 授权撤回、App 快照过期、事务/签名失败、未知提交不会多发可用凭据。
 - code 创建后当前公开 ProfileRevision 改变时兑换失败，不能以旧展示资料对应的交互继续签发。
+- 三渠道均覆盖 PUBLIC/CONFIDENTIAL；共享 sector/sub 不共享 grant/code/token。批准回调清单包含其它渠道时，TEST 授权仍可正常进行。
+- STABLE 清空或 GREY 缩量/停止发生在 code 兑换前时重查资格及精确 runtime tuple，拒绝陈旧 code，不消费或跨渠道兜底。
 
 ## 依赖与实现边界
 

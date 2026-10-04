@@ -44,16 +44,19 @@ family 采用“滑动闲置期限＋固定绝对上限”，具体时长见 [OA
 <a id="br-oau-011"></a>
 ### BR-OAU-011：刷新不得扩权或复活
 
-Refresh family 保存 authId、applicationId、clientId、grantId、原 channel/rpcApiMajor、client authorizationEpoch、Tester episode、grant revocationEpoch 和已授予的 refreshScopeCeiling F。省略 scope 使用 F；显式 scope 必须包含 openid/offline_access 且为 F 子集，越界返回 invalid_scope，不能以 grant 后来增加了 scope（包括同渠道另一 client 新增同意）为理由扩大旧 family。新权限通过 UC014/015 取得新凭据。
+Refresh family 保存 authId、applicationId、clientId、grantId、原 channel/rpcApiMajor、client authorizationEpoch、仅 TEST 的 Tester episode、grant revocationEpoch 和已授予的 refreshScopeCeiling F。省略 scope 使用 F；显式 scope 必须包含 openid/offline_access 且为 F 子集，越界返回 invalid_scope，不能以 grant 后来增加了 scope（包括同渠道另一 client 新增同意）为理由扩大旧 family。新权限通过 UC014/015 取得新凭据。
 
-本次拟用集合记为 Q。Auth 先通过 ResolveClientRuntimeConfiguration 读取 token 原 channel/major 的当前版本，再用返回的 registration/runtime tuple 调用 ResolveAuthorizationContext；不能把签发时旧 Version tuple 作为刷新前置值，也不能根据请求换 major/channel。必须验证 family 的 authId/applicationId/channel 与所引用共享 grant 完全一致，并验证 client 的 App 归属；共享 grant 不允许另一 client 使用该 family。确认用户、client、Tester episode 和 grant epoch 有效后，实际签发 access scopes 为 `Q∩G∩D∩C`，C 为 UC014/BR-OAU-001 定义的 Auth 当前目录许可集合，必须仍包含 openid/offline_access，否则 invalid_grant、不签后继凭据。本次 token 响应 scope 必须如实返回实际集合。
+本次拟用集合记为 Q。Auth 先通过 ResolveClientRuntimeConfiguration 读取 token 原 channel/major 的当前版本，再用返回的 registration/runtime tuple 调用 ResolveAuthorizationContext；不能把签发时旧 Version tuple 作为刷新前置值，也不能根据请求换 major/channel。必须验证 family 的 authId/applicationId/channel 与所引用共享 grant 完全一致，并验证 client 的 App 归属；共享 grant 不允许另一 client 使用该 family。确认用户、client、原渠道当前资格（TEST 另校验同一 Tester episode）和 grant epoch 有效后，实际签发 access scopes 为 `Q∩G∩D∩C`，C 为 UC014/BR-OAU-001 定义的 Auth 当前目录许可集合，必须仍包含 openid/offline_access，否则 invalid_grant、不签后继凭据。本次 token 响应 scope 必须如实返回实际集合。
 
 自动求交只限制本次 access token，不裁剪历史 G，也不把当前 D/C 写成下一代 refresh 的永久上限。下一代 refresh 保留 Q 作为 ceiling；仅客户端显式缩小 Q 才永久缩小该 family 上限。因 D 暂时缩小或 Catalog enabled=false 而未使用的、原本已同意的 scope，可在版本许可和目录启用恢复时由 refresh 再次取得，但永远不能超过 F/G。本用例不弹 UI 或自动扩大用户同意。
 
 grant revocationEpoch 或 client authorizationEpoch 不匹配、client 禁用、用户不可用、Tester episode 改变、family 撤销/到期均 invalid_grant。grant 仅增加权限而 revision 改变、单纯 Version/publication/credentialRevision 变化不使 family 失效。共享 grant 的撤销对同应用同渠道所有 client 的 family 生效；单个 client 的禁用或 authorizationEpoch 变化仅使该 client 的凭据失效，不修改共享 G 或撤销另一 client 的 family。CONFIDENTIAL 必须使用当前 secret。正常刷新不撤销同 family 尚未到期的 access token，family/用户撤销仍统一生效；不能覆盖旧 epoch 来恢复已撤销凭据。
 
+STABLE/GREY 的当前资格按 UC014/BR-OAU-001 重新查询。STABLE 清空、GREY 缩量导致未命中或 rollout 停止时，本次刷新 invalid_grant，不消费 refresh、不续期、不切换 STABLE。发布或 cohort 变化本身不推进 Auth grant/client epoch，也不新增持久撤销状态；以后资格恢复，尚未过期、未消费且未被撤销的原凭据可按原 channel/major 和 scope 上限再次校验。GREY 不绑定 Tester episode，也不绑定 rolloutId；App 不向 Auth 提供 cohort seed/rollout 身份。到期、重放或显式撤销依旧不可恢复。
+
 ## 验收场景
 
+- STABLE/GREY 正常刷新；清空/停止/未命中时拒绝且不消费，资格恢复后仅未过期未撤销的原凭据可恢复；不自动切换渠道。
 - 没有明确 offline_access 同意不返回 refresh；停用该能力时 discovery 同步收缩。
 - 同渠道另一 client 新增同意不扩大原 family ceiling；用户撤回共享授权使两类 client 的旧 family 均失效，禁用单个 client 不撤销另一 client 的 family。
 - 正常旋转同时延长闲置截止时间，但不延长绝对期限；按协议首版时长，第 20 天刷新后闲置截止为第 50 天，持续有效至第 179 天时，刷新后最多到第 180 天。

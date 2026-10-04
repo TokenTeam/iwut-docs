@@ -27,6 +27,8 @@
 
 只接受 Auth 在线确认的 ACTIVE USER，Auth 同时确认应用当前 adminAuthId 具有 APPROVED Developer 资格。App 资格通过 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md) 获取；redirect URI 与 scopes 必须来自同一个批准 Version snapshot，展示资料必须来自当前已批准 ProfileRevision，不信任应用提交的版本、URL、scope、展示值或批准状态。Scope Catalog 所有权与 enabled 单状态由 [BR-SCP-004](UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) 决定；令 C 为 Auth 当前 enabled=true 且具备已交付资源访问、资料披露或协议控制处理的 scopes；offline_access 的处理由 UC016 定义，不要求为它虚构业务资源 audience。本次请求包含未知、enabled=false 或无对应处理的项时返回 invalid_scope，不展示为可授予权限，也不静默删除请求项后继续。Catalog 读取故障返回依赖不可用，不能当作停用或用户拒绝。首版技术 scopes 及装载门禁见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。
 
+渠道资格统一使用 App 的 UC-APP-019/020/021 provider：TEST 要求当前 ACTIVE Tester episode；STABLE 要求原 exact-major 的正式发布可用，不要求 Tester；GREY 要求原 exact-major 的当前 rollout 可用且可信 authId 命中当前 cohort。testerMembershipId 仅 TEST 必填，STABLE/GREY 必须为空，未知渠道或字段组合异常失败关闭。Auth 不计算 cohort、不接收客户端自报命中结果，也不使用客户端 Application Filter 作为授权边界。应用启动的 TEST > GREY > STABLE 选择属于 App/客户端；OAuth 始终验证明确的 client/channel，不自动换渠道或 major。
+
 <a id="br-oau-002"></a>
 ### BR-OAU-002：显式同意与最小授权
 
@@ -58,6 +60,7 @@ Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 
 
 - 同渠道 major 1 只需 openid、major 2 需 openid/email：运行 major 1 不删除已同意 email，major 2 不重复要求同意。
 - 同应用同渠道 PUBLIC 已同意 openid/email 后，CONFIDENTIAL 请求相同范围可按 prompt 规则复用；新增权限只确认差集，offline_access 仍须满足专用确认规则。
+- TEST/STABLE/GREY 均可完成授权；STABLE 非 Tester 可用，GREY 仅当前命中用户可用。未知渠道、client/channel 不一致和错误 Tester 字段组合拒绝。
 - TEST grant 不用于 GREY/STABLE；同一应用跨渠道 sub 相同也不绕过 consent。
 - 两类 client 并发首次同意只产生一条 grant；冲突交互重新展示后合并新增同意，不丢失已有范围；撤销前的旧页面不能重新授予权限。
 - email 停用时，请求 email 返回 invalid_scope，已有同意不能绕过；若 email 仅是版本 optional 项，客户端改为只请求 openid 可继续。必需项停用时无法满足 requiredScopes，不静默降级。
@@ -74,7 +77,7 @@ Version、major 或 Publication 变化不删除 G，不因当前 D 变小写回 
 
 ## 依赖与实现边界
 
-依赖 UC007/012 Session、UC001 权威目录、UC-APP-018/019；UC015 消费授权码。官方门户是独立交付项但属于上线验收，不能仅实现后端就启用授权入口。参数/时限/密钥格式引用 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)，不在本 UC 重定义。
+依赖 UC007/012 Session、UC001 权威目录、UC-APP-018/019 及已交付的 UC-APP-020/021 渠道扩展；UC015 消费授权码。官方门户是独立交付项但属于上线验收，不能仅实现后端就启用授权入口。参数/时限/密钥格式引用 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)，不在本 UC 重定义。
 
 ## 变更记录
 

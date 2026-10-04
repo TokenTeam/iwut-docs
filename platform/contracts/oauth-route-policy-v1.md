@@ -35,7 +35,7 @@
 
 1. 根对象只保留 `version`、`routes`，按此顺序输出。
 2. routes 按 routeId 升序；每项字段按示例顺序全部输出，包含 GRPC 的空字符串 path。
-3. requiredScopes、allowedChannels 按字符串升序输出、不得重复；不允许 null。
+3. requiredScopes、allowedChannels 按字符串升序输出、不得重复；不允许 null。allowedChannels 必须是 TEST/GREY/STABLE 的非空子集；摘要格式不变，扩大渠道集合会改变摘要，Auth/Gateway 须同步部署。
 4. 使用 Go `encoding/json.Marshal` 的紧凑 UTF-8 JSON 编码规则，无 BOM、缩进或尾随换行；字符串转义采用其默认 HTML escaping。
 5. `callers` 是 Auth 本地授权注册表，不进入共享摘要。服务身份必须另外具有 `auth.oauth.delegation.issue`；同时匹配本表 route 与 audience，不能只凭服务权限选任意 audience。
 
