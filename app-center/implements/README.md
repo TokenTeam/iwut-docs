@@ -46,7 +46,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC Provider 方法、本地 service caller registry 与逐方法权限、secret revision 验证、TEST exact-major/批准 Version/Review/Profile/Tester 单 Mongo snapshot、5秒 runtime tuple、sector 回调事实并集及完整 cross-service 验收；服务 `657eccd`、API `310fc10` | —（当前 TEST 后端范围；Auth grant/code/token、Scope enabled 过滤、sector/sub 与未来渠道由 Auth/后续 UC 交付） |
 | [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major stable set/replace/clear、共享 Publication OCC、EMPTY 保留与 History、0016 migration、HTTP/gRPC、STABLE OAuth 管理及五个 Auth-only Provider 方法、完整 cross-service 验收；服务 `531f077`、API `90519af` | —（当前 App Center 后端范围；Grey、test clear、Catalog 与 Auth grant/code/token 独立交付） |
 | [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `ACCEPTED` | `COMPLETE` | Stable-backed Grey set/adjust/replace/clear、固定 HMAC cohort、共享 Publication OCC/History、0017 migration、双协议、GREY OAuth 与 Provider cohort 复算、完整 cross-service 验收；服务 `d8369b1`、API `59436f1` | —（当前 Grey 管理与 Auth provider 范围；统一 test>grey>stable 解析、Catalog、test clear 与 Auth grant/token 独立交付） |
-| [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `IN_PROGRESS` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | 当前实现工作包；需完成 API、0018 migration、Domain/UseCase、双协议和完整后端验收 |
+| [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | API、0018 migration、Domain/UseCase、双协议和完整后端验收已交付 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018、UC019 与 UC020 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -217,6 +217,12 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - 修正013/014的生成HTTP客户端绑定：资料放独立profile子message，HTTP正文仍为原三字段；path-only字段显式JSON名与路由模板匹配。013旧请求字段编号2/3/4及名称reserved，gRPC创建改用profile子message，所有本地调用与生成物同步更新；新增真实生成HTTP客户端创建/更新回归。未扩展其他历史接口。
 - 最终 `make check-full` 21/21通过：`.artifacts/verification/20260926T165213Z-dyloh589/report.json`，`changed_sources=[]`，Mongo race317.175s、HTTP/gRPC E2E39.931s。修复前中断的报告不作为验收证据。
 - 015前置依赖已满足，按既有ACCEPTED设计和脚本brief激活。只交付提交审核，不提前实现审核决定/查询/前端。
+
+## 2026-10-04 UC022 完成交付
+
+- 服务提交 `c69e9f2`、API 提交 `c5c8504`，均为本地提交，未 push；新增 Application 级 Filter 的 Get/Set/Clear HTTP/gRPC 管理接口、类型化 `profile-filter-v1` Domain、独立 OCC 与不可变 Revision。
+- `0018_application_filter` 创建当前指针与不可变历史 collection、严格 validator 和命名唯一索引；真实写入在 Mongo 事务中复用 Application `coordinationRevision` 栅栏，并在事务内复查管理员和 expected revision。
+- BR-FLT-001–010 的后端范围由 Domain、UseCase、Transport 和真实 Mongo 测试覆盖，包括默认 ALLOW_ALL、相同规则/重复 Clear no-op、显式 Clear 历史、规则边界、并发写最多一个提交、管理员限制、损坏 pointer fail closed，以及 HTTP/gRPC 共用处理器。客户端求值器和 Catalog 分发仍属于后续工作包。
 
 ## 2026-09-27 UC015 完成与本轮串行交付闭合
 
