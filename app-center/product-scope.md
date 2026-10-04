@@ -127,11 +127,11 @@ Filter 是独立于 Test/Grey/Stable 的客户端可见性机制：
 | Grey | 服务端执行 | 为命中服务端灰度分流的用户解析 grey 目标 |
 | Stable | 服务端执行 | 为普通公开访问解析默认 stable 目标 |
 
-服务端保存 Filter 规则，并随候选 Application 把规则发送给客户端；它不接收规则求值所需的原始用户信息，也不执行规则。客户端负责取得本地用户信息、执行规则并决定是否展示。规则如何登记、审核和版本化仍是后续领域设计问题。
+服务端保存 Filter 规则，并随候选 Application 把规则发送给客户端；它不接收规则求值所需的原始用户信息，也不执行规则。客户端负责取得本地用户信息、执行规则并决定是否展示。[UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) 已确认 Application 级不可变 Revision、无审核立即发布和类型化 `profile-filter-v1`。
 
 Filter 的产品定位是客户端发现和展示机制，而不是安全边界。客户端可能被修改、规则可能无法执行，用户也可能绕过展示界面；服务端鉴权、Tester 资格、scope 授权和发布目标访问仍由各自的服务端规则决定，与 Filter 结果无关。
 
-首版 Filter 规则表达什么用户信息、采用怎样的声明格式、缺少字段时如何求值，以及规则属于 Application、ApplicationProfileRevision 还是独立修订对象，尚待后续 Capability Map 和领域模型确定。这里先确认服务端持有规则、客户端执行规则这一职责边界。
+首版 Filter 字段 key 与四种标量复用 Auth ProfileFieldDefinition 的稳定语法，缺失字段和跨语言求值语义由 [Application Filter v1](../platform/contracts/application-filter-v1.md) 固定。Filter 属于独立 ApplicationFilterRevision，不依附 Profile、Version 或 Publication。
 
 Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受只对可信已登录 authId 使用 per-rollout seed 的 HMAC 确定性万分比分桶；同一连续 rollout 调整比例或替换目标时保持 cohort，Clear 后重新分组。
 
@@ -187,7 +187,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 2. **Test-only 查询契约**：已确定不混入普通公开目录，而进入独立的“我参与的测试”入口；仍需定义分页、移除后的可见性和无兼容 test 时的结果。
 3. **管理员转让**：它是首版 Ownership 的必要能力，还是进入首版后的下一阶段治理能力？
 4. **受控图标资产**：当前 icon 只是可空不透明字符串；何时升级为受控资产、由谁拥有并如何迁移，等待真实需求后决定，不阻塞首版资料审核。
-5. **Filter 规则模型**：已确定采用独立 ApplicationFilterRevision 方向；仍需确定规则可引用哪些本地用户字段、声明格式、缺失字段结果和审核策略。
+5. **Filter 客户端交付**：App Center 规则模型与管理流程已由 UC-APP-022 确定；官方客户端仍需实现求值器、共享向量和管理 UI。
 
 这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016、OAuth/OIDC 扩展 UC-APP-018/019 以及 Stable/Grey UC-APP-020/021 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
 

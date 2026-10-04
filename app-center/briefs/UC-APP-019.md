@@ -391,7 +391,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 | --- | --- | --- |
 | `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `a50377983f49` |
 | `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
-| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `e8650715ef24` |
+| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `5d63fc0c10b4` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |

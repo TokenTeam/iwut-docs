@@ -29,6 +29,8 @@ DeveloperApplicationQuota                                      │
          │     └─ 0..1 OAuthClientCredential (separate revision)
          ├─ 0..* ApplicationPublication (aggregate root, one per RPC major)
          │     └─ 0..* ApplicationPublicationHistory
+         ├─ 0..1 ApplicationFilter (aggregate root)
+         │     └─ 0..* ApplicationFilterRevision
          └─ 1 ApplicationTesterAccess (aggregate root)
                ├─ 0..* ApplicationTesterJoinLink
                └─ 0..* ApplicationTesterMembership episode
@@ -153,6 +155,14 @@ ApplicationTesterJoinLink 和 ApplicationTesterMembership 是生命周期独立�
 
 Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生新 membershipId，参见 [BR-TST-016](use-cases/UC-APP-009-join-application-as-tester.md#br-tst-016)。历史记录可以独立读取；聚合执行命令时只需要装载保护当前不变量所需的状态。
 
+### ApplicationFilter 与 ApplicationFilterRevision
+
+ApplicationFilter 是每个 Application 至多一个的公开展示策略协调聚合。它保存 currentFilterRevisionId、revision、nextSequence 和最近更新审计；聚合不存在等价于 revision 0 的 `ALLOW_ALL`。
+
+ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，mode 为 `RULE` 或 `ALLOW_ALL`。Filter 不需要草稿、提交或审核生命周期；每次真实 Set/Clear 创建下一 sequence 的 Revision 并原子推进 current pointer。规则属于 Application，不按 Version、Publication channel 或 rpcApiMajor 复制，因此同一当前规则同时随 Grey/Stable Catalog 候选分发，Test 入口不执行 Filter。
+
+规则树采用 `profile-filter-v1`，字段 key 与四种标量复用 Auth ProfileFieldDefinition 的稳定语法，但 App Center 不读取字段目录或用户值。Filter 修改不改变 Publication、Profile、Version、OAuth 或服务端运行资格。权威规则见 [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md)。
+
 ## 主要实体与关系
 
 | 实体 | 身份 | 直接归属 | 关键关系 |
@@ -167,6 +177,8 @@ Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生�
 | ApplicationProfileReview | ApplicationProfileReviewId | ApplicationProfileReview | 引用一个 ProfileRevision；冻结 snapshot 并保存一次性决定 |
 | ApplicationPublication | ApplicationPublicationId | ApplicationPublication | 对应一个 Application 与一个 RPC major；引用 Version |
 | ApplicationPublicationHistory | HistoryId | ApplicationPublication | 记录一次真实槽位变化 |
+| ApplicationFilter | ApplicationId | ApplicationFilter | 当前 Filter Revision 指针和独立 OCC |
+| ApplicationFilterRevision | FilterRevisionId | ApplicationFilterRevision | 属于一个 Application；不可变且创建后立即发布 |
 | ApplicationTesterJoinLink | JoinLinkId | ApplicationTesterAccess | 向匿名持有者提供申请 Tester Membership 的凭证 |
 | ApplicationTesterMembership | MembershipId | ApplicationTesterAccess | 连接 Application 与 testerAuthId 的一次资格 episode |
 
@@ -192,7 +204,7 @@ Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生�
 | PublicationRevision | 一个 RPC major 下全部槽位共享的乐观并发版本 |
 | GreyRollout | UC-APP-021 定义的 rolloutId、grey Version、万分比与内部稳定 cohortSeed 组合 |
 | TesterJoinTokenHash | Tester 加入 secret 的不可逆校验值 |
-| FilterRule | 服务端保存和分发、客户端使用本地用户信息求值的规则；结构尚未确定 |
+| FilterRule | `profile-filter-v1` 类型化有界树；服务端保存和分发，客户端使用本地用户信息求值 |
 
 值对象没有独立生命周期；字段限制继续引用各 UC 中的权威 BR，而不在本文复制一份易漂移的规则。
 
@@ -212,17 +224,9 @@ ReviewPolicyProvider 与 ProfileReviewPolicyProvider 分别提供版本化的运
 
 发布资格检查组合 Version、最新批准 Review 与外部复检结果。它服务于 Publication 命令，但不会把 Version 或 Review 移入 Publication 聚合。
 
-## FilterRule 的未决归属
+## FilterRule 的归属
 
-FilterRule 已进入首版产品范围，但尚无足够用例决定其聚合归属。当前保留三种候选：
-
-| 候选 | 适用条件 | 主要影响 |
-| --- | --- | --- |
-| ProfileContent 的一部分 | Filter 与公开资料总是一起审核，并随批准自动公开 | 模型最小，但资料变化会连带 Filter |
-| Application 的独立字段 | Filter 几乎不修订且不需要独立审核 | 简单，但审计与历史表达较弱 |
-| ApplicationFilterRevision 独立聚合 | Filter 有独立草稿、审核、回滚或策略版本 | 边界清晰，但增加一条生命周期 |
-
-在明确“谁编辑、谁审核、何时生效、是否回滚”之前，本文只把 FilterRule 作为 Catalog 输出需要引用的领域概念，不提前选择其中一种。
+[UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) 已确认 ApplicationFilter＋不可变 ApplicationFilterRevision。Filter 无需审核，每次修改立即发布；它与 Profile、Version 和 Publication 独立演进。客户端求值线格式由 [Application Filter v1](../platform/contracts/application-filter-v1.md) 固定。
 
 ## 需要后续 UC 验证的聚合切分
 
@@ -230,7 +234,6 @@ FilterRule 已进入首版产品范围，但尚无足够用例决定其聚合归
 - ApplicationTesterAccess 在并发加入时是否应作为单一聚合，还是拆分后使用显式一致性协议。
 - ApplicationReview 作为独立聚合后，与 ApplicationVersion 状态迁移的本地原子协调方式。
 - 管理员转让如何跨 Application、Quota 及下级聚合重新建立权限与名称占用关系。
-- FilterRule 最终归属及其审核、修订和发布模型。
 
 这些问题用于验证边界，不要求现在为每个问题创建独立 UC。
 

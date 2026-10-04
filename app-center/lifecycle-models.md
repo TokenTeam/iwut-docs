@@ -188,7 +188,7 @@ Filter rule ──────── client-side display only
 | 设置或替换发布槽位 | 不修改 Version 审核状态，不修改 Profile |
 | Profile 被批准并自动公开 | 不创建 stable，不选择运行 Version |
 | 更换 test Version | 不移除 Tester Membership |
-| 修改 Filter 规则 | 不改变服务端发布槽位或服务端授权 |
+| 修改 Filter 规则 | 立即发布新的 ApplicationFilterRevision；不改变服务端发布槽位或服务端授权 |
 
 已有约束继续以 [BR-REV-019](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-019)、[BR-PUB-004](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-004) 和 Tester 相关 BR 为权威来源；未来关系需要在各自 UC 中分配新 BR。
 
@@ -199,7 +199,7 @@ Filter rule ──────── client-side display only
 1. 设计 test clear。
 2. Application 归档、普通停用与平台紧急 suspension。
 3. 统一服务端启动目标解析与 Catalog Query Contract。
-4. 独立 FilterRevision 的归属、审核/发布方式和客户端求值契约。
+4. 官方客户端 Filter 求值器和普通 Catalog 分发。
 5. Public Profile 的普通用户对外查询契约；受控 icon 资产语义留待真实需求出现后扩展。
 6. APPROVED Version 的资格撤销及引用处置。
 

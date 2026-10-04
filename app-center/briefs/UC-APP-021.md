@@ -842,7 +842,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `e8650715ef24` |
+| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `5d63fc0c10b4` |
 | `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |

@@ -15,7 +15,7 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-022` |
+| Use Case / App Center | `UC-APP-023` |
 | Business Rule / Application | `BR-APP-008` |
 | Business Rule / Application Profile | `BR-PRF-041` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
@@ -24,6 +24,7 @@
 | Business Rule / Tester | `BR-TST-037` |
 | Business Rule / Runtime Resolution | `BR-RUN-011` |
 | Business Rule / OAuth Client | `BR-OAC-014` |
+| Business Rule / Application Filter | `BR-FLT-011` |
 | Architecture Decision | `ADR-007` |
 
 Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确认没有未登记的既有定义。
@@ -55,6 +56,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `ACCEPTED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | Auth-only 原生 gRPC provider 已完成；实现证据见 `implements/README.md`。 |
 | `UC-APP-020` | 管理稳定发布槽位 | `ACCEPTED` | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) | — | Stable set/replace/clear、EMPTY Publication 与 STABLE OAuth channel 已完成；实现证据见 `implements/README.md`。 |
 | `UC-APP-021` | 管理灰度发布 | `ACCEPTED` | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) | — | Stable 基线、确定性 cohort、比例调整、清空与 GREY OAuth 已实现；见 implements。 |
+| `UC-APP-022` | 管理 Application Filter | `ACCEPTED` | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) | — | 无审核的 Application 级不可变 Revision、类型化规则和客户端求值契约；当前实现工作包。 |
 
 ## Business Rules
 
@@ -271,6 +273,21 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-OAC-011` | Auth sector 的回调事实来源 | Boundary / Query | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-011) | — | App 只返回批准回调事实。 |
 | `BR-OAC-012` | STABLE OAuth channel 激活 | Boundary / Authorization | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md#br-oac-012) | — | UC020 接受后扩展 UC018/019 的现有模型，不建立第二套 registration。 |
 | `BR-OAC-013` | GREY OAuth channel 与 cohort 资格 | Boundary / Authorization | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-oac-013) | — | 扩展 UC018/019 的现有模型，并由 Provider 重算用户 cohort。 |
+
+### Application Filter (`BR-FLT`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-FLT-001` | Application 级公开展示策略 | Boundary / Policy | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-001) | — | — |
+| `BR-FLT-002` | 无需审核的不可变 Revision | Lifecycle / Audit | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-002) | — | — |
+| `BR-FLT-003` | 默认允许与显式 Clear | Command Semantics / Lifecycle | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-003) | — | — |
+| `BR-FLT-004` | 类型化有界规则 | Field / Invariant | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-004) | — | — |
+| `BR-FLT-005` | 字段目录解耦 | Boundary / Compatibility | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-005) | — | — |
+| `BR-FLT-006` | 客户端确定性求值 | Client Contract / Privacy | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-006) | — | — |
+| `BR-FLT-007` | Filter 不是安全边界 | Security / Boundary | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-007) | — | — |
+| `BR-FLT-008` | OCC、no-op 与序号 | Concurrency / Command Semantics | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-008) | — | — |
+| `BR-FLT-009` | 管理员与原子写栅栏 | Authorization / Consistency | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-009) | — | — |
+| `BR-FLT-010` | 最小披露与不可变历史 | Audit / Privacy | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-010) | — | — |
 
 
 ## Architecture Decision Records

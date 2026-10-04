@@ -342,7 +342,7 @@ Mongo migration 预留为 `0017_grey_rollout`：
 
 1. 统一运行目标解析 Query Contract，按有效 Tester Test、命中 Grey、Stable 返回唯一目标。
 2. Application 归档、管理员停用与平台紧急 suspension，统一影响目录、运行解析和 OAuth provider。
-3. 独立 ApplicationFilterRevision 的规则、审核和客户端求值契约。
+3. [UC-APP-022](UC-APP-022-manage-application-filter.md) 已定义无审核 ApplicationFilterRevision 与客户端求值契约。
 4. 普通目录与“我参与的测试”两个查询入口。
 5. test clear、原子 Grey promote 等后续操作按实际管理体验补充。
 

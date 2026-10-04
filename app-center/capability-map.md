@@ -116,7 +116,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 Filter 不是第四种发布槽位，也不参与 Test/Grey/Stable 的服务端选择。
 
-当前把“随候选 Application 分发 Filter 规则”放在 Catalog & Resolution，把“读取本地用户信息并求值”放在客户端边界。Filter 规则的作者、审核方式、修订身份以及它最终属于 Application、Public Profile 还是独立对象，仍由后续领域模型决定。
+“随候选 Application 分发 Filter 规则”属于 Catalog & Resolution，“读取本地用户信息并求值”属于客户端边界。[UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) 已确认 Filter 是 Application 级独立不可变 Revision，不审核并在每次真实修改后立即发布；同一规则作用于 Grey/Stable，Test 不执行。
 
 Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格、scope 授权与启动目标访问继续使用各自的服务端事实。
 
@@ -143,7 +143,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021` | test 清空、Application 级停止分发、统一解析 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md) | 普通用户公开资料查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
-| Catalog & Resolution | `UC-APP-012` 的 test-only 解析 | 候选列表、详情、统一解析、Filter 规则契约 |
+| Catalog & Resolution | `UC-APP-012` 的 test-only 解析、`UC-APP-022` 的 Filter 管理契约 | 候选列表、详情、统一解析及 Filter 分发 |
 | OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 与跨服务验证已完成；Auth grant/code/token 继续独立交付 |
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。
