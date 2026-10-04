@@ -2,6 +2,10 @@
 
 状态：`ACTIVE`
 
+## 账号与平台资格治理（2026-10-05）
+
+新增[治理设计草案](design-notes/account-governance-delivery-plan.md)，规划管理员授予/撤销、账号禁用/恢复、Developer 暂停/恢复、Developer 退出及本人注销五个候选 UC。当前仅规划，不改变既有权限、Developer 枚举或 bootstrap 行为。优先闭合管理员治理；App 应用归属处置、暂停的对外生效边界与注销数据清理仍是跨服务交付依赖。具体实现现状以 [实现记录](implements/README.md) 为准，不以本页历史开放问题推断实现缺失。
+
 ## 当前设计优先级（2026-09-27）
 
 用户决定先推进 OIDC 登录、用户 scope 授权和收回，支持 PUBLIC_PKCE 与 CONFIDENTIAL_SECRET。已建立 Auth014–019、App018–019、Gateway002 的 PROPOSED 设计，见 [工作包总览](design-notes/oauth-oidc-delivery-plan.md)。Gateway OAUTH2 仍未启用；生产 Catalog 初始装载、官方门户、资源委托验证及联合测试属于明确交付依赖，在线 Catalog 管理后移。TEST 之外的正式运行资格、原生无感浏览器 SSO 桥和动态资料 scope 仍需后续设计。

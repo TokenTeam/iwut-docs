@@ -54,6 +54,8 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 文档入口
 
+- [账号与平台资格治理草案](design-notes/account-governance-delivery-plan.md)：管理员授予/撤销、账号禁用/恢复与注销、Developer 暂停/恢复与退出的候选 UC 边界、顺序和交付依赖；尚未接受或实施。
+
 - [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md)：同账号 Session 列表与明确目标集合回收草案，PROPOSED；不包含关联组跨账号管理。
 
 - [应用登录、Scope 授权与撤销讨论草案](design-notes/oauth-consent-lifecycle.md)：历史讨论材料；本轮已分配 UC014–019 与 OIDC 契约，见下方工作包总览，均尚未接受。
