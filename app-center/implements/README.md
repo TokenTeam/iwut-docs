@@ -48,9 +48,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `ACCEPTED` | `COMPLETE` | Stable-backed Grey set/adjust/replace/clear、固定 HMAC cohort、共享 Publication OCC/History、0017 migration、双协议、GREY OAuth 与 Provider cohort 复算、完整 cross-service 验收；服务 `d8369b1`、API `59436f1` | —（当前 Grey 管理与 Auth provider 范围；统一 test>grey>stable 解析、Catalog、test clear 与 Auth grant/token 独立交付） |
 | [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | API、0018 migration、Domain/UseCase、双协议和完整后端验收已交付 |
 | [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（当前单 Application 解析范围；候选列表、详情、Filter 分发与前端独立交付） |
-| [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `IN_PROGRESS` | Stable-backed 普通列表/详情设计已接受，组合公开 Profile、UC023 唯一目标和当前 Filter | brief、API、Catalog batch query、0019 索引 migration 与完整后端验收正在交付 |
+| [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（当前普通 Catalog 后端范围；客户端 Filter 求值、“我参与的测试”、搜索与排名独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC023 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC024 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -312,3 +312,11 @@ UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004�
 - 高优先级候选只有在宿主 capability 不满足时继续向低优先级候选查找。悬空指针、损坏 Grey、Review/Version/OAuth snapshot 漂移和历史不一致统一作为内部数据不变量异常返回 HTTP 500 / gRPC INTERNAL；没有可运行候选返回 HTTP 404 / gRPC NOT_FOUND。
 - HTTP/gRPC 身份中间件允许本方法缺省身份，但任何已提供的空白、多值、旧格式或无效凭证都会失败关闭。匿名与普通用户查询不读取或泄露 Test pointer；测试覆盖优先级、Grey 命中/未命中、capability 回退、exact-major、隐私边界、快照只读性、损坏状态及双协议 E2E。
 - 无新增 migration。最终 `make check-full` 21/21 通过，报告为服务工作树 `.artifacts/verification/20261004T060503Z-i0t3sx0w/report.json`；最后的 Mongo/HTTP/gRPC `-race` 全量套件约 12 分 30 秒。候选列表、详情、Filter 分发、前端与生产身份入口继续由后续工作包交付。
+
+## 2026-10-04 UC024 完成
+
+- 服务 `4dfe8d6`、独立 API `8f7ad35` 均为本地提交，未 push。新增独立 `app_center.v1.application_catalog.ApplicationCatalogService`，通过 HTTP/gRPC 提供普通公开 Application 列表与详情；身份可缺省，但任何已提供的无效凭据都会失败关闭。
+- 普通候选必须同时具有 exact-major compatible Stable 和当前批准公开 Profile。进入候选后复用 UC023 的 `TEST > GREY > STABLE` 唯一目标解析；test-only Application 不进入普通列表。每项同时返回公开 Profile 和当前 `profile-filter-v1`，客户端使用本地用户信息求值，App Center 不接收用户 Profile 或保存命中结果。
+- 列表使用绑定 major/capabilities 的 opaque ApplicationId keyset，默认 20、上限 100，并受内部扫描和 3 MiB 建议响应预算约束。页面或详情在单个只读 MongoDB snapshot 中批量读取 Application、Profile/审核、Publication/History、Membership、Version/Review/OAuth 和 Filter；pointer、批准 snapshot 或 Filter 漂移会使整次查询返回 HTTP 500 / gRPC INTERNAL。
+- `0019_application_catalog_indexes` 仅增加 Stable 候选扫描的 partial index。测试覆盖匿名 Stable、Grey/Test 身份选择、不兼容候选排除、Filter 默认值、cursor、索引和 Profile 审核快照损坏，并把 UC024 加入真实 HTTP/gRPC E2E。
+- 首轮完整门禁在最后阶段发现迁移幂等测试的预期索引清单遗漏 0019 新索引；修正后失败用例及 UC024 Mongo/E2E 以 race 模式定向通过。最终 `make check-full` 21/21 通过，报告为服务工作树 `.artifacts/verification/20261004T084644Z-2ob_ltw7/report.json`，`changed_sources=[]`；Mongo/HTTP/gRPC race 全量阶段 `748.447s`。
