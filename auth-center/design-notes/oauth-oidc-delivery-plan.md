@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | ApplicationVersion OAuth 扩展 | 在 UC-APP-002/003/004/005/007 中创建、编辑、审核并发布依附 Version 的 pkce/confidential 回调配置 | 已有 Version/Review/Publication |
 | [UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) | 管理 Application＋channel 级稳定 client identity、独立 secret credential 和停用 | 已有 Application/Developer 管理门禁；不依赖 Publication |
-| [UC-APP-019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | Auth 读取配置、验证 secret、取得当前回调/scopes 和用户运行资格 | APP018、已有 TEST/Tester/批准快照 |
+| [UC-APP-019](../../app-center/use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | Auth 读取配置、验证 secret、取得当前回调/scopes 和用户运行资格 | APP018、已交付 TEST/STABLE/GREY 运行资格与批准快照 |
 | [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) | 官方登录/consent、用户 grant、一次性授权码 | APP019、平台 Session、生产 Catalog |
 | [UC-AUTH-015](../use-cases/UC-AUTH-015-exchange-authorization-code.md) | 两种 client 兑换 code，签发 ID/access token | AUTH014、OIDC 签名/JWKS |
 | [UC-AUTH-016](../use-cases/UC-AUTH-016-refresh-application-tokens.md) | 明确离线授权、refresh 旋转与重放处置 | AUTH015/018，可后置 |
@@ -30,7 +30,7 @@
 [App 提供方契约](../../platform/contracts/app-oauth-client-v1.md) 分成两类：
 
 - 当前应用管理员：RegisterOAuthClient、GetApplicationOAuthRegistration、SetOAuthClientStatus、GetOAuthClientCredentialMetadata、RotateOAuthClientSecret。每个 Application 每渠道每种 type 只有一个稳定 clientId；redirect URI 在 ApplicationVersion 中管理；secret 仅登记/轮换时返回一次，不存在读取旧 secret 的接口。
-- Auth 内部：GetClientConfiguration、VerifyClientSecret、ResolveClientRuntimeConfiguration、ResolveAuthorizationContext、GetApplicationPublishedRedirects。运行配置以稳定 clientId 加 channel/rpcApiMajor 在登录前返回批准 Version 的回调/scopes；最后一项再绑定当前 TEST/Tester 资格。客户端不能提交“申请哪些就批准哪些”。
+- Auth 内部：GetClientConfiguration、VerifyClientSecret、ResolveClientRuntimeConfiguration、ResolveAuthorizationContext、GetApplicationPublishedRedirects。运行配置以稳定 clientId 加 channel/rpcApiMajor 在登录前返回批准 Version 的回调/scopes；用户上下文再绑定当前渠道资格。客户端不能提交“申请哪些就批准哪些”。
 
 App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 App MongoDB，也不保有可独立变更的第二份 client 注册表。
 

@@ -237,3 +237,16 @@ App UC020/021 已交付，Auth UC014–019 的 TEST-only 实现现在扩展为 T
 设计与 brief 已同步：按渠道检查 Tester/当前发布/cohort，跨渠道隔离 grant 和凭据，
 共享 Application sector/sub，支持批准回调并集和多渠道 route policy。
 当前扩展状态为 IN_PROGRESS；原 TEST 完成记录保留，待真实 App 三渠道联调后补记完成。
+
+## 2026-10-04 OAuth 多渠道扩展完成
+
+本节取代前节的扩展 IN_PROGRESS。先以文档提交 `3b15291` 明确 UC014–019 的三渠道规则并重新生成 brief，随后在 Auth `4f50f6a` 完成实现。API 沿用 `d187bee`，既有枚举和五个 App provider 方法无需变更；旧 TEST Mongo 记录无需迁移。Auth、API 和文档均未 push/部署。
+
+- TEST 保留 ACTIVE Tester episode 校验；STABLE/GREY 必须无 Tester 字段，分别依赖当前正式发布/当前灰度 cohort；拒绝未知渠道及跨渠道 runtime，不自动切换 channel/major。
+- grant、code、access/refresh 仍按原渠道隔离；Application sector/sub 跨渠道稳定。批准回调并集接受三渠道，修复同一应用新增正式/灰度发布后 TEST sector 查询被拒绝的问题。
+- route policy 可声明三渠道的非空唯一子集，拒绝未知/重复项；摘要算法未变，扩大渠道需要同步 Gateway 策略。
+- 发布清空或灰度资格丢失时，UserInfo、refresh、委托签发均拒绝；失败 refresh 不消费、不续期。资格恢复仍须满足原凭据的期限/撤销/权限边界；旧 code 的精确 publication tuple 不随恢复而更新。撤销 TEST grant 不影响同应用 STABLE/GREY grant。
+
+验证通过 `make check`、`make test-race`、`MONGODB_INTEGRATION_PORT=27059 make test-mongo`，以及 OAuth 专项真实 Mongo 验收；完整 Mongo 包约 119 秒，生产 Wire/跨服务测试包约 50 秒。使用实际 App `4dfe8d6` / API `8f7ad35`，通过其管理 API 创建三渠道 client、正式/灰度发布及比例/清空变更，覆盖两类客户端、非 Tester、灰度缩量/恢复、清空/恢复、陈旧 code、同 sub/不同 grant、跨渠道请求和路由拒绝、撤销隔离。仍沿用确定性 DNS 测试依赖，未修改 App 源码/系统 DNS；没有把实际 App provider 替换为测试桩。适配器单元测试另覆盖畸形响应和未知渠道。
+
+全部 40 份 brief 漂移检查、registry 及 30 项文档工具测试通过，临时 Mongo 容器已清理。公网默认关闭不变，官方登录客户端、Gateway/Traefik 和资源服务仍须独立交付与验收；UC014/019 的整体 CORE_COMPLETE 边界不因此改变。
