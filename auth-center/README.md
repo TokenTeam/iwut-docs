@@ -54,6 +54,8 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 文档入口
 
+- [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md)：同账号 Session 列表与明确目标集合回收草案，PROPOSED；不包含关联组跨账号管理。
+
 - [应用登录、Scope 授权与撤销讨论草案](design-notes/oauth-consent-lifecycle.md)：历史讨论材料；本轮已分配 UC014–019 与 OIDC 契约，见下方工作包总览，均尚未接受。
 
 - [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md)：邮箱验证码登录与本机设备授权已接受；[brief](briefs/UC-AUTH-012.md)，实现集成依赖 UC011。

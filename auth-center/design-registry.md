@@ -8,7 +8,7 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-020` |
+| Use Case / Auth Center | `UC-AUTH-021` |
 | Business Rule / OAuth Authorization | `BR-OAU-022` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
@@ -17,7 +17,7 @@
 | Business Rule / Reviewer Permission | `BR-RVW-005` |
 | Business Rule / User Profile | `BR-UPF-012` |
 | Business Rule / User Registration | `BR-REG-009` |
-| Business Rule / Login and Session | `BR-LGN-019` |
+| Business Rule / Login and Session | `BR-LGN-025` |
 | Business Rule / Email Binding | `BR-EML-010` |
 
 ## Use Cases
@@ -43,6 +43,7 @@
 | `UC-AUTH-017` | 读取 OIDC 用户信息 | `ACCEPTED` | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-018` | 查看及收回本人应用授权 | `ACCEPTED` | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `ACCEPTED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
+| `UC-AUTH-020` | 管理及回收同一账号的 Session | `PROPOSED` | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md) | — | 有效会话列表与明确 Session ID 集合的原子回收；不扩展到关联组或设备凭据。 |
 
 ## Business Rules
 
@@ -142,6 +143,12 @@
 | `BR-LGN-016` | 邮箱登录 Session 与邮箱更换边界 | Session / Lifecycle | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-016) | — | — |
 | `BR-LGN-017` | 原子登录与结果恢复 | Atomicity / Retry | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-017) | — | — |
 | `BR-LGN-018` | 邮箱登录隐私与失败关闭 | Privacy / Failure | [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md#br-lgn-018) | — | — |
+| `BR-LGN-019` | 同账号授权边界 | Authorization / Ownership | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md#br-lgn-019) | — | — |
+| `BR-LGN-020` | 有效会话列表与只读语义 | Query / Lifecycle | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md#br-lgn-020) | — | — |
+| `BR-LGN-021` | 明确目标集合的幂等回收 | Revocation / Idempotency | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md#br-lgn-021) | — | — |
+| `BR-LGN-022` | 回收与登录检查的原子顺序 | Atomicity / Concurrency | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md#br-lgn-022) | — | — |
+| `BR-LGN-023` | 会话回收与设备、OAuth 生命周期隔离 | Boundary / Lifecycle | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md#br-lgn-023) | — | — |
+| `BR-LGN-024` | 有界处理、审计与错误 | Failure / Audit | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md#br-lgn-024) | — | — |
 
 ## 维护规则
 
