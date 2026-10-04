@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义二十二个活跃纵切片；UC-APP-017 已被否决并归档，UC-APP-022 已完成后端交付，UC-APP-023 已接受并进入实现：
+当前已经定义二十二个活跃纵切片；UC-APP-017 已被否决并归档，UC-APP-023 已完成后端交付：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -97,6 +97,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-023 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；UC-APP-023 是当前实现工作包；其余已接受活跃 UC 的当前后端工作包均为 `COMPLETE`。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-023 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；其余已接受活跃 UC 的当前后端工作包均为 `COMPLETE`。下一步进入普通应用列表与详情的聚合查询设计。
 
 OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付，UC-APP-020/021 已启用 STABLE/GREY。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有。

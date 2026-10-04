@@ -47,9 +47,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major stable set/replace/clear、共享 Publication OCC、EMPTY 保留与 History、0016 migration、HTTP/gRPC、STABLE OAuth 管理及五个 Auth-only Provider 方法、完整 cross-service 验收；服务 `531f077`、API `90519af` | —（当前 App Center 后端范围；Grey、test clear、Catalog 与 Auth grant/code/token 独立交付） |
 | [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `ACCEPTED` | `COMPLETE` | Stable-backed Grey set/adjust/replace/clear、固定 HMAC cohort、共享 Publication OCC/History、0017 migration、双协议、GREY OAuth 与 Provider cohort 复算、完整 cross-service 验收；服务 `d8369b1`、API `59436f1` | —（当前 Grey 管理与 Auth provider 范围；统一 test>grey>stable 解析、Catalog、test clear 与 Auth grant/token 独立交付） |
 | [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | API、0018 migration、Domain/UseCase、双协议和完整后端验收已交付 |
-| [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `IN_PROGRESS` | 单 Application 的 Test/Grey/Stable 统一启动目标解析设计已接受 | brief、工作包、Domain/UseCase、MongoDB snapshot、HTTP/gRPC 与完整后端验收正在交付 |
+| [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（当前单 Application 解析范围；候选列表、详情、Filter 分发与前端独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018、UC019 与 UC020 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC023 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -303,3 +303,11 @@ UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004�
 - 管理 API 同时支持 HTTP/gRPC。UC018 的三个 channel 均已启用；UC019 的五个 Auth-only Provider 方法支持 GREY runtime、已发布回调并集与服务端 cohort 复算，未命中统一返回 runtime unavailable，且不读取 Tester Membership。
 - 最终 `make check-auth-app` 22/22 通过，报告为服务工作树 `.artifacts/verification/20261003T193810Z-aeknf0s6/report.json`；Mongo/HTTP/gRPC race 与 Auth/App race 均通过。首轮全量运行暴露的迁移计数、顺序升级清单和旧 History validator 回归已修复并在最终报告中复验。
 - 统一 `test > grey > stable` 启动解析、匿名 Stable fallback、Catalog、test clear、Application disable、Auth grant/code/token/sector/sub 和前端不在本工作包。
+
+## 2026-10-04 UC023 完成
+
+- 服务 `17530b9`、独立 API `d90283e` 均为本地提交，未 push。新增独立 `app_center.v1.runtime_resolution` 协议，支持原生 gRPC 与 `POST /v1/applications/{application_id}/launch-target:resolve` HTTP 查询。
+- resolver 在单个只读 MongoDB snapshot 内按 exact RPC major 复查 Application、可选 ACTIVE Tester、Publication、History、APPROVED Version/Review snapshot 及 Version OAuth 配置，并按 `TEST > GREY > STABLE` 返回一个不可变目标。匿名请求只参与 Stable；可信已登录用户可以参与 Grey，ACTIVE Tester 可以参与 Test。
+- 高优先级候选只有在宿主 capability 不满足时继续向低优先级候选查找。悬空指针、损坏 Grey、Review/Version/OAuth snapshot 漂移和历史不一致统一作为内部数据不变量异常返回 HTTP 500 / gRPC INTERNAL；没有可运行候选返回 HTTP 404 / gRPC NOT_FOUND。
+- HTTP/gRPC 身份中间件允许本方法缺省身份，但任何已提供的空白、多值、旧格式或无效凭证都会失败关闭。匿名与普通用户查询不读取或泄露 Test pointer；测试覆盖优先级、Grey 命中/未命中、capability 回退、exact-major、隐私边界、快照只读性、损坏状态及双协议 E2E。
+- 无新增 migration。最终 `make check-full` 21/21 通过，报告为服务工作树 `.artifacts/verification/20261004T060503Z-i0t3sx0w/report.json`；最后的 Mongo/HTTP/gRPC `-race` 全量套件约 12 分 30 秒。候选列表、详情、Filter 分发、前端与生产身份入口继续由后续工作包交付。
