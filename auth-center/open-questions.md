@@ -6,6 +6,8 @@
 
 新增[治理设计草案](design-notes/account-governance-delivery-plan.md)，规划管理员授予/撤销、账号禁用/恢复、Developer 暂停/恢复、Developer 退出及本人注销五个候选 UC。当前仅规划，不改变既有权限、Developer 枚举或 bootstrap 行为。管理员管理已展开为 [UC021](use-cases/UC-AUTH-021-manage-platform-administrators.md)（PROPOSED），固定集合、最后管理员保护及一次性初始化仍待接受；系统未上线，不设计旧 bootstrap 迁移，生产应急恢复规程独立交付；App 应用归属处置、暂停的对外生效边界与注销数据清理仍是跨服务交付依赖。具体实现现状以 [实现记录](implements/README.md) 为准，不以本页历史开放问题推断实现缺失。
 
+账号禁用与恢复已展开为 [UC022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)（PROPOSED）：选择 accountRevision 作为认证材料代际；UC021 前置能力及全部认证/OAuth 消费路径的版本校验是实施依赖。已签下游短期 JWS 和第三方自身登录态的边界见该 UC，不宣称全部即时登出。
+
 ## 当前设计优先级（2026-09-27）
 
 用户决定先推进 OIDC 登录、用户 scope 授权和收回，支持 PUBLIC_PKCE 与 CONFIDENTIAL_SECRET。已建立 Auth014–019、App018–019、Gateway002 的 PROPOSED 设计，见 [工作包总览](design-notes/oauth-oidc-delivery-plan.md)。Gateway OAUTH2 仍未启用；生产 Catalog 初始装载、官方门户、资源委托验证及联合测试属于明确交付依赖，在线 Catalog 管理后移。TEST 之外的正式运行资格、原生无感浏览器 SSO 桥和动态资料 scope 仍需后续设计。

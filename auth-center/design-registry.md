@@ -8,7 +8,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-022` |
+| Use Case / Auth Center | `UC-AUTH-023` |
+| Business Rule / Account Lifecycle | `BR-ACC-009` |
 | Business Rule / Platform Administrator | `BR-ADM-009` |
 | Business Rule / OAuth Authorization | `BR-OAU-022` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
@@ -48,7 +49,22 @@
 
 | `UC-AUTH-021` | 授予与撤销平台管理员资格 | `PROPOSED` | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md) | — | 固定管理集合、最后管理员保护及一次性 bootstrap；尚未实现。 |
 
+| `UC-AUTH-022` | 禁用与恢复用户账号 | `PROPOSED` | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md) | — | 账号版本隔离全部旧认证材料；依赖 UC021 及认证消费路径扩展，尚未实现。 |
+
 ## Business Rules
+
+### Account Lifecycle (`BR-ACC`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-ACC-001` | 账号边界与状态转换 | Lifecycle / Boundary | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-001) | — | — |
+| `BR-ACC-002` | 账号版本与不可复活 | Versioning / Revocation | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) | — | — |
+| `BR-ACC-003` | 所有认证路径的版本闭合 | Authentication / Consistency | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-003) | — | — |
+| `BR-ACC-004` | 可信身份与下游生效边界 | Identity / Propagation | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-004) | — | — |
+| `BR-ACC-005` | OAuth 同意、开发者及应用边界 | OAuth / Ownership | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-005) | — | — |
+| `BR-ACC-006` | 事务、并发与最后管理员保护 | Atomicity / Invariant | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-006) | — | — |
+| `BR-ACC-007` | 审计、查询与错误边界 | Audit / Privacy | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-007) | — | — |
+| `BR-ACC-008` | 完整交付与历史数据边界 | Delivery / Compatibility | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-008) | — | — |
 
 ### Platform Administrator (`BR-ADM`)
 
@@ -168,11 +184,12 @@
 
 ## 维护规则
 
-- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU/ADM-NNN`。
+- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU/ADM/ACC-NNN`。
 - `UPF` 表示 User Profile，覆盖用户资料字段定义与资料编辑；不复用 App Center 的 `PRF` 编号空间。
 - `REG` 表示用户创建及初始关联，`LGN` 表示登录、Session 与设备凭据撤销规则。
 - `EML` 表示邮箱绑定与激活；邮箱认证用例不得复用绑定挑战。
 - `ADM` 表示平台管理员资格、初始化及治理连续性约束。
+- `ACC` 表示账号生命周期与账号级认证材料失效。
 - BR 状态继承其权威 UC，不单独保存状态。
 - 新增编号时同时更新 Next ID；废弃编号不得重新分配。
 - 同一规则只有一个权威正文；其它 bounded context 通过链接引用。

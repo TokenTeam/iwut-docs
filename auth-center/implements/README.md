@@ -21,6 +21,7 @@
 | [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 3587ba7/API b7d9b6c；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计；developerHandle 全局唯一占用、禁止改名/转让/释放、历史 APPROVED 首次补设、审计索引升级、Mongo 并发/损坏数据/迁移与实际 App 联调验收 | Gateway 与客户端独立交付，生产入口及恢复就绪声明默认关闭 |
 | [UC-AUTH-020](../use-cases/UC-AUTH-020-manage-own-sessions.md) | `PROPOSED` | `NOT_STARTED` | 已建立同账号 Session 列表与显式集合回收草案 | 设计接受、brief、Proto、管理鉴权只读路径、批量事务/审计、HTTP/gRPC 与 Gateway/客户端交付 |
 | [UC-AUTH-021](../use-cases/UC-AUTH-021-manage-platform-administrators.md) | `PROPOSED` | `NOT_STARTED` | 已设计固定管理集合、查询/授撤、最后管理员事务保护和一次性 bootstrap | 设计接受、UC004/010 与共享契约联动、brief、API/后端、初始化与并发验收；生产恢复规程及 Gateway/客户端独立交付 |
+| [UC-AUTH-022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md) | `PROPOSED` | `NOT_STARTED` | 已设计账号禁用/恢复、版本失效及全部认证消费路径清单 | UC021 前置实现、设计接受、共享身份契约/初始化/schema/brief、认证及 OAuth 横向扩展、真实并发与下游窗口验收 |
 
 ## 实现边界
 
