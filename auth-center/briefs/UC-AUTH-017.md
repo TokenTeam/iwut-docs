@@ -37,6 +37,8 @@
 
 ### 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](../use-cases/UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。
+
 持有效应用 access token 读取标准 UserInfo。只披露已授予且当前允许的 claims，沿用“用户主动提供、平台校验格式、不保证学生资料真实性”的边界。
 
 ### 输入与输出
@@ -517,7 +519,7 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-017-get-oidc-user-info.md` | 52 | `fc3dd58848bd` |
+| `use-cases/UC-AUTH-017-get-oidc-user-info.md` | 54 | `60dcfc514b82` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |

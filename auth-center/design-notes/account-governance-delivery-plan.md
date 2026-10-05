@@ -1,10 +1,10 @@
 # 账号与平台资格治理设计草案
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 日期：2026-10-05
 
-本文规划后续 UC 的边界、顺序和接受条件，不修改已接受 UC 的权限或状态契约，也不表示下列能力已经实现。五个治理用例均已分配 UC021–025 并在 design-registry 登记，均为 PROPOSED；本轮不生成实现 brief。已有同账号 Session 管理继续由 [UC020](../use-cases/UC-AUTH-020-manage-own-sessions.md) 跟踪。
+本文规划后续 UC 的边界、顺序和接受条件，不修改已接受 UC 的权限或状态契约，也不表示下列能力已经实现。五个治理用例均已分配 UC021–025 并在 design-registry 登记，均为 ACCEPTED；本轮已用脚本生成实现 brief。已有同账号 Session 管理继续由 [UC020](../use-cases/UC-AUTH-020-manage-own-sessions.md) 跟踪。
 
 ## 建议拆分与顺序
 
@@ -22,11 +22,11 @@
 
 ## 一、授予与撤销平台管理员资格
 
-已展开为 [UC021](../use-cases/UC-AUTH-021-manage-platform-administrators.md)，状态 PROPOSED。固定权限集合、在线授权、最后管理员保护、共享版本、一次性首次初始化以该 UC 的 BR-ADM-001–008 为草案规则来源；本计划不重复定义。UC004 继续只管理应用审核权限，既有接受契约需在 UC021 接受时同步调整。
+已展开为 [UC021](../use-cases/UC-AUTH-021-manage-platform-administrators.md)，状态 ACCEPTED。固定权限集合、在线授权、最后管理员保护、共享版本、一次性首次初始化以该 UC 的 BR-ADM-001–008 为草案规则来源；本计划不重复定义。UC004 继续只管理应用审核权限，既有接受契约需在 UC021 接受时同步调整。
 
 ## 二、禁用与恢复账号
 
-已展开为 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md)，状态 PROPOSED。账号状态版本、旧认证材料永久失效、恢复后重新认证、最后管理员保护和下游生效窗口以该 UC 的 BR-ACC-001–008 为草案规则来源；本计划不重复定义。接受和实现时需扩展各认证消费路径，不能只修改 accountStatus。
+已展开为 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md)，状态 ACCEPTED。账号状态版本、旧认证材料永久失效、恢复后重新认证、最后管理员保护和下游生效窗口以该 UC 的 BR-ACC-001–008 为草案规则来源；本计划不重复定义。接受和实现时需扩展各认证消费路径，不能只修改 accountStatus。
 
 ## 三、暂停与恢复 Developer
 
@@ -45,3 +45,5 @@
 优先评审已展开的 UC021 和 UC022，按管理员治理、账号禁用/恢复的依赖顺序实施；两者建立后续治理的操作权限和最后管理员保护基础。Developer 暂停/恢复可以继续复用现有枚举，但仍需 App 逐入口确认生效范围。
 
 Developer 退出和账号注销共用 [App 归属退出协调草案](../../platform/contracts/account-owner-exit-v1.md)；在 App 提供相应权威 UC 与实现、状态消费者对齐及清理/保留和备份恢复策略接受前，不生成标为可实施的 brief。这些依赖不阻止先完善普通用户治理或同账号 Session 管理。
+
+2026-10-05：UC021–025 已接受并生成 brief，独立 subagent 工作包开始实施；App UC025 提供归属屏障/个人清理前置能力。有应用者继续 BLOCKED，应用转让/关闭不在本轮，公网部署与无密钥受理需独立验收。

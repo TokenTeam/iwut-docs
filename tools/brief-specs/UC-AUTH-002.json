@@ -1,0 +1,28 @@
+{
+  "uc": "UC-AUTH-002",
+  "note": "Governance projection extension: accountStatus and WITHDRAWN, CLOSED tombstone with UNSPECIFIED developer only in that case. Native gRPC provider and actual App role-aware review consumer, preserve complete batch/fail-closed.",
+  "uc_sections": [
+    "目标与范围",
+    "调用者与输入",
+    "输出",
+    "主流程",
+    "异常流程",
+    "数据模型",
+    "API 契约",
+    "测试与验收",
+    "非目标"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-developer-status-v1.md": [
+      "目的与所有权",
+      "gRPC 方法",
+      "完整批量语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求",
+      "兼容性"
+    ]
+  }
+}

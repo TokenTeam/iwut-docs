@@ -4,11 +4,11 @@
 
 ## 账号与平台资格治理（2026-10-05）
 
-新增[治理设计草案](design-notes/account-governance-delivery-plan.md)，规划管理员授予/撤销、账号禁用/恢复、Developer 暂停/恢复、Developer 退出及本人注销五个候选 UC。当前仅规划，不改变既有权限、Developer 枚举或 bootstrap 行为。管理员管理已展开为 [UC021](use-cases/UC-AUTH-021-manage-platform-administrators.md)（PROPOSED），固定集合、最后管理员保护及一次性初始化仍待接受；系统未上线，不设计旧 bootstrap 迁移，生产应急恢复规程独立交付；App 应用归属处置、暂停的对外生效边界与注销数据清理仍是跨服务交付依赖。具体实现现状以 [实现记录](implements/README.md) 为准，不以本页历史开放问题推断实现缺失。
+新增[治理设计草案](design-notes/account-governance-delivery-plan.md)，规划管理员授予/撤销、账号禁用/恢复、Developer 暂停/恢复、Developer 退出及本人注销五个候选 UC。治理设计已接受，既有权限/状态/初始化契约同步修订；代码和部署状态独立跟踪。管理员管理已展开为 [UC021](use-cases/UC-AUTH-021-manage-platform-administrators.md)（ACCEPTED），固定集合、最后管理员保护及一次性初始化仍待接受；系统未上线，不设计旧 bootstrap 迁移，生产应急恢复规程独立交付；App 应用归属处置、暂停的对外生效边界与注销数据清理仍是跨服务交付依赖。具体实现现状以 [实现记录](implements/README.md) 为准，不以本页历史开放问题推断实现缺失。
 
-账号禁用与恢复已展开为 [UC022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)（PROPOSED）：选择 accountRevision 作为认证材料代际；UC021 前置能力及全部认证/OAuth 消费路径的版本校验是实施依赖。已签下游短期 JWS 和第三方自身登录态的边界见该 UC，不宣称全部即时登出。
+账号禁用与恢复已展开为 [UC022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)（ACCEPTED）：选择 accountRevision 作为认证材料代际；UC021 前置能力及全部认证/OAuth 消费路径的版本校验是实施依赖。已签下游短期 JWS 和第三方自身登录态的边界见该 UC，不宣称全部即时登出。
 
-Developer 暂停/恢复、主动退出和本人注销已展开为 UC023–025（均 PROPOSED/NOT_STARTED）。退出首版不重新开通；注销允许保有有效设备密钥的禁用账号使用专用途径，先满足应用归属/管理员交接门禁。共同硬依赖见 [App 归属退出协调草案](../platform/contracts/account-owner-exit-v1.md)；WITHDRAWN/CLOSED 消费语义、数据清理与保留策略、终止清单及备份恢复必须在接受和上线前分别闭合，不能视为现有能力。
+Developer 暂停/恢复、主动退出和本人注销已展开为 UC023–025（均 ACCEPTED/IN_PROGRESS）。退出首版不重新开通；注销允许保有有效设备密钥的禁用账号使用专用途径，先满足应用归属/管理员交接门禁。共同硬依赖见 [App 归属退出协调草案](../platform/contracts/account-owner-exit-v1.md)；WITHDRAWN/CLOSED 消费语义、数据清理与保留策略、终止清单及备份恢复必须在接受和上线前分别闭合，不能视为现有能力。
 
 ## 当前设计优先级（2026-09-27）
 
@@ -88,3 +88,5 @@ sector 与 sub 由 Auth 按 Application 保存，不由 App 保存；渠道/type
 ## 应用审核权限扩展（2026-10-03）
 
 UC004 已接受管理 app.profile.review 与 app.version.review 两项独立权限，UC010 同步扩充 App audience 投影，沿用 auth.reviewer.manage 作为管理入口权限。设计见 [UC004](use-cases/UC-AUTH-004-manage-reviewer-permission.md)；新增 Auth/API/Gateway 实现及真实 App 回归已完成，证据见 [实现记录](implements/README.md#2026-10-03-uc004010-应用审核权限扩展)。TEST/OAuth 的权限授予与签发依赖已闭合；OAuth 自身仍按独立工作包交付，生产环境仍需显式授予相关人员权限。
+
+2026-10-05：UC021–025 已接受并生成 brief，独立 subagent 工作包开始实施；App UC025 提供归属屏障/个人清理前置能力。有应用者继续 BLOCKED，应用转让/关闭不在本轮，公网部署与无密钥受理需独立验收。

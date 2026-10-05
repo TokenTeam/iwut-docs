@@ -49,6 +49,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | API、0018 migration、Domain/UseCase、双协议和完整后端验收已交付 |
 | [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（当前单 Application 解析范围；候选列表、详情、Filter 分发与前端独立交付） |
 | [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（当前普通 Catalog 后端范围；客户端 Filter 求值、“我参与的测试”、搜索与排名独立交付） |
+| [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `IN_PROGRESS` | 已固定与 Auth 的方法、屏障和清理契约 | 提供方/工作器、状态消费者、API 及真实联合验收；不含应用转让/关闭 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC024 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 

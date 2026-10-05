@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-004` 管理用户的应用审核权限 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-RVW-001`–`BR-RVW-004`（4 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-ADM-005`（来自 `UC-AUTH-021`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/auth-center-api-routing.md`、`platform/contracts/auth-session-identity-issuance-v1.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -45,15 +45,7 @@
 
 调用者必须是具有 `auth.reviewer.manage` 权限的 `PLATFORM_ADMIN` 用户。平台管理员统揽跨 bounded context 的人员权限治理，但每个能力仍使用独立原子权限。
 
-本用例以 `auth.reviewer.manage` 的显式 grant 表达 PLATFORM_ADMIN 管理能力；主体仍为 USER，不新增 principalType 或通用角色继承。
-
-首个 PLATFORM_ADMIN 通过显式、一次性的运维命令 provision：
-
-```text
-auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
-```
-
-该命令要求 USER principal 已存在，幂等写入管理员 grant 与审计记录；它不是 Auth 普通启动路径，不允许仅因为环境变量仍存在就在每次重启时重新授予已撤销权限。后续管理员全部通过受审计的管理用例授予。bootstrap 在同一事务中保存全局已消费标记：对原目标重跑只报告已执行，不再次写权限或审计；对另一目标重跑拒绝。即使原管理员权限后来被撤销，也不能通过重跑该命令恢复。
+PLATFORM_ADMIN 的完整集合、一次性 bootstrap 与后续授予/撤销由 [UC021](../use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-001) 和 [BR-ADM-005](../use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005) 唯一规定。主体仍为 USER；本用例仅消费 auth.reviewer.manage，不单独创建或修改管理资格，也不自动授予审核权限。首次 bootstrap 直接授予完整管理集合，无旧数据迁移。
 
 ### 输入与主流程
 
@@ -88,7 +80,7 @@ ManageApplicationReviewPermissionCommand {
 - 写命令 `action` 使用 UNSPECIFIED/GRANT/REVOKE 枚举，UNSPECIFIED 拒绝；expectedRevision
   必填且为正 int64，reason 去除两端空白后为非空 UTF-8 文本且不超过 1024 bytes。
 - 新命令的 permission 必填且只接受两项精确字符串；不修剪、忽略大小写、接受通配符或默认选择版本权限。auth.reviewer.manage、任意 OAuth scope 和未知 permission 均拒绝。旧命令的固定映射是兼容适配，不是新命令的缺省值。
-- 已验签 JWS 必须包含 `auth.reviewer.manage`；写入事务内还须确认 actor 为当前 ACTIVE USER 且仍有该权限。
+- 已验签 JWS 必须包含 `auth.reviewer.manage`；所有读写还须在线确认 actor 当前 ACTIVE、完整管理集合及 UC022 的账号版本；写入事务内再次复核。
   body/path 不得指定或替代 actor。只修改选定审核权限，保留其它权限。
 - 权限写入、bootstrap 与 [UC010 的签发一致性](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004)
   使用相同认证事务协调边界；已确认撤销后不能再签出含该权限的新 token。
@@ -134,7 +126,7 @@ HTTP 路径字段绑定：两个新请求和旧 GetReviewerPermissionRequest 的
 - `auth_principals.permissions`：当前有效原子权限集合，元素唯一且稳定排序。
 - `auth_principals.permissionRevision`：正 int64，权限变化时增加。
 - `auth_permission_audit_events`：append-only 事件，包含 eventId、subjectAuthId、actorType、action、permission、reason、before/after、beforeRevision、afterRevision、occurredAt。普通管理请求 actorType=`USER`，actorAuthId 为已认证用户；运维初始化 actorType=`BOOTSTRAP_COMMAND`，不伪造 actorAuthId。
-- `auth_runtime` 的 `platform-admin-bootstrap` 单例：保存 subjectAuthId、eventId、occurredAt，表示全局初始化已消费，不能通过重启或权限撤销清除。
+- 初始化标记和管理资格审计由 UC021 拥有，不复用审核权限事件表达整组管理员授予。
 
 ### API 与实现依赖
 
@@ -191,6 +183,29 @@ auth.reviewer.manage、app.profile.review 与 app.version.review 是三项独立
 ### BR-RVW-004：撤销传播上界
 
 撤销后 Auth 不再签发包含该权限的新 token。已经签发并通过本地验签的 token 最多继续有效到 trusted-identity-v1 的 `exp`，因此权限撤销传播上界等于用户身份 token 的最大 TTL。首版不为“即时撤销”引入每请求 Auth introspection；若安全策略要求秒级强制失效，必须另立 ADR 选择 denylist/event push 或在线授权，而不能悄悄改变本地验签模型。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-AUTH-021`
+
+<!-- 权威位置: use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005 -->
+### BR-ADM-005：一次性管理员初始化
+
+使用单个 `auth_runtime/platform-admin-bootstrap` 消费标记，记录 subjectAuthId、eventId、occurredAt 和管理集合版本 1。不增加第二个治理初始化标记。该记录表示首次初始化已经消费，不是权限来源副本，不因管理员被撤销而清除。
+
+首次部署使用显式停服运维命令，不启动监听，不接受远程匿名调用，不因 ENV 或普通启动自动授予：
+
+```text
+auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
+```
+
+仅当消费标记不存在、没有任何四项管理权限记录时可首次执行。目标必须已有 ACTIVE USER、激活邮箱及恢复就绪能力；在一个事务中授予完整集合、增加一次 permissionRevision、写治理审计并消费标记。其他用户审核权限不影响初始化，不自动授予应用审核权限。
+
+同一目标命令重跑且消费标记完整一致时，仅返回 applied=false 和原事件 ID，不再写权限、版本或审计；该检查先于目标当前邮箱/权限条件，所以后来撤销也不会被重跑恢复。不同目标或损坏标记拒绝。首次执行才返回 applied=true。后续授予必须走已认证管理 API。
+
+本用例实施时直接调整 UC004 的首次 bootstrap 定义与实现，不增加 migrate 命令、旧状态转换或自动补齐权限。治理 API 要求初始化标记符合本集合版本；旧格式标记或部分管理权限记录按不兼容数据拒绝，不自动清除或修复。开发测试环境通过显式重建测试数据验证新流程；本文不授权删除任何现存数据，也不要求保留上线前测试库的升级兼容性。
 
 ## 平台共享契约（按 spec 显式抽取）
 
@@ -382,7 +397,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `nbf` | number（Unix 秒） | 是 | 生效时间 |
 | `exp` | number（Unix 秒） | 是 | 失效时间 |
 | `jti` | string | 是 | 该 token 的唯一标识；非空 |
-| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED` 之一；普通用户省略 |
+| `account_revision` | string | Auth audience USER 必需 | 规范无前导零的正 int64 十进制字符串；Auth 在线比较当前 ACTIVE 主体版本，规则见 UC-AUTH-022/BR-ACC-004；其他 audience 不要求或推导此字段 |
+| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED`、`WITHDRAWN` 之一；普通用户省略 |
 | `permissions` | array&lt;string&gt; | 条件必需 | 权限用例必需；元素必须是非空、无首尾 whitespace 的唯一字符串，按精确字符串匹配；未知权限可以透传但不能产生隐式授权 |
 
 `sub` 是身份主体，不是 `uid` 的同义词；当 Auth 的内部用户标识与 `authId` 不同时，以 `authId` 为准。`developer_status` 表达 Auth 权威给出的开发者资格结果，而不是 token 类型；字段缺失表示该主体是尚未进入 Developer 生命周期的普通用户，不表示 token 或身份无效。`permissions` 表达 Auth 在签发时授予该主体、且绑定本 token audience 的原子权限集合；App Center 运行版本审核消费精确值 `app.version.review`，公开资料审核消费独立精确值 `app.profile.review`；二者不互相隐式授权。
@@ -446,14 +462,17 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-004`（use-cases/UC-AUTH-004-manage-reviewer-permission.md）：变更记录
+- `UC-AUTH-021`（use-cases/UC-AUTH-021-manage-platform-administrators.md）：目标与范围、参与者与身份、输入与输出、API、主流程、错误语义与运行约束、测试与验收、实现依赖与联动、变更记录
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：治理工作包路由
 - `platform/contracts/auth-session-identity-issuance-v1.md`（docs 根级共享文档）：范围与权威来源、服务授权扩展、请求与凭据流向
-- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
+- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 168 | `bff1cb174151` |
-| `platform/contracts/auth-center-api-routing.md` | 100 | `1ca39b5e9bc5` |
+| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 162 | `98c33762540d` |
+| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `db46fb9b9689` |
+| `platform/contracts/auth-center-api-routing.md` | 110 | `a2999614c568` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
-| `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
+| `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

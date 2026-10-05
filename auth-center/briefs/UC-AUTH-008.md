@@ -37,6 +37,8 @@
 
 ### 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](../use-cases/UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。
+
 > Session 持有者要求 Auth 撤销当前 Session，使该 token 不再通过后续在线检查，而不改变设备凭据、账号或其它 Session。
 
 本用例只定义服务端 Session 撤销能力。它不定义“退出登录”的界面、是否删除本地 token/私钥、账号切换或离线提示；这些属于非权威的[客户端认证生命周期建议](../client-guides/authentication-lifecycle.md)。设备凭据撤销由 [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) 定义。
@@ -258,6 +260,6 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-008-revoke-own-session.md` | 71 | `484fcf66a431` |
-| `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
+| `use-cases/UC-AUTH-008-revoke-own-session.md` | 73 | `5ebaffed9134` |
+| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |

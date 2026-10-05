@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+治理扩展：批准门禁的角色区分、WITHDRAWN/CLOSED 和账号状态条件由 [BR-APP-011](UC-APP-025-coordinate-account-owner-exit.md#br-app-011) 定义，替代仅判断 AnySuspended 的门禁；本文其余“暂停检查”均表示该完整批准资格检查。依赖故障仍保持 PENDING。
+
 > 拥有 `app.version.review` 权限且不存在利益冲突的 reviewer，根据不可变 ApplicationReview snapshot 和一份明确版本的审核策略，对 `PENDING` attempt 作出一次 `APPROVED` 或 `REJECTED` 决定。
 
 本用例负责：
@@ -69,7 +71,7 @@ ApplicationVersion.updatedBy: reviewer authId
 ApplicationVersion.updatedAt: decidedAt
 ```
 
-若 reviewer 请求批准时发现当前 admin 或 Review.submittedBy 已暂停，同样执行上述 `REJECTED` 迁移，但 `decision.decidedBy` 和 Version.updatedBy 使用 Auth Center 按 purpose 解析的 SYSTEM principal Auth ID，reason 使用稳定系统文本“当前应用管理员或审核提交者已被暂停，待处理审核已由系统自动拒绝。”。App Center 在首次需要时通过 [Auth System Principal v1](../../platform/contracts/auth-system-principal-v1.md) 查询并缓存成功结果；依赖失败时保持 PENDING，不使用静态配置或占位 ID。
+若 reviewer 请求批准时发现当前 admin 或 Review.submittedBy 已暂停，同样执行上述 `REJECTED` 迁移，但 `decision.decidedBy` 和 Version.updatedBy 使用 Auth Center 按 purpose 解析的 SYSTEM principal Auth ID，reason 使用稳定系统文本“当前应用管理员或审核提交者不满足账号与开发者资格要求，待处理审核已由系统自动拒绝。”。App Center 在首次需要时通过 [Auth System Principal v1](../../platform/contracts/auth-system-principal-v1.md) 查询并缓存成功结果；依赖失败时保持 PENDING，不使用静态配置或占位 ID。
 
 Version 的运行内容和 ApplicationReview.snapshot 在两种决定中都不改变。
 
@@ -153,7 +155,7 @@ Command 使用动作词 `APPROVE/REJECT`；持久化后的结果状态使用 `AP
 批准分支：
 
 6. 确认 confirmedCheckIds 无重复、全部由策略定义，并覆盖本次全部 requiredCheckIds。
-7. 通过 DeveloperSuspensionChecker 检查 candidate 中的当前 adminId 和 submittedBy。任一人已暂停时，跳过 ScopeCatalog 和 URL 检查，使用 System Auth ID 和固定 reason 构造自动 `REJECTED` decision，并进入步骤 11。
+7. 通过 DeveloperReviewEligibilityChecker 检查 candidate 中的当前 adminId 和 submittedBy。任一人已暂停时，跳过 ScopeCatalog 和 URL 检查，使用 System Auth ID 和固定 reason 构造自动 `REJECTED` decision，并进入步骤 11。
 8. 通过 ScopeCatalog 再次确认 snapshot 中的 scopes 仍允许新版本申请，取得 approvalScopeCatalogRevision。
 9. 通过 LaunchURLSubmissionPolicy 再次检查 snapshot.launchUrl，取得 approvalPreflightPolicyVersion；按 BR-VER-018 重新验证 snapshot.oauthRedirects。
 10. 从 Clock 取得 decidedAt，构造 outcome=`APPROVED` 的不可变 decision。
@@ -304,7 +306,7 @@ confirmedCheckIds 表示 reviewer 明确确认已经完成策略要求，不表�
 
 APPROVE 必须针对 ApplicationReview.snapshot 重新执行：
 
-- DeveloperSuspensionChecker 对当前 adminId 与 Review.submittedBy 的暂停检查。
+- DeveloperReviewEligibilityChecker 对当前 adminId 与 Review.submittedBy 的暂停检查。
 - ScopeCatalog requestable 检查。
 - LaunchURLSubmissionPolicy 公网 HTTPS 与 DNS 地址策略检查。
 - BR-VER-018 的 OAuth 回调双数组结构、规范 URL 与安全限制检查。
@@ -370,10 +372,11 @@ type ReviewPolicyProvider interface {
     ) (*VersionReviewPolicy, error)
 }
 
-type DeveloperSuspensionChecker interface {
-    AnySuspended(
+type DeveloperReviewEligibilityChecker interface {
+    ApprovalBlocked(
         ctx context.Context,
-        authIDs []AuthID,
+        currentAdminID AuthID,
+        submittedBy AuthID,
     ) (bool, error)
 }
 

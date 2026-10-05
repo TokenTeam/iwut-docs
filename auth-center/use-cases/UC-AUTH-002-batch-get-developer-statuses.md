@@ -40,19 +40,22 @@ BatchDeveloperStatuses {
 
 DeveloperStatusEntry {
   authId: AuthId
-  developerStatus: PENDING | APPROVED | REJECTED | SUSPENDED
+  accountStatus: ACTIVE | DISABLED | CLOSED
+  developerStatus: PENDING | APPROVED | REJECTED | SUSPENDED | WITHDRAWN | null // null 仅 CLOSED
 }
 ```
 
 成功响应为每个请求 Auth ID 返回且只返回一条记录，顺序与请求一致。不得追加未请求
 主体，也不得省略未知或损坏记录后返回部分成功。
 
+WITHDRAWN 为已退出，不是暂停或普通用户；历史提交者可返回该状态。响应增加 accountStatus=ACTIVE/DISABLED/CLOSED；CLOSED 的合法 USER 墓碑可成功返回，developerStatus 在此唯一例外为 null/线格式 UNSPECIFIED，不恢复旧资格。ACTIVE/DISABLED 普通非 Developer 仍 NOT_FOUND。App 角色区分规则由 [App 退出协调用例的状态消费规则](../../app-center/use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-011) 定义。
+
 ## 主流程
 
 1. 验证调用方内部服务身份和 allowlist 权限。
 2. 校验 authIds 数量、长度和唯一性。
 3. Repository 用一次批量读取取得全部匹配的 Auth principal。
-4. 确认每个请求主体都存在、类型为 `USER`，并具有合法 Developer 状态。
+4. 确认每个请求主体都存在、类型为 `USER`，并具有合法 Developer 状态，或为合法 CLOSED 墓碑。
 5. 按请求顺序返回完整结果。
 
 ## 异常流程
@@ -91,8 +94,10 @@ developer_status、测试 fixture 或其它服务数据库不能替代本查询�
 <a id="br-dev-004"></a>
 ### BR-DEV-004：状态语义
 
-首版只公开 `PENDING/APPROVED/REJECTED/SUSPENDED`。UC-APP-005 只把
+公开 `PENDING/APPROVED/REJECTED/SUSPENDED/WITHDRAWN`。UC-APP-005 只把
 `SUSPENDED` 判断为暂停，但 Auth 返回完整枚举，让消费方不需要用 bool 掩盖未知状态。
+
+CLOSED 墓碑作为明确终止状态返回是本规则的例外，不将其伪装成 PENDING 或 WITHDRAWN。
 
 普通 USER 可以不是 Developer，此时 `developerStatus = null`；SYSTEM principal 也不具有
 Developer 状态。两者都不能作为本查询的成功结果，且不得被伪装成 `PENDING`。

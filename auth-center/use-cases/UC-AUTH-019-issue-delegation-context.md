@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
+
 受授权 Gateway 为即将转发的资源请求在线验证 opaque access token，得到目标路由专用的短期签名上下文。与 UC010 的平台 Session→USER 签发并列，不能混用。
 
 ## 输入与输出

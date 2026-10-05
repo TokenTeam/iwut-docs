@@ -54,13 +54,13 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 文档入口
 
-- [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md)：暂停与恢复 Developer 资格草案，PROPOSED。
-- [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md)：本人退出 Developer 资格草案，PROPOSED。
-- [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md)：本人注销账号草案，PROPOSED。
+- [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md)：暂停与恢复 Developer 资格草案，ACCEPTED。
+- [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md)：本人退出 Developer 资格草案，ACCEPTED。
+- [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md)：本人注销账号草案，ACCEPTED。
 
-- [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)：账号禁用与恢复草案，账号版本保证旧 Session/token 不复活；依赖 UC021，PROPOSED。
+- [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)：账号禁用与恢复草案，账号版本保证旧 Session/token 不复活；依赖 UC021，ACCEPTED。
 
-- [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md)：管理员资格查询、授予/撤销、最后管理员保护与 一次性 bootstrap 草案，PROPOSED。
+- [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md)：管理员资格查询、授予/撤销、最后管理员保护与 一次性 bootstrap 草案，ACCEPTED。
 
 - [账号与平台资格治理草案](design-notes/account-governance-delivery-plan.md)：管理员授予/撤销、账号禁用/恢复与注销、Developer 暂停/恢复与退出的候选 UC 边界、顺序和交付依赖；尚未接受或实施。
 
@@ -112,3 +112,5 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [UC-AUTH-019：校验应用访问凭据并签发可信委托上下文](use-cases/UC-AUTH-019-issue-delegation-context.md)。
 
 OAuth 最新分工：Auth 唯一管理 Application 级 sector/sub，各渠道/type 共享用户标识；client 与 grant 按渠道隔离，同应用同渠道的两类 client 及各 major 共用历史授权，token 仍各自绑定 client。版本变化不删除同意记录，访问使用当前有效交集，详见 [交付总览](design-notes/oauth-oidc-delivery-plan.md)。
+
+2026-10-05：UC021–025 已接受并生成 brief，独立 subagent 工作包开始实施；App UC025 提供归属屏障/个人清理前置能力。有应用者继续 BLOCKED，应用转让/关闭不在本轮，公网部署与无密钥受理需独立验收。

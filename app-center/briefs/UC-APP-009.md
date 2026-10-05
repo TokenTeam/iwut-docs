@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-009` 通过有效链接加入 Application Tester 列表 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-TST-010`–`BR-TST-019`（10 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-APP-010`（来自 `UC-APP-025`） |
 | ADR | `ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-device-session-v1.md`、`platform/contracts/tester-join-url-v1.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -36,6 +36,8 @@
 ## 用例正文
 
 ### 目标与范围
+
+Tester 加入须在同一事务遵守 [BR-APP-010](../use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-010) 的 ACCOUNT_CLOSURE 屏障；Developer 退出不阻止普通加入。
 
 > 一个已登录用户使用仍然有效的 Tester 加入链接，自助取得整个 Application 的 Tester Membership；加入时不要求 Developer 资格，并受到 Application 级 Tester 数量上限约束。
 
@@ -423,6 +425,21 @@ App Center 只为 Membership 保存 opaque authId，不收集学生证明或额�
 
 成功响应可以返回 joinLinkId 作为加入来源审计，但不能返回 secret、tokenHash 或其他 Tester 身份。
 
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-025`
+
+<!-- 权威位置: use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-010 -->
+### BR-APP-010：注销个人状态清理
+
+ACCOUNT_CLOSURE 的准备及永久 sealed 同时阻止 Tester Join 新增个人状态；DEVELOPER_WITHDRAWAL 仍允许普通 Tester 加入。创建/Join 与 Prepare 共用账号栅栏，涉及 Application coordination fence 时统一顺序 account→Application。
+
+COMMITTED ACCOUNT_CLOSURE 后以有界批次清理该 testerAuthId 的全部 ACTIVE/REMOVED membership episode，并在各 Application coordination fence 内处理，保证人数计数及并发移除一致；其他用户不受影响。零应用账号的 creation quota 可以删除。仅在扫描为空并确认不可重建时标为 COMPLETE。
+
+application_filters/filter_revisions 是应用公开 Filter，不是用户偏好，不能删除。保留 Application、Version、Review、Publication 及历史 createdBy/submittedBy/reviewer 等归因；当前没有独立个人偏好 collection，禁止凭名称猜测清理表。未来新增个人数据需显式纳入清单。
+
 ## 架构决定（仅本次需要的章节）
 
 ### ADR-006：Proto v1 与独立 API 仓库协作（`ACCEPTED`）
@@ -620,7 +637,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `nbf` | number（Unix 秒） | 是 | 生效时间 |
 | `exp` | number（Unix 秒） | 是 | 失效时间 |
 | `jti` | string | 是 | 该 token 的唯一标识；非空 |
-| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED` 之一；普通用户省略 |
+| `account_revision` | string | Auth audience USER 必需 | 规范无前导零的正 int64 十进制字符串；Auth 在线比较当前 ACTIVE 主体版本，规则见 UC-AUTH-022/BR-ACC-004；其他 audience 不要求或推导此字段 |
+| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED`、`WITHDRAWN` 之一；普通用户省略 |
 | `permissions` | array&lt;string&gt; | 条件必需 | 权限用例必需；元素必须是非空、无首尾 whitespace 的唯一字符串，按精确字符串匹配；未知权限可以透传但不能产生隐式授权 |
 
 `sub` 是身份主体，不是 `uid` 的同义词；当 Auth 的内部用户标识与 `authId` 不同时，以 `authId` 为准。`developer_status` 表达 Auth 权威给出的开发者资格结果，而不是 token 类型；字段缺失表示该主体是尚未进入 Developer 生命周期的普通用户，不表示 token 或身份无效。`permissions` 表达 Auth 在签发时授予该主体、且绑定本 token audience 的原子权限集合；App Center 运行版本审核消费精确值 `app.version.review`，公开资料审核消费独立精确值 `app.profile.review`；二者不互相隐式授权。
@@ -648,18 +666,20 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-009`（use-cases/UC-APP-009-join-application-as-tester.md）：数据模型/application_tester_memberships、数据模型/ACTIVE Tester 计数、后续用例、变更记录
+- `UC-APP-025`（use-cases/UC-APP-025-coordinate-account-owner-exit.md）：目标与范围、主流程与 API、数据与验收、交付依赖
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、测试向量、变更记录
-- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
+- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-009-join-application-as-tester.md` | 411 | `556bdc015bae` |
+| `use-cases/UC-APP-009-join-application-as-tester.md` | 413 | `71b19b545669` |
+| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/tester-join-url-v1.md` | 38 | `0edbb9f4f2d2` |
-| `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
+| `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

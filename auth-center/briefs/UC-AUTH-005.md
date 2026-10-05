@@ -38,6 +38,8 @@
 
 ### 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](../use-cases/UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
+
 > 已认证且账号可用的普通用户，明确提交要设置和删除的资料字段，在不覆盖其他客户端修改的前提下，一次性更新自己的资料。
 
 本用例承接用户已确认的资料定位、字段定义方向，以及“主体内嵌基础资料”的存储方向。命令细节、容量限制和错误语义已接受；实际字段目录及生产接入仍按交付依赖推进。本文件是本用例与 `BR-UPF-*` 的唯一规则正文；此前设计笔记转为导航和示例。
@@ -374,12 +376,12 @@ profile.revision 使用 BSON int64，profile.updatedAt 使用 BSON datetime。�
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-005`（use-cases/UC-AUTH-005-edit-own-user-profile.md）：持久化与返回说明、变更记录
-- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：传输载体、JOSE Header、Claims、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
+- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：传输载体、JOSE Header、Claims、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 285 | `9e4e092d772e` |
-| `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
+| `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 287 | `60af229c87c6` |
+| `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
 | `auth-center/query-contracts/user-profile-editing.md` | 37 | `293a3acd318b` |

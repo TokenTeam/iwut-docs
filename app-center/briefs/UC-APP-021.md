@@ -704,7 +704,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `nbf` | number（Unix 秒） | 是 | 生效时间 |
 | `exp` | number（Unix 秒） | 是 | 失效时间 |
 | `jti` | string | 是 | 该 token 的唯一标识；非空 |
-| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED` 之一；普通用户省略 |
+| `account_revision` | string | Auth audience USER 必需 | 规范无前导零的正 int64 十进制字符串；Auth 在线比较当前 ACTIVE 主体版本，规则见 UC-AUTH-022/BR-ACC-004；其他 audience 不要求或推导此字段 |
+| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED`、`WITHDRAWN` 之一；普通用户省略 |
 | `permissions` | array&lt;string&gt; | 条件必需 | 权限用例必需；元素必须是非空、无首尾 whitespace 的唯一字符串，按精确字符串匹配；未知权限可以透传但不能产生隐式授权 |
 
 `sub` 是身份主体，不是 `uid` 的同义词；当 Auth 的内部用户标识与 `authId` 不同时，以 `authId` 为准。`developer_status` 表达 Auth 权威给出的开发者资格结果，而不是 token 类型；字段缺失表示该主体是尚未进入 Developer 生命周期的普通用户，不表示 token 或身份无效。`permissions` 表达 Auth 在签发时授予该主体、且绑定本 token audience 的原子权限集合；App Center 运行版本审核消费精确值 `app.version.review`，公开资料审核消费独立精确值 `app.profile.review`；二者不互相隐式授权。
@@ -754,7 +755,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 #### App Center 固定授权映射
 
-App Center 首版只开放原生 gRPC 的 OAuth provider，不生成 HTTP annotation。完整方法与本地 caller registry permission 固定为：
+App Center 通过原生 gRPC 开放 OAuth provider 和账号归属退出 provider，不生成 HTTP annotation。完整方法与本地 caller registry permission 固定为：
 
 | gRPC 方法 | 必需 permission |
 | --- | --- |
@@ -811,7 +812,7 @@ App Center 必须提供：
 | `APP_CENTER_SERVICE_IDENTITY_MAX_TTL` | 接受的最大 token TTL，默认 `1m` |
 | `APP_CENTER_SERVICE_IDENTITY_CLOCK_SKEW` | claims 时钟偏差，默认 `30s` |
 
-App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` permission，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
+App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` permission，以及 account-owner-exit-v1 固定的三个 app.account-owner-exit.* 精确权限，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
 
 #### 错误与轮换
 
@@ -835,8 +836,8 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 - `ADR-002`（adr/ADR-002-partition-publication-by-rpc-api-major.md）：背景、为什么不使用 platform/target、考虑过的替代方案、结果、关联用例、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
-- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档
-- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射
+- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射、账号归属退出方法
 
 ## 溯源
 
@@ -849,5 +850,5 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
-| `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
-| `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |
+| `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
+| `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |

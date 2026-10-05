@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
+
 > 已在客户端本地保存学校账号密码的用户，明确选择创建平台账号，提交学校账号关联声明并通过新设备凭据的持有证明，建立正式 USER 主体并获得首次登录会话；邮箱和学生资料不作为注册前提。
 
 本文件是创建行为与 `BR-REG-*` 的唯一规则正文。凭据证明、关联声明和认证载体遵守已接受的 [App 设备认证与 Session v1 契约](../../platform/contracts/auth-device-session-v1.md)；设计接受不表示后端、客户端或 Gateway 已交付。

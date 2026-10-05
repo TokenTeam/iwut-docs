@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
+
 让当前用户了解应用及其请求的权限，通过 Auth 控制的门户作出决定，生成只供本次 client 兑换的一次性授权码。本用例拥有授权交互和用户 grant；不兑换 token、不把应用的前端“已同意”声明当作用户决定。
 
 ## 输入与输出

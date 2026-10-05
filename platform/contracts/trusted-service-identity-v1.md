@@ -40,7 +40,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 ## App Center 固定授权映射
 
-App Center 首版只开放原生 gRPC 的 OAuth provider，不生成 HTTP annotation。完整方法与本地 caller registry permission 固定为：
+App Center 通过原生 gRPC 开放 OAuth provider 和账号归属退出 provider，不生成 HTTP annotation。完整方法与本地 caller registry permission 固定为：
 
 | gRPC 方法 | 必需 permission |
 | --- | --- |
@@ -97,7 +97,7 @@ App Center 必须提供：
 | `APP_CENTER_SERVICE_IDENTITY_MAX_TTL` | 接受的最大 token TTL，默认 `1m` |
 | `APP_CENTER_SERVICE_IDENTITY_CLOCK_SKEW` | claims 时钟偏差，默认 `30s` |
 
-App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` permission，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
+App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` permission，以及 account-owner-exit-v1 固定的三个 app.account-owner-exit.* 精确权限，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
 
 ## 错误与轮换
 
@@ -110,3 +110,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 ## 契约测试要求
 
 至少验证合法调用、缺失/错误签名、未知 serviceId、未知 kid、错误 audience、过长 TTL、disabled caller、缺少 RPC permission 和未允许 purpose。生产等价 E2E 必须由真实 App signer 调用真实 Auth interceptor，不能只验证同接口 fake server。
+
+## 账号归属退出方法
+
+精确 full method、调用方向及权限以 [account-owner-exit-v1](account-owner-exit-v1.md#固定线格式与方法授权) 为准。Auth 接受 App 的 auth.account-owner-exit.read；App 接受 Auth 的 prepare/finish/read。它们不授予其他服务权限、不开放 HTTP 或通用 wildcard。

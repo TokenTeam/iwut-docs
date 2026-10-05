@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。
+
 > Session 持有者要求 Auth 撤销当前 Session，使该 token 不再通过后续在线检查，而不改变设备凭据、账号或其它 Session。
 
 本用例只定义服务端 Session 撤销能力。它不定义“退出登录”的界面、是否删除本地 token/私钥、账号切换或离线提示；这些属于非权威的[客户端认证生命周期建议](../client-guides/authentication-lifecycle.md)。设备凭据撤销由 [UC-AUTH-009](UC-AUTH-009-revoke-own-credential.md) 定义。

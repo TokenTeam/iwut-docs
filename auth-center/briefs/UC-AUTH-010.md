@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-010` 由 Session 签发可信用户身份 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-IDN-001`–`BR-IDN-006`（6 条） |
-| 外部引用 BR | `BR-DEV-004`，`BR-LGN-004`（来自 `UC-AUTH-002`、`UC-AUTH-007`） |
+| 外部引用 BR | `BR-ACC-004`，`BR-ADM-001`，`BR-DEV-004`，`BR-LGN-004`（来自 `UC-AUTH-002`、`UC-AUTH-007`、`UC-AUTH-021`、`UC-AUTH-022`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/auth-device-session-v1.md`、`platform/contracts/auth-session-identity-issuance-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -63,6 +63,8 @@ IssuedUserIdentity {
 ```
 
 不接受客户端声明的 authId、permissions、developerStatus、issuer、TTL 或签名 key。audience 来自 Gateway 已匹配的固定路由；Auth 仍独立检查调用服务的 audience allowlist。输出只回给 Gateway，不作为响应头、Cookie 或业务响应交给终端。
+
+Auth audience 的 `account_revision` 条件必需投影及在线消费规则引用 [UC022/BR-ACC-004](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-004)；App audience 不增加该 claim。所有 Session 校验同时满足 UC022 的 accountRevision，CLOSED 永不签发。
 
 ### 主流程
 
@@ -122,11 +124,11 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
 | `iwut-app-center` | `app.profile.review`、`app.version.review` | 有合法非 null 状态时携带 |
-| `iwut-auth-center` | `auth.reviewer.manage` | 不携带 |
+| `iwut-auth-center` | UC021/BR-ADM-001 固定四项管理权限 | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](../use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
 
-两项应用审核权限均来自 UC004 的独立显式 grant；不能从管理权限、Developer 状态或另一项审核权限推导。向 App 签发时保留精确值并稳定排序，只拥有其中一项时只签该项；不向 App 披露 auth.reviewer.manage，不向 Auth audience 披露应用审核权限。
+两项应用审核权限均来自 UC004 的独立显式 grant；不能从管理权限、Developer 状态或另一项审核权限推导。向 App 签发时保留精确值并稳定排序，只拥有其中一项时只签该项；不向 App 披露任何管理权限，不向 Auth audience 披露应用审核权限。
 
 这只是允许 token 携带哪些能力，不表示调用者已获准执行目标业务。UC004 等后端继续检查其必需权限。新业务权限可扩充明确的服务端投影目录，不开放客户端自选权限，也不自动透传未知权限。不携带学生资料、关联 token、关联组、Session token 或私钥。首版不增加 role claim。
 
@@ -166,13 +168,46 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 
 > 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
 
+### 来自 `UC-AUTH-022`
+
+<!-- 权威位置: use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-004 -->
+### BR-ACC-004：可信身份与下游生效边界
+
+Auth 自身消费的 USER JWS 也必须防止恢复后重放。UC010 为 `iwut-auth-center` 签发时增加 `account_revision` claim，值为当前 accountRevision 的规范十进制字符串（正 int64，无前导零），来自与 Session 检查相同的快照。Auth 的所有 USER JWS 入口统一在线比较该 claim 与当前 ACTIVE 账号版本；缺失或不一致拒绝，不只在本用例管理入口校验。实施时同步 trusted-identity-v1 的条件必需字段与实现。
+
+该字段首版只向 Auth audience 投影；不加入 OIDC ID Token、用户资料或第三方身份，不为 App 引入新的在线 introspection 要求。App audience USER JWS 及 UC019 委托 JWS 仍按既有短 TTL/leeway 离线校验。禁用确认后，Auth 不再为目标账号签发新身份；在此之前已签发的短期 JWS 可能继续被下游接受直到到期，不能承诺瞬间阻断已转发请求。
+
+OIDC ID Token 是一次认证的证据，第三方自己建立的 Cookie/Session 不由本用例远程销毁。旧 opaque access/refresh token 在 Auth 在线检查时永久失败；第三方继续访问平台资源必须经过这些检查。要求应用立即登出需另行设计 OIDC logout/通知协议，不由本 UC 暗中增加。
+
+### 来自 `UC-AUTH-021`
+
+<!-- 权威位置: use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-001 -->
+### BR-ADM-001：固定管理权限集合
+
+管理员集合 v1 固定为以下四项：
+
+| permission | 能力边界 |
+| --- | --- |
+| `auth.platform-admin.manage` | 本用例的管理员资格管理与查询 |
+| `auth.reviewer.manage` | UC004 的两项审核权限管理 |
+| `auth.account.manage` | 后续账号禁用与恢复用例 |
+| `auth.developer.manage` | 后续 Developer 暂停与恢复用例 |
+
+不新增 principalType，不存第二份可独立修改的 role/granted 布尔值，不从 Developer 身份推导资格。四项全部存在为 GRANTED，四项均不存在为 NONE。
+
+只包含部分管理权限（包括仅有 auth.reviewer.manage）的集合不符合本用例数据约束，失败关闭，不能视为普通用户或由 GRANT 静默补齐。与四项无关的权限不参与该分类。
+
+GRANT 将 NONE 转为 GRANTED；REVOKE 将 GRANTED 转为 NONE，删除整个管理集合。管理权限不记录多个叠加授予来源。审核权限本身、Developer 状态、设备凭据和 Session 均保留。不得通过 UC004 修改集合中的任何一项。
+
 ### 来自 `UC-AUTH-002`
 
 <!-- 权威位置: use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004 -->
 ### BR-DEV-004：状态语义
 
-首版只公开 `PENDING/APPROVED/REJECTED/SUSPENDED`。UC-APP-005 只把
+公开 `PENDING/APPROVED/REJECTED/SUSPENDED/WITHDRAWN`。UC-APP-005 只把
 `SUSPENDED` 判断为暂停，但 Auth 返回完整枚举，让消费方不需要用 bool 掩盖未知状态。
+
+CLOSED 墓碑作为明确终止状态返回是本规则的例外，不将其伪装成 PENDING 或 WITHDRAWN。
 
 普通 USER 可以不是 Developer，此时 `developerStatus = null`；SYSTEM principal 也不具有
 Developer 状态。两者都不能作为本查询的成功结果，且不得被伪装成 `PENDING`。
@@ -334,7 +369,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `nbf` | number（Unix 秒） | 是 | 生效时间 |
 | `exp` | number（Unix 秒） | 是 | 失效时间 |
 | `jti` | string | 是 | 该 token 的唯一标识；非空 |
-| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED` 之一；普通用户省略 |
+| `account_revision` | string | Auth audience USER 必需 | 规范无前导零的正 int64 十进制字符串；Auth 在线比较当前 ACTIVE 主体版本，规则见 UC-AUTH-022/BR-ACC-004；其他 audience 不要求或推导此字段 |
+| `developer_status` | string | 可选 | 仅 Developer 主体携带；取值 `PENDING`、`APPROVED`、`REJECTED`、`SUSPENDED`、`WITHDRAWN` 之一；普通用户省略 |
 | `permissions` | array&lt;string&gt; | 条件必需 | 权限用例必需；元素必须是非空、无首尾 whitespace 的唯一字符串，按精确字符串匹配；未知权限可以透传但不能产生隐式授权 |
 
 `sub` 是身份主体，不是 `uid` 的同义词；当 Auth 的内部用户标识与 `authId` 不同时，以 `authId` 为准。`developer_status` 表达 Auth 权威给出的开发者资格结果，而不是 token 类型；字段缺失表示该主体是尚未进入 Developer 生命周期的普通用户，不表示 token 或身份无效。`permissions` 表达 Auth 在签发时授予该主体、且绑定本 token audience 的原子权限集合；App Center 运行版本审核消费精确值 `app.version.review`，公开资料审核消费独立精确值 `app.profile.review`；二者不互相隐式授权。
@@ -489,7 +525,7 @@ App Center 必须提供：
 | `APP_CENTER_SERVICE_IDENTITY_MAX_TTL` | 接受的最大 token TTL，默认 `1m` |
 | `APP_CENTER_SERVICE_IDENTITY_CLOCK_SKEW` | claims 时钟偏差，默认 `30s` |
 
-App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` permission，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
+App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` permission，以及 account-owner-exit-v1 固定的三个 app.account-owner-exit.* 精确权限，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
 
 #### 错误与轮换
 
@@ -508,20 +544,24 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：参考、变更记录
+- `UC-AUTH-022`（use-cases/UC-AUTH-022-disable-and-restore-user-account.md）：目标与范围、参与者与接口、主流程、错误语义与配置、验收场景、实现依赖与联动、变更记录
+- `UC-AUTH-021`（use-cases/UC-AUTH-021-manage-platform-administrators.md）：目标与范围、参与者与身份、输入与输出、API、主流程、错误语义与运行约束、测试与验收、实现依赖与联动、变更记录
 - `UC-AUTH-002`（use-cases/UC-AUTH-002-batch-get-developer-statuses.md）：目标与范围、调用者与输入、输出、主流程、异常流程、数据模型、API 契约、测试与验收、非目标、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
-- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：旧未签名 JSON Header 不兼容的原因、关联文档
-- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：App Center 固定授权映射
+- `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：App Center 固定授权映射、账号归属退出方法
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 142 | `cd886b322836` |
-| `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 151 | `98d2b3e33077` |
-| `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |
+| `use-cases/UC-AUTH-022-disable-and-restore-user-account.md` | 183 | `f13eb70a5211` |
+| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `db46fb9b9689` |
+| `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
+| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
-| `platform/contracts/trusted-identity-v1.md` | 133 | `cfaa02fcbb8c` |
-| `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |
+| `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
+| `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |

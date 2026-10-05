@@ -20,11 +20,11 @@
 | [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
 | [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 3587ba7/API b7d9b6c；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计；developerHandle 全局唯一占用、禁止改名/转让/释放、历史 APPROVED 首次补设、审计索引升级、Mongo 并发/损坏数据/迁移与实际 App 联调验收 | Gateway 与客户端独立交付，生产入口及恢复就绪声明默认关闭 |
 | [UC-AUTH-020](../use-cases/UC-AUTH-020-manage-own-sessions.md) | `PROPOSED` | `NOT_STARTED` | 已建立同账号 Session 列表与显式集合回收草案 | 设计接受、brief、Proto、管理鉴权只读路径、批量事务/审计、HTTP/gRPC 与 Gateway/客户端交付 |
-| [UC-AUTH-021](../use-cases/UC-AUTH-021-manage-platform-administrators.md) | `PROPOSED` | `NOT_STARTED` | 已设计固定管理集合、查询/授撤、最后管理员事务保护和一次性 bootstrap | 设计接受、UC004/010 与共享契约联动、brief、API/后端、初始化与并发验收；生产恢复规程及 Gateway/客户端独立交付 |
-| [UC-AUTH-022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md) | `PROPOSED` | `NOT_STARTED` | 已设计账号禁用/恢复、版本失效及全部认证消费路径清单 | UC021 前置实现、设计接受、共享身份契约/初始化/schema/brief、认证及 OAuth 横向扩展、真实并发与下游窗口验收 |
-| [UC-AUTH-023](../use-cases/UC-AUTH-023-suspend-and-restore-developer.md) | `PROPOSED` | `NOT_STARTED` | 已设计资格暂停/恢复、生命周期版本及独立审计 | UC021/022 前置实现、设计接受、状态消费/路由/API/brief、真实 App 与 OAuth 验收 |
-| [UC-AUTH-024](../use-cases/UC-AUTH-024-withdraw-developer.md) | `PROPOSED` | `NOT_STARTED` | 已设计本人退出、WITHDRAWN、永久 handle 占用、确认与取消 | UC021–023、App 归属处置/屏障、状态枚举及历史审核策略对齐、设计接受和实现 |
-| [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `PROPOSED` | `NOT_STARTED` | 已设计专用设备证明、CLOSED、活动存储清理/保留及终止清单 | 治理 UC、App 归属/个人数据清理、公开协议向量、数据清单/备份与无密钥受理流程，尚不可生产交付 |
+| [UC-AUTH-021](../use-cases/UC-AUTH-021-manage-platform-administrators.md) | `ACCEPTED` | `IN_PROGRESS` | 已设计固定管理集合、查询/授撤、最后管理员事务保护和一次性 bootstrap | 设计接受、UC004/010 与共享契约联动、brief、API/后端、初始化与并发验收；生产恢复规程及 Gateway/客户端独立交付 |
+| [UC-AUTH-022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md) | `ACCEPTED` | `IN_PROGRESS` | 已设计账号禁用/恢复、版本失效及全部认证消费路径清单 | UC021 前置实现、设计接受、共享身份契约/初始化/schema/brief、认证及 OAuth 横向扩展、真实并发与下游窗口验收 |
+| [UC-AUTH-023](../use-cases/UC-AUTH-023-suspend-and-restore-developer.md) | `ACCEPTED` | `IN_PROGRESS` | 已设计资格暂停/恢复、生命周期版本及独立审计 | UC021/022 前置实现、设计接受、状态消费/路由/API/brief、真实 App 与 OAuth 验收 |
+| [UC-AUTH-024](../use-cases/UC-AUTH-024-withdraw-developer.md) | `ACCEPTED` | `IN_PROGRESS` | 已设计本人退出、WITHDRAWN、永久 handle 占用、确认与取消 | UC021–023、App 归属处置/屏障、状态枚举及历史审核策略对齐、设计接受和实现 |
+| [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `ACCEPTED` | `IN_PROGRESS` | 已设计专用设备证明、CLOSED、活动存储清理/保留及终止清单 | 治理 UC、App 归属/个人数据清理、公开协议向量、数据清单/备份与无密钥受理流程，尚不可生产交付 |
 
 ## 实现边界
 

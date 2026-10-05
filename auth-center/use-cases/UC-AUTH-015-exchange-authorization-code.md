@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 UC025 注销是删除本人 pairwise 映射的明确例外：Application sector 保留，旧 sub 不转让或复用。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
+
 应用按登记认证方式兑换 code，得到独立 ID Token 和 access token。两种接入方式共用一次性授权码状态机，不签发通用平台 Session。
 
 ## 输入与输出

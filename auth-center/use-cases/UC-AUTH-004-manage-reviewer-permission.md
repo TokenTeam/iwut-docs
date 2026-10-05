@@ -12,15 +12,7 @@
 
 调用者必须是具有 `auth.reviewer.manage` 权限的 `PLATFORM_ADMIN` 用户。平台管理员统揽跨 bounded context 的人员权限治理，但每个能力仍使用独立原子权限。
 
-本用例以 `auth.reviewer.manage` 的显式 grant 表达 PLATFORM_ADMIN 管理能力；主体仍为 USER，不新增 principalType 或通用角色继承。
-
-首个 PLATFORM_ADMIN 通过显式、一次性的运维命令 provision：
-
-```text
-auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
-```
-
-该命令要求 USER principal 已存在，幂等写入管理员 grant 与审计记录；它不是 Auth 普通启动路径，不允许仅因为环境变量仍存在就在每次重启时重新授予已撤销权限。后续管理员全部通过受审计的管理用例授予。bootstrap 在同一事务中保存全局已消费标记：对原目标重跑只报告已执行，不再次写权限或审计；对另一目标重跑拒绝。即使原管理员权限后来被撤销，也不能通过重跑该命令恢复。
+PLATFORM_ADMIN 的完整集合、一次性 bootstrap 与后续授予/撤销由 [UC021](UC-AUTH-021-manage-platform-administrators.md#br-adm-001) 和 [BR-ADM-005](UC-AUTH-021-manage-platform-administrators.md#br-adm-005) 唯一规定。主体仍为 USER；本用例仅消费 auth.reviewer.manage，不单独创建或修改管理资格，也不自动授予审核权限。首次 bootstrap 直接授予完整管理集合，无旧数据迁移。
 
 ## 输入与主流程
 
@@ -55,7 +47,7 @@ ManageApplicationReviewPermissionCommand {
 - 写命令 `action` 使用 UNSPECIFIED/GRANT/REVOKE 枚举，UNSPECIFIED 拒绝；expectedRevision
   必填且为正 int64，reason 去除两端空白后为非空 UTF-8 文本且不超过 1024 bytes。
 - 新命令的 permission 必填且只接受两项精确字符串；不修剪、忽略大小写、接受通配符或默认选择版本权限。auth.reviewer.manage、任意 OAuth scope 和未知 permission 均拒绝。旧命令的固定映射是兼容适配，不是新命令的缺省值。
-- 已验签 JWS 必须包含 `auth.reviewer.manage`；写入事务内还须确认 actor 为当前 ACTIVE USER 且仍有该权限。
+- 已验签 JWS 必须包含 `auth.reviewer.manage`；所有读写还须在线确认 actor 当前 ACTIVE、完整管理集合及 UC022 的账号版本；写入事务内再次复核。
   body/path 不得指定或替代 actor。只修改选定审核权限，保留其它权限。
 - 权限写入、bootstrap 与 [UC010 的签发一致性](UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004)
   使用相同认证事务协调边界；已确认撤销后不能再签出含该权限的新 token。
@@ -123,7 +115,7 @@ auth.reviewer.manage、app.profile.review 与 app.version.review 是三项独立
 - `auth_principals.permissions`：当前有效原子权限集合，元素唯一且稳定排序。
 - `auth_principals.permissionRevision`：正 int64，权限变化时增加。
 - `auth_permission_audit_events`：append-only 事件，包含 eventId、subjectAuthId、actorType、action、permission、reason、before/after、beforeRevision、afterRevision、occurredAt。普通管理请求 actorType=`USER`，actorAuthId 为已认证用户；运维初始化 actorType=`BOOTSTRAP_COMMAND`，不伪造 actorAuthId。
-- `auth_runtime` 的 `platform-admin-bootstrap` 单例：保存 subjectAuthId、eventId、occurredAt，表示全局初始化已消费，不能通过重启或权限撤销清除。
+- 初始化标记和管理资格审计由 UC021 拥有，不复用审核权限事件表达整组管理员授予。
 
 ## API 与实现依赖
 
@@ -166,3 +158,5 @@ bootstrap 重定向到另一目标时返回 `PLATFORM_ADMIN_BOOTSTRAP_CONSUMED` 
 - 2026-09-24：启动实现，固定权限状态查询、HTTP/gRPC 绑定、管理员能力表达、全局一次性 bootstrap 与 UC010 事务协调要求。
 
 - 2026-10-03：扩展为管理用户的两项应用审核权限，新增显式权限命令/组合查询，保留旧版本审核 API，并与 UC010 投影扩展同步交付；设计接受不表示扩展实现已完成。
+
+- 2026-10-05：bootstrap 与平台管理资格移交已接受 UC021；所有 Auth 用户身份消费遵守 UC022 账号版本。

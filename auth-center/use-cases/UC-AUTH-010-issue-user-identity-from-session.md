@@ -31,6 +31,8 @@ IssuedUserIdentity {
 
 不接受客户端声明的 authId、permissions、developerStatus、issuer、TTL 或签名 key。audience 来自 Gateway 已匹配的固定路由；Auth 仍独立检查调用服务的 audience allowlist。输出只回给 Gateway，不作为响应头、Cookie 或业务响应交给终端。
 
+Auth audience 的 `account_revision` 条件必需投影及在线消费规则引用 [UC022/BR-ACC-004](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-004)；App audience 不增加该 claim。所有 Session 校验同时满足 UC022 的 accountRevision，CLOSED 永不签发。
+
 ## 主流程
 
 1. 验证调用服务身份、方法 permission、请求结构与 audience 授权。
@@ -57,11 +59,11 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
 | `iwut-app-center` | `app.profile.review`、`app.version.review` | 有合法非 null 状态时携带 |
-| `iwut-auth-center` | `auth.reviewer.manage` | 不携带 |
+| `iwut-auth-center` | UC021/BR-ADM-001 固定四项管理权限 | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
 
-两项应用审核权限均来自 UC004 的独立显式 grant；不能从管理权限、Developer 状态或另一项审核权限推导。向 App 签发时保留精确值并稳定排序，只拥有其中一项时只签该项；不向 App 披露 auth.reviewer.manage，不向 Auth audience 披露应用审核权限。
+两项应用审核权限均来自 UC004 的独立显式 grant；不能从管理权限、Developer 状态或另一项审核权限推导。向 App 签发时保留精确值并稳定排序，只拥有其中一项时只签该项；不向 App 披露任何管理权限，不向 Auth audience 披露应用审核权限。
 
 这只是允许 token 携带哪些能力，不表示调用者已获准执行目标业务。UC004 等后端继续检查其必需权限。新业务权限可扩充明确的服务端投影目录，不开放客户端自选权限，也不自动透传未知权限。不携带学生资料、关联 token、关联组、Session token 或私钥。首版不增加 role claim。
 

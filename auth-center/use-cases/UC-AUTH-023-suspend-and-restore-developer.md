@@ -1,6 +1,6 @@
 # UC-AUTH-023：暂停与恢复 Developer 资格
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -8,7 +8,7 @@
 
 本用例只支持 APPROVED 与 SUSPENDED 之间的转换，不批准 PENDING、不恢复 REJECTED，不重新开通 UC024 的 WITHDRAWN。没有定时自动恢复。
 
-## 参与者与 API 草案
+## 参与者与 API
 
 操作人使用 Gateway SESSION 换取面向 Auth 的 USER JWS，必须是当前 ACTIVE、账号版本匹配且具备 UC021 完整管理员集合和 `auth.developer.manage` 的 USER。目标可以是 ACTIVE 或 DISABLED USER；改变其 Developer 资格不会改变账号状态。
 
@@ -62,7 +62,7 @@ SUSPEND/RESTORE 是显式状态转换，重复操作和过期 revision 均冲突
 
 新的 UC010 App audience 身份携带当前 Developer 状态；Auth OAuth 所有者检查读到 SUSPENDED 时拒绝该所有者应用的相关签发/使用。普通用户功能不要求 Developer APPROVED。
 
-App 只允许 APPROVED 的开发写入口在新身份下拒绝；已有离线验签的短期 Developer JWS 存在原 TTL/leeway 窗口，暂停不提供跨库即时撤销。已有 UC002 当前状态检查仍按其消费用例生效，但不能宣称所有 App 方法已经在线查询。接受时必须列出并验收受影响入口。
+App 只允许 APPROVED 的开发写入口在新身份下拒绝；已有离线验签的短期 Developer JWS 存在原 TTL/leeway 窗口，暂停不提供跨库即时撤销。已有 UC002 当前状态检查仍按其消费用例生效，但不能宣称所有 App 方法已经在线查询。实施时必须列出并验收受影响入口。
 
 暂停不清空 TEST/GREY/STABLE、不撤销审核结论、不隐藏 Catalog，也不删除应用 URL。若需立即停止应用服务，应另行执行 App 应用治理；不得让 Auth 直接修改 App 数据库。
 
@@ -103,8 +103,10 @@ developerHandle 及其永久唯一占用不变化。原应用归属、审核历�
 - 真实 App 消费新的身份及 UC002 状态，验证暂停窗口与恢复；OAuth 不误撤销其他用户 grant，也不复活已有撤销 token。
 - 使用真实 Mongo、签名、生产 HTTP/gRPC、并发和未知提交测试。
 
-硬依赖 UC021 管理权限及 UC022 的 Auth 身份账号版本复核，两者尚未实现。UC024/025 未启用时无需提前存在退出操作，但启用它们前必须接入取消协调。接受时同步 UC013 的 developerRevision 初始化、UC002/UC010 状态消费说明、存储校验、API/路由和 brief；WITHDRAWN 的完整扩展由 UC024 负责。
+硬依赖 UC021 管理权限及 UC022 的 Auth 身份账号版本复核，两者尚未实现。UC024/025 未启用时无需提前存在退出操作，但启用它们前必须接入取消协调。实施时同步 UC013 的 developerRevision 初始化、UC002/UC010 状态消费说明、存储校验、API/路由和 brief；WITHDRAWN 的完整扩展由 UC024 负责。
 
 ## 变更记录
 
 - 2026-10-05：提出 Developer 暂停/恢复；保留普通功能，固定资格版本、生命周期审计、恢复门禁和与终止流程的竞争规则。
+
+- 2026-10-05：按用户决定接受，生成 brief 并启动独立工作包；依赖顺序与生产启用门禁继续有效，不把设计接受记为实现完成。

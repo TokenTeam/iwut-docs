@@ -15,8 +15,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-025` |
-| Business Rule / Application | `BR-APP-008` |
+| Use Case / App Center | `UC-APP-026` |
+| Business Rule / Application | `BR-APP-012` |
 | Business Rule / Application Profile | `BR-PRF-041` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
 | Business Rule / Review | `BR-REV-029` |
@@ -60,6 +60,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-022` | 管理 Application Filter | `ACCEPTED` | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) | — | 无审核的 Application 级不可变 Revision、类型化规则和客户端求值契约；后端管理纵切片已交付。 |
 | `UC-APP-023` | 解析 Application 的统一启动目标 | `ACCEPTED` | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) | — | 统一 Test/Grey/Stable 单 Application 解析；后续 Catalog 列表与详情复用。 |
 | `UC-APP-024` | 查询普通 Application Catalog 列表与详情 | `ACCEPTED` | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) | — | Stable-backed 普通目录，组合公开 Profile、UC023 唯一目标与 Filter。 |
+| `UC-APP-025` | 协调账号归属退出与个人状态清理 | `ACCEPTED` | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md) | — | Auth 治理交付依赖，零归属屏障与注销个人状态清理。 |
 
 ## Business Rules
 
@@ -74,6 +75,10 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-APP-005` | 创建配额 | Policy / Invariant | [UC-APP-001](use-cases/UC-APP-001-create-application.md#br-app-005) | — | — |
 | `BR-APP-006` | 并发原子性 | Consistency | [UC-APP-001](use-cases/UC-APP-001-create-application.md#br-app-006) | — | — |
 | `BR-APP-007` | 创建时间 | Audit / Invariant | [UC-APP-001](use-cases/UC-APP-001-create-application.md#br-app-007) | — | — |
+| `BR-APP-008` | 归属屏障与零义务准备 | Lifecycle / Consistency | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-008) | — | — |
+| `BR-APP-009` | 单调终局与持久收敛 | Lifecycle / Consistency | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-009) | — | — |
+| `BR-APP-010` | 注销个人状态清理 | Lifecycle / Consistency | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-010) | — | — |
+| `BR-APP-011` | 退出与终止状态的消费 | Lifecycle / Consistency | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-011) | — | — |
 
 ### Application Profile (`BR-PRF`)
 

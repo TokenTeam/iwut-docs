@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。
+
 > 已认证用户要求 Auth 撤销属于自己账号的一条设备凭据，使该公钥不能再建立新 Session，并使依赖该凭据的既有 Session 在后续在线检查中失效。
 
 本用例只改变 Auth 持有的凭据状态。它不声称能够删除客户端私钥，也不规定退出警告、本地清理和离线体验；客户端组合建议见[客户端认证生命周期建议](../client-guides/authentication-lifecycle.md)。只撤销当前 Session 使用 [UC-AUTH-008](UC-AUTH-008-revoke-own-session.md)。

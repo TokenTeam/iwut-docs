@@ -303,7 +303,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 #### App Center 固定授权映射
 
-App Center 首版只开放原生 gRPC 的 OAuth provider，不生成 HTTP annotation。完整方法与本地 caller registry permission 固定为：
+App Center 通过原生 gRPC 开放 OAuth provider 和账号归属退出 provider，不生成 HTTP annotation。完整方法与本地 caller registry permission 固定为：
 
 | gRPC 方法 | 必需 permission |
 | --- | --- |
@@ -360,7 +360,7 @@ App Center 必须提供：
 | `APP_CENTER_SERVICE_IDENTITY_MAX_TTL` | 接受的最大 token TTL，默认 `1m` |
 | `APP_CENTER_SERVICE_IDENTITY_CLOCK_SKEW` | claims 时钟偏差，默认 `30s` |
 
-App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` permission，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
+App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` permission，以及 account-owner-exit-v1 固定的三个 app.account-owner-exit.* 精确权限，不允许 Auth provider permission、system principal purpose 或 identity audience 扩展。App provider audience 固定为 `iwut-app-center`，不能用环境变量改成 Auth audience。registry 在启动时严格解析并预加载公钥；每次 RPC 本地验签和授权，不回调 Auth。
 
 #### 错误与轮换
 
@@ -383,7 +383,7 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 - `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：目标与范围、已确认的设计选择、输入与身份、建立、调整或替换主流程、清空主流程、确定性分桶、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口、STABLE 扩展、GREY 扩展
-- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射、账号归属退出方法
 
 ## 溯源
 
@@ -394,4 +394,4 @@ App Center registry 中 `iwut-auth-center` 只允许上述五个 `app.oauth.*` p
 | `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `5d63fc0c10b4` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
-| `platform/contracts/trusted-service-identity-v1.md` | 112 | `696ad25845e5` |
+| `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |

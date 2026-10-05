@@ -1,0 +1,26 @@
+{
+  "uc": "UC-AUTH-021",
+  "note": "Accepted governance implementation. Preserve DDD, shared authentication fence, exact authentication dispatch, HTTP/native gRPC and default-off public gates. No legacy data migration. Backend acceptance requires real Mongo and cross-service evidence; deployment readiness is separate.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与身份",
+    "输入与输出",
+    "API",
+    "主流程",
+    "错误语义与运行约束",
+    "测试与验收",
+    "实现依赖与联动"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "Claims",
+      "时间与有效期",
+      "错误边界"
+    ],
+    "platform/contracts/auth-device-session-v1.md": [
+      "Session 载体"
+    ]
+  }
+}

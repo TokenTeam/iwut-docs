@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-012` 使用邮箱登录 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-LGN-013`–`BR-LGN-018`（6 条） |
-| 外部引用 BR | `BR-EML-002`，`BR-IDN-004`，`BR-LGN-003`、`BR-LGN-004`、`BR-LGN-007`、`BR-LGN-009`、`BR-LGN-010`，`BR-REG-003`（来自 `UC-AUTH-006`、`UC-AUTH-007`、`UC-AUTH-010`、`UC-AUTH-011`） |
+| 外部引用 BR | `BR-ACC-012`，`BR-EML-002`，`BR-IDN-004`，`BR-LGN-003`、`BR-LGN-004`、`BR-LGN-007`、`BR-LGN-009`、`BR-LGN-010`，`BR-REG-003`（来自 `UC-AUTH-006`、`UC-AUTH-007`、`UC-AUTH-010`、`UC-AUTH-011`、`UC-AUTH-025`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/auth-center-api-routing.md`、`platform/contracts/auth-device-session-v1.md`、`platform/contracts/auth-email-login-v1.md` |
 
@@ -36,6 +36,8 @@
 ## 用例正文
 
 ### 目标与范围
+
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](../use-cases/UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
 
 > 用户通过已激活邮箱的验证码进入原平台账号，同时证明对本机设备私钥的控制权，由 Auth 登记或复用该设备凭据并建立 Session。
 
@@ -230,6 +232,29 @@ Begin 对未知、已知、禁用邮箱返回相同形状挑战并使用相同�
 ## 外部引用的业务规则
 
 > 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-AUTH-025`
+
+<!-- 权威位置: use-cases/UC-AUTH-025-close-own-account.md#br-acc-012 -->
+### BR-ACC-012：清理范围与最小永久保留
+
+首版数据策略如下；期限是上限而非必须保存到最后一天。实施时必须检查与各现行永久占用/审计规则的冲突并同步修改，不以本草案直接删除生产数据。
+
+| 数据 | 终止后处理 |
+| --- | --- |
+| 主体、资料 | 活动存储删除资料 values、显示资料及业务能力；永久最小墓碑仅保留 authId、principalType=USER、CLOSED、最终 accountRevision、terminatedAt、closureOperationId，保证历史引用和不可复活，不保留学校关联、邮箱或公钥 |
+| 激活/待绑定邮箱、短期邮件操作 | 清理邮箱原文、唯一归属及短期材料；移除唯一占用的事务提交后才可由新账号重新验证注册。清理前统一不能用该邮箱恢复 CLOSED 账号，不将旧验证码改绑新账号 |
+| 设备凭据 | 删除公钥及使用元数据；永久保留规范公钥指纹和 CLOSED authId 的最小占用墓碑，防止旧设备密钥跨账号重用，延续 UC009 不释放密钥归属的约束。新注册必须使用新密钥 |
+| Session、挑战及结果、授权交互、code/access/refresh/family | 删除秘密摘要、操作内容及业务记录；由永久主体墓碑防重建，不为检测重放继续保存已终止账号全部 token 历史 |
+| grant、pairwise 用户映射 | 删除该 authId 的 consent 内容及 `(authId,sectorId)→sub` 映射；不删除 Application 的 sector。旧 sub 不转交新账号，日志/第三方引用不宣称被删除 |
+| 学生关联 | 删除本账号的成员关系及其专属材料；组仍有其他成员时保留组，不暴露或改变其他成员；无成员且无合法未决引用时，在关联事务栅栏下删除 lookup/关联密文和空组。并发注册加成员不得误删共享组 |
+| developerHandle | 永久保留规范 handle、原 authId、claimedAt 和终止占用标记；不转让、不释放、不连同邮箱/资料保留。该最小公开命名空间墓碑明确向本人披露 |
+| Auth 审计 | 只读期内保留最小事件归因，不保留 token/邮箱/资料副本；账号相关普通事件上限为事件发生后 180 天，已超期的随本次任务清理。注销事件保留 180 天；期满按专用保留任务删除，不由业务更新覆盖 |
+| 协调决定、清理进度及查询令牌 | App 确认终局前保留必要决定；查询摘要最多 30 天，详细清理任务在全部步骤完成且终局回执后清理，永久终止事实由最小墓碑承担 |
+
+默认活动存储清理目标为终止后 24 小时，超时告警并保留失败进度，绝不伪报完成。普通日志不应保存上述秘密，已经存在的可识别普通日志轮转上限 30 天；备份自然淘汰上限 30 天。部署未落实这些期限时不得展示该承诺或启用入口。
+
+现有审计的 append-only 表示保留期内不可更新/删除；接受本 UC 时需要明确增加受控保留期清理例外，不能由普通业务账号任意删除审计。永久墓碑的字段就是允许保留的完整集合，不能附加整份 principal 或自由文本快照。
 
 ### 来自 `UC-AUTH-011`
 
@@ -497,22 +522,24 @@ reason/HTTP/gRPC 状态遵守 UC012。超大消息使用 EMAIL_LOGIN_REQUEST_TOO
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-012`（use-cases/UC-AUTH-012-login-with-email.md）：实现约定/前置基线与复用边界、实现约定/邮件密钥与操作指纹、实现约定/启用与故障、变更记录
+- `UC-AUTH-025`（use-cases/UC-AUTH-025-close-own-account.md）：目标与范围、认证与资格、API 与确认过程、主流程、首版运行与协议固定值、错误、限额与验收、实现依赖与联动、变更记录
 - `UC-AUTH-011`（use-cases/UC-AUTH-011-set-and-activate-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖与边界、变更记录
 - `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-006`（use-cases/UC-AUTH-006-create-user.md）：目标与范围、参与者与前置条件、输入与输出、主流程、持久化候选、异常语义、测试与验收、交付依赖与验收边界、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、治理工作包路由
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-012-login-with-email.md` | 201 | `e2692ee1e896` |
-| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 277 | `fe77d446d400` |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 142 | `cd886b322836` |
-| `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
-| `use-cases/UC-AUTH-006-create-user.md` | 277 | `783f832c5407` |
-| `platform/contracts/auth-center-api-routing.md` | 100 | `1ca39b5e9bc5` |
+| `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 155 | `6b6f375f1aad` |
+| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 279 | `a96eacf40f23` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |
+| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
+| `use-cases/UC-AUTH-006-create-user.md` | 279 | `2b56bd4eb59d` |
+| `platform/contracts/auth-center-api-routing.md` | 110 | `a2999614c568` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/auth-email-login-v1.md` | 88 | `ef2417d3b9e4` |

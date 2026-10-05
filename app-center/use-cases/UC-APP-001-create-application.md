@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+创建事务必须遵守 [BR-APP-008](UC-APP-025-coordinate-account-owner-exit.md#br-app-008) 的账号归属屏障，旧 APPROVED JWS 不得越过 PREPARED/SEALED。
+
 > developerStatus 为 `APPROVED` 的调用者，在其创建配额内建立一个应用，并成为当前管理员。
 
 Application 当前只有四个业务字段：

@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-019` 校验应用访问凭据并签发可信委托上下文 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAU-018`–`BR-OAU-020`（3 条） |
-| 外部引用 BR | `BR-OAU-001`（来自 `UC-AUTH-014`） |
+| 外部引用 BR | `BR-ACC-012`，`BR-OAU-001`（来自 `UC-AUTH-014`、`UC-AUTH-025`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/app-oauth-client-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/oauth-delegation-v1.md`、`platform/contracts/oauth-oidc-v1.md`、`platform/contracts/oauth-route-policy-v1.md` |
 
@@ -36,6 +36,8 @@
 ## 用例正文
 
 ### 目标与范围
+
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](../use-cases/UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
 
 受授权 Gateway 为即将转发的资源请求在线验证 opaque access token，得到目标路由专用的短期签名上下文。与 UC010 的平台 Session→USER 签发并列，不能混用。
 
@@ -95,6 +97,29 @@ App 快照、委托期限及撤销传播上界按 [委托上下文契约](../../
 ## 外部引用的业务规则
 
 > 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-AUTH-025`
+
+<!-- 权威位置: use-cases/UC-AUTH-025-close-own-account.md#br-acc-012 -->
+### BR-ACC-012：清理范围与最小永久保留
+
+首版数据策略如下；期限是上限而非必须保存到最后一天。实施时必须检查与各现行永久占用/审计规则的冲突并同步修改，不以本草案直接删除生产数据。
+
+| 数据 | 终止后处理 |
+| --- | --- |
+| 主体、资料 | 活动存储删除资料 values、显示资料及业务能力；永久最小墓碑仅保留 authId、principalType=USER、CLOSED、最终 accountRevision、terminatedAt、closureOperationId，保证历史引用和不可复活，不保留学校关联、邮箱或公钥 |
+| 激活/待绑定邮箱、短期邮件操作 | 清理邮箱原文、唯一归属及短期材料；移除唯一占用的事务提交后才可由新账号重新验证注册。清理前统一不能用该邮箱恢复 CLOSED 账号，不将旧验证码改绑新账号 |
+| 设备凭据 | 删除公钥及使用元数据；永久保留规范公钥指纹和 CLOSED authId 的最小占用墓碑，防止旧设备密钥跨账号重用，延续 UC009 不释放密钥归属的约束。新注册必须使用新密钥 |
+| Session、挑战及结果、授权交互、code/access/refresh/family | 删除秘密摘要、操作内容及业务记录；由永久主体墓碑防重建，不为检测重放继续保存已终止账号全部 token 历史 |
+| grant、pairwise 用户映射 | 删除该 authId 的 consent 内容及 `(authId,sectorId)→sub` 映射；不删除 Application 的 sector。旧 sub 不转交新账号，日志/第三方引用不宣称被删除 |
+| 学生关联 | 删除本账号的成员关系及其专属材料；组仍有其他成员时保留组，不暴露或改变其他成员；无成员且无合法未决引用时，在关联事务栅栏下删除 lookup/关联密文和空组。并发注册加成员不得误删共享组 |
+| developerHandle | 永久保留规范 handle、原 authId、claimedAt 和终止占用标记；不转让、不释放、不连同邮箱/资料保留。该最小公开命名空间墓碑明确向本人披露 |
+| Auth 审计 | 只读期内保留最小事件归因，不保留 token/邮箱/资料副本；账号相关普通事件上限为事件发生后 180 天，已超期的随本次任务清理。注销事件保留 180 天；期满按专用保留任务删除，不由业务更新覆盖 |
+| 协调决定、清理进度及查询令牌 | App 确认终局前保留必要决定；查询摘要最多 30 天，详细清理任务在全部步骤完成且终局回执后清理，永久终止事实由最小墓碑承担 |
+
+默认活动存储清理目标为终止后 24 小时，超时告警并保留失败进度，绝不伪报完成。普通日志不应保存上述秘密，已经存在的可识别普通日志轮转上限 30 天；备份自然淘汰上限 30 天。部署未落实这些期限时不得展示该承诺或启用入口。
+
+现有审计的 append-only 表示保留期内不可更新/删除；接受本 UC 时需要明确增加受控保留期清理例外，不能由普通业务账号任意删除审计。永久墓碑的字段就是允许保留的完整集合，不能附加整份 principal 或自由文本快照。
 
 ### 来自 `UC-AUTH-014`
 
@@ -580,14 +605,16 @@ Auth 启用非空业务路由时，部署须明确声明资源委托验证已就
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
+- `UC-AUTH-025`（use-cases/UC-AUTH-025-close-own-account.md）：目标与范围、认证与资格、API 与确认过程、主流程、首版运行与协议固定值、错误、限额与验收、实现依赖与联动、变更记录
 - `UC-AUTH-014`（use-cases/UC-AUTH-014-authorize-application.md）：目标与范围、输入与输出、主流程、验收场景、依赖与实现边界、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-019-issue-delegation-context.md` | 60 | `354922a46cfe` |
-| `use-cases/UC-AUTH-014-authorize-application.md` | 85 | `c922e8a628b2` |
+| `use-cases/UC-AUTH-019-issue-delegation-context.md` | 62 | `5da867514791` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 155 | `6b6f375f1aad` |
+| `use-cases/UC-AUTH-014-authorize-application.md` | 87 | `6d3e9fdcda39` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |

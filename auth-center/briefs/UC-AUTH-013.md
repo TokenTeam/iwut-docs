@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-013` 申请 Developer |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-DEV-006`–`BR-DEV-012`（7 条） |
-| 外部引用 BR | `BR-DEV-004`，`BR-EML-004`，`BR-IDN-004`，`BR-LGN-004`、`BR-LGN-016`（来自 `UC-AUTH-002`、`UC-AUTH-007`、`UC-AUTH-010`、`UC-AUTH-011`、`UC-AUTH-012`） |
+| 外部引用 BR | `BR-ACC-012`，`BR-DEV-004`，`BR-EML-004`，`BR-IDN-004`，`BR-LGN-004`、`BR-LGN-016`（来自 `UC-AUTH-002`、`UC-AUTH-007`、`UC-AUTH-010`、`UC-AUTH-011`、`UC-AUTH-012`、`UC-AUTH-025`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/auth-center-api-routing.md`、`platform/contracts/auth-developer-application-v1.md`、`platform/contracts/auth-device-session-v1.md` |
 
@@ -36,6 +36,8 @@
 ## 用例正文
 
 ### 目标与范围
+
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](../use-cases/UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 Developer revision 初始化及变更引用 [UC023](../use-cases/UC-AUTH-023-suspend-and-restore-developer.md#br-dev-013)；WITHDRAWN 不可通过 Apply 重新开通，永久 handle 占用的终止形态由 UC025 定义。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
 
 > 当前普通 USER 已具备激活邮箱和可用的邮箱登录方式，选择开发者 ID 并明确申请 Developer 后，由 Auth 原子确认名称占用和前置条件，自助开通资格。
 
@@ -230,13 +232,38 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 
 > 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
 
+### 来自 `UC-AUTH-025`
+
+<!-- 权威位置: use-cases/UC-AUTH-025-close-own-account.md#br-acc-012 -->
+### BR-ACC-012：清理范围与最小永久保留
+
+首版数据策略如下；期限是上限而非必须保存到最后一天。实施时必须检查与各现行永久占用/审计规则的冲突并同步修改，不以本草案直接删除生产数据。
+
+| 数据 | 终止后处理 |
+| --- | --- |
+| 主体、资料 | 活动存储删除资料 values、显示资料及业务能力；永久最小墓碑仅保留 authId、principalType=USER、CLOSED、最终 accountRevision、terminatedAt、closureOperationId，保证历史引用和不可复活，不保留学校关联、邮箱或公钥 |
+| 激活/待绑定邮箱、短期邮件操作 | 清理邮箱原文、唯一归属及短期材料；移除唯一占用的事务提交后才可由新账号重新验证注册。清理前统一不能用该邮箱恢复 CLOSED 账号，不将旧验证码改绑新账号 |
+| 设备凭据 | 删除公钥及使用元数据；永久保留规范公钥指纹和 CLOSED authId 的最小占用墓碑，防止旧设备密钥跨账号重用，延续 UC009 不释放密钥归属的约束。新注册必须使用新密钥 |
+| Session、挑战及结果、授权交互、code/access/refresh/family | 删除秘密摘要、操作内容及业务记录；由永久主体墓碑防重建，不为检测重放继续保存已终止账号全部 token 历史 |
+| grant、pairwise 用户映射 | 删除该 authId 的 consent 内容及 `(authId,sectorId)→sub` 映射；不删除 Application 的 sector。旧 sub 不转交新账号，日志/第三方引用不宣称被删除 |
+| 学生关联 | 删除本账号的成员关系及其专属材料；组仍有其他成员时保留组，不暴露或改变其他成员；无成员且无合法未决引用时，在关联事务栅栏下删除 lookup/关联密文和空组。并发注册加成员不得误删共享组 |
+| developerHandle | 永久保留规范 handle、原 authId、claimedAt 和终止占用标记；不转让、不释放、不连同邮箱/资料保留。该最小公开命名空间墓碑明确向本人披露 |
+| Auth 审计 | 只读期内保留最小事件归因，不保留 token/邮箱/资料副本；账号相关普通事件上限为事件发生后 180 天，已超期的随本次任务清理。注销事件保留 180 天；期满按专用保留任务删除，不由业务更新覆盖 |
+| 协调决定、清理进度及查询令牌 | App 确认终局前保留必要决定；查询摘要最多 30 天，详细清理任务在全部步骤完成且终局回执后清理，永久终止事实由最小墓碑承担 |
+
+默认活动存储清理目标为终止后 24 小时，超时告警并保留失败进度，绝不伪报完成。普通日志不应保存上述秘密，已经存在的可识别普通日志轮转上限 30 天；备份自然淘汰上限 30 天。部署未落实这些期限时不得展示该承诺或启用入口。
+
+现有审计的 append-only 表示保留期内不可更新/删除；接受本 UC 时需要明确增加受控保留期清理例外，不能由普通业务账号任意删除审计。永久墓碑的字段就是允许保留的完整集合，不能附加整份 principal 或自由文本快照。
+
 ### 来自 `UC-AUTH-002`
 
 <!-- 权威位置: use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004 -->
 ### BR-DEV-004：状态语义
 
-首版只公开 `PENDING/APPROVED/REJECTED/SUSPENDED`。UC-APP-005 只把
+公开 `PENDING/APPROVED/REJECTED/SUSPENDED/WITHDRAWN`。UC-APP-005 只把
 `SUSPENDED` 判断为暂停，但 Auth 返回完整枚举，让消费方不需要用 bool 掩盖未知状态。
+
+CLOSED 墓碑作为明确终止状态返回是本规则的例外，不将其伪装成 PENDING 或 WITHDRAWN。
 
 普通 USER 可以不是 Developer，此时 `developerStatus = null`；SYSTEM principal 也不具有
 Developer 状态。两者都不能作为本查询的成功结果，且不得被伪装成 `PENDING`。
@@ -404,24 +431,26 @@ UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-013`（use-cases/UC-AUTH-013-apply-for-developer.md）：变更记录
+- `UC-AUTH-025`（use-cases/UC-AUTH-025-close-own-account.md）：目标与范围、认证与资格、API 与确认过程、主流程、首版运行与协议固定值、错误、限额与验收、实现依赖与联动、变更记录
 - `UC-AUTH-002`（use-cases/UC-AUTH-002-batch-get-developer-statuses.md）：目标与范围、调用者与输入、输出、主流程、异常流程、数据模型、API 契约、测试与验收、非目标、变更记录
 - `UC-AUTH-011`（use-cases/UC-AUTH-011-set-and-activate-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖与边界、变更记录
 - `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-012`（use-cases/UC-AUTH-012-login-with-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、治理工作包路由
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-013-apply-for-developer.md` | 201 | `e1eadd262acc` |
-| `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 151 | `98d2b3e33077` |
-| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 277 | `fe77d446d400` |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 142 | `cd886b322836` |
-| `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
-| `use-cases/UC-AUTH-012-login-with-email.md` | 201 | `e2692ee1e896` |
-| `platform/contracts/auth-center-api-routing.md` | 100 | `1ca39b5e9bc5` |
+| `use-cases/UC-AUTH-013-apply-for-developer.md` | 203 | `1eb6329b5b9a` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 155 | `6b6f375f1aad` |
+| `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
+| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 279 | `a96eacf40f23` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |
+| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
+| `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
+| `platform/contracts/auth-center-api-routing.md` | 110 | `a2999614c568` |
 | `platform/contracts/auth-developer-application-v1.md` | 58 | `83ce98a96c34` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |

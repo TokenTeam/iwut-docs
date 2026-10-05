@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+Tester 加入须在同一事务遵守 [BR-APP-010](UC-APP-025-coordinate-account-owner-exit.md#br-app-010) 的 ACCOUNT_CLOSURE 屏障；Developer 退出不阻止普通加入。
+
 > 一个已登录用户使用仍然有效的 Tester 加入链接，自助取得整个 Application 的 Tester Membership；加入时不要求 Developer 资格，并受到 Application 级 Tester 数量上限约束。
 
 本用例负责：

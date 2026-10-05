@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。 Developer revision 初始化及变更引用 [UC023](UC-AUTH-023-suspend-and-restore-developer.md#br-dev-013)；WITHDRAWN 不可通过 Apply 重新开通，永久 handle 占用的终止形态由 UC025 定义。 账号终止后的最小保留及审计保留期清理由 UC025/BR-ACC-012 定义；append-only 在保留期内成立，期满仅受控清理任务可删除。
+
 > 当前普通 USER 已具备激活邮箱和可用的邮箱登录方式，选择开发者 ID 并明确申请 Developer 后，由 Auth 原子确认名称占用和前置条件，自助开通资格。
 
 首版采用**满足条件直接 APPROVED，不设人工资格审核**。应用创建、资料/版本审核与发布仍由 App Center 各自用例决定；Developer 开通不代表任何应用自动获准发布，也不授予 Reviewer 或管理员权限。

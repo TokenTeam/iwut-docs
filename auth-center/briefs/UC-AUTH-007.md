@@ -37,6 +37,8 @@
 
 ### 目标与范围
 
+账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](../use-cases/UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。
+
 > 已有平台账号的用户通过设备凭据证明账号控制权，由 Auth 建立可在线检查、可撤销的 Session，供后续受保护请求使用。
 
 本文件是设备登录、Session 建立与在线检查规则的权威正文，也供 [UC-AUTH-006](../use-cases/UC-AUTH-006-create-user.md) 建立首次会话引用。Session 与凭据撤销的 `BR-LGN-*` 正文分别位于 UC-AUTH-008/009。认证协议引用 [App 设备认证与 Session v1 契约](../../platform/contracts/auth-device-session-v1.md)，运行参数由本 UC 定义；设计接受不表示已实现。
@@ -442,7 +444,7 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-007-login.md` | 250 | `c38e3a56e232` |
-| `use-cases/UC-AUTH-006-create-user.md` | 277 | `783f832c5407` |
-| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 168 | `bff1cb174151` |
+| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
+| `use-cases/UC-AUTH-006-create-user.md` | 279 | `2b56bd4eb59d` |
+| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 162 | `98c33762540d` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |

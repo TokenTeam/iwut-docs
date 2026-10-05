@@ -1,6 +1,6 @@
 # UC-AUTH-021：授予与撤销平台管理员资格
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -8,7 +8,7 @@
 
 系统尚未上线，本用例按首次部署设计管理员初始化，不提供旧 bootstrap 数据迁移或历史管理资格兼容分支。它不提供任意权限编辑、可配置角色、管理员分级、双人审批、用户搜索、账号禁用、Developer 暂停或账号注销。后三类治理动作由后续 UC 定义；本用例授予其管理权限不表示相应接口已经可用。
 
-这是待接受的扩展设计。UC004 现行 bootstrap、UC010 audience 投影及已发布 API 在本用例接受并同步修改前保持原语义，不能仅凭本草案自动扩权。
+本设计已接受；UC004 的 bootstrap 与 UC010 的 Auth audience 投影同步引用本用例。权限仍须显式初始化或授予，不因部署启动自动扩权。
 
 ## 参与者与身份
 
@@ -48,7 +48,7 @@ PlatformAdministratorPage {
 
 Get 和 Manage 返回 PlatformAdministratorState。membership 表示保存的权限集合事实，effective 表示当前能否作为有效管理员，不以客户端提供的 role 字段为依据。grantBlockers 固定按 `ALREADY_GRANTED, ACCOUNT_DISABLED, EMAIL_REQUIRED, EMAIL_RECOVERY_UNAVAILABLE` 顺序返回所有适用项；它是观察时的门禁提示，提交时必须重新验证。
 
-## API 草案
+## API
 
 独立 package `auth_center.v1.platform_administrator`，service `PlatformAdministratorService`：
 
@@ -141,7 +141,7 @@ auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
 
 同一目标命令重跑且消费标记完整一致时，仅返回 applied=false 和原事件 ID，不再写权限、版本或审计；该检查先于目标当前邮箱/权限条件，所以后来撤销也不会被重跑恢复。不同目标或损坏标记拒绝。首次执行才返回 applied=true。后续授予必须走已认证管理 API。
 
-本用例接受时直接调整 UC004 的首次 bootstrap 定义与实现，不增加 migrate 命令、旧状态转换或自动补齐权限。治理 API 要求初始化标记符合本集合版本；旧格式标记或部分管理权限记录按不兼容数据拒绝，不自动清除或修复。开发测试环境通过显式重建测试数据验证新流程；本文不授权删除任何现存数据，也不要求保留上线前测试库的升级兼容性。
+本用例实施时直接调整 UC004 的首次 bootstrap 定义与实现，不增加 migrate 命令、旧状态转换或自动补齐权限。治理 API 要求初始化标记符合本集合版本；旧格式标记或部分管理权限记录按不兼容数据拒绝，不自动清除或修复。开发测试环境通过显式重建测试数据验证新流程；本文不授权删除任何现存数据，也不要求保留上线前测试库的升级兼容性。
 
 <a id="br-adm-006"></a>
 ### BR-ADM-006：最小查询与错误披露
@@ -153,7 +153,7 @@ auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
 <a id="br-adm-007"></a>
 ### BR-ADM-007：签发投影与撤销边界
 
-本用例接受时，UC010 的 `iwut-auth-center` allowlist 扩展为 BR-ADM-001 四项；`iwut-app-center` 不增加这些管理权限。权限只取当前权威集合，不进入 OAuth Scope Catalog、ID token 或用户 consent，不向第三方委托。
+本用例实施时，UC010 的 `iwut-auth-center` allowlist 扩展为 BR-ADM-001 四项；`iwut-app-center` 不增加这些管理权限。权限只取当前权威集合，不进入 OAuth Scope Catalog、ID token 或用户 consent，不向第三方委托。
 
 授予/撤销与 UC010 签发共用认证事务协调边界，已确认撤销后不得新签含撤销权限的身份。已经签出的 USER JWS 沿用既有 TTL/leeway，不能保证离线消费方立即失效；本用例与 UC004 写入口在线复核当前管理权限，因此旧 JWS 不能继续完成相应管理写入。其他权限和 Session 不因本操作自动撤销。
 
@@ -192,14 +192,16 @@ auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
 7. 查询只返回允许字段；分页游标目标被撤销后仍可翻页；跨页变化不影响提交时 CAS。自撤成功返回状态，下一次管理查询拒绝。
 8. 真实 Mongo 副本集、生产 Wire、真实签名及生成 HTTP/gRPC 客户端覆盖上述规则；不能以只有 mock 的领域测试替代并发和事务验收。Gateway SESSION 三协议及 CLI 首次初始化分别验证。
 
-## 依赖与接受时联动
+## 实现依赖与联动
 
 UC004、UC010、UC011/012 后端已具备基础；本用例不依赖后续账号或 Developer 治理 UC 的实现。没有 App 新接口依赖。
 
-接受时同步修改 UC004 的 bootstrap 权限集合与初始化定义、UC010 的 Auth audience 投影、共享路由/鉴权契约、治理权限存储校验、API、首次部署与恢复说明，并生成脚本 brief；不得把本文 PROPOSED 的四项集合视为现有 UC 已经接受的事实。后续禁用/注销用例接受前必须引用 BR-ADM-003 并验证共享协调边界。
+实施时同步修改 UC004 的 bootstrap 权限集合与初始化定义、UC010 的 Auth audience 投影、共享路由/鉴权契约、治理权限存储校验、API、首次部署与恢复说明，并生成脚本 brief；不得把本文 PROPOSED 的四项集合视为现有 UC 已经接受的事实。后续禁用/注销用例接受前必须引用 BR-ADM-003 并验证共享协调边界。
 
 ## 变更记录
 
 - 2026-10-05：建立管理员资格管理草案；固定集合、在线复核、最后管理员保护、共享权限版本、旧 bootstrap 显式迁移及生产恢复边界。
 
 - 2026-10-05：确认系统尚未上线，移除独立迁移命令、历史资格状态和双标记设计；首次 bootstrap 直接授予完整集合，保留一次性执行及撤销后不可重跑恢复的约束。
+
+- 2026-10-05：按用户决定接受，生成 brief 并启动独立工作包；依赖顺序与生产启用门禁继续有效，不把设计接受记为实现完成。

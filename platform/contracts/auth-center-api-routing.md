@@ -98,3 +98,13 @@ TLS 与公网可达性由部署和 Gateway 决定，监听 HTTP 不代表公网�
 验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法、两个旧 Reviewer 管理方法与两个新增应用审核权限方法、
 生成客户端、当前用户隔离、重复/替代身份头拒绝、严格 JSON、资料 CAS、撤销幂等性及内部 RPC
 不暴露为 HTTP。保留原生 gRPC 回归测试。
+
+## 治理工作包路由
+
+UC021/022/023 的管理入口使用 SESSION，Auth audience USER JWS 必须携带 account_revision 并在线复核；UC024 使用 DIRECT 有效 Session；UC025 使用 DIRECT 专用设备证明/用途隔离令牌。精确 package/service/method 和 POST /v1 路径分别引用对应已接受 UC 的 API 表，不提供 wildcard 或公共内部服务入口。API annotations 与 Gateway 清单须逐项验收；后端实现不等于公网已启用。
+
+- [UC021](../../auth-center/use-cases/UC-AUTH-021-manage-platform-administrators.md#api)：platform_administrator.PlatformAdministratorService 三方法。
+- [UC022](../../auth-center/use-cases/UC-AUTH-022-disable-and-restore-user-account.md#参与者与接口)：account_management.AccountManagementService 两方法。
+- [UC023](../../auth-center/use-cases/UC-AUTH-023-suspend-and-restore-developer.md#参与者与-api)：developer_management.DeveloperManagementService 两方法。
+- [UC024](../../auth-center/use-cases/UC-AUTH-024-withdraw-developer.md#参与者与接口)：developer_withdrawal.DeveloperWithdrawalService 四方法。
+- [UC025](../../auth-center/use-cases/UC-AUTH-025-close-own-account.md#api-与确认过程)：account_closure.AccountClosureService 五方法；确认/查询专用 header 不可被当作一般 Authorization。

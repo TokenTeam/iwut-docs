@@ -1,0 +1,58 @@
+{
+  "uc": "UC-APP-025",
+  "note": "App prerequisite for accepted Auth governance. Implement zero-owned exit fence, durable decisions, account-closure tester cleanup, typed lifecycle projection and role-sensitive review gate. No application transfer/closure. Run full backend and actual Auth interop tiers.",
+  "uc_sections": [
+    "目标与范围",
+    "主流程与 API",
+    "数据与验收",
+    "交付依赖"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-003": [
+      "决定",
+      "Port 所有权",
+      "自动化约束"
+    ],
+    "ADR-004": [
+      "决定",
+      "测试环境"
+    ],
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/account-owner-exit-v1.md": [
+      "范围与事实来源",
+      "内部接口",
+      "App 原子屏障",
+      "Auth 协调与故障",
+      "固定线格式与方法授权",
+      "交付门禁"
+    ],
+    "platform/contracts/auth-developer-status-v1.md": [
+      "目的与所有权",
+      "gRPC 方法",
+      "完整批量语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求",
+      "兼容性"
+    ],
+    "platform/contracts/trusted-service-identity-v1.md": [
+      "目的与范围",
+      "传输与 JOSE",
+      "Claims",
+      "Auth Center 固定授权映射",
+      "App Center 固定授权映射",
+      "ENV 配置",
+      "错误与轮换",
+      "契约测试要求",
+      "账号归属退出方法"
+    ]
+  }
+}
