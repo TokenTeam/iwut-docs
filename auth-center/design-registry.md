@@ -8,7 +8,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-021` |
+| Use Case / Auth Center | `UC-AUTH-022` |
+| Business Rule / Platform Administrator | `BR-ADM-009` |
 | Business Rule / OAuth Authorization | `BR-OAU-022` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
@@ -45,7 +46,22 @@
 | `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `ACCEPTED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-020` | 管理及回收同一账号的 Session | `PROPOSED` | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md) | — | 有效会话列表与明确 Session ID 集合的原子回收；不扩展到关联组或设备凭据。 |
 
+| `UC-AUTH-021` | 授予与撤销平台管理员资格 | `PROPOSED` | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md) | — | 固定管理集合、最后管理员保护及显式 bootstrap 迁移；尚未实现。 |
+
 ## Business Rules
+
+### Platform Administrator (`BR-ADM`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-ADM-001` | 固定管理权限集合与历史兼容 | Authority / Compatibility | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-001) | — | — |
+| `BR-ADM-002` | 在线授权与授予前置条件 | Authorization / Recovery | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-002) | — | — |
+| `BR-ADM-003` | 最后有效管理员保护 | Invariant / Concurrency | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-003) | — | — |
+| `BR-ADM-004` | 共享版本、原子审计与重试 | Atomicity / Audit | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-004) | — | — |
+| `BR-ADM-005` | 首次初始化与旧部署迁移 | Bootstrap / Migration | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005) | — | — |
+| `BR-ADM-006` | 最小查询与错误披露 | Query / Privacy | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-006) | — | — |
+| `BR-ADM-007` | 签发投影与撤销边界 | Projection / Revocation | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-007) | — | — |
+| `BR-ADM-008` | 恢复与初始化的边界 | Recovery / Boundary | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-008) | — | — |
 
 ### Scope Catalog (`BR-SCP`)
 
@@ -152,10 +168,11 @@
 
 ## 维护规则
 
-- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU-NNN`。
+- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU/ADM-NNN`。
 - `UPF` 表示 User Profile，覆盖用户资料字段定义与资料编辑；不复用 App Center 的 `PRF` 编号空间。
 - `REG` 表示用户创建及初始关联，`LGN` 表示登录、Session 与设备凭据撤销规则。
 - `EML` 表示邮箱绑定与激活；邮箱认证用例不得复用绑定挑战。
+- `ADM` 表示平台管理员资格、初始化及治理连续性约束。
 - BR 状态继承其权威 UC，不单独保存状态。
 - 新增编号时同时更新 Next ID；废弃编号不得重新分配。
 - 同一规则只有一个权威正文；其它 bounded context 通过链接引用。

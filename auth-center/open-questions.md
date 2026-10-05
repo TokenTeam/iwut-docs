@@ -4,7 +4,7 @@
 
 ## 账号与平台资格治理（2026-10-05）
 
-新增[治理设计草案](design-notes/account-governance-delivery-plan.md)，规划管理员授予/撤销、账号禁用/恢复、Developer 暂停/恢复、Developer 退出及本人注销五个候选 UC。当前仅规划，不改变既有权限、Developer 枚举或 bootstrap 行为。优先闭合管理员治理；App 应用归属处置、暂停的对外生效边界与注销数据清理仍是跨服务交付依赖。具体实现现状以 [实现记录](implements/README.md) 为准，不以本页历史开放问题推断实现缺失。
+新增[治理设计草案](design-notes/account-governance-delivery-plan.md)，规划管理员授予/撤销、账号禁用/恢复、Developer 暂停/恢复、Developer 退出及本人注销五个候选 UC。当前仅规划，不改变既有权限、Developer 枚举或 bootstrap 行为。管理员管理已展开为 [UC021](use-cases/UC-AUTH-021-manage-platform-administrators.md)（PROPOSED），固定集合、最后管理员保护及显式迁移仍待接受，生产应急恢复规程独立交付；App 应用归属处置、暂停的对外生效边界与注销数据清理仍是跨服务交付依赖。具体实现现状以 [实现记录](implements/README.md) 为准，不以本页历史开放问题推断实现缺失。
 
 ## 当前设计优先级（2026-09-27）
 

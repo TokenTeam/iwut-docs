@@ -54,6 +54,8 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 文档入口
 
+- [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md)：管理员资格查询、授予/撤销、最后管理员保护与 bootstrap 迁移草案，PROPOSED。
+
 - [账号与平台资格治理草案](design-notes/account-governance-delivery-plan.md)：管理员授予/撤销、账号禁用/恢复与注销、Developer 暂停/恢复与退出的候选 UC 边界、顺序和交付依赖；尚未接受或实施。
 
 - [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md)：同账号 Session 列表与明确目标集合回收草案，PROPOSED；不包含关联组跨账号管理。
