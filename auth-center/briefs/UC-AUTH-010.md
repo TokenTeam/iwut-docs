@@ -238,7 +238,7 @@ Developer 状态。两者都不能作为本查询的成功结果，且不得被�
 
 Session 秘密为 CSPRNG 生成的 32 字节，线上 token 为其 B64U 编码，恰好 43 字符。数据库 tokenDigest 为 `SHA256(rawToken32)`，不是对 43 字符文本做散列。sessionId 不等于 token，也不能用于鉴权。
 
-HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不加 `Bearer `。最多一个值，缺失、空白、重复、逗号合并、错误长度/编码均拒绝；不能从 query、cookie、消息正文、`Authorization` 或 `x-iwut-identity` 回退取值。对 UC008 格式错误映射 INVALID_SESSION_TOKEN；对需要有效 Session 的 UC009 映射 SESSION_INVALID。
+HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不加 `Bearer `。最多一个值，缺失、空白、重复、逗号合并、错误长度/编码均拒绝；不能从 query、cookie、消息正文、`Authorization` 或 `x-iwut-identity` 回退取值。对 UC008 格式错误映射 INVALID_SESSION_TOKEN；对需要有效 Session 的 UC009 映射 SESSION_INVALID。UC020 独立入口的缺失/畸形或混用载体为 INVALID_SESSION_TOKEN（400），载体合法但当前资格失效为 SESSION_INVALID（401），不得沿用 UC008 的免有效性检查。
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
@@ -561,7 +561,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 | `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
-| `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
+| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
 | `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |

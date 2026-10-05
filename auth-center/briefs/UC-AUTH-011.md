@@ -632,7 +632,7 @@ associationToken32 = SHA256(Frame(UTF8(schemeVersion), UTF8(normalizedStudentNum
 
 Session 秘密为 CSPRNG 生成的 32 字节，线上 token 为其 B64U 编码，恰好 43 字符。数据库 tokenDigest 为 `SHA256(rawToken32)`，不是对 43 字符文本做散列。sessionId 不等于 token，也不能用于鉴权。
 
-HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不加 `Bearer `。最多一个值，缺失、空白、重复、逗号合并、错误长度/编码均拒绝；不能从 query、cookie、消息正文、`Authorization` 或 `x-iwut-identity` 回退取值。对 UC008 格式错误映射 INVALID_SESSION_TOKEN；对需要有效 Session 的 UC009 映射 SESSION_INVALID。
+HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不加 `Bearer `。最多一个值，缺失、空白、重复、逗号合并、错误长度/编码均拒绝；不能从 query、cookie、消息正文、`Authorization` 或 `x-iwut-identity` 回退取值。对 UC008 格式错误映射 INVALID_SESSION_TOKEN；对需要有效 Session 的 UC009 映射 SESSION_INVALID。UC020 独立入口的缺失/畸形或混用载体为 INVALID_SESSION_TOKEN（400），载体合法但当前资格失效为 SESSION_INVALID（401），不得沿用 UC008 的免有效性检查。
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
@@ -746,7 +746,7 @@ HTTP 与 gRPC 的 reason/状态由 UC011 错误表拥有；未知枚举/字段�
 - `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-006`（use-cases/UC-AUTH-006-create-user.md）：目标与范围、参与者与前置条件、输入与输出、主流程、持久化候选、异常语义、测试与验收、交付依赖与验收边界、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、治理工作包路由
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、治理工作包路由、UC020 同账号 Session 管理
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
@@ -758,6 +758,6 @@ HTTP 与 gRPC 的 reason/状态由 UC011 错误表拥有；未知枚举/字段�
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `use-cases/UC-AUTH-006-create-user.md` | 279 | `2b56bd4eb59d` |
-| `platform/contracts/auth-center-api-routing.md` | 110 | `a2999614c568` |
-| `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
+| `platform/contracts/auth-center-api-routing.md` | 121 | `2a07a5e76c81` |
+| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
 | `platform/contracts/auth-email-binding-v1.md` | 100 | `bbe1a81c1d9a` |

@@ -463,7 +463,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 - `UC-AUTH-004`（use-cases/UC-AUTH-004-manage-reviewer-permission.md）：变更记录
 - `UC-AUTH-021`（use-cases/UC-AUTH-021-manage-platform-administrators.md）：目标与范围、参与者与身份、输入与输出、API、主流程、错误语义与运行约束、测试与验收、实现依赖与联动、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：治理工作包路由
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：治理工作包路由、UC020 同账号 Session 管理
 - `platform/contracts/auth-session-identity-issuance-v1.md`（docs 根级共享文档）：范围与权威来源、服务授权扩展、请求与凭据流向
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
 
@@ -473,6 +473,6 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | --- | --- | --- |
 | `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 162 | `98c33762540d` |
 | `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
-| `platform/contracts/auth-center-api-routing.md` | 110 | `a2999614c568` |
+| `platform/contracts/auth-center-api-routing.md` | 121 | `2a07a5e76c81` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

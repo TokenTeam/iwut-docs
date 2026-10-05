@@ -1,6 +1,6 @@
 # UC-AUTH-020：管理及回收同一账号的 Session
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -28,7 +28,7 @@ OwnSessionPage {
   currentSessionId: SessionId
   observedAt: Instant
   sessions: OwnSessionSummary[]
-  nextCursor: SessionId?  // 没有下一页时为空
+  nextCursor: SessionId?  // 最后扫描的候选 ID；没有下一页时为空
 }
 
 OwnSessionSummary {
@@ -51,7 +51,7 @@ SessionsRevoked {}
 
 sessionId/credentialId 是引用标识，不是认证材料。列表不返回 sessionToken/tokenDigest、公钥/指纹、邮箱、IP、地理位置、学校信息或其他账号资料；首版不新增这些数据的收集。credentialId 仅帮助辨识哪些会话使用同一凭据，不表示已经验证物理设备名称或“一个凭据等于一台设备”。
 
-## API 草案
+## API 契约
 
 独立 package `auth_center.v1.session_management`，service `SessionManagementService`：
 
@@ -66,7 +66,7 @@ Session 唯一载体沿用 [Session 载体](../../platform/contracts/auth-device
 
 Gateway 将来按 DIRECT 转发并保留原 Session，由 Auth 自行鉴权；不能先换 USER JWS，否则既无法可靠确定“当前 Session”，也会改变列表对 LRU 的只读语义。DIRECT 不代表匿名。只有两个完整方法加入明确的 Session 管理分派，不使用 package 通配匿名例外。
 
-API Proto、共享 RPC 鉴权表、公共 `/auth-center` 路由映射和 Gateway 清单在接受并实施时同步；本草案不宣称接口已经可调用。响应 no-store，时间采用 Timestamp/UTC，16 KiB 解码上限及严格 ProtoJSON 沿用既有管理接口惯例。
+API Proto、共享 RPC 鉴权表和公共 `/auth-center` 路由映射随本次后端实施同步；Gateway 的实际清单与三协议联合验收保持独立交付。响应 no-store，时间采用 Timestamp/UTC，16 KiB 解码上限及严格 ProtoJSON 沿用既有管理接口惯例。
 
 ## 主流程
 
@@ -100,7 +100,9 @@ API Proto、共享 RPC 鉴权表、公共 `/auth-center` 路由映射和 Gateway
 
 正常最多 10 条有效会话，数量语义引用 [BR-LGN-010](UC-AUTH-007-login.md#br-lgn-010)。仍提供有界分页以覆盖合法历史超额状态，不能为了返回列表偷偷执行 LRU 或截掉数据而不提供 nextCursor。排序固定为 `(createdAt DESC, sessionId DESC)`，不按易变的 lastUsedAt 排序；isCurrent 由与当前 Session ID 比较得出。
 
-cursor 为上页最后返回的 sessionId。服务端按当前 authId 定位游标记录，以其不可变 createdAt/sessionId 作为排他排序边界；该记录后来过期/撤销仍可作锚点，但不再进入有效列表。未知、非本人或已物理清理的合法游标统一 INVALID_SESSION_CURSOR，客户端重新查询第一页。每页有独立 observedAt，不承诺跨页数据库快照；分页期间的新会话由重新查询第一页发现，不能据此构造“原子全部在线设备清单”。
+cursor 为上页最后扫描的候选 sessionId，由服务端 nextCursor 指定，可能不在 sessions 中。服务端按当前 authId 定位游标记录，以其不可变 createdAt/sessionId 作为排他排序边界；该记录后来过期/撤销仍可作锚点，但不再进入有效列表。未知、非本人或已物理清理的合法游标统一 INVALID_SESSION_CURSOR，客户端重新查询第一页。每页有独立 observedAt，不承诺跨页数据库快照；分页期间的新会话由重新查询第一页发现，不能据此构造“原子全部在线设备清单”。
+
+每页最多处理 200 条同账号排序候选，凭据按候选批量加载；达到 pageSize 后停止，或扫描预算耗尽后返回已取得的有效项。若仍有后续候选，nextCursor 为最后实际处理的候选 ID；允许不足页甚至空 sessions 但有 nextCursor，客户端须继续翻页，只有空 nextCursor 才表示扫描结束。至多多读一条候选用于判断后续是否存在，不将它作为已处理游标。正常撤销/过期/旧账号版本候选过滤；已选中候选的损坏或跨账号来源仍失败关闭。此规则避免历史数据增长造成单次无界扫描，也不把预算耗尽伪装成没有其他有效 Session。
 
 查询不更新调用者或任何被列举会话的 lastUsedAt、expiresAt、credential 使用时间或容量；可使用必要的内部一致性栅栏，但不得调用会顺带 touch 的普通 Session 检查路径。与 UC007 的“查询会话列表不刷新”规则保持一致。lastUsedAt 是 Auth 最近一次成功权威会话检查时间，不是设备在线心跳；列表中的有效记录也可能来自客户端未收到响应的成功登录。
 
@@ -168,8 +170,10 @@ cursor 为上页最后返回的 sessionId。服务端按当前 authId 定位游�
 
 UC007/008/009/010/012 的后端依赖已交付。实现需新增无 lastUsedAt 副作用的 Session 管理鉴权读取路径，复用完整有效性校验及事务栅栏，不能复制一个遗漏 EMAIL_CODE_AND_DEVICE 的简化检查器。需补充 owner/createdAt/sessionId 查询索引、批量命令审计及限流；不要求 Redis、学校权威接口或新的学生身份校验。
 
-列表与命令设计属于本 UC，同一账号的设备凭据列表、远端持久退出策略和跨账号关联组管理仍另立用例。当前只提出设计，状态 PROPOSED、实现 NOT_STARTED；接受后生成实施 brief 并交付 Proto/适配器与验证，不以此文档存在作为启用依据。
+列表与命令设计属于本 UC，同一账号的设备凭据列表、远端持久退出策略和跨账号关联组管理仍另立用例。本用例已 ACCEPTED；脚本生成实施 brief 并交付 Proto、适配器与验证，不以设计接受代替部署启用。独立 `AUTH_SESSION_MANAGEMENT_ENABLED` 默认 false；开启要求用户入口启用。限额配置为 `AUTH_SESSION_MANAGEMENT_GLOBAL_PER_MINUTE=600`、`AUTH_SESSION_MANAGEMENT_SOURCE_PER_MINUTE=120`、`AUTH_SESSION_MANAGEMENT_ACCOUNT_PER_MINUTE=30`、`AUTH_SESSION_MANAGEMENT_MAX_BUCKETS=4096`，有限正整数上限 1000000。正文/原生消息统一 16 KiB；过大视为 INVALID_SESSION_MANAGEMENT_REQUEST（400），不新增另一组业务 reason。
 
 ## 变更记录
 
 - 2026-10-04：提出同 authId 会话列表与显式集合回收；保持当前退出/凭据撤销独立，明确 LRU 只读、分页、原子批量、重试不扩大目标及跨账号边界。
+
+- 2026-10-05：接受并启动实现；明确 200 条候选扫描预算、可继续的短页/空页游标、默认关闭开关和固定入口限额；沿用已交付的只读 Session 检查及账号版本，不增加 Redis 或学生身份依赖。

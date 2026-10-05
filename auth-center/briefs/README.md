@@ -34,3 +34,5 @@ python3 tools/gen_brief.py --check --all
 抽取范围在 `tools/brief-specs/UC-AUTH-005.json` 至 `UC-AUTH-013.json`：`uc_sections` 选择本 UC 章节，`include_own_brs` 选择本 UC 规则，`query_sections` 显式选择当前 context 的 `query-contracts/` 章节，`shared_sections` 选择 `platform/` 章节。查询和平台路径均相对 docs 仓库根，缺失章节、非法路径或来源逃逸会使生成失败。
 
 查询契约同样进入溯源摘要、未纳入章节索引和漂移检查；修改选中的源文档后重新生成。设计已接受不等于依赖已交付，brief 中的实现依赖仍必须满足。
+
+- [UC-AUTH-020](UC-AUTH-020.md)：同 authId Session 只读列表、有界分页与明确目标集合的原子回收。

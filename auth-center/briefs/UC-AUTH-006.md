@@ -491,7 +491,7 @@ associationToken32 = SHA256(Frame(UTF8(schemeVersion), UTF8(normalizedStudentNum
 
 Session 秘密为 CSPRNG 生成的 32 字节，线上 token 为其 B64U 编码，恰好 43 字符。数据库 tokenDigest 为 `SHA256(rawToken32)`，不是对 43 字符文本做散列。sessionId 不等于 token，也不能用于鉴权。
 
-HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不加 `Bearer `。最多一个值，缺失、空白、重复、逗号合并、错误长度/编码均拒绝；不能从 query、cookie、消息正文、`Authorization` 或 `x-iwut-identity` 回退取值。对 UC008 格式错误映射 INVALID_SESSION_TOKEN；对需要有效 Session 的 UC009 映射 SESSION_INVALID。
+HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不加 `Bearer `。最多一个值，缺失、空白、重复、逗号合并、错误长度/编码均拒绝；不能从 query、cookie、消息正文、`Authorization` 或 `x-iwut-identity` 回退取值。对 UC008 格式错误映射 INVALID_SESSION_TOKEN；对需要有效 Session 的 UC009 映射 SESSION_INVALID。UC020 独立入口的缺失/畸形或混用载体为 INVALID_SESSION_TOKEN（400），载体合法但当前资格失效为 SESSION_INVALID（401），不得沿用 UC008 的免有效性检查。
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
@@ -512,6 +512,8 @@ Auth 原生 gRPC 新接口固定为以下 full method；可执行 Proto 在独�
 | `/auth_center.v1.user_profile.UserProfileService/EditOwnProfile` | trusted-identity-v1 用户 JWS，audience 为 `iwut-auth-center`；按 UC005 再查当前主体。 |
 | `/auth_center.v1.user_profile.UserProfileService/GetOwnProfile` | 同上。 |
 | `/auth_center.v1.user_profile.UserProfileService/GetProfileEditingSchema` | 同上。 |
+| `/auth_center.v1.session_management.SessionManagementService/ListOwnSessions` | 有效 Session，ACTIVE USER；UC020 只读管理检查不 touch LRU，同 authId 有界分页。 |
+| `/auth_center.v1.session_management.SessionManagementService/RevokeOwnSessions` | 有效 Session，ACTIVE USER；UC020 最终事务复核、原子回收明确 ID 集合，禁止包含当前 Session。 |
 | 既有 Scope/Developer/SystemPrincipal 方法 | 保持 trusted-service-identity-v1 与各自固定 permission/purpose allowlist。 |
 
 同一调用只依据该方法规定的认证类型授权，不接受其它类型替代。会话撤销请求不因携带一个失效用户 JWS 而失去幂等性；匿名证明接口也不因附带身份获得额外权限。所有认证材料均需脱敏。客户端请求中声明的 authId、角色、设备名称或 applicationId 不生成可信 context。
@@ -550,4 +552,4 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 287 | `60af229c87c6` |
-| `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
+| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |

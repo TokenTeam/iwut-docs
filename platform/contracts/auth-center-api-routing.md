@@ -108,3 +108,14 @@ UC021/022/023 的管理入口使用 SESSION，Auth audience USER JWS 必须携�
 - [UC023](../../auth-center/use-cases/UC-AUTH-023-suspend-and-restore-developer.md#参与者与-api)：developer_management.DeveloperManagementService 两方法。
 - [UC024](../../auth-center/use-cases/UC-AUTH-024-withdraw-developer.md#参与者与接口)：developer_withdrawal.DeveloperWithdrawalService 四方法。
 - [UC025](../../auth-center/use-cases/UC-AUTH-025-close-own-account.md#api-与确认过程)：account_closure.AccountClosureService 五方法；确认/查询专用 header 不可被当作一般 Authorization。
+
+## UC020 同账号 Session 管理
+
+独立 `auth_center.v1.session_management.SessionManagementService`，由默认关闭的 `AUTH_SESSION_MANAGEMENT_ENABLED` 控制：
+
+| Method | Auth 内部路径 | RPC | Gateway 模式 | 成功状态 |
+| --- | --- | --- | --- | --- |
+| POST | `/v1/users/me/sessions:list` | SessionManagementService/ListOwnSessions | DIRECT | 200 |
+| POST | `/v1/users/me/sessions:revoke` | SessionManagementService/RevokeOwnSessions | DIRECT | 200 |
+
+公网路径加统一 `/auth-center` 前缀。只传唯一 x-iwut-session，不先换 JWS；Auth 在只读/命令最终事务重新检查当前 Session，不刷新 lastUsedAt。严格 ProtoJSON、16 KiB、无 query、no-store。Gateway 实际清单与三协议验收另行交付；新方法未启用时不回退至匿名或普通 JWS 路径。

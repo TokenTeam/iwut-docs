@@ -45,7 +45,7 @@
 | `UC-AUTH-017` | 读取 OIDC 用户信息 | `ACCEPTED` | [UC-AUTH-017](use-cases/UC-AUTH-017-get-oidc-user-info.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-018` | 查看及收回本人应用授权 | `ACCEPTED` | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `ACCEPTED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
-| `UC-AUTH-020` | 管理及回收同一账号的 Session | `PROPOSED` | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md) | — | 有效会话列表与明确 Session ID 集合的原子回收；不扩展到关联组或设备凭据。 |
+| `UC-AUTH-020` | 管理及回收同一账号的 Session | `ACCEPTED` | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md) | — | 有效会话列表与明确 Session ID 集合的原子回收；不扩展到关联组或设备凭据。 |
 | `UC-AUTH-021` | 授予与撤销平台管理员资格 | `ACCEPTED` | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md) | — | 固定管理集合、最后管理员保护及一次性 bootstrap；尚未实现。 |
 | `UC-AUTH-022` | 禁用与恢复用户账号 | `ACCEPTED` | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md) | — | 账号版本隔离全部旧认证材料；依赖 UC021 及认证消费路径扩展，尚未实现。 |
 | `UC-AUTH-023` | 暂停与恢复 Developer 资格 | `ACCEPTED` | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md) | — | 管理侧资格状态转换、独立版本及恢复门禁；尚未实现。 |
