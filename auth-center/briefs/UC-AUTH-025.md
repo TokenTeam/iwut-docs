@@ -172,6 +172,10 @@ confirmationToken 一次消费，绑定 operation、本人 authId、上述版本
 
 保留独立于旧业务备份的最小终止清单（authId、最终 accountRevision、terminatedAt、operationId），与墓碑同等保护并持续备份。Auth 终止事务写持久待投递记录，以 operationId 幂等写入不会随业务备份回滚的清单；收到持久化确认前只展示 TERMINATION_PENDING，本地 CLOSED 不可取消或回滚，投递故障必须告警并重试。恢复历史备份后先隔离服务，重放此清单、重新执行清理并核验，再接流量，防止旧备份复活账号。清单不可用、可能不完整或未能核验最新终止事实时保持停服，不直接以旧备份接流量。清单同步和恢复演练是上线门禁；未完成前不能承诺已终止账号不会因灾备回滚复活。
 
+终止事实仍只含上述四项；同一独立存储按 operationId 另存最小命名空间占用快照：authId、已登记设备公钥的规范 SHA-256 指纹集合，以及存在时的 developerHandle 与首次 claimedAt。快照不含公钥、邮箱、学生关联 token 或个人资料。这些信息原本即属于永久保留的凭据/handle 占用，独立保存是为了覆盖“备份早于凭据登记或 handle 认领”的恢复场景，避免恢复后将它们重新分配给别人。先持久化占用快照，再持久化终止事实，二者均确认后才返回 TERMINATED。只有快照而无终止事实的崩溃残留不能自行终止账号；既有快照不允许被较旧业务备份的子集覆盖。
+
+恢复先验证全量清单及对应快照，再恢复永久占用、重放账号终止并重建清理任务。重复执行幂等；账号、operationId、终止版本或占用归属矛盾均拒绝接流量。数据库存在已确认终止而独立清单缺失时必须拒绝启动，不能把误挂载的空目录视为成功恢复。未确认的本地 CLOSED 事务可继续投递，确认后的事实不得从旧备份重新推导。
+
 清理不删除 App 的历史应用/审核事实。App 还需清理该账号的 Tester membership、个人过滤偏好等个人状态，并确认终局 sealed；其幂等清理及有界完成回执属于 App 新 UC 的交付范围。其它平台资源服务若另存用户数据，必须进入数据清单和清理协调验收，不能以 Auth 数据已清理宣称全平台清理完成。
 
 <!-- 权威位置: use-cases/UC-AUTH-025-close-own-account.md#br-acc-014 -->
@@ -333,7 +337,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 157 | `2812fce31705` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `3b39a5fc675f` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

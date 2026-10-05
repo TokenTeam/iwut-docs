@@ -577,7 +577,7 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-015-exchange-authorization-code.md` | 81 | `cbaee4baf6fe` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 157 | `2812fce31705` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `3b39a5fc675f` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |
