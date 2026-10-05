@@ -19,7 +19,7 @@
 | [UC-AUTH-011](../use-cases/UC-AUTH-011-set-and-activate-email.md) | `ACCEPTED` | `COMPLETE` | Auth e6711d9/API 39122c2；原子邮箱注册/绑定、严格 Session presence、持久化额度、TLS SMTP、轮换/幂等、真实 Mongo/Wire/HTTP/gRPC 验收 | Gateway 与客户端独立交付，生产配置未启用 |
 | [UC-AUTH-012](../use-cases/UC-AUTH-012-login-with-email.md) | `ACCEPTED` | `COMPLETE` | 已基于 UC011 rebase；代码 9ee4d4b、运行说明 58f8a67/API 46544d1；邮箱登录/设备授权、共享额度/SMTP、全部 Session 消费路径和真实集成验收 | 已快进合入 auth-center/v1；Gateway 与客户端独立交付 |
 | [UC-AUTH-013](../use-cases/UC-AUTH-013-apply-for-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 3587ba7/API b7d9b6c；Session 申请/查询、邮箱恢复门禁、有界限流、原子资格/审计；developerHandle 全局唯一占用、禁止改名/转让/释放、历史 APPROVED 首次补设、审计索引升级、Mongo 并发/损坏数据/迁移与实际 App 联调验收 | Gateway 与客户端独立交付，生产入口及恢复就绪声明默认关闭 |
-| [UC-AUTH-020](../use-cases/UC-AUTH-020-manage-own-sessions.md) | `ACCEPTED` | `IN_PROGRESS` | 已接受并生成 brief；沿用当前账号版本及只读认证边界，实施列表、明确集合回收与审计 | Proto、仓储/限流、HTTP/gRPC 验证；Gateway/客户端独立交付 |
+| [UC-AUTH-020](../use-cases/UC-AUTH-020-manage-own-sessions.md) | `ACCEPTED` | `COMPLETE` | 同账号有效 Session 分页、明确集合原子回收、幂等审计；HTTP/gRPC、真实 Mongo 与 Wire 验证通过 | 默认关闭；Gateway DIRECT 路由及客户端 Session 管理界面独立交付 |
 | [UC-AUTH-021](../use-cases/UC-AUTH-021-manage-platform-administrators.md) | `ACCEPTED` | `COMPLETE` | Auth ea13341（UC022 集成 ccee202）、API 0b36b6c；固定四项管理权限、邮箱恢复门禁、HTTP/gRPC 查询/授撤、共享权限 CAS、最后管理员保护、原子审计、一次性 bootstrap；真实 Mongo/Wire/邮件激活与撤权测试 | 公网开关默认关闭；生产应急恢复规程、Gateway 与客户端独立交付；UC025 已实现 bootstrap 审计到期原子收据，生产恢复仍需演练 |
 | [UC-AUTH-022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md) | `ACCEPTED` | `COMPLETE` | Auth ccee202/API d5e170b；账号状态 HTTP/gRPC、accountRevision、最后管理员保护、原子审计，设备/邮箱/Session/LRU/OAuth/JWS/Profile 最终写入均校验版本；禁用后恢复不复活旧认证材料，真实 Mongo/Wire 验收 | 已接入禁用时原子取消未决退出；App audience 短期离线窗口及 Gateway/客户端独立交付 |
 | [UC-AUTH-023](../use-cases/UC-AUTH-023-suspend-and-restore-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 08fa346/API e4c01b3；独立资格治理 HTTP/gRPC、developerRevision、邮箱恢复门禁、原子审计、取消未决退出；普通登录保留，真实 Mongo/Wire、App 与 OAuth 状态消费验收 | 入口默认关闭；Gateway、客户端与生产治理规程独立交付 |
@@ -268,3 +268,15 @@ UC021–025 已 ACCEPTED，brief 由脚本生成，subagent 在独立服务/API 
 - App 最高层 `make check-auth-app` 的 22 项检查均通过，报告 `.artifacts/verification/20261005T121507Z-mf6vlagz/report.json`。总门禁为 `source-changed`，仅 `docs` 发生变化：并行任务新增 Console 设计及 AGENTS 导航，Auth/App/API 来源均未变化；本轮涉及的权威 UC/契约未被并行修改，随后再次核验 brief/registry/文档工具。该固定基线使用 Auth UC024 `ab60f32`，其后以最终 Auth `95a3c3a` 重新执行真实 Auth–App 脚本通过。最终 Auth 自身的联合验收直接启动 App `b346cfa`，覆盖完整注销与回执恢复。
 
 COMPLETE 表示本次后端工作包；Gateway 路由/客户端确认 UI、名下应用转让或关闭、生产数据保留与恢复演练、禁用用户无私钥受理仍按各 UC 的交付边界处理。新增公网入口默认关闭，后台终止清理不能随公网开关关闭而停止。UC020 随后作为独立工作包接受并开始实施，见顶部状态表。
+
+
+## 2026-10-05 UC020 Session 管理交付
+
+UC020 原为 PROPOSED，本轮接受为 ACCEPTED，并以脚本生成 brief。subagent 完成核心仓储及传输测试，主任务完成 Proto、配置、限流、HTTP/gRPC、生产 Wire 集成及交叉评审修正；分支 rebase 确认后快进合入 `auth-center/v1`。Auth `85fb5e0` 固定 API `72fa554`，本地提交，未 push 或部署。
+
+- `ListOwnSessions` 只列当前 authId 的有效 Session，不跨 association 账号，不刷新 lastUsedAt/有效期。排序及游标基于不可变创建时间和 ID；每页最多处理 200 候选，可返回空页及继续游标，避免历史记录造成无界扫描。
+- `RevokeOwnSessions` 只处理明确的 1–50 个目标，包含当前 Session 时整批拒绝。未知、其他账号和已撤销 ID 不泄露状态；实际变化和单条审计同事务，重试不扩大目标，不撤销凭据或 OAuth。新审计纳入 CLOSED 后 180 天清理。
+- 两个精确 DIRECT 方法只接受规范 `x-iwut-session`；严格 HTTP/Proto 输入、错误码、no-store 及 Retry-After 对齐。原生 gRPC 的畸形 wire 在 handler 阶段返回约定参数错误，避免 codec 错误被框架改为 INTERNAL；拒绝前执行入口限流。
+- `AUTH_SESSION_MANAGEMENT_ENABLED` 默认 false；启用需用户端点。全局/来源/账号分钟配额默认 600/120/30，来源与账号共享 4096 个有界桶。部署说明见 Auth README。
+- 验证通过 `make check`、`make test-race`、全量 `MONGODB_INTEGRATION_PORT=37044 make test-mongo`（真实 Mongo 包约 236 秒，生产 Wire/实际 App 包约 111 秒；App `b346cfa`）。新增真实 Mongo race 专项覆盖事务重试、未知提交、审计回滚、回收/LRU 并发、禁用/恢复/CLOSED、邮箱来源、损坏数据和有界分页。真实 HTTP/gRPC 验证同关联不同账号隔离、只读 LRU、当前 Session 拒绝、幂等回收、同凭据重新登录及开关关闭。
+- 48 份 brief 漂移检查、registry、Auth 协议向量和 30 项文档工具测试通过。Gateway 实际 DIRECT 清单、三协议联合验收及客户端界面保持独立交付；COMPLETE 指本次 Auth/API 后端工作包。

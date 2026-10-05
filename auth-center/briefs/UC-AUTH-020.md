@@ -93,7 +93,7 @@ sessionId/credentialId 是引用标识，不是认证材料。列表不返回 se
 | `ListOwnSessions` | `POST /v1/users/me/sessions:list` | 有效 x-iwut-session；200，OwnSessionPage |
 | `RevokeOwnSessions` | `POST /v1/users/me/sessions:revoke` | 有效 x-iwut-session；200，`{}` |
 
-完整 RPC 方法名为 `/auth_center.v1.session_management.SessionManagementService/ListOwnSessions` 与 `/auth_center.v1.session_management.SessionManagementService/RevokeOwnSessions`。两者同时交付 HTTP/JSON 与原生 gRPC，POST JSON 不接受 query、未知字段、重复字段或 null 列表/条目。pageSize 缺省与显式 0 要区分；cursor 省略或空字符串表示第一页。
+完整 RPC 方法名为 `/auth_center.v1.session_management.SessionManagementService/ListOwnSessions` 与 `/auth_center.v1.session_management.SessionManagementService/RevokeOwnSessions`。两者同时交付 HTTP/JSON 与原生 gRPC，POST JSON 不接受 query、未知字段、重复字段或 null 字段/列表条目。pageSize 缺省与显式 0 要区分；cursor 省略或空字符串表示第一页。
 
 Session 唯一载体沿用 [Session 载体](../../platform/contracts/auth-device-session-v1.md#session-载体)，只接受一个规范的 x-iwut-session。拒绝 Authorization、Cookie、x-iwut-identity 或 OAuth access token 作为替代/混合认证；Session token 不进入正文、路径或 query。
 
@@ -317,7 +317,7 @@ UC009 撤销当前认证凭据后，再用原 Session 重试会得到 SESSION_IN
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-020-manage-own-sessions.md` | 179 | `2dfeb0f184cd` |
+| `use-cases/UC-AUTH-020-manage-own-sessions.md` | 179 | `4854c03b98ef` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
 | `platform/contracts/auth-center-api-routing.md` | 121 | `2a07a5e76c81` |
