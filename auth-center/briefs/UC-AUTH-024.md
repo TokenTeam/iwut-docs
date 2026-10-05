@@ -74,7 +74,7 @@ Session 无效为 401；请求非法为 400；operation 不属于本人为统一
 
 ### 实现依赖与联动
 
-依赖 UC021–023 的治理、账号/资格版本和取消边界；App 归属屏障是未满足的硬依赖。实施时扩展 UC002、UC013、UC010、JWS/内部状态 Proto 和所有 App 状态消费者，明确 App 归属处置与历史审核政策；同步 brief。首版不增加重新申请、资格审批或旧数据迁移。本 UC 已 ACCEPTED，设计接受不等于依赖已实现。
+依赖 UC021–023 的治理、账号/资格版本和取消边界；App 归属屏障由已交付的 UC-APP-025 满足。实施时扩展 UC002、UC013、UC010、JWS/内部状态 Proto 和所有 App 状态消费者，明确 App 归属处置与历史审核政策；同步 brief。首版不增加重新申请、资格审批或旧数据迁移。本 UC 已 ACCEPTED，设计接受不等于依赖已实现。
 
 ## 业务规则（UC-AUTH-024 权威正文）
 
@@ -267,7 +267,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-024-withdraw-developer.md` | 91 | `f740c0b3737c` |
+| `use-cases/UC-AUTH-024-withdraw-developer.md` | 91 | `fd28fc8a43cb` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

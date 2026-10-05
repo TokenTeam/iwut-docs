@@ -49,7 +49,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | API、0018 migration、Domain/UseCase、双协议和完整后端验收已交付 |
 | [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（当前单 Application 解析范围；候选列表、详情、Filter 分发与前端独立交付） |
 | [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（当前普通 Catalog 后端范围；客户端 Filter 求值、“我参与的测试”、搜索与排名独立交付） |
-| [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `IN_PROGRESS` | 已固定与 Auth 的方法、屏障和清理契约 | 提供方/工作器、状态消费者、API 及真实联合验收；不含应用转让/关闭 |
+| [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `COMPLETE` | App b346cfa/API 1d7b87b；App 归属屏障、持久终局/个人清理、认证回查、0020 迁移、状态消费者、真实 Mongo 与 Auth＋App 验收 | 默认关闭；不含应用转让/关闭与生产部署 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC024 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -321,3 +321,9 @@ UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004�
 - 列表使用绑定 major/capabilities 的 opaque ApplicationId keyset，默认 20、上限 100，并受内部扫描和 3 MiB 建议响应预算约束。页面或详情在单个只读 MongoDB snapshot 中批量读取 Application、Profile/审核、Publication/History、Membership、Version/Review/OAuth 和 Filter；pointer、批准 snapshot 或 Filter 漂移会使整次查询返回 HTTP 500 / gRPC INTERNAL。
 - `0019_application_catalog_indexes` 仅增加 Stable 候选扫描的 partial index。测试覆盖匿名 Stable、Grey/Test 身份选择、不兼容候选排除、Filter 默认值、cursor、索引和 Profile 审核快照损坏，并把 UC024 加入真实 HTTP/gRPC E2E。
 - 首轮完整门禁在最后阶段发现迁移幂等测试的预期索引清单遗漏 0019 新索引；修正后失败用例及 UC024 Mongo/E2E 以 race 模式定向通过。最终 `make check-full` 21/21 通过，报告为服务工作树 `.artifacts/verification/20261004T084644Z-2ob_ltw7/report.json`，`changed_sources=[]`；Mongo/HTTP/gRPC race 全量阶段 `748.447s`。
+
+## 2026-10-05 UC025 归属退出协调
+
+App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gRPC 使用独立 service identity 权限；同账号屏障覆盖应用创建及 Tester 加入，保留永久退出封印，取消本次注销不得解除既有 Developer 退出封印。新增 0020 迁移、持久决定/重试及 App 个人状态清理；ACTIVE/DISABLED/CLOSED、WITHDRAWN 消费和历史审核处理同步验收。
+
+`make check-auth-app` 的 22 项检查均通过，报告 `.artifacts/verification/20261005T121507Z-mf6vlagz/report.json`；总门禁为 `source-changed`，唯一变化源是并行 Console 设计/AGENTS 导航所在的 docs 仓库，服务和 API 来源未变化。随后再次核验本轮 brief/registry/文档工具，不把该总门禁描述为无漂移通过。完整门禁固定 Auth UC024 `ab60f32`；后续针对最终 Auth `95a3c3a` 的真实 Auth–App 脚本再次通过，Auth 侧同时以本 App 版本完成退出、注销、回执丢失和恢复联调。此前迁移数量/并发 fixture 失败已修复并包含在最终完整门禁中。未 push，入口默认关闭；应用转让/关闭仍是独立能力。

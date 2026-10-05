@@ -546,7 +546,7 @@ Session 寿命、认证限额、MongoDB 并发实现与保留策略由 [UC-AUTH-
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-006-create-user.md` | 279 | `2b56bd4eb59d` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `3b39a5fc675f` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `4a8ab75ce6d1` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 287 | `60af229c87c6` |

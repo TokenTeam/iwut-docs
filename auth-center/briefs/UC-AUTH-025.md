@@ -98,7 +98,7 @@ Begin 不披露账号状态；Prepare 对未知目标、签名无效、凭据撤
 
 ### 实现依赖与联动
 
-硬依赖 UC021/022、UC023/024 的生命周期版本和取消规则、App 归属屏障/个人数据清理；上述尚未交付。还需全平台数据清单、备份/日志保留能力、终止清单恢复演练和禁用账号无密钥的人工受理流程。
+硬依赖 UC021/022、UC023/024 的生命周期版本和取消规则、App 归属屏障/个人数据清理；上述后端依赖已在本轮工作包交付。还需全平台数据清单、备份/日志保留能力、终止清单恢复演练和禁用账号无密钥的人工受理流程。
 
 实施时同步 UC002 的 CLOSED 主体查询及 App 历史审核处理、UC006–019/020–024 的 CLOSED 拒绝、UC013 handle 终止占用、UC015 pairwise 映射删除例外、所有审计保留规则、客户端引导、共享注销签名字节/公开向量及可执行 API。共享归属契约另与 App agent 对齐；不添加旧数据库迁移。本轮生成实施 brief 并交付后端；公网启用仍受恢复受理、数据清单和部署验收门禁约束。
 
@@ -337,7 +337,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `3b39a5fc675f` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `4a8ab75ce6d1` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

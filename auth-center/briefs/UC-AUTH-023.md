@@ -93,7 +93,7 @@ HTTP 与原生 gRPC 同时交付，Gateway 外部前缀 `/auth-center`，精确�
 - 真实 App 消费新的身份及 UC002 状态，验证暂停窗口与恢复；OAuth 不误撤销其他用户 grant，也不复活已有撤销 token。
 - 使用真实 Mongo、签名、生产 HTTP/gRPC、并发和未知提交测试。
 
-硬依赖 UC021 管理权限及 UC022 的 Auth 身份账号版本复核，两者尚未实现。UC024/025 未启用时无需提前存在退出操作，但启用它们前必须接入取消协调。实施时同步 UC013 的 developerRevision 初始化、UC002/UC010 状态消费说明、存储校验、API/路由和 brief；WITHDRAWN 的完整扩展由 UC024 负责。
+硬依赖 UC021 管理权限及 UC022 的 Auth 身份账号版本复核，两者已在本轮后端工作包中实现。UC024/025 未启用时无需提前存在退出操作，但启用它们前必须接入取消协调。实施时同步 UC013 的 developerRevision 初始化、UC002/UC010 状态消费说明、存储校验、API/路由和 brief；WITHDRAWN 的完整扩展由 UC024 负责。
 
 ## 业务规则（UC-AUTH-023 权威正文）
 
@@ -288,7 +288,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-023-suspend-and-restore-developer.md` | 112 | `bff16548144e` |
+| `use-cases/UC-AUTH-023-suspend-and-restore-developer.md` | 112 | `c8bff17cbf0e` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

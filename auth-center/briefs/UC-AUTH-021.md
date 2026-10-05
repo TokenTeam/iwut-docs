@@ -146,7 +146,7 @@ Get 对存在且结构合法的 USER 返回当前资格，允许返回 NONE 和 
 
 UC004、UC010、UC011/012 后端已具备基础；本用例不依赖后续账号或 Developer 治理 UC 的实现。没有 App 新接口依赖。
 
-实施时同步修改 UC004 的 bootstrap 权限集合与初始化定义、UC010 的 Auth audience 投影、共享路由/鉴权契约、治理权限存储校验、API、首次部署与恢复说明，并生成脚本 brief；不得把本文 PROPOSED 的四项集合视为现有 UC 已经接受的事实。后续禁用/注销用例接受前必须引用 BR-ADM-003 并验证共享协调边界。
+实施时同步修改 UC004 的 bootstrap 权限集合与初始化定义、UC010 的 Auth audience 投影、共享路由/鉴权契约、治理权限存储校验、API、首次部署与恢复说明，并生成脚本 brief；本用例已 ACCEPTED，四项固定集合与相关用例同步生效。后续禁用/注销用例接受前必须引用 BR-ADM-003 并验证共享协调边界。
 
 ## 业务规则（UC-AUTH-021 权威正文）
 
@@ -312,6 +312,6 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `eb95f9788b00` |
+| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

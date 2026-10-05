@@ -447,7 +447,7 @@ UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-013-apply-for-developer.md` | 203 | `1eb6329b5b9a` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `3b39a5fc675f` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `4a8ab75ce6d1` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 279 | `a96eacf40f23` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |

@@ -196,7 +196,7 @@ auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
 
 UC004、UC010、UC011/012 后端已具备基础；本用例不依赖后续账号或 Developer 治理 UC 的实现。没有 App 新接口依赖。
 
-实施时同步修改 UC004 的 bootstrap 权限集合与初始化定义、UC010 的 Auth audience 投影、共享路由/鉴权契约、治理权限存储校验、API、首次部署与恢复说明，并生成脚本 brief；不得把本文 PROPOSED 的四项集合视为现有 UC 已经接受的事实。后续禁用/注销用例接受前必须引用 BR-ADM-003 并验证共享协调边界。
+实施时同步修改 UC004 的 bootstrap 权限集合与初始化定义、UC010 的 Auth audience 投影、共享路由/鉴权契约、治理权限存储校验、API、首次部署与恢复说明，并生成脚本 brief；本用例已 ACCEPTED，四项固定集合与相关用例同步生效。后续禁用/注销用例接受前必须引用 BR-ADM-003 并验证共享协调边界。
 
 ## 变更记录
 

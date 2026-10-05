@@ -472,7 +472,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 162 | `98c33762540d` |
-| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `eb95f9788b00` |
+| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
 | `platform/contracts/auth-center-api-routing.md` | 110 | `a2999614c568` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |

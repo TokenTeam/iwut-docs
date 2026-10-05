@@ -754,7 +754,7 @@ HTTP 与 gRPC 的 reason/状态由 UC011 错误表拥有；未知枚举/字段�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 279 | `a96eacf40f23` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `3b39a5fc675f` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `4a8ab75ce6d1` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `use-cases/UC-AUTH-006-create-user.md` | 279 | `2b56bd4eb59d` |
