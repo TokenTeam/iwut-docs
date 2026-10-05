@@ -537,7 +537,7 @@ reason/HTTP/gRPC 状态遵守 UC012。超大消息使用 EMAIL_LOGIN_REQUEST_TOO
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 157 | `ca8b8577d101` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 157 | `2812fce31705` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 279 | `a96eacf40f23` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |

@@ -140,7 +140,7 @@ policyVersion 精确为 `account-closure-v1`。注销秘密摘要输入为 `Fram
 
 Begin 不披露账号状态；Prepare 对未知目标、签名无效、凭据撤销或版本变化统一 `ACCOUNT_CLOSURE_PROOF_INVALID`（401）。已证明本人后才能返回正常 BLOCKED 明细。非法输入 400；未知/不匹配令牌或 operation 统一 401；过期/版本或终局冲突 409；依赖/存储/未知提交 503；限流 429。数据损坏不能伪装为无归属或已清理。
 
-入口默认关闭 `AUTH_ACCOUNT_CLOSURE_ENABLED`，依赖用户认证基础、App provider 和清理工作器配置；特殊 DISABLED 注销不绕过功能门禁。Begin 复用设备认证的有界 IP/locator 容量，证明后采用有界账号桶，初始写每分钟 10、收据读取每分钟 30；读写令牌摘要、签名和任何秘密不进入日志。
+入口默认关闭 `AUTH_ACCOUNT_CLOSURE_ENABLED`，依赖用户认证基础、App provider 和清理工作器配置；特殊 DISABLED 注销不绕过功能门禁。 此开关控制 Begin/Prepare/Confirm；已有操作的 Cancel/Get 在配置完整的注销 runtime 中继续按专用令牌提供。配置独立终止目录即构建恢复与清理 runtime，关闭公网开关不能跳过启动重放或停止已提交任务。存在注销数据却缺失必要运行依赖时失败关闭，不静默忽略任务。Begin 复用设备认证的有界 IP/locator 容量，证明后采用有界账号桶，初始写每分钟 10、收据读取每分钟 30；读写令牌摘要、签名和任何秘密不进入日志。
 
 验收至少覆盖：ACTIVE/DISABLED 设备证明；无 Session、无邮箱普通用户；未知/撤销密钥与旧 LOGIN 签名；预览后权限/Developer/账号/凭据变化；SUSPENDED 无应用可终止而有应用阻止；最后管理员与并发交接；旧 JWS、token、邮箱 challenge/result 不复活；清理中断/重启/重复执行；邮箱释放后新注册不被旧任务删除；共享关联组并发注册；永久 handle/密钥占用；App 回执丢失；收据只读隔离；备份恢复重放终止清单。使用真实 Mongo 与双服务集成，不能只验证账号字段变成 CLOSED。
 
