@@ -77,3 +77,7 @@ Developer 自助申请的有效 Session 接口、nullable 状态及 HTTP 路由�
 - [App OAuth Client 提供方契约 v1](contracts/app-oauth-client-v1.md)：应用管理员管理接口、Auth 内部配置/secret 验证/授权上下文接口。
 - [OAuth 委托上下文与 Traefik v1](contracts/oauth-delegation-v1.md)：opaque access token 在线校验、专用 JWS、路由与三协议入口。
 - [工作包与依赖总览](../auth-center/design-notes/oauth-oidc-delivery-plan.md)：Auth 014–019、App 018–019、Gateway 002；不覆盖已接受的 Session/USER 契约。
+
+## 账号与 Developer 退出协调草案
+
+[账号退出时的 App 归属协调 v1](contracts/account-owner-exit-v1.md)（PROPOSED）供 Auth UC024/025 使用，定义归属准备屏障、持久终局和失败重试；App 权威用例与实现尚未交付，不改变现有 App API。

@@ -8,13 +8,13 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-023` |
-| Business Rule / Account Lifecycle | `BR-ACC-009` |
+| Use Case / Auth Center | `UC-AUTH-026` |
+| Business Rule / Account Lifecycle | `BR-ACC-015` |
 | Business Rule / Platform Administrator | `BR-ADM-009` |
 | Business Rule / OAuth Authorization | `BR-OAU-022` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
-| Business Rule / Developer Status | `BR-DEV-013` |
+| Business Rule / Developer Status | `BR-DEV-023` |
 | Business Rule / System Principal | `BR-SYS-005` |
 | Business Rule / Reviewer Permission | `BR-RVW-005` |
 | Business Rule / User Profile | `BR-UPF-012` |
@@ -46,10 +46,11 @@
 | `UC-AUTH-018` | 查看及收回本人应用授权 | `ACCEPTED` | [UC-AUTH-018](use-cases/UC-AUTH-018-revoke-application-authorization.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `ACCEPTED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-020` | 管理及回收同一账号的 Session | `PROPOSED` | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md) | — | 有效会话列表与明确 Session ID 集合的原子回收；不扩展到关联组或设备凭据。 |
-
 | `UC-AUTH-021` | 授予与撤销平台管理员资格 | `PROPOSED` | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md) | — | 固定管理集合、最后管理员保护及一次性 bootstrap；尚未实现。 |
-
 | `UC-AUTH-022` | 禁用与恢复用户账号 | `PROPOSED` | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md) | — | 账号版本隔离全部旧认证材料；依赖 UC021 及认证消费路径扩展，尚未实现。 |
+| `UC-AUTH-023` | 暂停与恢复 Developer 资格 | `PROPOSED` | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md) | — | 管理侧资格状态转换、独立版本及恢复门禁；尚未实现。 |
+| `UC-AUTH-024` | 本人退出 Developer 资格 | `PROPOSED` | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md) | — | WITHDRAWN、永久 handle 占用及 App 归属屏障；尚未实现。 |
+| `UC-AUTH-025` | 本人注销账号 | `PROPOSED` | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md) | — | 专用设备证明、不可恢复终止、最小保留及可重试清理；尚未实现。 |
 
 ## Business Rules
 
@@ -65,6 +66,12 @@
 | `BR-ACC-006` | 事务、并发与最后管理员保护 | Atomicity / Invariant | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-006) | — | — |
 | `BR-ACC-007` | 审计、查询与错误边界 | Audit / Privacy | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-007) | — | — |
 | `BR-ACC-008` | 完整交付与历史数据边界 | Delivery / Compatibility | [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-008) | — | — |
+| `BR-ACC-009` | 明确终止与不可恢复 | Lifecycle / Governance | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md#br-acc-009) | — | — |
+| `BR-ACC-010` | 用途绑定的近期设备证明 | Lifecycle / Governance | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md#br-acc-010) | — | — |
+| `BR-ACC-011` | 归属、治理与竞争 | Lifecycle / Governance | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md#br-acc-011) | — | — |
+| `BR-ACC-012` | 清理范围与最小永久保留 | Lifecycle / Governance | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md#br-acc-012) | — | — |
+| `BR-ACC-013` | 清理任务与备份恢复 | Lifecycle / Governance | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md#br-acc-013) | — | — |
+| `BR-ACC-014` | 结果、审计与第三方边界 | Lifecycle / Governance | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md#br-acc-014) | — | — |
 
 ### Platform Administrator (`BR-ADM`)
 
@@ -105,6 +112,16 @@
 | `BR-DEV-010` | 本人资格查询与门禁解释 | Query / Eligibility | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-010) | — | — |
 | `BR-DEV-011` | 开发者公开 ID 与唯一占用 | Identity / Uniqueness | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-011) | — | — |
 | `BR-DEV-012` | 已开通账号首次补设公开 ID | Compatibility / Atomicity | [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-012) | — | — |
+| `BR-DEV-013` | 独立资格与单调版本 | Lifecycle / Governance | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md#br-dev-013) | — | — |
+| `BR-DEV-014` | 保留普通功能与传播边界 | Lifecycle / Governance | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md#br-dev-014) | — | — |
+| `BR-DEV-015` | 暂停优先与退出竞争 | Lifecycle / Governance | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md#br-dev-015) | — | — |
+| `BR-DEV-016` | OAuth 恢复及 handle 连续性 | Lifecycle / Governance | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md#br-dev-016) | — | — |
+| `BR-DEV-017` | 审计与并发一致性 | Lifecycle / Governance | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md#br-dev-017) | — | — |
+| `BR-DEV-018` | 明确本人退出与稳定身份 | Lifecycle / Governance | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md#br-dev-018) | — | — |
+| `BR-DEV-019` | 先处置应用再退出 | Lifecycle / Governance | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md#br-dev-019) | — | — |
+| `BR-DEV-020` | 可取消准备与不可逆提交 | Lifecycle / Governance | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md#br-dev-020) | — | — |
+| `BR-DEV-021` | 状态消费与历史审核 | Lifecycle / Governance | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md#br-dev-021) | — | — |
+| `BR-DEV-022` | 原子性、查询与审计 | Lifecycle / Governance | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md#br-dev-022) | — | — |
 
 ### System Principal (`BR-SYS`)
 

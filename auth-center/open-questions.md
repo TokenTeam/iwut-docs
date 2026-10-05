@@ -8,6 +8,8 @@
 
 账号禁用与恢复已展开为 [UC022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)（PROPOSED）：选择 accountRevision 作为认证材料代际；UC021 前置能力及全部认证/OAuth 消费路径的版本校验是实施依赖。已签下游短期 JWS 和第三方自身登录态的边界见该 UC，不宣称全部即时登出。
 
+Developer 暂停/恢复、主动退出和本人注销已展开为 UC023–025（均 PROPOSED/NOT_STARTED）。退出首版不重新开通；注销允许保有有效设备密钥的禁用账号使用专用途径，先满足应用归属/管理员交接门禁。共同硬依赖见 [App 归属退出协调草案](../platform/contracts/account-owner-exit-v1.md)；WITHDRAWN/CLOSED 消费语义、数据清理与保留策略、终止清单及备份恢复必须在接受和上线前分别闭合，不能视为现有能力。
+
 ## 当前设计优先级（2026-09-27）
 
 用户决定先推进 OIDC 登录、用户 scope 授权和收回，支持 PUBLIC_PKCE 与 CONFIDENTIAL_SECRET。已建立 Auth014–019、App018–019、Gateway002 的 PROPOSED 设计，见 [工作包总览](design-notes/oauth-oidc-delivery-plan.md)。Gateway OAUTH2 仍未启用；生产 Catalog 初始装载、官方门户、资源委托验证及联合测试属于明确交付依赖，在线 Catalog 管理后移。TEST 之外的正式运行资格、原生无感浏览器 SSO 桥和动态资料 scope 仍需后续设计。

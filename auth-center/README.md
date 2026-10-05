@@ -54,6 +54,10 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 文档入口
 
+- [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md)：暂停与恢复 Developer 资格草案，PROPOSED。
+- [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md)：本人退出 Developer 资格草案，PROPOSED。
+- [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md)：本人注销账号草案，PROPOSED。
+
 - [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)：账号禁用与恢复草案，账号版本保证旧 Session/token 不复活；依赖 UC021，PROPOSED。
 
 - [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md)：管理员资格查询、授予/撤销、最后管理员保护与 一次性 bootstrap 草案，PROPOSED。
