@@ -122,6 +122,8 @@ expectedRevision 必须显式出现；ALL 不得同时提交 scopes，SCOPES 必
 
 默认活动存储清理目标为终止后 24 小时，超时告警并保留失败进度，绝不伪报完成。普通日志不应保存上述秘密，已经存在的可识别普通日志轮转上限 30 天；备份自然淘汰上限 30 天。部署未落实这些期限时不得展示该承诺或启用入口。
 
+首次管理员的全局 bootstrap 消费事实永久保留；其原事件到期删除时按 [管理员初始化规则](../use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005) 在同一认证事务写 auditRetiredAt 收据，防止清理后所有管理员操作因审计缺失被拒绝。此全局控制记录不属于账号资料墓碑。
+
 现有审计的 append-only 表示保留期内不可更新/删除；接受本 UC 时需要明确增加受控保留期清理例外，不能由普通业务账号任意删除审计。永久墓碑的字段就是允许保留的完整集合，不能附加整份 principal 或自由文本快照。
 
 ### 来自 `UC-AUTH-014`
@@ -577,7 +579,7 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-018-revoke-application-authorization.md` | 65 | `2e2a9e44c83f` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 155 | `6b6f375f1aad` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 157 | `ca8b8577d101` |
 | `use-cases/UC-AUTH-014-authorize-application.md` | 87 | `6d3e9fdcda39` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |

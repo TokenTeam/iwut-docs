@@ -558,7 +558,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 | --- | --- | --- |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 144 | `b87f14177d5a` |
 | `use-cases/UC-AUTH-022-disable-and-restore-user-account.md` | 183 | `f13eb70a5211` |
-| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `db46fb9b9689` |
+| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `eb95f9788b00` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `platform/contracts/auth-device-session-v1.md` | 123 | `501e81cdeb09` |

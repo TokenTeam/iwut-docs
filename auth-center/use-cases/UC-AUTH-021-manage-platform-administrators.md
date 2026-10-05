@@ -129,7 +129,7 @@ GRANT 将 NONE 转为 GRANTED；REVOKE 将 GRANTED 转为 NONE，删除整个管
 <a id="br-adm-005"></a>
 ### BR-ADM-005：一次性管理员初始化
 
-使用单个 `auth_runtime/platform-admin-bootstrap` 消费标记，记录 subjectAuthId、eventId、occurredAt 和管理集合版本 1。不增加第二个治理初始化标记。该记录表示首次初始化已经消费，不是权限来源副本，不因管理员被撤销而清除。
+使用单个 `auth_runtime/platform-admin-bootstrap` 消费标记，记录 subjectAuthId、eventId、occurredAt 和管理集合版本 1。不增加第二个治理初始化标记。该记录表示首次初始化已经消费，不是权限来源副本，不因管理员被撤销而清除。 原始 bootstrap 审计可受 UC025 的注销保留期清理约束；清理器只在原事件已满 180 天且原 subject 为合法 CLOSED 墓碑时，在同一 Auth 事务中设置此消费标记的 auditRetiredAt 并删除事件。消费校验在事件存在时仍严格核对；缺失事件仅在 auditRetiredAt 不早于 occurredAt+180 天、不晚于当前时间且 subject 仍为合法 CLOSED 时接受，任意缺失或损坏仍失败关闭。该收据不授予权限、不替代消费标记，不保存整份历史审计。
 
 首次部署使用显式停服运维命令，不启动监听，不接受远程匿名调用，不因 ENV 或普通启动自动授予：
 

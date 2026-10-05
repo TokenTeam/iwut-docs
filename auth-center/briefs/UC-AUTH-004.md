@@ -193,7 +193,7 @@ auth.reviewer.manage、app.profile.review 与 app.version.review 是三项独立
 <!-- 权威位置: use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005 -->
 ### BR-ADM-005：一次性管理员初始化
 
-使用单个 `auth_runtime/platform-admin-bootstrap` 消费标记，记录 subjectAuthId、eventId、occurredAt 和管理集合版本 1。不增加第二个治理初始化标记。该记录表示首次初始化已经消费，不是权限来源副本，不因管理员被撤销而清除。
+使用单个 `auth_runtime/platform-admin-bootstrap` 消费标记，记录 subjectAuthId、eventId、occurredAt 和管理集合版本 1。不增加第二个治理初始化标记。该记录表示首次初始化已经消费，不是权限来源副本，不因管理员被撤销而清除。 原始 bootstrap 审计可受 UC025 的注销保留期清理约束；清理器只在原事件已满 180 天且原 subject 为合法 CLOSED 墓碑时，在同一 Auth 事务中设置此消费标记的 auditRetiredAt 并删除事件。消费校验在事件存在时仍严格核对；缺失事件仅在 auditRetiredAt 不早于 occurredAt+180 天、不晚于当前时间且 subject 仍为合法 CLOSED 时接受，任意缺失或损坏仍失败关闭。该收据不授予权限、不替代消费标记，不保存整份历史审计。
 
 首次部署使用显式停服运维命令，不启动监听，不接受远程匿名调用，不因 ENV 或普通启动自动授予：
 
@@ -472,7 +472,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 162 | `98c33762540d` |
-| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `db46fb9b9689` |
+| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `eb95f9788b00` |
 | `platform/contracts/auth-center-api-routing.md` | 110 | `a2999614c568` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
