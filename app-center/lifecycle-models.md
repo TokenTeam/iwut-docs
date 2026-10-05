@@ -4,7 +4,7 @@
 
 ## 文档目的
 
-本文集中描述三个主要生命周期：ApplicationVersion、ApplicationProfileRevision 和 ApplicationPublication。它与 [Domain Model](domain-model.md) 配合阅读，不定义 HTTP、数据库或代码结构。
+本文集中描述 ApplicationVersion、ApplicationProfileRevision、ApplicationPublication 和 ApplicationAdminTransfer 生命周期。它与 [Domain Model](domain-model.md) 配合阅读，不定义 HTTP、数据库或代码结构。
 
 图中的“当前”迁移已经有 UC 和 BR 权威正文；“目标”迁移来自 [首版产品范围](product-scope.md)，仍需要未来 UC 建立具体业务规则。
 
@@ -191,6 +191,25 @@ Filter rule ──────── client-side display only
 | 修改 Filter 规则 | 立即发布新的 ApplicationFilterRevision；不改变服务端发布槽位或服务端授权 |
 
 已有约束继续以 [BR-REV-019](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-019)、[BR-PUB-004](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-004) 和 Tester 相关 BR 为权威来源；未来关系需要在各自 UC 中分配新 BR。
+
+## ApplicationAdminTransfer 生命周期
+
+[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 提出独立于 Application 当前结果的管理权转让状态机：
+
+```text
+                         ACCEPT
+                    ┌────────────► ACCEPTED
+                    │
+                    ├── REJECT ──► REJECTED
+CREATE ──► PENDING ─┤
+                    ├── CANCEL ──► CANCELLED
+                    │
+                    └── EXPIRE ──► EXPIRED
+```
+
+Application 只保存当前 adminId 和 ownershipRevision；PENDING 及终态历史由 ApplicationAdminTransfer 保存。只有 ACCEPTED 改变当前管理员，并在同一事务移动双方配额、处理 Tester 加入链接和接受者选择的 CONFIDENTIAL credential 行为。其他终态只结束待处理关系。
+
+PENDING 入站申请同时是目标账号 owner-exit 的 blocker；它不是 ApplicationVersion、ProfileRevision 或 Publication 状态。这一生命周期与其他管理员写操作共享 Application coordination fence，但不会自动改变任何 Version、Profile、Publication、Filter 或 Tester Membership。
 
 ## 后续设计顺序
 

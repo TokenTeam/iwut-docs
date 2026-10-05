@@ -16,6 +16,7 @@ AuthId ────────────────────────�
 DeveloperApplicationQuota                                      │
   └─ constrains                                                 │
        Application (aggregate root) ◄───────────────────────────┘
+         ├─ 0..* ApplicationAdminTransfer (aggregate root)
          ├─ 1 ApplicationProfile (aggregate root)
          │     ├─ 0..* ApplicationProfileRevision
          │     └─ 0..1 currentPublishedProfileRevisionId
@@ -46,11 +47,17 @@ CatalogResolver (domain/query service)
 
 ### Application
 
-Application 是稳定业务身份和当前管理权的聚合根。当前业务字段保持 `id`、`name`、`adminId`、`createdAt`；公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
+Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
 
 Application 提供其他聚合共同引用的 `applicationId` 和当前 `adminId`。版本序号与资料序号的分配器属于创建协调所需状态，不增加 Application 的公开业务含义。
 
-未来的改名、归档和管理员转让会扩展这一聚合的行为；它们不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
+管理员转让只改变 adminId 并增加 ownershipRevision；申请过程由独立 ApplicationAdminTransfer 保存。未来的改名、归档和关闭仍会扩展这一聚合的行为；它们不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
+
+### ApplicationAdminTransfer
+
+ApplicationAdminTransfer 是一次管理权转让过程的聚合根，保存 applicationId、fromAdminId、toAdminId、sourceOwnershipRevision、PENDING/终态和审计时间。它与 Application 分开，使拒绝、取消、过期及多次历史申请不会污染当前管理权结果。
+
+每个 Application 同时最多一个 PENDING 申请。目标显式接受时，应用服务在同一本地事务内协调 Transfer、Application、双方 DeveloperApplicationQuota、可选 OAuthClientCredential 和当前 TesterJoinLink；具体生命周期与原子边界以 [BR-APP-013](use-cases/UC-APP-026-transfer-application-administration.md#br-app-013)、[BR-APP-016](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016) 和 [BR-APP-018](use-cases/UC-APP-026-transfer-application-administration.md#br-app-018) 为准。
 
 ### DeveloperApplicationQuota
 
@@ -58,7 +65,7 @@ DeveloperApplicationQuota 以 `adminId` 为身份，表达一个 Developer 当�
 
 DeveloperApplicationQuota 自身的 `limit` 与 `usedCount` 是配额的唯一权威状态。缺少该聚合时，创建 Application 使用进程组装时注入的初始上限惰性建立它；该配置默认 10。已存在配额的 `limit` 不得被启动配置或创建路径覆盖，只能由未来的独立配额调整用例修改。具体配置契约、持久化形状由对应 UC 和 adapter 定义。
 
-创建 Application 时的名称占用、配额消费和 Application 创建具有一个业务一致性要求，权威规则见 [BR-APP-005](use-cases/UC-APP-001-create-application.md#br-app-005) 与 [BR-APP-006](use-cases/UC-APP-001-create-application.md#br-app-006)。管理员转让和归档出现后，需要重新判断配额归属与释放语义。
+创建 Application 时的名称占用、配额消费和 Application 创建具有一个业务一致性要求，权威规则见 [BR-APP-005](use-cases/UC-APP-001-create-application.md#br-app-005) 与 [BR-APP-006](use-cases/UC-APP-001-create-application.md#br-app-006)。管理员转让把一个占用从源配额原子移动到目标配额；目标容量不足或同名时拒绝，见 [BR-APP-016](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016)。归档或关闭是否释放配额仍需各自用例定义。
 
 ### ApplicationVersion
 
@@ -167,7 +174,8 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 
 | 实体 | 身份 | 直接归属 | 关键关系 |
 | --- | --- | --- | --- |
-| Application | ApplicationId | Application | 引用当前 adminId；被所有下级聚合引用 |
+| Application | ApplicationId | Application | 引用当前 adminId 和 ownershipRevision；被所有下级聚合引用 |
+| ApplicationAdminTransfer | ApplicationAdminTransferId | ApplicationAdminTransfer | 引用一个 Application、源/目标管理员和发起时 ownershipRevision |
 | ApplicationVersion | ApplicationVersionId | ApplicationVersion | 属于一个 Application；拥有多个 Review attempt |
 | ApplicationReview | ApplicationReviewId | ApplicationReview | 引用一个 Version；冻结 snapshot 并保存一次性决定 |
 | ApplicationVersionOAuthConfig | ApplicationVersionId | ApplicationVersion | 一对一依附 Version；与 Version 共用 revision 和审核生命周期 |
@@ -189,6 +197,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 | 值对象 | 含义 |
 | --- | --- |
 | ApplicationId、ApplicationVersionId 等 | 类型化 UUIDv7 身份，避免不同实体 ID 混用 |
+| ApplicationAdminTransferId | 类型化 UUIDv7 转让申请身份 |
 | AuthId | Auth 提供的不透明用户身份引用 |
 | ApplicationName | 技术名称原值及大小写不敏感比较键 |
 | VersionLabel | 开发者自用、大小写敏感且不参与排序的标签 |
@@ -233,7 +242,7 @@ ReviewPolicyProvider 与 ProfileReviewPolicyProvider 分别提供版本化的运
 - ApplicationProfile 在实现中是否能如 UC-APP-013 和 UC-APP-016 要求的那样，在并发创建和审核时同时保护单一 DRAFT/SUBMITTED 工作修订与当前公开指针。
 - ApplicationTesterAccess 在并发加入时是否应作为单一聚合，还是拆分后使用显式一致性协议。
 - ApplicationReview 作为独立聚合后，与 ApplicationVersion 状态迁移的本地原子协调方式。
-- 管理员转让如何跨 Application、Quota 及下级聚合重新建立权限与名称占用关系。
+- Application 关闭如何协调当前管理权、配额释放、OAuth/Tester 凭证和下级聚合终态。
 
 这些问题用于验证边界，不要求现在为每个问题创建独立 UC。
 

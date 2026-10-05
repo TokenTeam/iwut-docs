@@ -15,8 +15,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-026` |
-| Business Rule / Application | `BR-APP-012` |
+| Use Case / App Center | `UC-APP-027` |
+| Business Rule / Application | `BR-APP-020` |
 | Business Rule / Application Profile | `BR-PRF-041` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
 | Business Rule / Review | `BR-REV-029` |
@@ -61,6 +61,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-023` | 解析 Application 的统一启动目标 | `ACCEPTED` | [UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) | — | 统一 Test/Grey/Stable 单 Application 解析；后续 Catalog 列表与详情复用。 |
 | `UC-APP-024` | 查询普通 Application Catalog 列表与详情 | `ACCEPTED` | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) | — | Stable-backed 普通目录，组合公开 Profile、UC023 唯一目标与 Filter。 |
 | `UC-APP-025` | 协调账号归属退出与个人状态清理 | `ACCEPTED` | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md) | — | Auth 治理交付依赖，零归属屏障与注销个人状态清理。 |
+| `UC-APP-026` | 转让 Application 管理权 | `PROPOSED` | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) | — | 发起—接受转让、配额原子移动、账号退出屏障及可选 CONFIDENTIAL secret 轮换。 |
 
 ## Business Rules
 
@@ -79,6 +80,14 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-APP-009` | 单调终局与持久收敛 | Lifecycle / Consistency | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-009) | — | — |
 | `BR-APP-010` | 注销个人状态清理 | Lifecycle / Consistency | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-010) | — | — |
 | `BR-APP-011` | 退出与终止状态的消费 | Lifecycle / Consistency | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-011) | — | — |
+| `BR-APP-012` | 转让身份与参与者 | Identity / Authorization | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-012) | — | — |
+| `BR-APP-013` | 单一待处理申请与固定过期 | Lifecycle / Invariant | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-013) | — | — |
+| `BR-APP-014` | 新鲜 Auth 资格与有界竞态 | Authorization / Consistency | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-014) | — | — |
+| `BR-APP-015` | 管理权 revision 与共享写栅栏 | Concurrency / Consistency | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-015) | — | — |
+| `BR-APP-016` | 所有权、配额与名称原子转移 | Invariant / Consistency | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016) | — | — |
+| `BR-APP-017` | 账号退出屏障与确定锁序 | Concurrency / Consistency | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-017) | — | — |
+| `BR-APP-018` | Credential 与 Tester 链接处理 | Security / Lifecycle | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-018) | — | — |
+| `BR-APP-019` | 终态审计、幂等与最小披露 | Audit / Privacy | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md#br-app-019) | — | — |
 
 ### Application Profile (`BR-PRF`)
 

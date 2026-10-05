@@ -13,6 +13,7 @@ Identity Context
           ▼
 App Center Context
   ├─ 拥有并创建 Application
+  ├─ 拥有当前管理员、管理权 revision 与转让生命周期
   ├─ 拥有 ApplicationProfile、ApplicationProfileRevision 及其资料生命周期
   ├─ 拥有独立 ApplicationProfileReview 与提交快照
   ├─ 拥有 ApplicationVersion 及其审核生命周期
@@ -33,7 +34,8 @@ App Center Context
 - ApplicationProfileRevision 的身份、应用内 sequence、displayName、可空 description、可空不透明 icon、DRAFT/SUBMITTED/APPROVED/REJECTED 状态、revision，以及创建和最近修改审计；资料草稿采用完整替换和乐观并发。
 - 每次 ProfileReview attempt 的身份、不可变 displayName/description/icon 快照、sourceRevision、一次性 decision、状态，以及提交和决定审计。
 - ApplicationProfile 当前工作修订与公开资料指针，以及 App Center 自己的版本化 ProfileReviewPolicy。
-- 哪个 authId 是 Application 当前 adminId。
+- 哪个 authId 是 Application 当前 adminId，以及用于管理权 OCC 的 ownershipRevision。
+- 每次管理权转让的源、目标、PENDING/终态与审计；App Center 不把通知消息当作事实来源。
 - 同一 adminId 下哪些名称已经被占用。
 - adminId 当前的应用创建配额和已使用数量。
 - ApplicationVersion 的身份、应用内 sequence、入口 URL、RPC 兼容声明、scopes、依附 Version 的 pkce/confidential OAuth redirect URIs、审核状态、revision，以及创建和最近修改审计。
@@ -41,7 +43,7 @@ App Center Context
 - App Center 自己的版本化审核策略和检查项。
 - 每个 `(applicationId, rpcApiMajor)` 当前 test 发布指针、Publication revision 和修改审计。
 - 每次真实槽位变化的追加式 PublicationHistory。
-- 每个 Application 当前有效的 Tester 加入链接、secret 哈希，以及 `ROTATED/MANUAL` 撤销审计。
+- 每个 Application 当前有效的 Tester 加入链接、secret 哈希，以及 `ROTATED/MANUAL/ADMIN_TRANSFER` 撤销审计。
 - 哪些 authId 当前是某个 Application 的 Tester、历史 Membership episode，以及固定 100 人上限下的 ACTIVE Tester 数量。
 - 对给定 Tester、hostRpcApiMajor 和 hostCapabilities，哪个 test ApplicationVersion 构成当前 TestLaunchDescriptor。
 - 对给定 Application、可选可信用户身份、hostRpcApiMajor 和 hostCapabilities，哪个 Test、Grey 或 Stable ApplicationVersion 构成唯一 LaunchTargetDescriptor；该统一查询由 UC-APP-023 定义。
@@ -53,7 +55,7 @@ App Center Context
 
 - 当前调用者是否已经通过身份验证。
 - 当前调用者对应的 authId。
-- 当前调用者的 developerStatus；只有 `APPROVED` 可以执行当前已经定义的应用与版本管理写操作。
+- 当前账号的 accountStatus 与 developerStatus；只有 `ACTIVE`＋`APPROVED` 可以接受管理权转让，其他管理写操作沿各自 UC 的门禁。
 - Developer 申请状态及必要操作审计。
 - reviewer 权限；当前已定义 `app.version.review` 和独立的 `app.profile.review`。
 - 可供应用申请的 scope 名称与定义。
@@ -82,6 +84,8 @@ App Center Context
 - UC-APP-016 把 REJECTED ProfileRevision 定义为终态。网页端可以读取被拒绝内容并预填 UC-APP-013 创建表单；App Center 只看到一次普通的新建草稿，不提供恢复/复制接口或保存来源关系。
 - UC-APP-018 管理 Application＋channel 级稳定 client identity、状态与独立 secret credential；redirect URI 不复制到 registration，而由当前批准并发布的 ApplicationVersion 提供。
 - UC-APP-019 向 Auth 分别提供登录前运行配置和登录后用户授权上下文；运行 tuple 包含当前 profileRevisionId，展示资料只来自当前 APPROVED ProfileRevision，没有技术名称 fallback。Auth 拥有 consent、code、token 和 grant。
+- UC-APP-025 在 App 本地拥有账号归属退出 fence、决定与清理回执；Auth 拥有退出/关闭操作及其权威终局。
+- [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 在发起时新鲜检查目标、接受时新鲜批量检查源和目标的 Auth 状态；App 本地事务拥有转让终态、配额移动、名称冲突和 current admin 变化。它不要求 Auth 提供 revision 或 reservation，而是通过 UC025 的账号 fence 阻止退出终局竞态。
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。
 

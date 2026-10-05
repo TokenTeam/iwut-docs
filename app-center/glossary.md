@@ -34,7 +34,7 @@ Auth Center 分配的用户身份 ID。App Center 不负责生成或解释它。
 
 Application 当前管理员的 authId。创建时等于调用者 authId，不属于 CreateApplication 请求正文。
 
-adminId 不是永久绑定创建者的字段：学生毕业后可以通过未来的管理员转让用例把应用交给新的维护者。
+adminId 不是永久绑定创建者的字段：学生毕业等交接场景可以通过 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 提出的显式接受流程把应用交给新的维护者。
 
 ## name
 

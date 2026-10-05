@@ -43,7 +43,7 @@ Client User Data + Filter 规则 ───────────────�
 
 | 参与者 | 首版目标 |
 | --- | --- |
-| Developer / Application Admin | 登记应用，维护资料与版本，组织测试，控制发布和回退 |
+| Developer / Application Admin | 登记应用，维护资料与版本，组织测试，控制发布和回退，并通过目标显式接受转让管理权 |
 | Reviewer | 审核确定的版本或公开资料快照，并留下可追溯决定 |
 | Tester | 通过加入链接取得 Application 级测试资格，并使用兼容的 test 版本 |
 | 普通用户 | 在官方客户端中取得候选应用，由客户端执行 Filter 后看到最终列表，并使用已解析的发布目标 |
@@ -63,6 +63,8 @@ Auth 继续拥有身份、Developer 资格、Reviewer 权限和 Scope Catalog；
 - `ApplicationVersion`：入口 URL、RPC API 兼容范围、宿主能力要求、scopes，以及依附 Version 的 pkce/confidential redirect URI 配置。
 
 两类内容各自采用草稿修订和审核快照。公开资料修改不制造虚假的运行版本，运行版本发布也不隐式改变公开资料。
+
+当前管理员需要退出管理时，按 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 发起转让；目标管理员显式接受后，App Center 原子改变当前 adminId 和双方配额占用。接受者可以按实际服务器交接情况保留或轮换 CONFIDENTIAL secret。该流程与 UC-APP-025 的账号退出屏障配合，使有归属义务的账号先完成处置再退出。
 
 ### 2. Reviewer 作出审核决定
 
@@ -139,7 +141,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 
 | 能力 | 首版纳入 | 说明 |
 | --- | --- | --- |
-| Application Ownership | 是 | 创建、读取、受控修改、归档；管理员转让与 Application 级禁用是否进入首版见待定项 |
+| Application Ownership | 是 | 创建、账号退出屏障，以及 UC-APP-026 提出的显式接受式管理员转让；读取、改名、归档、关闭与 Application 级禁用继续独立设计 |
 | Public Profile | 是 | 资料草稿、审核、批准后自动公开和读取；icon 先作为不透明字符串 |
 | Version Review | 是 | Version 草稿、编辑、提交、决定、拒绝后恢复和查询 |
 | Tester Management | 是 | 加入链接、加入、移除、撤销链接和 test 目标解析 |
@@ -178,6 +180,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 7. 同一用户在相同 rollout 配置下得到稳定的 grey/stable 选择，Tester 则优先得到兼容 test；这些发布选择由服务端完成。
 8. 聚合查询为每个候选 Application 返回公开资料与唯一解析后的启动目标，不暴露无权访问的槽位或全部 Version。
 9. 审核、发布、回退和停止分发均能追溯到操作者、时间和对应快照。
+10. 当前管理员可以发起管理权转让；目标显式接受后，Application、双方配额、可选 credential 轮换和 Tester 加入链接处置原子收敛。
 
 ## 后续用例前仍需要决定
 
@@ -185,7 +188,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 
 1. **Application 归档与禁用细节**：方向已经确定为管理员日常 clear、普通归档和平台紧急 suspension/disable 分离；仍需确定 admin/SysAdmin 权限、审计、对既有 token 的影响和重新启用条件。
 2. **Test-only 查询契约**：已确定不混入普通公开目录，而进入独立的“我参与的测试”入口；仍需定义分页、移除后的可见性和无兼容 test 时的结果。
-3. **管理员转让**：它是首版 Ownership 的必要能力，还是进入首版后的下一阶段治理能力？
+3. **Application 关闭**：转让已经由 UC-APP-026 提案定义；不可逆关闭仍需决定跨 Auth/OAuth 收敛、名称保留、配额释放和审计完成条件。
 4. **受控图标资产**：当前 icon 只是可空不透明字符串；何时升级为受控资产、由谁拥有并如何迁移，等待真实需求后决定，不阻塞首版资料审核。
 5. **Filter 客户端交付**：App Center 规则模型与管理流程已由 UC-APP-022 确定；官方客户端仍需实现求值器、共享向量和管理 UI。
 

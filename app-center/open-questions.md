@@ -7,9 +7,6 @@
 - developerStatus 被暂停后，已有应用是否继续可用，还是只禁止创建和管理？
 - `app.version.review` 权限由谁申请、授予、暂停和撤销？当前只确认 Auth 是权限事实来源。
 - 是否需要双人批准、按 scope/风险等级分配 reviewer，或在高风险应用上升级审核？当前 UC-APP-005 只要求一名无利益冲突的 reviewer。
-- 管理员转让由原 admin 发起、新 admin 接受；是否允许平台 reviewer 强制取消或介入争议？
-- 管理员转让后，原 admin 与新 admin 的配额占用如何变化？当前建议在接受时检查新 admin 配额并转移一个占用。
-- 若新 admin 已有大小写等价的同名应用，转让是直接拒绝，还是允许同时改名？当前建议拒绝并要求先改名。
 
 ## 字段
 
@@ -49,5 +46,6 @@
 - Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。
 - Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
 - 管理员日常停止某个渠道使用 clear；平台紧急处置使用后续 Application 级 suspension/disable，不销毁原槽位配置。
+- [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 已提出普通管理员转让的完整规则：原管理员发起、目标显式接受，接受时原子移动配额；目标容量不足或存在同名应用时拒绝。平台强制转让、争议仲裁和紧急接管明确后置为独立治理用例。
 - [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受 Grey 首版只面向已登录用户、要求 Stable 基线、使用万分比和 per-rollout CSPRNG seed 的 HMAC 确定性分桶。
 - Filter 使用独立 ApplicationFilterRevision 方向，避免把规则塞进 Application 或强制与 Profile 同步修订；规则语言和审核策略仍待定义。
