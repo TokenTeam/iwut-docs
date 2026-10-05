@@ -46,7 +46,7 @@
 | `UC-AUTH-019` | 校验应用访问凭据并签发可信委托上下文 | `ACCEPTED` | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md) | — | OAuth/OIDC 新设计，未实现。 |
 | `UC-AUTH-020` | 管理及回收同一账号的 Session | `PROPOSED` | [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md) | — | 有效会话列表与明确 Session ID 集合的原子回收；不扩展到关联组或设备凭据。 |
 
-| `UC-AUTH-021` | 授予与撤销平台管理员资格 | `PROPOSED` | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md) | — | 固定管理集合、最后管理员保护及显式 bootstrap 迁移；尚未实现。 |
+| `UC-AUTH-021` | 授予与撤销平台管理员资格 | `PROPOSED` | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md) | — | 固定管理集合、最后管理员保护及一次性 bootstrap；尚未实现。 |
 
 ## Business Rules
 
@@ -54,11 +54,11 @@
 
 | ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| `BR-ADM-001` | 固定管理权限集合与历史兼容 | Authority / Compatibility | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-001) | — | — |
+| `BR-ADM-001` | 固定管理权限集合 | Authority / Boundary | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-001) | — | — |
 | `BR-ADM-002` | 在线授权与授予前置条件 | Authorization / Recovery | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-002) | — | — |
 | `BR-ADM-003` | 最后有效管理员保护 | Invariant / Concurrency | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-003) | — | — |
 | `BR-ADM-004` | 共享版本、原子审计与重试 | Atomicity / Audit | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-004) | — | — |
-| `BR-ADM-005` | 首次初始化与旧部署迁移 | Bootstrap / Migration | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005) | — | — |
+| `BR-ADM-005` | 一次性管理员初始化 | Bootstrap / Lifecycle | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005) | — | — |
 | `BR-ADM-006` | 最小查询与错误披露 | Query / Privacy | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-006) | — | — |
 | `BR-ADM-007` | 签发投影与撤销边界 | Projection / Revocation | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-007) | — | — |
 | `BR-ADM-008` | 恢复与初始化的边界 | Recovery / Boundary | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-008) | — | — |

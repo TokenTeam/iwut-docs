@@ -22,7 +22,7 @@
 
 ## 一、授予与撤销平台管理员资格
 
-已展开为 [UC021](../use-cases/UC-AUTH-021-manage-platform-administrators.md)，状态 PROPOSED。固定权限集合、在线授权、最后管理员保护、共享版本、首次初始化和旧部署显式迁移以该 UC 的 BR-ADM-001–008 为草案规则来源；本计划不重复定义。UC004 继续只管理应用审核权限，既有接受契约需在 UC021 接受时同步调整。
+已展开为 [UC021](../use-cases/UC-AUTH-021-manage-platform-administrators.md)，状态 PROPOSED。固定权限集合、在线授权、最后管理员保护、共享版本、一次性首次初始化以该 UC 的 BR-ADM-001–008 为草案规则来源；本计划不重复定义。UC004 继续只管理应用审核权限，既有接受契约需在 UC021 接受时同步调整。
 
 ## 二、禁用与恢复账号
 
