@@ -26,7 +26,7 @@
 | [UC-AUTH-024](../use-cases/UC-AUTH-024-withdraw-developer.md) | `ACCEPTED` | `COMPLETE` | Auth ab60f32/API 5144c8c；本人 Session 准备/确认/取消/查询、WITHDRAWN、永久 handle、独立 App provider、持久协调及回执丢失恢复；真实 Auth＋App 验收 | 公网默认关闭；名下应用转让/关闭仍为独立 UC，存在归属时明确阻止退出；Gateway/客户端独立交付 |
 | [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `ACCEPTED` | `COMPLETE` | Auth 95a3c3a/API 4babe5b；ACTIVE/DISABLED 专用设备证明、明确确认、CLOSED、永久占用、独立终止清单与离线恢复、分批清理及保留期、App 回执；真实 Mongo/HTTP/gRPC/双服务与恢复测试 | 公网默认关闭；生产数据清单、30 天备份/日志期限、独立清单恢复演练和无密钥受理仍是启用门禁，Gateway/客户端独立交付 |
 | [UC-AUTH-026](../use-cases/UC-AUTH-026-apply-application-closure.md) | `ACCEPTED` | `COMPLETE` | 永久 application tombstone/receipt、UC014–019 最终 gate、同 Session/设备 challenge32 P-256 reauth、5 分钟 app.close proof、Mongo/transport/config/Wire 与真实 App UC027 proof/Apply/Get/故障恢复联调；服务 `5d26cb3`、权限修复 `4f661e4`、API `1ba1b81` | 生产/Gateway 入口默认关闭；网络帧级丢包和双边进程重启演练独立交付 |
-| [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `ACCEPTED` | `IN_PROGRESS` | suspend/restore 两项独立权限、平台管理员授权但不自动获得操作权、共享权限版本和 App audience 投影契约 | Auth/API 后端实施中；App Center 暂停/恢复状态机与实际 consumer 联合验收独立交付 |
+| [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `ACCEPTED` | `COMPLETE` | Auth `e110b97` / API `359c6bc`；suspend/restore 两项独立权限、HTTP/gRPC、当前管理员复核、邮箱恢复门禁、ACTIVE/DISABLED 语义、共享权限版本与原子审计、严格解码、有界限流及 App audience 投影；真实 Mongo/Wire 验收 | 公网开关默认关闭；Gateway 路由、客户端治理界面、App Center 暂停/恢复状态机与实际 consumer 联合验收独立交付 |
 
 ## 实现边界
 
@@ -282,3 +282,15 @@ UC020 原为 PROPOSED，本轮接受为 ACCEPTED，并以脚本生成 brief。su
 - `AUTH_SESSION_MANAGEMENT_ENABLED` 默认 false；启用需用户端点。全局/来源/账号分钟配额默认 600/120/30，来源与账号共享 4096 个有界桶。部署说明见 Auth README。
 - 验证通过 `make check`、`make test-race`、全量 `MONGODB_INTEGRATION_PORT=37044 make test-mongo`（真实 Mongo 包约 236 秒，生产 Wire/实际 App 包约 111 秒；App `b346cfa`）。新增真实 Mongo race 专项覆盖事务重试、未知提交、审计回滚、回收/LRU 并发、禁用/恢复/CLOSED、邮箱来源、损坏数据和有界分页。真实 HTTP/gRPC 验证同关联不同账号隔离、只读 LRU、当前 Session 拒绝、幂等回收、同凭据重新登录及开关关闭。
 - 48 份 brief 漂移检查、registry、Auth 协议向量和 30 项文档工具测试通过。Gateway 实际 DIRECT 清单、三协议联合验收及客户端界面保持独立交付；COMPLETE 指本次 Auth/API 后端工作包。
+
+## 2026-10-06 UC027 应用运维权限交付
+
+UC027 保持 ACCEPTED。独立 API `359c6bc` 定义两个精确 HTTP/gRPC 方法；Auth `e110b97` 完成 Domain/Port/UseCase、Mongo、传输、配置、生产 Wire 和运行说明。提交均为本地提交，未 push 或部署。
+
+- `app.application.suspend` 与 `app.application.restore` 独立授予，不进入 UC021 固定管理员 bundle，不复用 UC004 Reviewer API，也不成为 OAuth scope。管理入口要求 Auth-audience JWS 中的 `auth.platform-admin.manage`，并在同一事务在线复核完整当前管理员资格。
+- 授予要求 ACTIVE 用户、已验证邮箱和可用邮箱恢复；查询与撤销接受 ACTIVE/DISABLED 用户。禁用账号保留 granted 事实但 effective 为 false，恢复账号后按原授权重新生效；CLOSED/SYSTEM 不可作为目标。
+- 两项权限与 UC004 共用 `auth_principals.permissions`、`permissionRevision`、`authenticationFence` 和 `auth_permission_audit_events`。并发修改使用同一 CAS，权限变化与不可变审计同事务；变更不授予 Reviewer、管理员或 Developer 能力。
+- UC010 仅向 App audience 投影两项权限，Auth audience 不包含它们。真实生产 Wire 验证生成 HTTP 客户端、原生 gRPC、缺失/错误 audience、普通用户拒绝、授予/撤销和新签发 JWS；Mongo 验证并发 CAS、邮箱门禁、禁用账号撤销及共享审计。
+- 验证通过 `make check`、`make test-race`、全量 `make test-mongo`；真实 Mongo 包约 234 秒，生产 Wire 包约 120 秒。Proto 漂移检查通过，临时 Mongo 容器已清理。
+
+COMPLETE 指 Auth/API 后端工作包。Gateway SESSION 路由、客户端管理界面以及 App 对 suspend/restore 权限的业务状态机仍按 UC 边界独立交付。
