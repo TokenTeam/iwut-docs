@@ -26,6 +26,11 @@
 - Application 级禁用应如何区分 admin 与 SysAdmin 权限，如何影响 Catalog、运行解析和现有 Publication，并允许怎样的重新启用？紧急隐藏公开资料归于此能力，不增加 ProfileRevision REVOKED 状态。
 - AI DRAFT 审核未来读取哪些内容、如何标识模型与策略版本、结论是建议还是门禁，以及怎样进入生命周期？当前不实现，也不增加 AI 状态或自动迁移。
 
+## 阻塞 UC-APP-027 接受的问题
+
+- Auth Center 需要建立哪个消费方 UC，把 application closure tombstone 加入 authorize、code exchange、token/refresh 和在线 delegation 的最终检查边界，并与 [Application Closure v1](../platform/contracts/application-closure-v1.md) 对齐？
+- 近期重新认证证明由 Auth 哪个入口签发、使用何种稳定 claim/签名/防重放契约？普通 App USER JWS 的 iat 不能证明刚发生了新认证。UC027 已确定 proof 必须绑定 `purpose=app.close`、applicationId、sub、jti，且最大 5 分钟，但双方可执行契约尚未建立。
+
 ## 旧实现（已确认，不再开放）
 
 - 旧实现已雪藏；当前实现是 App Center 首个正式版本，不作为独立第二代 module。
@@ -47,5 +52,6 @@
 - Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
 - 管理员日常停止某个渠道使用 clear；平台紧急处置使用后续 Application 级 suspension/disable，不销毁原槽位配置。
 - [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 已提出普通管理员转让的完整规则：原管理员发起、目标显式接受，接受时原子移动配额；目标容量不足或存在同名应用时拒绝。平台强制转让、争议仲裁和紧急接管明确后置为独立治理用例。
+- [UC-APP-027](use-cases/UC-APP-027-close-application.md) 已确定不可逆关闭语义：CLOSING 立即停止本地运行与管理、释放配额和 owner 义务，保留历史与技术名称；Auth application tombstone 持久收敛后进入 CLOSED。归档、临时停用和平台 suspension 仍是不同的可恢复能力。
 - [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受 Grey 首版只面向已登录用户、要求 Stable 基线、使用万分比和 per-rollout CSPRNG seed 的 HMAC 确定性分桶。
 - Filter 使用独立 ApplicationFilterRevision 方向，避免把规则塞进 Application 或强制与 Profile 同步修订；规则语言和审核策略仍待定义。

@@ -33,7 +33,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 | 能力 | 核心问题 | 主要业务事实 | 首版输出 |
 | --- | --- | --- | --- |
-| Application Ownership | 这个 Application 是谁管理的，如何安全转让，是否仍处于可管理状态？ | Application、adminId、ownershipRevision、技术名称、创建配额与 ApplicationAdminTransfer | 稳定 Application 身份与当前管理权 |
+| Application Ownership | 这个 Application 是谁管理的，如何安全转让，是否仍处于可管理状态？ | Application、adminId、ownershipRevision、lifecycle、技术名称、创建配额、ApplicationAdminTransfer 与 ApplicationClosure | 稳定 Application 身份、当前管理权与终止状态 |
 | Version Review | 哪个网页版本具备怎样的运行声明，它是否取得发布资格？ | ApplicationVersion、ApplicationReview、审核快照与决定 | 具备或不具备发布资格的 Version |
 | Runtime Publication | 对某个 RPC API major，服务端当前选择哪些 test/grey/stable 目标？ | ApplicationPublication、槽位、grey rollout、PublicationHistory | 服务端发布目标与可追溯变化 |
 | Public Profile | 普通用户看到的应用资料是哪一版，它是否已经获准公开？ | ApplicationProfileRevision、资料审核与当前公开修订 | 已发布目录资料 |
@@ -47,9 +47,9 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 负责 Application 的稳定身份和管理权，是其他能力的共同根。创建配额属于这项能力，因为它约束 Developer 可以拥有多少个 Application，而不是版本或发布数量。
 
-当前设计包括创建、账号归属退出屏障，以及 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 提出的发起—接受式管理员转让。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，接受时原子移动配额和名称占用，并通过 ownershipRevision 与共享写栅栏保护并发。
+当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 提出的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。
 
-管理视图、受控改名、归档、Application 级禁用和不可逆关闭仍需后续用例。
+管理视图、受控改名、可恢复归档和 Application 级临时/平台禁用仍需后续用例；UC027 仍待跨服务依赖完成和评审接受。
 
 这项能力不保存公开 displayName、简介、运行入口、发布槽位或 Tester 列表。
 
@@ -140,7 +140,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 
 | 能力 | 已有设计证据 | 首版主要缺口 |
 | --- | --- | --- |
-| Application Ownership | `UC-APP-001`、`UC-APP-025`；`UC-APP-026` 提案 | 管理查询、改名、归档、Application 级禁用与不可逆关闭；UC026 待评审接受与实现 |
+| Application Ownership | `UC-APP-001`、`UC-APP-025`；`UC-APP-026`、`UC-APP-027` 提案 | 管理查询、改名、归档、Application 级禁用；UC026/027 待评审接受与实现，UC027 还依赖 Auth 关闭消费方与近期认证证明契约 |
 | Version Review | `UC-APP-002`–`UC-APP-006` | 查询、草稿放弃、批准资格撤销或紧急处置 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023` | test 清空、Application 级停止分发 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md)；`UC-APP-024` 的公开读取 | 受控 icon 资产为以后扩展 |

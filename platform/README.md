@@ -81,3 +81,7 @@ Developer 自助申请的有效 Session 接口、nullable 状态及 HTTP 路由�
 ## 账号与 Developer 退出协调草案
 
 [账号退出时的 App 归属协调 v1](contracts/account-owner-exit-v1.md)（ACCEPTED）供 Auth UC024/025 使用，定义归属准备屏障、持久终局和失败重试；App UC025 已接受并进入实现，提供方扩展与 Auth 同批交付。
+
+## Application 关闭协调提案
+
+[Application 关闭协调 v1](contracts/application-closure-v1.md)（PROPOSED）定义 App UC027 在本地不可逆关闭后，如何让 Auth 持久建立 applicationId 级授权撤销栅栏并通过幂等回执收敛。Auth 消费方 UC 与近期重新认证证明契约尚待建立，因此当前不能进入实现。

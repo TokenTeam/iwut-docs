@@ -135,6 +135,7 @@ CREATE ──► PENDING ─┤
 - 操作发现已经到期时返回 EXPIRED 终态，不覆盖为 REJECTED 或 CANCELLED。
 - 同一参与者重复请求相同终态返回既有结果；试图把其他终态改写为本终态返回冲突。
 - REJECTED、CANCELLED、EXPIRED 立即不再构成目标账号的 pending owner-exit blocker。
+- 当前管理员依据 UC-APP-027 把 Application 推进为 CLOSING 时，可以在同一本地事务把 PENDING 申请改为 CANCELLED，`resolutionCause=APPLICATION_CLOSURE`；这不是参与者主动取消，也没有恢复入口。
 
 ## 业务规则
 
@@ -216,6 +217,7 @@ ApplicationAdminTransfer {
   expiresAt
   resolvedAt?
   resolvedBy?
+  resolutionCause?: EXPLICIT | APPLICATION_CLOSURE
   confidentialCredentialHandling?
 }
 ```
@@ -228,7 +230,7 @@ ApplicationAdminTransfer {
 - `(fromAdminId, requestedAt, transferId)` 与 `(applicationId, requestedAt, transferId)` 审计索引。
 - validator 固定参与者非空且不同、正 sourceOwnershipRevision、状态与 resolved 字段组合、`requestedAt < expiresAt`。
 
-ACCEPTED、REJECTED、CANCELLED 都要求 resolvedAt 与 resolvedBy；EXPIRED 要求 resolvedAt 且 resolvedBy 为空。只有 ACCEPTED 保存 confidentialCredentialHandling，其他状态必须为空。
+ACCEPTED、REJECTED、CANCELLED 都要求 resolvedAt 与 resolvedBy；EXPIRED 要求 resolvedAt 且 resolvedBy 为空。只有 ACCEPTED 保存 confidentialCredentialHandling，其他状态必须为空。CANCELLED 保存 resolutionCause：普通源管理员取消为 EXPLICIT；UC027 的关闭事务为 APPLICATION_CLOSURE。其他终态不保存该字段。
 
 App migration 0021 为既有 Application 回填 `ownershipRevision=1`，创建转让集合及索引，并把 TesterJoinLink `revocationReason` 扩展为 `ROTATED | MANUAL | ADMIN_TRANSFER`。ADMIN_TRANSFER 与 MANUAL 一样要求 `replacedByJoinLinkId=null`。
 

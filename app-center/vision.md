@@ -6,7 +6,7 @@
 
 App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户端在后续用例中发现和使用这些应用。
 
-本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018 至 UC-APP-024 扩展 OAuth/OIDC、Stable、Grey、Filter、统一运行解析和普通 Catalog，UC-APP-025/026 补齐账号归属退出协调和管理权转让：
+本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018 至 UC-APP-024 扩展 OAuth/OIDC、Stable、Grey、Filter、统一运行解析和普通 Catalog，UC-APP-025 至 027 补齐账号归属退出协调、管理权转让和不可逆关闭：
 
 > 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；版本批准只产生渠道无关的发布资格，已有当前公开资料的应用可以把已批准版本放入 Test 或 Stable，并在 Stable 基线上配置 Grey；Tester 通过加入链接获得 Test 资格，App Center 为匿名或已认证用户统一解析兼容的 Test、Grey 或 Stable 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope、公开展示资料和用户资格快照。
 
@@ -24,6 +24,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 系统为 Application 分配 UUIDv7 ID。
 - Application 记录当前 adminId；创建时它等于调用者的 authId。
 - 当前管理员可以向另一名 ACTIVE＋APPROVED Developer 发起转让；目标显式接受后，App Center 原子移动 adminId 与双方配额，并按接受者选择保留或轮换 CONFIDENTIAL secret，见 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md)。
+- 当前管理员经近期重新认证可以不可逆关闭 Application；CLOSING 立即停止本地运行与管理能力并释放 owner 义务，Auth 永久撤销完成后收敛 CLOSED，见 [UC-APP-027](use-cases/UC-APP-027-close-application.md)。
 - 每个开发者受到可调整的应用创建配额限制；初始配额暂定为 10。
 - 记录 createdAt，作为后续审计事实。
 - name 在同一 adminId 下按大小写不敏感方式唯一。
@@ -54,7 +55,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 
 ## 当前尚未设计或明确后置的能力
 
-- Application 管理查询、受控改名、归档、禁用和恢复；物理删除仍不是首版目标。
+- Application 管理查询、受控改名、可恢复归档、临时/平台禁用和恢复；物理删除仍不是首版目标。不可逆关闭由 UC-APP-027 提案覆盖，但尚待跨服务依赖和评审。
 - 协作者和角色。
 - 平台强制转让、争议仲裁和管理员紧急接管；普通双方确认式转让由 UC-APP-026 提案定义。
 - ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销。
@@ -70,7 +71,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 ## 本轮成功标准
 
 - UC-APP-001 的输入、结果和错误没有歧义。
-- Application 的稳定身份字段及 UC026 提出的 ownershipRevision 有明确来源。
+- Application 的稳定身份字段、UC026 提出的 ownershipRevision，以及 UC027 提出的 lifecycleStatus/lifecycleRevision 有明确来源。
 - adminId 不能由请求正文冒充，必须取自已验证的 authId。
 - 只有 Auth 中开发者资格为 APPROVED 的调用者可以创建。
 - `(adminId, name)` 唯一约束和创建配额在并发请求下仍成立。

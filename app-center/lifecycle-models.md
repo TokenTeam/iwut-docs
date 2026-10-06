@@ -211,15 +211,28 @@ Application 只保存当前 adminId 和 ownershipRevision；PENDING 及终态历
 
 PENDING 入站申请同时是目标账号 owner-exit 的 blocker；它不是 ApplicationVersion、ProfileRevision 或 Publication 状态。这一生命周期与其他管理员写操作共享 Application coordination fence，但不会自动改变任何 Version、Profile、Publication、Filter 或 Tester Membership。
 
+## Application 关闭生命周期
+
+[UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出 Application 自身的不可逆生命周期：
+
+```text
+ACTIVE ── START CLOSURE ──► CLOSING ── AUTH APPLIED ──► CLOSED
+                                  │
+                                  └── 持久重试，不允许取消或恢复
+```
+
+ACTIVE 是全部现有管理与运行入口的前置状态。进入 CLOSING 的本地事务立即释放配额和 owner 义务、终止 PENDING 转让与 ACTIVE 加入链接、禁用 OAuth client slot，并让 Catalog、启动解析、审核决定和全部写入口失败。Version、Profile、Review、Publication、Filter 与 Membership 保留原状态作审计。
+
+CLOSED 只表示 Auth 已保存永久 application tombstone 并返回持久回执；它不是首次停止运行的时刻。App→Auth 失败会使状态长期保持 CLOSING，但不能恢复 ACTIVE。ApplicationId、原命名空间技术名称及 Auth sector/sub 映射都不复用。
+
 ## 后续设计顺序
 
 生命周期缺口适合按依赖顺序补齐，但暂不在本文分配 UC 编号：
 
 1. 设计 test clear。
-2. Application 归档、普通停用与平台紧急 suspension。
-3. 统一服务端启动目标解析与 Catalog Query Contract。
-4. 官方客户端 Filter 求值器和普通 Catalog 分发。
-5. Public Profile 的普通用户对外查询契约；受控 icon 资产语义留待真实需求出现后扩展。
-6. APPROVED Version 的资格撤销及引用处置。
+2. Application 归档、普通停用与平台紧急 suspension；不可逆关闭已经由 UC-APP-027 提案覆盖。
+3. 官方客户端 Filter 求值器与“我参与的测试”入口。
+4. 受控 icon 资产语义。
+5. APPROVED Version 的资格撤销及引用处置。
 
 在这些边界确定前，不需要继续按顺序预写二十多个完整 UC。

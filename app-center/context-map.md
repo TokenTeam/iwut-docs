@@ -8,12 +8,15 @@
 Identity Context
   ├─ 提供可信 authId + developerStatus
   ├─ 提供可信 reviewer permissions
-  └─ 拥有 Auth Scope Catalog
+  ├─ 拥有 Auth Scope Catalog
+  ├─ 签发绑定用途的近期重新认证证明
+  └─ 拥有 Application 授权关闭 tombstone
           │
           ▼
 App Center Context
   ├─ 拥有并创建 Application
   ├─ 拥有当前管理员、管理权 revision 与转让生命周期
+  ├─ 拥有 Application 生命周期与不可逆关闭过程
   ├─ 拥有 ApplicationProfile、ApplicationProfileRevision 及其资料生命周期
   ├─ 拥有独立 ApplicationProfileReview 与提交快照
   ├─ 拥有 ApplicationVersion 及其审核生命周期
@@ -36,6 +39,7 @@ App Center Context
 - ApplicationProfile 当前工作修订与公开资料指针，以及 App Center 自己的版本化 ProfileReviewPolicy。
 - 哪个 authId 是 Application 当前 adminId，以及用于管理权 OCC 的 ownershipRevision。
 - 每次管理权转让的源、目标、PENDING/终态与审计；App Center 不把通知消息当作事实来源。
+- Application 的 ACTIVE/CLOSING/CLOSED、lifecycleRevision、关闭过程、Auth 回执与本地持久重试事实。
 - 同一 adminId 下哪些名称已经被占用。
 - adminId 当前的应用创建配额和已使用数量。
 - ApplicationVersion 的身份、应用内 sequence、入口 URL、RPC 兼容声明、scopes、依附 Version 的 pkce/confidential OAuth redirect URIs、审核状态、revision，以及创建和最近修改审计。
@@ -43,7 +47,7 @@ App Center Context
 - App Center 自己的版本化审核策略和检查项。
 - 每个 `(applicationId, rpcApiMajor)` 当前 test 发布指针、Publication revision 和修改审计。
 - 每次真实槽位变化的追加式 PublicationHistory。
-- 每个 Application 当前有效的 Tester 加入链接、secret 哈希，以及 `ROTATED/MANUAL/ADMIN_TRANSFER` 撤销审计。
+- 每个 Application 当前有效的 Tester 加入链接、secret 哈希，以及 `ROTATED/MANUAL/ADMIN_TRANSFER/APPLICATION_CLOSURE` 撤销审计。
 - 哪些 authId 当前是某个 Application 的 Tester、历史 Membership episode，以及固定 100 人上限下的 ACTIVE Tester 数量。
 - 对给定 Tester、hostRpcApiMajor 和 hostCapabilities，哪个 test ApplicationVersion 构成当前 TestLaunchDescriptor。
 - 对给定 Application、可选可信用户身份、hostRpcApiMajor 和 hostCapabilities，哪个 Test、Grey 或 Stable ApplicationVersion 构成唯一 LaunchTargetDescriptor；该统一查询由 UC-APP-023 定义。
@@ -59,6 +63,8 @@ App Center Context
 - Developer 申请状态及必要操作审计。
 - reviewer 权限；当前已定义 `app.version.review` 和独立的 `app.profile.review`。
 - 可供应用申请的 scope 名称与定义。
+- Application 级永久授权关闭 tombstone，以及它对 grant、code、token、refresh、introspection/delegation 的最终执行。
+- 能证明用户刚完成认证、绑定具体高风险用途与 Application 的短时证明。
 
 客户端在申请时进行弱师生验证，平台后续自行联系确认。App Center 使用 authId 和 developerStatus，但不接收学生证明材料，也不重新执行验证。
 
@@ -86,6 +92,7 @@ App Center Context
 - UC-APP-019 向 Auth 分别提供登录前运行配置和登录后用户授权上下文；运行 tuple 包含当前 profileRevisionId，展示资料只来自当前 APPROVED ProfileRevision，没有技术名称 fallback。Auth 拥有 consent、code、token 和 grant。
 - UC-APP-025 在 App 本地拥有账号归属退出 fence、决定与清理回执；Auth 拥有退出/关闭操作及其权威终局。
 - [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 在发起时新鲜检查目标、接受时新鲜批量检查源和目标的 Auth 状态；App 本地事务拥有转让终态、配额移动、名称冲突和 current admin 变化。它不要求 Auth 提供 revision 或 reservation，而是通过 UC025 的账号 fence 阻止退出终局竞态。
+- [UC-APP-027](use-cases/UC-APP-027-close-application.md) 在 App 本地拥有不可逆生命周期、即时运行 gate、配额释放和关闭收敛任务；Auth 依据 [Application Closure v1](../platform/contracts/application-closure-v1.md) 拥有永久授权 tombstone。两边以稳定 closureId 和持久回执收敛，不共享事务。Auth 还需建立近期重新认证证明的可执行契约，普通 App USER JWS 不能替代它。
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。
 

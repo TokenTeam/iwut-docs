@@ -17,6 +17,7 @@ DeveloperApplicationQuota                                      │
   └─ constrains                                                 │
        Application (aggregate root) ◄───────────────────────────┘
          ├─ 0..* ApplicationAdminTransfer (aggregate root)
+         ├─ 0..1 ApplicationClosure (aggregate root)
          ├─ 1 ApplicationProfile (aggregate root)
          │     ├─ 0..* ApplicationProfileRevision
          │     └─ 0..1 currentPublishedProfileRevisionId
@@ -47,11 +48,11 @@ CatalogResolver (domain/query service)
 
 ### Application
 
-Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
+Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`；[UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出 `lifecycleStatus` 和 `lifecycleRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
 
 Application 提供其他聚合共同引用的 `applicationId` 和当前 `adminId`。版本序号与资料序号的分配器属于创建协调所需状态，不增加 Application 的公开业务含义。
 
-管理员转让只改变 adminId 并增加 ownershipRevision；申请过程由独立 ApplicationAdminTransfer 保存。未来的改名、归档和关闭仍会扩展这一聚合的行为；它们不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
+管理员转让只改变 adminId 并增加 ownershipRevision；申请过程由独立 ApplicationAdminTransfer 保存。关闭只推进 Application 生命周期；过程、Auth 回执与收敛状态由独立 ApplicationClosure 保存。它们都不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
 
 ### ApplicationAdminTransfer
 
@@ -59,13 +60,19 @@ ApplicationAdminTransfer 是一次管理权转让过程的聚合根，保存 app
 
 每个 Application 同时最多一个 PENDING 申请。目标显式接受时，应用服务在同一本地事务内协调 Transfer、Application、双方 DeveloperApplicationQuota、可选 OAuthClientCredential 和当前 TesterJoinLink；具体生命周期与原子边界以 [BR-APP-013](use-cases/UC-APP-026-transfer-application-administration.md#br-app-013)、[BR-APP-016](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016) 和 [BR-APP-018](use-cases/UC-APP-026-transfer-application-administration.md#br-app-018) 为准。
 
+### ApplicationClosure
+
+ApplicationClosure 是一个 Application 唯一且不可逆的关闭过程，保存 source ownership/lifecycle revision、发起者、绑定的 high-risk proof jti、`CLOSING/CLOSED`、Auth 撤销回执和时间。它与 Application 分开，使持久重试元数据和跨服务回执不会污染稳定身份，同时以 applicationId 唯一约束保证关闭不能重建或取消。
+
+进入 CLOSING 的本地事务协调 Application、管理员配额、PENDING ApplicationAdminTransfer、ACTIVE TesterJoinLink 和现有 OAuth client slot；Version/Profile/Review/Publication/Filter/Membership 保留原样。App 本地 gate 立即生效，Auth application tombstone 经持久协议异步收敛；权威边界见 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 和 [Application Closure v1](../platform/contracts/application-closure-v1.md)。
+
 ### DeveloperApplicationQuota
 
 DeveloperApplicationQuota 以 `adminId` 为身份，表达一个 Developer 当前可拥有的 Application 数量上限和占用量。它独立于单个 Application，因为约束跨越同一管理员的全部 Application。
 
 DeveloperApplicationQuota 自身的 `limit` 与 `usedCount` 是配额的唯一权威状态。缺少该聚合时，创建 Application 使用进程组装时注入的初始上限惰性建立它；该配置默认 10。已存在配额的 `limit` 不得被启动配置或创建路径覆盖，只能由未来的独立配额调整用例修改。具体配置契约、持久化形状由对应 UC 和 adapter 定义。
 
-创建 Application 时的名称占用、配额消费和 Application 创建具有一个业务一致性要求，权威规则见 [BR-APP-005](use-cases/UC-APP-001-create-application.md#br-app-005) 与 [BR-APP-006](use-cases/UC-APP-001-create-application.md#br-app-006)。管理员转让把一个占用从源配额原子移动到目标配额；目标容量不足或同名时拒绝，见 [BR-APP-016](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016)。归档或关闭是否释放配额仍需各自用例定义。
+创建 Application 时的名称占用、配额消费和 Application 创建具有一个业务一致性要求，权威规则见 [BR-APP-005](use-cases/UC-APP-001-create-application.md#br-app-005) 与 [BR-APP-006](use-cases/UC-APP-001-create-application.md#br-app-006)。管理员转让把一个占用从源配额原子移动到目标配额；目标容量不足或同名时拒绝，见 [BR-APP-016](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016)。不可逆关闭在进入 CLOSING 时释放一个配额占用但永久保留原命名空间技术名称，见 [BR-APP-025](use-cases/UC-APP-027-close-application.md#br-app-025)；未来归档是否释放配额仍需独立定义。
 
 ### ApplicationVersion
 
@@ -176,6 +183,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 | --- | --- | --- | --- |
 | Application | ApplicationId | Application | 引用当前 adminId 和 ownershipRevision；被所有下级聚合引用 |
 | ApplicationAdminTransfer | ApplicationAdminTransferId | ApplicationAdminTransfer | 引用一个 Application、源/目标管理员和发起时 ownershipRevision |
+| ApplicationClosure | ApplicationClosureId | ApplicationClosure | 一个 Application 至多一个；保存不可逆关闭与 Auth 回执 |
 | ApplicationVersion | ApplicationVersionId | ApplicationVersion | 属于一个 Application；拥有多个 Review attempt |
 | ApplicationReview | ApplicationReviewId | ApplicationReview | 引用一个 Version；冻结 snapshot 并保存一次性决定 |
 | ApplicationVersionOAuthConfig | ApplicationVersionId | ApplicationVersion | 一对一依附 Version；与 Version 共用 revision 和审核生命周期 |
@@ -198,6 +206,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 | --- | --- |
 | ApplicationId、ApplicationVersionId 等 | 类型化 UUIDv7 身份，避免不同实体 ID 混用 |
 | ApplicationAdminTransferId | 类型化 UUIDv7 转让申请身份 |
+| ApplicationClosureId | 类型化 UUIDv7 关闭过程身份 |
 | AuthId | Auth 提供的不透明用户身份引用 |
 | ApplicationName | 技术名称原值及大小写不敏感比较键 |
 | VersionLabel | 开发者自用、大小写敏感且不参与排序的标签 |
@@ -242,7 +251,7 @@ ReviewPolicyProvider 与 ProfileReviewPolicyProvider 分别提供版本化的运
 - ApplicationProfile 在实现中是否能如 UC-APP-013 和 UC-APP-016 要求的那样，在并发创建和审核时同时保护单一 DRAFT/SUBMITTED 工作修订与当前公开指针。
 - ApplicationTesterAccess 在并发加入时是否应作为单一聚合，还是拆分后使用显式一致性协议。
 - ApplicationReview 作为独立聚合后，与 ApplicationVersion 状态迁移的本地原子协调方式。
-- Application 关闭如何协调当前管理权、配额释放、OAuth/Tester 凭证和下级聚合终态。
+- ApplicationClosure 的实现是否能以有界本地事务完成配额、转让、链接和 OAuth slot 的原子变化，并在 Auth 长期故障时可靠保留收敛任务。
 
 这些问题用于验证边界，不要求现在为每个问题创建独立 UC。
 

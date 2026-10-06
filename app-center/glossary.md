@@ -8,7 +8,7 @@
 
 由开发者在 App Center 中创建的一条应用记录。
 
-当前只包含 id、name、adminId 和 createdAt。它不表示公开目录资料、OAuth client、可发布版本、审核对象或运行中的服务。
+当前已接受模型包含 id、name、adminId 和 createdAt；UC026/027 分别提出 ownershipRevision 与 lifecycleStatus/lifecycleRevision。它不表示公开目录资料、OAuth client、可发布版本、审核对象或运行中的服务。
 
 ## Application ID
 
@@ -35,6 +35,14 @@ Auth Center 分配的用户身份 ID。App Center 不负责生成或解释它。
 Application 当前管理员的 authId。创建时等于调用者 authId，不属于 CreateApplication 请求正文。
 
 adminId 不是永久绑定创建者的字段：学生毕业等交接场景可以通过 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 提出的显式接受流程把应用交给新的维护者。
+
+## Application Lifecycle
+
+[UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出的 `ACTIVE/CLOSING/CLOSED`。ACTIVE 允许现有管理与运行；CLOSING 表示不可逆关闭已经本地生效并等待 Auth 持久撤销回执；CLOSED 表示跨服务收敛完成。CLOSING 和 CLOSED 都不能恢复。
+
+## ApplicationClosure
+
+一个 Application 唯一的不可逆关闭过程，保存发起者、源 revision、开始时间、一次性近期认证证明 jti、Auth application tombstone 回执和最终完成时间。它不是可恢复归档、普通 job 或物理删除记录。
 
 ## name
 
@@ -186,7 +194,7 @@ Tester 不要求 Developer 资格。用户通过有效 Tester Join Link 自助�
 
 允许已登录用户在后续用例中自行加入 Application Tester 列表的匿名凭证，不指定目标 authId，也不等于一条 Tester Membership。
 
-每个 Application 同时最多有一个 ACTIVE Tester Join Link。App Center 只保存 secret 哈希和链接生命周期；二维码只是 joinUrl 的展示形式。轮换会以 `ROTATED` 原子撤销旧链接并创建新链接；显式撤销使用 `MANUAL` 且不创建替代链接。两种撤销都不会新增或移除 Tester。
+每个 Application 同时最多有一个 ACTIVE Tester Join Link。App Center 只保存 secret 哈希和链接生命周期；二维码只是 joinUrl 的展示形式。轮换会以 `ROTATED` 原子撤销旧链接并创建新链接；显式撤销使用 `MANUAL` 且不创建替代链接；管理员转让和 Application 关闭分别使用 `ADMIN_TRANSFER`、`APPLICATION_CLOSURE`。这些撤销都不会新增或移除 Tester。
 
 ## Tester Membership Episode
 
