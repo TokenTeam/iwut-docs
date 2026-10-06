@@ -8,8 +8,9 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-027` |
+| Use Case / Auth Center | `UC-AUTH-028` |
 | Business Rule / Account Lifecycle | `BR-ACC-015` |
+| Business Rule / Application Operations Permission | `BR-AOP-007` |
 | Business Rule / Platform Administrator | `BR-ADM-009` |
 | Business Rule / OAuth Authorization | `BR-OAU-029` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
@@ -52,6 +53,7 @@
 | `UC-AUTH-024` | 本人退出 Developer 资格 | `ACCEPTED` | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md) | — | WITHDRAWN、永久 handle 占用及 App 归属屏障；尚未实现。 |
 | `UC-AUTH-025` | 本人注销账号 | `ACCEPTED` | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md) | — | 专用设备证明、不可恢复终止、最小保留及可重试清理；尚未实现。 |
 | `UC-AUTH-026` | 应用关闭授权收敛与近期认证 | `ACCEPTED` | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md) | — | App 关闭 tombstone、OAuth 最终栅栏和同设备新挑战 app.close proof；[brief](briefs/UC-AUTH-026.md)。 |
+| `UC-AUTH-027` | 管理应用平台运维权限 | `PROPOSED` | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | — | 独立 suspend/restore 权限；平台管理员管理但不自动获得操作权，App 暂停状态机独立设计。 |
 
 ## Business Rules
 
@@ -86,6 +88,17 @@
 | `BR-ADM-006` | 最小查询与错误披露 | Query / Privacy | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-006) | — | — |
 | `BR-ADM-007` | 签发投影与撤销边界 | Projection / Revocation | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-007) | — | — |
 | `BR-ADM-008` | 恢复与初始化的边界 | Recovery / Boundary | [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-008) | — | — |
+
+### Application Operations Permission (`BR-AOP`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-AOP-001` | 精确运维权限与职责分离 | Authorization / Separation | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-001) | — | — |
+| `BR-AOP-002` | 平台管理员负责授权但不自动获得操作权 | Authority / Boundary | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-002) | — | — |
+| `BR-AOP-003` | 共享权限版本与原子审计 | Consistency / Audit | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-003) | — | — |
+| `BR-AOP-004` | Audience 最小投影与撤销窗口 | Projection / Revocation | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-004) | — | — |
+| `BR-AOP-005` | 账号状态、恢复能力与授权事实 | Lifecycle / Recovery | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-005) | — | — |
+| `BR-AOP-006` | Auth 授权与 App 业务状态分离 | Boundary / Ownership | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-006) | — | — |
 
 ### Scope Catalog (`BR-SCP`)
 
@@ -202,12 +215,13 @@
 
 ## 维护规则
 
-- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU/ADM/ACC-NNN`。
+- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU/ADM/ACC/AOP-NNN`。
 - `UPF` 表示 User Profile，覆盖用户资料字段定义与资料编辑；不复用 App Center 的 `PRF` 编号空间。
 - `REG` 表示用户创建及初始关联，`LGN` 表示登录、Session 与设备凭据撤销规则。
 - `EML` 表示邮箱绑定与激活；邮箱认证用例不得复用绑定挑战。
 - `ADM` 表示平台管理员资格、初始化及治理连续性约束。
 - `ACC` 表示账号生命周期与账号级认证材料失效。
+- `AOP` 表示由 Auth 管理并投影给 App Center 的平台级 Application 运维权限。
 - BR 状态继承其权威 UC，不单独保存状态。
 - 新增编号时同时更新 Next ID；废弃编号不得重新分配。
 - 同一规则只有一个权威正文；其它 bounded context 通过链接引用。
