@@ -7,6 +7,7 @@ Gateway 为终端到平台服务的请求提供路由选择、认证编排与转
 - [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md)：按同一路由选择 DIRECT/SESSION 策略，认证成功后由 Router 转发；OAUTH2 保留但不启用。
 - [UC-GW-002](use-cases/UC-GW-002-authenticate-oauth-and-forward.md)：对应用 Bearer 做在线委托交换，并显式接入 OIDC 标准 HTTP 端点；当前为提案。
 - [UC-GW-003](use-cases/UC-GW-003-attach-optional-user-identity.md)：公开读取允许匿名，提供 Session 时必须完整验证并附加 USER JWS；已接受并完成本地实现验证。
+- [外部 API 接入清单](external-api-exposure-inventory.md)：从 Auth/App UC 与统一 API 派生全部终端 method/path，记录身份策略、当前 route 与待接入缺口。
 - [设计注册表](design-registry.md)：本 context 的 UC/BR 索引。
 - [实现状态](implements/README.md)：设计与实现分别跟踪。
 - [ADR-GW-001](adr/ADR-GW-001-runtime-routing-and-protocol-adapters.md)：固定 Go module、Traefik 版本、协议适配和路由目录。
