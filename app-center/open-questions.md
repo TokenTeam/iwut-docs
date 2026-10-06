@@ -23,7 +23,7 @@
 - CreateApplication 是否需要幂等键？当前名称唯一规则已能阻止同名重复创建，暂不增加幂等键。
 - reviewer decision 当前写入后不可修改。资料审核不建立系统内申诉渠道，开发者需要直接联系平台；若未来确有纠错需求，应设计独立、可审计行为，不原地改写 decision。
 - test 槽位清空是普通管理员行为，还是在存在活跃 tester 时需要额外确认？
-- Application 级禁用应如何区分 admin 与 SysAdmin 权限，如何影响 Catalog、运行解析和现有 Publication，并允许怎样的重新启用？紧急隐藏公开资料归于此能力，不增加 ProfileRevision REVOKED 状态。
+- Application 管理员日常可恢复归档应如何影响 Catalog、配额和 owner 义务？平台紧急暂停/恢复已经与它分离并由 UC-APP-028 提案定义。
 - AI DRAFT 审核未来读取哪些内容、如何标识模型与策略版本、结论是建议还是门禁，以及怎样进入生命周期？当前不实现，也不增加 AI 状态或自动迁移。
 
 ## UC-APP-027 已关闭的接受依赖
@@ -50,8 +50,9 @@
 
 - Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。
 - Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
-- 管理员日常停止某个渠道使用 clear；平台紧急处置使用后续 Application 级 suspension/disable，不销毁原槽位配置。
+- 管理员日常停止某个渠道使用 clear；平台紧急处置使用 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 的 Application 级 suspension，不销毁原槽位配置。
 - [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 已提出普通管理员转让的完整规则：原管理员发起、目标显式接受，接受时原子移动配额；目标容量不足或存在同名应用时拒绝。平台强制转让、争议仲裁和紧急接管明确后置为独立治理用例。
 - [UC-APP-027](use-cases/UC-APP-027-close-application.md) 已确定不可逆关闭语义：CLOSING 立即停止本地运行与管理、释放配额和 owner 义务，保留历史与技术名称；Auth application tombstone 持久收敛后进入 CLOSED。归档、临时停用和平台 suspension 仍是不同的可恢复能力。
+- [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 已形成平台 suspension/restore 提案：两项精确权限独立授予，平台可用状态与关闭正交，暂停保留配置和 owner 义务，统一阻止 Catalog、启动、Tester Join 与 OAuth 在线 provider，恢复后重新执行当前资格。管理员日常归档仍另立用例。
 - [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受 Grey 首版只面向已登录用户、要求 Stable 基线、使用万分比和 per-rollout CSPRNG seed 的 HMAC 确定性分桶。
 - Filter 使用独立 ApplicationFilterRevision 方向，避免把规则塞进 Application 或强制与 Profile 同步修订；规则语言和审核策略仍待定义。

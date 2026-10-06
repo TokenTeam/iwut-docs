@@ -18,6 +18,7 @@ DeveloperApplicationQuota                                      │
        Application (aggregate root) ◄───────────────────────────┘
          ├─ 0..* ApplicationAdminTransfer (aggregate root)
          ├─ 0..1 ApplicationClosure (aggregate root)
+         ├─ 0..* ApplicationPlatformOperationEvent (append-only audit)
          ├─ 1 ApplicationProfile (aggregate root)
          │     ├─ 0..* ApplicationProfileRevision
          │     └─ 0..1 currentPublishedProfileRevisionId
@@ -48,11 +49,11 @@ CatalogResolver (domain/query service)
 
 ### Application
 
-Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`；[UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出 `lifecycleStatus` 和 `lifecycleRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
+Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`；[UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出 `lifecycleStatus` 和 `lifecycleRevision`；[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出与关闭正交的 `platformAvailabilityStatus` 和 `platformAvailabilityRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
 
 Application 提供其他聚合共同引用的 `applicationId` 和当前 `adminId`。版本序号与资料序号的分配器属于创建协调所需状态，不增加 Application 的公开业务含义。
 
-管理员转让只改变 adminId 并增加 ownershipRevision；申请过程由独立 ApplicationAdminTransfer 保存。关闭只推进 Application 生命周期；过程、Auth 回执与收敛状态由独立 ApplicationClosure 保存。它们都不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
+管理员转让只改变 adminId 并增加 ownershipRevision；申请过程由独立 ApplicationAdminTransfer 保存。关闭只推进 Application 生命周期；过程、Auth 回执与收敛状态由独立 ApplicationClosure 保存。暂停/恢复只改变平台可用状态，完整运维历史由 append-only ApplicationPlatformOperationEvent 保存。它们都不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
 
 ### ApplicationAdminTransfer
 
@@ -65,6 +66,12 @@ ApplicationAdminTransfer 是一次管理权转让过程的聚合根，保存 app
 ApplicationClosure 是一个 Application 唯一且不可逆的关闭过程，保存 source ownership/lifecycle revision、发起者、绑定的 high-risk proof jti、`CLOSING/CLOSED`、Auth 撤销回执和时间。它与 Application 分开，使持久重试元数据和跨服务回执不会污染稳定身份，同时以 applicationId 唯一约束保证关闭不能重建或取消。
 
 进入 CLOSING 的本地事务协调 Application、管理员配额、PENDING ApplicationAdminTransfer、ACTIVE TesterJoinLink 和现有 OAuth client slot；Version/Profile/Review/Publication/Filter/Membership 保留原样。App 本地 gate 立即生效，Auth application tombstone 经持久协议异步收敛；权威边界见 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 和 [Application Closure v1](../platform/contracts/application-closure-v1.md)。
+
+### ApplicationPlatformOperationEvent
+
+ApplicationPlatformOperationEvent 是一次平台暂停或恢复的不可变业务审计，保存 applicationId、SUSPEND/RESTORE、操作人、reason、前后状态/revision 和发生时间。当前结果仍由 Application 的 `platformAvailabilityStatus/platformAvailabilityRevision` 表达；事件历史不用于重放聚合，也不能覆盖当前状态。
+
+平台 availability 与 `ACTIVE/CLOSING/CLOSED` 正交：只有 ACTIVE 可以暂停或恢复；暂停保留 owner 义务和全部下级配置，允许管理员继续修复；Catalog、启动解析、Tester 新增加入和 OAuth provider 统一消费门禁。恢复只解除门禁，各路径继续按当前事实判断资格，见 [BR-APP-029](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-029)、[BR-APP-031](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-031) 和 [BR-APP-033](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-033)。
 
 ### DeveloperApplicationQuota
 
@@ -130,7 +137,7 @@ UC-APP-015 已把 ApplicationProfileReview 定义为引用 ProfileRevision 的�
 
 批准资料需要原子协调 ApplicationProfileRevision、ApplicationProfileReview、`workingProfileRevisionId` 与 `currentPublishedProfileRevisionId`；拒绝也会清空工作指针。权威规则见 [BR-PRF-026](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-026)、[BR-PRF-030](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030) 与 [BR-PRF-032](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-032)。被拒绝内容的重新编辑不是领域迁移：网页端预填创建表单，App Center 按照普通创建处理一个新 ProfileRevision。
 
-公开资料的紧急隐藏不扩展为 ProfileRevision 的 REVOKED 状态。后续应由 Application Ownership 定义 Application 级禁用：Application admin 或 SysAdmin 发起，并统一影响目录与运行分发。其权限、审计、重新启用及槽位处理尚未具体化为 UC。
+公开资料的紧急隐藏不扩展为 ProfileRevision 的 REVOKED 状态。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格；暂停不改写资料指针或审核历史。
 
 ### ApplicationPublication
 
@@ -184,6 +191,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 | Application | ApplicationId | Application | 引用当前 adminId 和 ownershipRevision；被所有下级聚合引用 |
 | ApplicationAdminTransfer | ApplicationAdminTransferId | ApplicationAdminTransfer | 引用一个 Application、源/目标管理员和发起时 ownershipRevision |
 | ApplicationClosure | ApplicationClosureId | ApplicationClosure | 一个 Application 至多一个；保存不可逆关闭与 Auth 回执 |
+| ApplicationPlatformOperationEvent | ApplicationPlatformOperationEventId | Application | 记录一次平台暂停或恢复；当前状态仍在 Application |
 | ApplicationVersion | ApplicationVersionId | ApplicationVersion | 属于一个 Application；拥有多个 Review attempt |
 | ApplicationReview | ApplicationReviewId | ApplicationReview | 引用一个 Version；冻结 snapshot 并保存一次性决定 |
 | ApplicationVersionOAuthConfig | ApplicationVersionId | ApplicationVersion | 一对一依附 Version；与 Version 共用 revision 和审核生命周期 |

@@ -15,8 +15,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-028` |
-| Business Rule / Application | `BR-APP-029` |
+| Use Case / App Center | `UC-APP-029` |
+| Business Rule / Application | `BR-APP-038` |
 | Business Rule / Application Profile | `BR-PRF-041` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
 | Business Rule / Review | `BR-REV-029` |
@@ -63,6 +63,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-025` | 协调账号归属退出与个人状态清理 | `ACCEPTED` | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md) | — | Auth 治理交付依赖，零归属屏障与注销个人状态清理。 |
 | `UC-APP-026` | 转让 Application 管理权 | `ACCEPTED` | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) | — | 发起—接受转让、配额原子移动、账号退出屏障及可选 CONFIDENTIAL secret 轮换。 |
 | `UC-APP-027` | 关闭 Application | `ACCEPTED` | [UC-APP-027](use-cases/UC-APP-027-close-application.md) | — | 不可逆 CLOSING/CLOSED、本地即时隔离、配额释放和持久 Auth 授权撤销收敛。 |
+| `UC-APP-028` | 暂停与恢复 Application | `PROPOSED` | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) | — | 平台运维精确权限、正交可用状态、运行/OAuth 在线门禁与可恢复配置保留。 |
 
 ## Business Rules
 
@@ -98,6 +99,15 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-APP-026` | 持久收敛、幂等与未知结果 | Consistency / Idempotency | [UC-APP-027](use-cases/UC-APP-027-close-application.md#br-app-026) | — | — |
 | `BR-APP-027` | 共享写栅栏与竞态 | Concurrency / Consistency | [UC-APP-027](use-cases/UC-APP-027-close-application.md#br-app-027) | — | — |
 | `BR-APP-028` | 终态审计、隐私与错误边界 | Audit / Privacy | [UC-APP-027](use-cases/UC-APP-027-close-application.md#br-app-028) | — | — |
+| `BR-APP-029` | 关闭生命周期与平台可用性正交 | Lifecycle / Invariant | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-029) | — | — |
+| `BR-APP-030` | 精确且独立的运维权限 | Authorization / Separation | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-030) | — | — |
+| `BR-APP-031` | 权威读取的即时平台门禁 | Availability / Security | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-031) | — | — |
+| `BR-APP-032` | 依附配置和 owner 义务保持不变 | Boundary / Invariant | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-032) | — | — |
+| `BR-APP-033` | 恢复不等于运行资格 | Lifecycle / Validation | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-033) | — | — |
+| `BR-APP-034` | OAuth 在线失效与有界残余 | Security / Revocation | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-034) | — | — |
+| `BR-APP-035` | 独立 OCC 与共享写栅栏 | Concurrency / Consistency | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-035) | — | — |
+| `BR-APP-036` | 原子审计、告警和隐私 | Audit / Operations / Privacy | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-036) | — | — |
+| `BR-APP-037` | 无自动恢复与失败关闭 | Availability / Consistency | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-037) | — | — |
 
 ### Application Profile (`BR-PRF`)
 

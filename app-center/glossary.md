@@ -8,7 +8,7 @@
 
 由开发者在 App Center 中创建的一条应用记录。
 
-当前已接受模型包含 id、name、adminId 和 createdAt；UC026/027 分别提出 ownershipRevision 与 lifecycleStatus/lifecycleRevision。它不表示公开目录资料、OAuth client、可发布版本、审核对象或运行中的服务。
+当前已接受模型包含 id、name、adminId 和 createdAt；UC026/027 分别提出 ownershipRevision 与 lifecycleStatus/lifecycleRevision；UC028 提出正交的 platformAvailabilityStatus/platformAvailabilityRevision。它不表示公开目录资料、OAuth client、可发布版本、审核对象或运行中的服务。
 
 ## Application ID
 
@@ -43,6 +43,14 @@ adminId 不是永久绑定创建者的字段：学生毕业等交接场景可以
 ## ApplicationClosure
 
 一个 Application 唯一的不可逆关闭过程，保存发起者、源 revision、开始时间、一次性近期认证证明 jti、Auth application tombstone 回执和最终完成时间。它不是可恢复归档、普通 job 或物理删除记录。
+
+## Platform Availability
+
+[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出的 `AVAILABLE/SUSPENDED` 平台可用状态。它与 Application Lifecycle 正交：SUSPENDED 临时阻止目录、启动、Tester 新增加入和 OAuth 在线资格，但保留 owner 义务和全部配置；Restore 只解除门禁，不保证当前配置满足运行资格。
+
+## ApplicationPlatformOperationEvent
+
+一次平台 SUSPEND 或 RESTORE 的不可变审计，记录 Application、操作人、reason、前后状态/revision 和时间。它不代替 Application 当前状态，也不向普通 Catalog 或 OAuth 客户端披露。
 
 ## name
 

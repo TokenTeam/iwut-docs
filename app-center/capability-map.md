@@ -16,7 +16,8 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
                                   │
                                   ▼
                       Application Ownership
-                    ├── Public Profile ───────────────┐
+                    ├── Platform Availability ────────┐
+                    ├── Public Profile ───────────────┤
                     ├── Version Review ───┐           │
                     ├── Tester Management ├── Runtime Publication
                     └── OAuth Client Integration ◄────┤
@@ -34,6 +35,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 | 能力 | 核心问题 | 主要业务事实 | 首版输出 |
 | --- | --- | --- | --- |
 | Application Ownership | 这个 Application 是谁管理的，如何安全转让，是否仍处于可管理状态？ | Application、adminId、ownershipRevision、lifecycle、技术名称、创建配额、ApplicationAdminTransfer 与 ApplicationClosure | 稳定 Application 身份、当前管理权与终止状态 |
+| Platform Availability | 平台是否暂时允许这个 ACTIVE Application 分发和通过在线授权资格？ | platformAvailabilityStatus/revision、ApplicationPlatformOperationEvent | 可恢复运行门禁与运维审计 |
 | Version Review | 哪个网页版本具备怎样的运行声明，它是否取得发布资格？ | ApplicationVersion、ApplicationReview、审核快照与决定 | 具备或不具备发布资格的 Version |
 | Runtime Publication | 对某个 RPC API major，服务端当前选择哪些 test/grey/stable 目标？ | ApplicationPublication、槽位、grey rollout、PublicationHistory | 服务端发布目标与可追溯变化 |
 | Public Profile | 普通用户看到的应用资料是哪一版，它是否已经获准公开？ | ApplicationProfileRevision、资料审核与当前公开修订 | 已发布目录资料 |
@@ -49,9 +51,15 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。
 
-管理视图、受控改名、可恢复归档和 Application 级临时/平台禁用仍需后续用例；UC027 仍待跨服务依赖完成和评审接受。
+管理视图、受控改名和管理员日常可恢复归档仍需后续用例；平台紧急暂停/恢复已经由 UC-APP-028 提案独立建模。
 
 这项能力不保存公开 displayName、简介、运行入口、发布槽位或 Tester 列表。
+
+### Platform Availability
+
+负责 ACTIVE Application 的 `AVAILABLE/SUSPENDED` 平台门禁及运维审计。它使用 Auth 独立授予的 suspend/restore 权限，在暂停后统一阻止 Catalog、启动解析、Tester 新增加入和 OAuth provider 在线资格，但不改写 Publication、Profile、Version、Tester、OAuth 配置、管理员、配额或 owner 义务。
+
+恢复只解除平台门禁；各消费方仍按自己的当前事实检查资格。关闭生命周期优先于本状态，CLOSING/CLOSED 不能恢复。权威提案见 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md)。
 
 ### Version Review
 
@@ -83,7 +91,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 已有设计覆盖 displayName、可空 description 和可空不透明 icon 字符串的资料草稿创建、更新、提交审核、批准或拒绝，以及批准时自动公开。[Profile Management Query Contract](query-contracts/profile-management.md) 已定义管理员和 Reviewer 的列表/详情读取语义。SUBMITTED 继续占用唯一工作修订位，不能并行创建下一份 DRAFT；REJECTED Revision 保持终态，网页端可预填旧内容后调用普通创建用例，但服务端不提供恢复/复制接口。首版还需要面向普通用户的当前公开资料查询；受控 icon 资产是以后可选扩展，不提供旧资料回滚。
 
-紧急隐藏不属于资料修订撤销。后续由 Application Ownership 定义 Application admin 或 SysAdmin 发起的 Application 级禁用，并统一影响目录与运行分发。
+紧急隐藏不属于资料修订撤销。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格。
 
 这项能力提供“展示什么”，不决定“运行哪个 Version”。
 
@@ -129,9 +137,9 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Version Review | Ownership 的当前 adminId；Identity 的 Developer/Reviewer 与 Scope Catalog | 管理和审核 Version |
 | Public Profile | Ownership 的当前 adminId；Identity 的 Developer/Reviewer | 管理和审核公开资料 |
 | Tester Management | Ownership 的当前 adminId；Identity 的 authId | 管理链接与 Membership |
-| Runtime Publication | Ownership、Version Review、Tester Management | 检查管理权和发布资格，解析 test 资格与服务端槽位 |
-| OAuth Client Integration | Ownership、Version Review、Runtime Publication、Tester Management | 管理 client 并为 Auth 解析登录前运行配置与登录后用户资格 |
-| Catalog & Resolution | Ownership、Public Profile、Runtime Publication、Tester Management、Version Review | 构造内部一致的候选目录与启动目标 |
+| Runtime Publication | Ownership、Platform Availability、Version Review、Tester Management | 检查管理权和发布资格，解析 test 资格与服务端槽位 |
+| OAuth Client Integration | Ownership、Platform Availability、Version Review、Runtime Publication、Tester Management | 管理 client 并为 Auth 解析登录前运行配置与登录后用户资格 |
+| Catalog & Resolution | Ownership、Platform Availability、Public Profile、Runtime Publication、Tester Management、Version Review | 构造内部一致的候选目录与启动目标 |
 | 官方客户端 | Catalog & Resolution 返回的候选与 Filter 规则；客户端本地用户信息 | 执行 Filter 并展示最终列表 |
 
 这张表描述领域事实流向。跨能力的一致性策略由后续领域模型和生命周期模型决定；它本身不隐含共享数据库或分布式事务要求。
@@ -140,7 +148,8 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 
 | 能力 | 已有设计证据 | 首版主要缺口 |
 | --- | --- | --- |
-| Application Ownership | `UC-APP-001`、`UC-APP-025`、`UC-APP-026`、`UC-APP-027` | 管理查询、改名、归档、Application 级禁用；UC026/027 已接受但尚待完成实现 |
+| Application Ownership | `UC-APP-001`、`UC-APP-025`、`UC-APP-026`、`UC-APP-027` | 管理查询、改名和管理员日常归档 |
+| Platform Availability | `UC-APP-028` | 提案待接受；API、服务实现和真实 Auth/App 联合验收 |
 | Version Review | `UC-APP-002`–`UC-APP-006` | 查询、草稿放弃、批准资格撤销或紧急处置 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023` | test 清空、Application 级停止分发 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md)；`UC-APP-024` 的公开读取 | 受控 icon 资产为以后扩展 |

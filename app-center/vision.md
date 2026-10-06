@@ -6,7 +6,7 @@
 
 App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户端在后续用例中发现和使用这些应用。
 
-本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018 至 UC-APP-024 扩展 OAuth/OIDC、Stable、Grey、Filter、统一运行解析和普通 Catalog，UC-APP-025 至 027 补齐账号归属退出协调、管理权转让和不可逆关闭：
+本阶段不尝试一次定义完整应用平台；UC-APP-001 至 UC-APP-016 验证应用管理与封闭测试闭环，UC-APP-018 至 UC-APP-024 扩展 OAuth/OIDC、Stable、Grey、Filter、统一运行解析和普通 Catalog，UC-APP-025 至 028 补齐账号归属退出协调、管理权转让、不可逆关闭和平台暂停/恢复：
 
 > 一个开发者可以创建一个由系统识别的应用记录，为自己管理的应用登记、修改和提交网页版本；独立 reviewer 可以依据可追溯策略批准或拒绝确定的版本或公开资料快照；资料批准后自动公开，拒绝时原公开资料不变，网页端可用被拒绝内容预填一份新草稿；版本批准只产生渠道无关的发布资格，已有当前公开资料的应用可以把已批准版本放入 Test 或 Stable，并在 Stable 基线上配置 Grey；Tester 通过加入链接获得 Test 资格，App Center 为匿名或已认证用户统一解析兼容的 Test、Grey 或 Stable 启动目标，并为 Auth 提供 Application＋channel 级稳定 OAuth client identity、Version 级受审核回调、scope、公开展示资料和用户资格快照。
 
@@ -16,6 +16,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - Application 当前管理员：管理 ACTIVE Tester Membership；移除只结束当前 episode，不形成黑名单或撤销加入链接。
 - Auth 授予 `app.version.review` 权限的平台 reviewer：在没有利益冲突时批准或拒绝 PENDING Review。
 - Auth 授予 `app.profile.review` 权限的资料 reviewer：在没有利益冲突时批准或拒绝 PENDING ProfileReview。
+- Auth 独立授予 `app.application.suspend` 或 `app.application.restore` 的平台运维人员：分别暂停或恢复 Application，不自动取得另一项权限。
 - 任意已登录用户：不需要 Developer 资格，即可通过有效链接自行加入 Application Tester 列表。
 
 ## 当前核心能力
@@ -25,6 +26,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - Application 记录当前 adminId；创建时它等于调用者的 authId。
 - 当前管理员可以向另一名 ACTIVE＋APPROVED Developer 发起转让；目标显式接受后，App Center 原子移动 adminId 与双方配额，并按接受者选择保留或轮换 CONFIDENTIAL secret，见 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md)。
 - 当前管理员经近期重新认证可以不可逆关闭 Application；CLOSING 立即停止本地运行与管理能力并释放 owner 义务，Auth 永久撤销完成后收敛 CLOSED，见 [UC-APP-027](use-cases/UC-APP-027-close-application.md)。
+- 平台运维人员可以依据 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 临时暂停或恢复 ACTIVE Application；暂停保留 owner 和配置，恢复后各运行路径重新检查当前资格。
 - 每个开发者受到可调整的应用创建配额限制；初始配额暂定为 10。
 - 记录 createdAt，作为后续审计事实。
 - name 在同一 adminId 下按大小写不敏感方式唯一。
@@ -55,14 +57,14 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 
 ## 当前尚未设计或明确后置的能力
 
-- Application 管理查询、受控改名、可恢复归档、临时/平台禁用和恢复；物理删除仍不是首版目标。不可逆关闭已由 UC-APP-027 接受，后端工作包待实现。
+- Application 管理查询、受控改名和管理员日常可恢复归档；物理删除仍不是首版目标。不可逆关闭已由 UC-APP-027 实现，平台暂停/恢复已由 UC-APP-028 提案。
 - 协作者和角色。
 - 平台强制转让、争议仲裁和管理员紧急接管；普通双方确认式转让由 UC-APP-026 提案定义。
 - ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销。
 - versionLabel 语义比较和 SemVer 校验。
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
-- Application admin 或 SysAdmin 发起的 Application 级禁用及重新启用；紧急隐藏不作为 ProfileRevision 状态。
+- Application 管理员自助停用；平台紧急暂停/恢复不作为 ProfileRevision 状态，已由 UC-APP-028 提案并使用独立运维权限。
 - Tester 主动退出、test clear，以及独立于 UC-APP-024 普通 Catalog 的“我参与的测试”入口。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
 - Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。
@@ -71,7 +73,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 ## 本轮成功标准
 
 - UC-APP-001 的输入、结果和错误没有歧义。
-- Application 的稳定身份字段、UC026 提出的 ownershipRevision，以及 UC027 提出的 lifecycleStatus/lifecycleRevision 有明确来源。
+- Application 的稳定身份字段、UC026 的 ownershipRevision、UC027 的 lifecycleStatus/lifecycleRevision，以及 UC028 提出的 platformAvailabilityStatus/platformAvailabilityRevision 有明确来源。
 - adminId 不能由请求正文冒充，必须取自已验证的 authId。
 - 只有 Auth 中开发者资格为 APPROVED 的调用者可以创建。
 - `(adminId, name)` 唯一约束和创建配额在并发请求下仍成立。

@@ -4,7 +4,7 @@
 
 ## 文档目的
 
-本文集中描述 ApplicationVersion、ApplicationProfileRevision、ApplicationPublication 和 ApplicationAdminTransfer 生命周期。它与 [Domain Model](domain-model.md) 配合阅读，不定义 HTTP、数据库或代码结构。
+本文集中描述 ApplicationVersion、ApplicationProfileRevision、ApplicationPublication、ApplicationAdminTransfer、Application 关闭生命周期和平台可用状态。它与 [Domain Model](domain-model.md) 配合阅读，不定义 HTTP、数据库或代码结构。
 
 图中的“当前”迁移已经有 UC 和 BR 权威正文；“目标”迁移来自 [首版产品范围](product-scope.md)，仍需要未来 UC 建立具体业务规则。
 
@@ -81,7 +81,7 @@ DRAFT ── REPLACE ──► DRAFT
 
 ### 紧急隐藏不属于本状态机
 
-公开资料的紧急隐藏被归为 Application 级禁用，而不是 `APPROVED -> REVOKED` 的 ProfileRevision 迁移。后续 Application Ownership 用例需要定义 admin/SysAdmin 权限、审计、对 Catalog 和运行解析的影响以及重新启用规则。ProfileRevision 与既有审核决定仍保留用于审计。
+公开资料的紧急隐藏被归为 Application 级暂停，而不是 `APPROVED -> REVOKED` 的 ProfileRevision 迁移。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出精确平台运维权限、独立审计以及对 Catalog、运行解析和 OAuth 在线资格的共同门禁。ProfileRevision 与既有审核决定仍保留用于审计。
 
 已定义的普通资料审核使用独立 `app.profile.review` 权限，不继承 Version Review 权限，也不授予 Application 禁用权限。
 
@@ -225,12 +225,26 @@ ACTIVE 是全部现有管理与运行入口的前置状态。进入 CLOSING 的�
 
 CLOSED 只表示 Auth 已保存永久 application tombstone 并返回持久回执；它不是首次停止运行的时刻。App→Auth 失败会使状态长期保持 CLOSING，但不能恢复 ACTIVE。ApplicationId、原命名空间技术名称及 Auth sector/sub 映射都不复用。
 
+## Application 平台可用状态
+
+[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出与关闭生命周期正交的可恢复平台门禁：
+
+```text
+AVAILABLE ── SUSPEND ──► SUSPENDED
+    ▲                         │
+    └──────── RESTORE ────────┘
+```
+
+只有 lifecycleStatus=`ACTIVE` 的 Application 可以在两态之间迁移。SUSPENDED 立即阻止 Catalog、TEST/统一启动解析、Tester 新增加入和 OAuth provider 在线资格；Version、Profile、Review、Publication、Filter、Tester Membership/JoinLink、OAuth registration/credential、管理员、配额和 owner 义务保持不变，管理与审核入口可继续修复当前配置。
+
+Restore 只解除平台门禁，不代表当前存在有效 Stable、Profile、Tester 或 OAuth 配置。之后每条读路径仍按自己的权威规则重新检查当前事实；关闭可从 AVAILABLE 或 SUSPENDED 发起，进入 CLOSING 后不再允许 restore。
+
 ## 后续设计顺序
 
 生命周期缺口适合按依赖顺序补齐，但暂不在本文分配 UC 编号：
 
 1. 设计 test clear。
-2. Application 归档、普通停用与平台紧急 suspension；不可逆关闭已经由 UC-APP-027 提案覆盖。
+2. Application 管理员日常可恢复归档；平台紧急 suspension/restore 已由 UC-APP-028 提案覆盖，不可逆关闭已由 UC-APP-027 覆盖。
 3. 官方客户端 Filter 求值器与“我参与的测试”入口。
 4. 受控 icon 资产语义。
 5. APPROVED Version 的资格撤销及引用处置。

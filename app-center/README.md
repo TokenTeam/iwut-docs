@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义二十六个活跃纵切片；UC-APP-017 已被否决并归档，其余 UC-APP-001 至 027 均已接受：
+当前已经定义二十七个活跃纵切片；UC-APP-017 已被否决并归档，UC-APP-001 至 027 已接受，UC-APP-028 正在提案：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -34,6 +34,7 @@
 - `UC-APP-025`：App Center 协调 Auth 的账号归属退出、阻止新增义务并清理账号关闭后的个人状态。
 - `UC-APP-026`：当前管理员发起管理权转让，目标显式接受并原子接收 Application、配额占用和安全处置选择。
 - `UC-APP-027`：当前管理员经近期重新认证后不可逆关闭 Application，本地立即隔离并持久协调 Auth 授权撤销。
+- `UC-APP-028`：获得精确平台运维权限的人员暂停或恢复 Application；暂停统一阻止目录、启动、Tester 新增加入和 OAuth 在线资格，恢复后重新执行当前配置资格。
 
 Application 的稳定业务字段仍为：
 
@@ -47,6 +48,8 @@ createdAt
 UC-APP-026 增加技术业务 OCC 字段 `ownershipRevision`；它只跟踪当前管理权变化，不把转让过程塞进 Application。
 
 UC-APP-027 增加 `lifecycleStatus` 与 `lifecycleRevision`，并以独立 ApplicationClosure 保存不可逆关闭过程和 Auth 收敛回执。
+
+UC-APP-028 提出独立的 `platformAvailabilityStatus` 与 `platformAvailabilityRevision`；它不扩展关闭状态机，也不修改下级配置或 owner 义务。
 
 除此之外的字段和能力都必须由后续具体用例引入。
 

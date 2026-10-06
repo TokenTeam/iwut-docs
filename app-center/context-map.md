@@ -8,6 +8,7 @@
 Identity Context
   ├─ 提供可信 authId + developerStatus
   ├─ 提供可信 reviewer permissions
+  ├─ 提供可信 Application 运维 permissions
   ├─ 拥有 Auth Scope Catalog
   ├─ 签发绑定用途的近期重新认证证明
   └─ 拥有 Application 授权关闭 tombstone
@@ -17,6 +18,7 @@ App Center Context
   ├─ 拥有并创建 Application
   ├─ 拥有当前管理员、管理权 revision 与转让生命周期
   ├─ 拥有 Application 生命周期与不可逆关闭过程
+  ├─ 拥有 Application 平台可用状态与暂停/恢复审计
   ├─ 拥有 ApplicationProfile、ApplicationProfileRevision 及其资料生命周期
   ├─ 拥有独立 ApplicationProfileReview 与提交快照
   ├─ 拥有 ApplicationVersion 及其审核生命周期
@@ -34,6 +36,7 @@ App Center Context
 
 - 哪个 Application ID 已经存在。
 - Application 的 name 和 createdAt。
+- Application 的 `ACTIVE/CLOSING/CLOSED` 生命周期、与其正交的 `AVAILABLE/SUSPENDED` 平台可用状态，以及各自 revision。
 - ApplicationProfileRevision 的身份、应用内 sequence、displayName、可空 description、可空不透明 icon、DRAFT/SUBMITTED/APPROVED/REJECTED 状态、revision，以及创建和最近修改审计；资料草稿采用完整替换和乐观并发。
 - 每次 ProfileReview attempt 的身份、不可变 displayName/description/icon 快照、sourceRevision、一次性 decision、状态，以及提交和决定审计。
 - ApplicationProfile 当前工作修订与公开资料指针，以及 App Center 自己的版本化 ProfileReviewPolicy。
@@ -62,6 +65,7 @@ App Center Context
 - 当前账号的 accountStatus 与 developerStatus；只有 `ACTIVE`＋`APPROVED` 可以接受管理权转让，其他管理写操作沿各自 UC 的门禁。
 - Developer 申请状态及必要操作审计。
 - reviewer 权限；当前已定义 `app.version.review` 和独立的 `app.profile.review`。
+- Application 平台运维人员权限；`app.application.suspend` 与 `app.application.restore` 独立授予且不在平台管理员固定 bundle 中。
 - 可供应用申请的 scope 名称与定义。
 - Application 级永久授权关闭 tombstone，以及它对 grant、code、token、refresh、introspection/delegation 的最终执行。
 - 能证明用户刚完成认证、绑定具体高风险用途与 Application 的短时证明。
@@ -93,6 +97,7 @@ App Center Context
 - UC-APP-025 在 App 本地拥有账号归属退出 fence、决定与清理回执；Auth 拥有退出/关闭操作及其权威终局。
 - [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 在发起时新鲜检查目标、接受时新鲜批量检查源和目标的 Auth 状态；App 本地事务拥有转让终态、配额移动、名称冲突和 current admin 变化。它不要求 Auth 提供 revision 或 reservation，而是通过 UC025 的账号 fence 阻止退出终局竞态。
 - [UC-APP-027](use-cases/UC-APP-027-close-application.md) 在 App 本地拥有不可逆生命周期、即时运行 gate、配额释放和关闭收敛任务；Auth 依据 [Application Closure v1](../platform/contracts/application-closure-v1.md) 与 [UC-AUTH-026](../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md) 拥有永久授权 tombstone。两边以稳定 closureId 和持久回执收敛，不共享事务。关闭 proof 由 Auth 按 [近期认证证明 v1](../platform/contracts/application-close-reauth-proof-v1.md) 对当前 Session 所属同一登记设备的新挑战签发；普通 USER JWS 不能替代它。
+- [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 由 App 本地保存正交的平台可用状态、OCC revision 和运维审计；Auth 只依据 [UC-AUTH-027](../auth-center/use-cases/UC-AUTH-027-manage-application-operations-permissions.md) 投影两项精确人员权限，不保存 applicationId 的暂停事实。暂停通过现有 UC019 provider 在线门禁影响 Auth，不建立 Auth 永久 tombstone。
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。
 

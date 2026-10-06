@@ -44,6 +44,7 @@ Client User Data + Filter 规则 ───────────────�
 | 参与者 | 首版目标 |
 | --- | --- |
 | Developer / Application Admin | 登记应用，维护资料与版本，组织测试，控制发布和回退，转让管理权，并在必要时不可逆关闭 Application |
+| Application Operations Staff | 使用独立授予的 suspend 或 restore 权限临时停止或恢复 Application 的平台分发与在线授权资格 |
 | Reviewer | 审核确定的版本或公开资料快照，并留下可追溯决定 |
 | Tester | 通过加入链接取得 Application 级测试资格，并使用兼容的 test 版本 |
 | 普通用户 | 在官方客户端中取得候选应用，由客户端执行 Filter 后看到最终列表，并使用已解析的发布目标 |
@@ -67,6 +68,8 @@ Auth 继续拥有身份、Developer 资格、Reviewer 权限和 Scope Catalog；
 当前管理员需要退出管理时，按 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 发起转让；目标管理员显式接受后，App Center 原子改变当前 adminId 和双方配额占用。接受者可以按实际服务器交接情况保留或轮换 CONFIDENTIAL secret。该流程与 UC-APP-025 的账号退出屏障配合，使有归属义务的账号先完成处置再退出。
 
 Application 确认永久终止时，当前管理员经近期重新认证和明确确认发起 [UC-APP-027](use-cases/UC-APP-027-close-application.md)。进入 CLOSING 后立即退出目录与运行解析、禁用 OAuth 使用并释放 owner 义务；App 以持久协议等待 Auth 建立永久授权撤销事实，随后完成 CLOSED。关闭不能恢复，技术身份和审计不会删除或复用。
+
+平台遇到安全、合规或运行风险时，获独立授权的运维人员依据 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 暂停 Application。暂停保留管理员、配额和全部配置，停止目录、启动、Tester 新增加入及 OAuth 在线资格；恢复只解除该门禁，当前 Version/Profile/Publication/Tester/OAuth 配置仍须通过原有检查。
 
 ### 2. Reviewer 作出审核决定
 
@@ -143,7 +146,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 
 | 能力 | 首版纳入 | 说明 |
 | --- | --- | --- |
-| Application Ownership | 是 | 创建、账号退出屏障，以及 UC-APP-026 提出的显式接受式管理员转让和 UC-APP-027 提出的不可逆关闭；读取、改名、可恢复归档与 Application 级禁用继续独立设计 |
+| Application Ownership | 是 | 创建、账号退出屏障、显式接受式管理员转让、不可逆关闭，以及 UC-APP-028 提出的平台暂停/恢复；读取、改名和管理员日常可恢复归档继续独立设计 |
 | Public Profile | 是 | 资料草稿、审核、批准后自动公开和读取；icon 先作为不透明字符串 |
 | Version Review | 是 | Version 草稿、编辑、提交、决定、拒绝后恢复和查询 |
 | Tester Management | 是 | 加入链接、加入、移除、撤销链接和 test 目标解析 |
@@ -184,14 +187,15 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 9. 审核、发布、回退和停止分发均能追溯到操作者、时间和对应快照。
 10. 当前管理员可以发起管理权转让；目标显式接受后，Application、双方配额、可选 credential 轮换和 Tester 加入链接处置原子收敛。
 11. 当前管理员经过近期重新认证可以不可逆关闭 Application；本地能力立即停止，Auth 永久撤销最终通过持久回执收敛，故障期间不恢复服务。
+12. 获独立授权的平台运维人员可以暂停或恢复 ACTIVE Application；暂停保留配置和 owner 义务，OAuth 在线路径在短期凭据残余窗口后停止。
 
 ## 后续用例前仍需要决定
 
 以下问题会改变尚未具体化的能力边界，应在对应 UC 开始前确认：
 
-1. **Application 归档与禁用细节**：方向已经确定为管理员日常 clear、普通归档和平台紧急 suspension/disable 分离；仍需确定 admin/SysAdmin 权限、审计、对既有 token 的影响和重新启用条件。
+1. **Application 日常归档**：平台紧急 suspension/restore 已由 UC-APP-028 提案确定；管理员可恢复归档仍需独立确定权限、目录语义、配额与 owner 义务。
 2. **Test-only 查询契约**：已确定不混入普通公开目录，而进入独立的“我参与的测试”入口；仍需定义分页、移除后的可见性和无兼容 test 时的结果。
-3. **UC027 的跨服务依赖**：不可逆关闭的产品语义已由提案确定；进入 ACCEPTED 前仍需 Auth 关闭消费方 UC 和近期重新认证证明契约。
+3. **UC028 的交付细节**：业务状态、权限和 OAuth 残余窗口已经形成提案；接受前仍需固定 API 字段号、告警 outbox 复用点和真实 Auth/App 联合测试入口。
 4. **受控图标资产**：当前 icon 只是可空不透明字符串；何时升级为受控资产、由谁拥有并如何迁移，等待真实需求后决定，不阻塞首版资料审核。
 5. **Filter 客户端交付**：App Center 规则模型与管理流程已由 UC-APP-022 确定；官方客户端仍需实现求值器、共享向量和管理 UI。
 
