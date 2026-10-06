@@ -1,6 +1,6 @@
 # UC-APP-026：转让 Application 管理权
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -316,8 +316,9 @@ secretsDisclosed: bool
 - UC018 credential repository 的事务内批量轮换复用点。
 - 真实 MongoDB 竞争测试与 Auth provider consumer 测试。
 
-本文件处于 PROPOSED，不生成实现 brief，也不开始代码工作包。评审接受后再用统一脚本登记 spec、生成 brief，并把实现状态从 NOT_STARTED 切换。
+本文件已经接受。实现以生成的 UC-APP-026 brief 为工作包输入，并按本节边界交付 Domain、API、migration、跨能力事务和完整验收。
 
 ## 变更记录
 
 - 2026-10-06：建立 UC-APP-026 提案；采用发起—接受模型、新鲜 Auth 检查、本地 ownershipRevision 与共享写栅栏；接受者显式选择 KEEP/ROTATE，转让时撤销 Tester 加入链接。
+- 2026-10-06：接受 UC-APP-026；依赖检查确认 UC001、UC008–011、UC018、UC025 和 Auth Developer Status provider 已交付，生成实现 brief 并启动纵切片。
