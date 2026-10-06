@@ -18,9 +18,9 @@
 | `UC-GW-001` | 按路由认证并转发请求 | `ACCEPTED` | [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md) | DIRECT/SESSION 编排；OAUTH2 仅预留。首个实现工作包已 `COMPLETE`。 |
 | `UC-GW-002` | 应用委托请求鉴权与转发 | `PROPOSED` | [UC-GW-002](use-cases/UC-GW-002-authenticate-oauth-and-forward.md) | OAuth/OIDC 新设计，未实现。 |
 | `UC-GW-003` | 为公开读取附加可选用户身份 | `ACCEPTED` | [UC-GW-003](use-cases/UC-GW-003-attach-optional-user-identity.md) | 匿名或有效 Session→USER JWS；无效凭据不降级。本地实现已验证。 |
-| `UC-GW-004` | 向 Auth 自认证入口保留可选 Session | `PROPOSED` | [UC-GW-004](use-cases/UC-GW-004-forward-optional-session-to-auth.md) | 邮箱注册/绑定双模式 route；可选 Session 原样下传，不换 USER JWS。 |
-| `UC-GW-005` | 转发账号注销用途隔离凭据 | `PROPOSED` | [UC-GW-005](use-cases/UC-GW-005-forward-account-closure-credentials.md) | 五条注销 route；confirmation/receipt 精确隔离，禁止通用凭据。 |
-| `UC-GW-006` | 携带用户身份与应用关闭高风险证明转发 | `PROPOSED` | [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md) | Close route 同时下传 App USER JWS 与唯一 high-risk proof。 |
+| `UC-GW-004` | 向 Auth 自认证入口保留可选 Session | `ACCEPTED` | [UC-GW-004](use-cases/UC-GW-004-forward-optional-session-to-auth.md) | Gateway `293ebc9`；可选 Session 原样下传，不换 USER JWS。 |
+| `UC-GW-005` | 转发账号注销用途隔离凭据 | `ACCEPTED` | [UC-GW-005](use-cases/UC-GW-005-forward-account-closure-credentials.md) | Gateway `293ebc9`；confirmation/receipt 精确隔离，禁止通用凭据。 |
+| `UC-GW-006` | 携带用户身份与应用关闭高风险证明转发 | `ACCEPTED` | [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md) | Gateway `293ebc9`；Close 同时下传 App USER JWS 与唯一 proof。 |
 
 ## Business Rules
 

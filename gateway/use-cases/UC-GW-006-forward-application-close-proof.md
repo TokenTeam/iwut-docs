@@ -1,6 +1,6 @@
 # UC-GW-006：携带用户身份与应用关闭高风险证明转发
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -18,7 +18,7 @@
 | `CloseApplication` | `POST /app-center/v1/applications/{application_id}:close` | `REQUIRED` → `iwut-app-center` USER JWS | 唯一 `x-iwut-high-risk-proof` `REQUIRED` 并保留 |
 | `GetApplicationClosure` | `GET /app-center/v1/applications/{application_id}/closure` | `REQUIRED` → `iwut-app-center` USER JWS | high-risk proof `FORBIDDEN` |
 
-Authorization、Cookie、OAuth 委托和外来内部身份均禁止。三条 Proto route 目标支持 HTTP/JSON、原生 gRPC 和 gRPC-Web；只有 Close route 可以把 proof 送到 App。
+Authorization、Cookie 和 OAuth 委托凭据均禁止；外来内部身份先清除，不得影响身份交换。三条 Proto route 目标支持 HTTP/JSON、原生 gRPC 和 gRPC-Web；只有 Close route 可以把 proof 送到 App。
 
 ## 主流程
 
@@ -62,7 +62,7 @@ Gateway 日志、trace、metrics 和错误不得包含 proof、Session、USER JW
 ## 错误语义
 
 - Session 或 high-risk proof 缺失、形状非法：HTTP 401 / gRPC UNAUTHENTICATED；
-- 任一载体重复/合并、proof 出现在错误 Route、与 Authorization/Cookie/外来身份混用：HTTP 400 / gRPC INVALID_ARGUMENT；
+- 任一载体重复/合并、proof 出现在错误 Route、与 Authorization/Cookie 混用：HTTP 400 / gRPC INVALID_ARGUMENT；伪造内部身份按既有边界清除；
 - Session 被 Auth 拒绝：HTTP 401 / gRPC UNAUTHENTICATED，App 零调用；
 - UC-AUTH-010 依赖故障或 deadline：HTTP 503/504 / gRPC UNAVAILABLE/DEADLINE_EXCEEDED；
 - App 对 proof、管理员资格、revision 或生命周期的拒绝：保持 UC-APP-027 语义，不改写为 Gateway 认证成功或 Session 错误；
@@ -80,10 +80,11 @@ Gateway 日志、trace、metrics 和错误不得包含 proof、Session、USER JW
 
 ## 依赖与实施边界
 
-依赖 [ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md)、[UC-AUTH-010](../../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md)、[UC-AUTH-026](../../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md)、[UC-APP-027](../../app-center/use-cases/UC-APP-027-close-application.md) 与 [Application 关闭近期认证证明 v1](../../platform/contracts/application-close-reauth-proof-v1.md)。实现需要让 v2 schema 对 terminal credential 表达 `FORBIDDEN/REQUIRED`、精确名称、大小/形状和保留，并允许其与必需 USER 身份交换组合；不得变成任意 header passthrough。
+依赖 [ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md)、[UC-AUTH-010](../../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md)、[UC-AUTH-026](../../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md)、[UC-APP-027](../../app-center/use-cases/UC-APP-027-close-application.md) 与 [Application 关闭近期认证证明 v1](../../platform/contracts/application-close-reauth-proof-v1.md)。Gateway `293ebc9` 已让 v2 schema 对 terminal credential 表达 `FORBIDDEN/REQUIRED`、精确名称、大小/形状和保留，并把它与必需 USER 身份交换绑定为有限矩阵，没有变成任意 header passthrough。
 
-本用例接受和真实联合验收前，Close route 保持未登记；Preview/Get 可作为普通 `APP_USER` backlog 独立实现，但必须禁止 high-risk proof。Auth/App 后端实现完成或 proof 已可签发不等于 Gateway 已安全开放关闭入口。
+Close/Preview/Get 三条 App route 与 Begin/Complete reauth 两条 Auth 配套 route 已登记，并通过 usecase、ForwardAuth、gRPC proxy 与生成配置测试。Auth/App 功能开关仍需部署时显式开启；真实 proof 签发、USER 交换、App 消费与三协议业务拒绝的联合验收仍是发布门禁。
 
 ## 变更记录
 
 - 2026-10-07：建立提案；固定 Close 的 Session→App USER JWS 与 required high-risk proof 双载体、身份交换先于下游、Gateway 不解析 proof、错误 Route 拒绝及三协议隐私边界。
+- 2026-10-07：接受设计；Gateway `293ebc9` 登记 App 三条与 Auth reauth 两条配套路由，交付 16 KiB compact-JWS 载体、身份交换先后关系、最小下传与三适配器测试。

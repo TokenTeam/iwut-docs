@@ -4,9 +4,9 @@
 | --- | --- | --- | --- |
 | [UC-GW-001](../use-cases/UC-GW-001-authenticate-and-forward.md) | `ACCEPTED` | `COMPLETE` | —（当前后端/本地部署工作包；生产公网发布仍为独立部署事项） |
 | [UC-GW-003](../use-cases/UC-GW-003-attach-optional-user-identity.md) | `ACCEPTED` | `VERIFIED_LOCAL` | API 与服务提交尚未 push；CI/发布候选需先发布统一基线。 |
-| [UC-GW-004](../use-cases/UC-GW-004-forward-optional-session-to-auth.md) | `PROPOSED` | `NOT_STARTED` | 可选 DIRECT Session 组合尚未实现。 |
-| [UC-GW-005](../use-cases/UC-GW-005-forward-account-closure-credentials.md) | `PROPOSED` | `NOT_STARTED` | terminal credential 必需性、用途隔离和精确下传尚未实现。 |
-| [UC-GW-006](../use-cases/UC-GW-006-forward-application-close-proof.md) | `PROPOSED` | `NOT_STARTED` | USER 身份交换与 required high-risk proof 组合尚未实现。 |
+| [UC-GW-004](../use-cases/UC-GW-004-forward-optional-session-to-auth.md) | `ACCEPTED` | `IMPLEMENTED` | 真实邮箱注册/绑定三协议联合验收与生产开关待完成。 |
+| [UC-GW-005](../use-cases/UC-GW-005-forward-account-closure-credentials.md) | `ACCEPTED` | `IMPLEMENTED` | 真实五方法三协议联合验收、Edge 脱敏与生产开关待完成。 |
+| [UC-GW-006](../use-cases/UC-GW-006-forward-application-close-proof.md) | `ACCEPTED` | `IMPLEMENTED` | 真实 proof 签发/消费及三协议业务拒绝联合验收与生产开关待完成。 |
 
 2026-09-23：已建立 `worktrees/iwut-gateway-ddd` 的空白孤儿分支 `gateway/v1`，仅放工程设计入口。没有复制旧配置、启用公开路由或部署服务。OAuth2、Redis 和 Gateway 管理后台不属于当前首版实现。
 
@@ -108,7 +108,7 @@ Gateway `0009947` 固定统一 API `9f914c5`，把 `routes.v1.yaml` 迁移为严
 
 以上提交尚未 push，因此状态为 `VERIFIED_LOCAL`，不能作为 CI/发布候选；未执行生产部署。
 
-## 2026-10-07 特殊终端凭据路由设计
+## 2026-10-07 特殊终端凭据路由实现
 
 基于 Auth UC011/025、Auth UC026 与 App UC027，把当前 v2 无法表达的六条特殊 route 拆为三个 Gateway 行为用例：
 
@@ -116,7 +116,11 @@ Gateway `0009947` 固定统一 API `9f914c5`，把 `routes.v1.yaml` 迁移为严
 - [UC-GW-005](../use-cases/UC-GW-005-forward-account-closure-credentials.md)：账号注销五条 route 作为闭合工作包；Confirm/Cancel 只允许 confirmation token，Get 只允许 receipt token，全部禁止通用身份混用。
 - [UC-GW-006](../use-cases/UC-GW-006-forward-application-close-proof.md)：CloseApplication 同时要求 Session→App USER JWS 和唯一 high-risk proof；身份交换成功后才向 App 下传，Gateway 不解析 proof claims。
 
-三项均为 `PROPOSED / NOT_STARTED`。设计复用已接受的 ADR-GW-002，不新增动态策略语言或任意 header passthrough；本轮未修改 Gateway worktree、API、路由配置、Traefik 生成物或部署。
+三项均已接受，Gateway `293ebc9` 在固定 API `9f914c5` 上实现：新增 13 条精确 route（共 36 条），包含邮箱 GetOwn 和 ApplicationCloseReauth Begin/Complete 三条配套入口；增加严格 32-byte RawURL Session/token、16 KiB compact-JWS proof、Cookie/已知 terminal header 全局默认拒绝、路由后最小恢复与 13 条特殊 RPC 完整认证矩阵防漂移。HTTP ForwardAuth、原生 gRPC 和 gRPC-Web 共用同一 usecase 判定；伪造内部身份仍先清除。
+
+`make check` 与 `make protocol-e2e` 通过；后者继续使用真实 Traefik、Auth、App 与 Mongo 验证现有 HTTP/JSON、原生 gRPC、gRPC-Web 链路无回归。新特殊 route 已通过 usecase、ForwardAuth、记录式 gRPC proxy 和 Traefik 生成契约测试，但现有真实 E2E 尚未打开邮箱绑定、账号注销与应用关闭 feature flag，也未覆盖 Prepare token 响应正文、proof 真实业务拒绝或 gRPC-Web 重复 header。因此状态为 `IMPLEMENTED`，不记为 `VERIFIED_LOCAL/COMPLETE`。未 push，未生产部署。
+
+部署联合验收至少需显式配置 `AUTH_USER_ENDPOINTS_ENABLED`、`AUTH_EMAIL_BINDING_ENABLED`、`AUTH_ACCOUNT_CLOSURE_ENABLED`、`AUTH_APPLICATION_CLOSE_REAUTH_ENABLED` 与 `APP_CENTER_APPLICATION_CLOSURE_ENABLED`，并满足邮件/HMAC、账号归属退出、身份签名及 App 关闭依赖。Gateway 不感知这些开关；后端关闭时的 404/UNIMPLEMENTED/UNAVAILABLE 不得误记为路由验收成功。
 
 ## 2026-10-03 应用审核权限路由扩展完成
 

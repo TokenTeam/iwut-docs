@@ -1,6 +1,6 @@
 # UC-GW-005：转发账号注销用途隔离凭据
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -60,7 +60,7 @@ confirmation/receipt token 是 32-byte CSPRNG 值的规范无填充 Base64URL，
 
 所有五条路由都禁止 Session、Authorization、Cookie、`x-iwut-identity`、`x-iwut-delegation`、Gateway service JWS 和其它 terminal header 到达 Auth handler。Confirm/Cancel/Get 只下传各自唯一专用 header；Begin/Prepare 不下传任何认证 header。
 
-HTTP ForwardAuth、原生 gRPC 与转换后的 gRPC-Web 对载体矩阵、错误类别和 Auth 调用次数必须一致。专用 token 不进入日志、trace、metrics、审计 payload、终端响应或认证错误；ForwardAuth 的成功响应 header 白名单不能把它回显给客户端或复制到错误响应。
+HTTP ForwardAuth、原生 gRPC 与转换后的 gRPC-Web 对载体矩阵、错误类别和 Auth 调用次数必须一致。请求 header 中已有的专用 token 不进入日志、trace、metrics、审计 payload、响应 header 或认证错误；ForwardAuth 的成功响应 header 白名单不能把它回显给客户端或复制到错误响应。UC-AUTH-025 的 Prepare 首次成功会在业务响应 body 中签发 `confirmationToken` 与 `receiptToken`，Gateway 必须原样返回该权威业务结果，不能把防止请求凭据回显误用成删除响应字段。
 
 ## 错误语义
 
@@ -77,15 +77,16 @@ HTTP ForwardAuth、原生 gRPC 与转换后的 gRPC-Web 对载体矩阵、错误
 - 缺失、空白、非 43 字符、非 Base64URL、有 padding、重复、逗号合并、双 header、错误方法 header 和 Authorization 代装全部失败关闭。
 - 规范形状但未知、过期、错误 operation、错误用途或已消费 token 由真实 Auth 拒绝；Gateway 不尝试另一用途或重放。
 - 客户端伪造 USER/委托身份、内部 routeId/audience、Forwarded 或 ForwardAuth 控制头不能改变 Route 或获得下传。
-- 成功与失败响应、Gateway/Auth 日志、trace 和 metrics 不包含 confirmation/receipt token、设备签名或 Gateway service credential。
+- 除 UC-AUTH-025 Prepare 的权威业务响应 body 首次签发 token 外，成功/失败响应 header、认证错误、Gateway/Auth 日志、trace 和 metrics 不包含 confirmation/receipt token、设备签名或 Gateway service credential。
 - 使用真实 Traefik、Gateway、Auth production composition/Mongo，对五个方法完成 HTTP/JSON、原生 gRPC、gRPC-Web 联合测试，并断言每次最多一个 Auth 业务调用。
 
 ## 依赖与实施边界
 
-依赖 [ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md)、[UC-AUTH-025](../../auth-center/use-cases/UC-AUTH-025-close-own-account.md)、[账号归属退出协议](../../platform/contracts/account-owner-exit-v1.md) 与统一 API 的 account-closure Proto。实现需要让 v2 route schema 表达 terminal credential 的 `FORBIDDEN/REQUIRED`、精确名称、载体形状和下游保留，不得启用任意 header passthrough。
+依赖 [ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md)、[UC-AUTH-025](../../auth-center/use-cases/UC-AUTH-025-close-own-account.md)、[账号归属退出协议](../../platform/contracts/account-owner-exit-v1.md) 与统一 API 的 account-closure Proto。Gateway `293ebc9` 已让 v2 route schema 表达 terminal credential 的 `FORBIDDEN/REQUIRED`、精确名称、载体形状和下游保留，且只接受固定的 confirmation/receipt 矩阵，没有启用任意 header passthrough。
 
-本用例接受和真实联合验收前，五条 route 保持未启用。Auth 的功能开关、HTTP listener 或后端实现完成不等于 Gateway 已提供公网注销入口；生产发布还须确认 Edge 不记录这些 header，且反向代理大小/重复值处理与 Gateway 契约一致。
+五条 route 已登记，结构性歧义/禁止载体在缺失或形状错误前失败，并通过 usecase、ForwardAuth、gRPC proxy 与生成配置测试。Auth 功能开关、真实五方法三协议联合验收、Edge 脱敏及重复值行为仍是生产发布门禁。
 
 ## 变更记录
 
 - 2026-10-07：建立提案；把账号注销五条终端入口作为单一安全工作包，固定 confirmation/receipt 用途隔离、通用凭据禁止、载体与语义分层及三协议秘密边界。
+- 2026-10-07：接受设计；Gateway `293ebc9` 登记五条路由，交付严格 32-byte RawURL token、用途隔离、默认拒绝与三适配器测试。

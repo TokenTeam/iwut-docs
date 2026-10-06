@@ -1,6 +1,6 @@
 # UC-GW-004：向 Auth 自认证入口保留可选 Session
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -22,7 +22,7 @@
 | `EmailBindingService/BeginSetEmail` | `POST /auth-center/v1/email-bindings` | `OPTIONAL` | `NEVER` | Session 存在时仅保留 Session |
 | `EmailBindingService/CompleteSetEmail` | `POST /auth-center/v1/email-bindings/{operation_id}/completion` | `OPTIONAL` | `NEVER` | Session 存在时仅保留 Session |
 
-两条 Proto route 均目标支持 HTTP/JSON、原生 gRPC 和 gRPC-Web。Authorization、Cookie、外来 USER/委托身份、专用 terminal header 均不允许。路由策略固定为 `AUTH_OPTIONAL_DIRECT_SESSION`；不能根据请求正文、Session 外形或 Auth 响应改选另一个 Route。
+两条 Proto route 均目标支持 HTTP/JSON、原生 gRPC 和 gRPC-Web。Authorization、Cookie 和专用 terminal header 均不允许；外来 USER/委托身份作为不可信内部 header 先清除，不参与凭据混用判定。路由策略固定为 `AUTH_OPTIONAL_DIRECT_SESSION`；不能根据请求正文、Session 外形或 Auth 响应改选另一个 Route。
 
 ## 主流程
 
@@ -52,9 +52,9 @@ Session 是否存在只能选择“无 Session 下传”或“原始 Session 下
 <a id="br-gwr-016"></a>
 ### BR-GWR-016：可选保留不产生内部身份
 
-本用例禁止调用 UC-AUTH-010，禁止注入 `x-iwut-identity` 或 `x-iwut-delegation`。有 Session 时只保留原始 `x-iwut-session`；无 Session 时 Auth 不应收到同名空 header/metadata。Authorization、Cookie、Gateway service JWS、外来内部身份和路由控制头都不得到达业务 handler。
+本用例禁止调用 UC-AUTH-010，禁止注入 `x-iwut-identity` 或 `x-iwut-delegation`。有 Session 时只保留原始 `x-iwut-session`；无 Session 时 Auth 不应收到同名空 header/metadata。Authorization、Cookie、Gateway service JWS、外来内部身份和路由控制头都不得到达业务 handler；其中外来内部身份与控制头按 UC-GW-001 的既有边界清除，不能被当成 Session 或其它终端凭据。
 
-客户端同时提交 Session 与任何未声明认证载体时按歧义或禁止凭据失败，不能优先选择其中一个。Gateway 不把 Session 放入日志、trace、metrics 标签、错误正文或响应 header。
+客户端同时提交 Session 与 Authorization、Cookie 或专用 terminal credential 时按歧义或禁止凭据失败，不能优先选择其中一个。Gateway 不把 Session 放入日志、trace、metrics 标签、错误正文或响应 header。
 
 <a id="br-gwr-017"></a>
 ### BR-GWR-017：三协议同一分支与单次转发
@@ -78,7 +78,7 @@ Gateway 不为 Auth 业务请求自动重试，不因 Auth 返回登录错误而
 
 - Begin/Complete 在 Session 完全缺失时不调用 UC-AUTH-010，Auth 只收到一次无 Session 请求，注册流程可按 UC-AUTH-011 工作。
 - 唯一规范 Session 在三协议中逐字节到达 Auth，Gateway 不生成 USER JWS；本人绑定/更换由 Auth 最终验证。
-- 空白、重复、逗号合并、非法形状 Session 以及 Session 与 Authorization/Cookie/外来身份混用在 Auth 业务 handler 前失败。
+- 空白、重复、逗号合并、非法形状 Session 以及 Session 与 Authorization/Cookie/专用 terminal credential 混用在 Auth 业务 handler 前失败；伪造内部身份被清除且不能改变结果。
 - 规范形状但过期、撤销、跨账号或与 operation 不匹配的 Session 由 Auth 拒绝，Gateway 不删除它后重放匿名请求。
 - 请求正文 mode/oneof、路径 operationId、query 或客户端 header 不能改变 target、策略或是否执行身份交换。
 - 无 Session 分支不产生空 header；有 Session 分支只保留 Session；两条分支均不泄露内部身份或请求凭据。
@@ -86,10 +86,11 @@ Gateway 不为 Auth 业务请求自动重试，不因 Auth 返回登录错误而
 
 ## 依赖与实施边界
 
-依赖 [ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md)、[Auth 邮箱绑定契约](../../platform/contracts/auth-email-binding-v1.md)、[设备认证与 Session v1](../../platform/contracts/auth-device-session-v1.md) 和已实现的 UC-AUTH-011/API。实现需要扩展 Gateway v2 配置校验，使可选 Session 可以在 USER `NEVER` 时按精确 route 条件保留；不得放宽现有可选 USER 身份或必需 DIRECT Session 组合。
+依赖 [ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md)、[Auth 邮箱绑定契约](../../platform/contracts/auth-email-binding-v1.md)、[设备认证与 Session v1](../../platform/contracts/auth-device-session-v1.md) 和已实现的 UC-AUTH-011/API。Gateway `293ebc9` 已扩展 v2 配置校验，使可选 Session 可以在 USER `NEVER` 时按精确 route 条件保留，并未放宽现有可选 USER 身份或必需 DIRECT Session 组合。
 
-本用例接受及本地联合验证前，两条路由保持未登记；Auth 后端或 feature flag 已存在不等于 Gateway 可以公开入口。实现工作包可以同时加入 `GetOwnEmailBinding` 的普通必需 DIRECT route，但必须分别测试它不允许 Session 缺失。
+两条可选 Session route 与 `GetOwnEmailBinding` 必需 DIRECT route 已登记并通过 usecase、ForwardAuth、gRPC proxy 与生成配置测试。Auth 对应 feature flag 仍需部署时显式开启；真实邮箱注册/本人绑定的三协议联合验收仍是发布门禁。
 
 ## 变更记录
 
 - 2026-10-07：建立提案；定义 Auth 双模式入口的可选原始 Session、坏凭据不降级、无 USER 交换与三协议单次转发边界。
+- 2026-10-07：接受设计；Gateway `293ebc9` 登记 Begin/Complete/GetOwn 三条路由，交付严格 Session 形状、可选 DIRECT 有限矩阵与三适配器测试。
