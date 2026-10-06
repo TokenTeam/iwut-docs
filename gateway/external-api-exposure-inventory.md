@@ -4,7 +4,7 @@
 
 - 快照日期：2026-10-07
 - 统一 API 基线：`9f914c5`
-- Gateway 实现基线：`293ebc9`
+- Gateway 实现基线：`7a3eb7c`
 
 ## 目的与使用规则
 
@@ -21,7 +21,7 @@
 | 标记 | 含义 |
 | --- | --- |
 | `VERIFIED` | 已进入 `config/routes.v2.yaml`，并完成对应业务流的本地三协议联合验证。 |
-| `IMPLEMENTED` | 已进入 Gateway `293ebc9` 的精确目录，且单元、ForwardAuth、gRPC proxy、Traefik 生成与全量回归通过；对应特殊业务流的真实三协议联合验收待完成。 |
+| `IMPLEMENTED` | 已进入 Gateway `7a3eb7c` 的精确目录，且单元、ForwardAuth、gRPC proxy、Traefik 生成与全量回归通过；对应业务流的真实联合验收仍按各 UC 发布门禁完成。 |
 | `BACKLOG` | 尚未进入目录；已有 UC/ADR 足以决定行为，不需要为该 route 新写 Gateway UC。实施时仍须扩充精确 allowlist、生成物与测试。 |
 | `POLICY_GAP` | Gateway 运行时无法表达所需凭据组合；当前清单无此状态条目。 |
 | `GW002` | 依赖仍为 `PROPOSED / NOT_STARTED` 的 UC-GW-002 与 `OIDC_HTTP` 专用适配，当前不得启用。 |
@@ -43,12 +43,12 @@
 
 | 范围 | 外部 method/path 数 | `VERIFIED` | `IMPLEMENTED` | `BACKLOG` | `POLICY_GAP` | `GW002` |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Auth Proto HTTP | 44 | 15 | 10 | 19 | 0 | 0 |
+| Auth Proto HTTP | 44 | 15 | 29 | 0 | 0 | 0 |
 | OAuth/OIDC 标准 HTTP | 8 | 0 | 0 | 0 | 0 | 8 |
-| App Proto HTTP | 43 | 8 | 3 | 32 | 0 | 0 |
-| **合计** | **95** | **23** | **13** | **51** | **0** | **8** |
+| App Proto HTTP | 43 | 8 | 35 | 0 | 0 | 0 |
+| **合计** | **95** | **23** | **64** | **0** | **0** | **8** |
 
-因此，当前 Gateway 目录已接入 36/95 个派生外部 method/path：23 个已完成对应业务流的真实联合验证，13 个已实现但待特殊业务流联合验收。“Auth/App 后端已经实现”仍不能自动推出“Gateway 已生产开放”。
+因此，当前 Gateway 目录已接入全部 87 个 Auth/App Proto 外部 method/path：23 个已完成对应业务流的真实联验，64 个已实现并通过策略类别的三协议真实 smoke。剩余 8/95 是 UC-GW-002 管辖的 OAuth/OIDC 标准 HTTP 端点，仍失败关闭。“已进入 Gateway 目录”仍不等于所有后端 feature flag 已开启或已生产发布。
 
 ## Auth Center 外部入口
 
@@ -82,33 +82,33 @@
 | [UC-AUTH-026] | `BeginApplicationCloseReauth` — `POST /auth-center/v1/application-close-reauth:begin` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.begin-application-close-reauth` |
 | [UC-AUTH-026] | `CompleteApplicationCloseReauth` — `POST /auth-center/v1/application-close-reauth:complete` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.complete-application-close-reauth` |
 
-### 待接入：现有策略可覆盖
+### 已实现：复用现有策略
 
 | UC | 接口（RPC — 外部 HTTP） | 策略 | 状态 |
 | --- | --- | --- | --- |
-| [UC-AUTH-012] | `BeginEmailLogin` — `POST /auth-center/v1/email-logins` | `PUBLIC` | `BACKLOG` |
-| [UC-AUTH-012] | `CompleteEmailLogin` — `POST /auth-center/v1/email-logins/{operation_id}/completion` | `PUBLIC` | `BACKLOG` |
-| [UC-AUTH-013] | `ApplyForDeveloper` — `POST /auth-center/v1/users/me/developer-application` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-013] | `GetOwnDeveloperEligibility` — `GET /auth-center/v1/users/me/developer-eligibility` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-018] | `ListOwnApplicationGrants` — `POST /auth-center/v1/users/me/application-grants:list` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-018] | `RevokeOwnApplicationGrant` — `POST /auth-center/v1/users/me/application-grants/{grant_id}:revoke` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-020] | `ListOwnSessions` — `POST /auth-center/v1/users/me/sessions:list` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-020] | `RevokeOwnSessions` — `POST /auth-center/v1/users/me/sessions:revoke` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-021] | `ManagePlatformAdministrator` — `POST /auth-center/v1/platform-administrators:manage` | `AUTH_USER` | `BACKLOG` |
-| [UC-AUTH-021] | `GetPlatformAdministrator` — `POST /auth-center/v1/platform-administrators:get` | `AUTH_USER` | `BACKLOG` |
-| [UC-AUTH-021] | `ListPlatformAdministrators` — `POST /auth-center/v1/platform-administrators:list` | `AUTH_USER` | `BACKLOG` |
-| [UC-AUTH-022] | `ManageUserAccountStatus` — `POST /auth-center/v1/user-accounts:manage-status` | `AUTH_USER` | `BACKLOG` |
-| [UC-AUTH-022] | `GetUserAccountStatus` — `POST /auth-center/v1/user-accounts:get-status` | `AUTH_USER` | `BACKLOG` |
-| [UC-AUTH-023] | `ManageDeveloperStatus` — `POST /auth-center/v1/developers:manage-status` | `AUTH_USER` | `BACKLOG` |
-| [UC-AUTH-023] | `GetManagedDeveloperStatus` — `POST /auth-center/v1/developers:get-managed-status` | `AUTH_USER` | `BACKLOG` |
-| [UC-AUTH-024] | `PrepareDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:prepare` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-024] | `ConfirmDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:confirm` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-024] | `CancelDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:cancel` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-024] | `GetDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:get` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
+| [UC-AUTH-012] | `BeginEmailLogin` — `POST /auth-center/v1/email-logins` | `PUBLIC` | `IMPLEMENTED` — `auth.begin-email-login` |
+| [UC-AUTH-012] | `CompleteEmailLogin` — `POST /auth-center/v1/email-logins/{operation_id}/completion` | `PUBLIC` | `IMPLEMENTED` — `auth.complete-email-login` |
+| [UC-AUTH-013] | `ApplyForDeveloper` — `POST /auth-center/v1/users/me/developer-application` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.apply-for-developer` |
+| [UC-AUTH-013] | `GetOwnDeveloperEligibility` — `GET /auth-center/v1/users/me/developer-eligibility` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.get-own-developer-eligibility` |
+| [UC-AUTH-018] | `ListOwnApplicationGrants` — `POST /auth-center/v1/users/me/application-grants:list` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.list-own-application-grants` |
+| [UC-AUTH-018] | `RevokeOwnApplicationGrant` — `POST /auth-center/v1/users/me/application-grants/{grant_id}:revoke` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.revoke-own-application-grant` |
+| [UC-AUTH-020] | `ListOwnSessions` — `POST /auth-center/v1/users/me/sessions:list` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.list-own-sessions` |
+| [UC-AUTH-020] | `RevokeOwnSessions` — `POST /auth-center/v1/users/me/sessions:revoke` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.revoke-own-sessions` |
+| [UC-AUTH-021] | `ManagePlatformAdministrator` — `POST /auth-center/v1/platform-administrators:manage` | `AUTH_USER` | `IMPLEMENTED` — `auth.manage-platform-administrator` |
+| [UC-AUTH-021] | `GetPlatformAdministrator` — `POST /auth-center/v1/platform-administrators:get` | `AUTH_USER` | `IMPLEMENTED` — `auth.get-platform-administrator` |
+| [UC-AUTH-021] | `ListPlatformAdministrators` — `POST /auth-center/v1/platform-administrators:list` | `AUTH_USER` | `IMPLEMENTED` — `auth.list-platform-administrators` |
+| [UC-AUTH-022] | `ManageUserAccountStatus` — `POST /auth-center/v1/user-accounts:manage-status` | `AUTH_USER` | `IMPLEMENTED` — `auth.manage-user-account-status` |
+| [UC-AUTH-022] | `GetUserAccountStatus` — `POST /auth-center/v1/user-accounts:get-status` | `AUTH_USER` | `IMPLEMENTED` — `auth.get-user-account-status` |
+| [UC-AUTH-023] | `ManageDeveloperStatus` — `POST /auth-center/v1/developers:manage-status` | `AUTH_USER` | `IMPLEMENTED` — `auth.manage-developer-status` |
+| [UC-AUTH-023] | `GetManagedDeveloperStatus` — `POST /auth-center/v1/developers:get-managed-status` | `AUTH_USER` | `IMPLEMENTED` — `auth.get-managed-developer-status` |
+| [UC-AUTH-024] | `PrepareDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:prepare` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.prepare-developer-withdrawal` |
+| [UC-AUTH-024] | `ConfirmDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:confirm` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.confirm-developer-withdrawal` |
+| [UC-AUTH-024] | `CancelDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:cancel` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.cancel-developer-withdrawal` |
+| [UC-AUTH-024] | `GetDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:get` | `AUTH_DIRECT_SESSION` | `IMPLEMENTED` — `auth.get-developer-withdrawal` |
 
 ### 待设计/实现策略能力
 
-当前 Auth Proto 外部入口无 `POLICY_GAP`；剩余 19 条未接入方法均可由现有有限策略矩阵表达。
+当前 44 条 Auth Proto 外部入口已全部进入 Gateway 精确目录，无 `BACKLOG` 或 `POLICY_GAP`。
 
 ### OAuth/OIDC 标准端点
 
@@ -143,46 +143,46 @@
 | [UC-APP-027] | `CloseApplication` — `POST /app-center/v1/applications/{application_id}:close` | `APP_HIGH_RISK` | `IMPLEMENTED` — `app.close-application` |
 | [UC-APP-027] | `GetApplicationClosure` — `GET /app-center/v1/applications/{application_id}/closure` | `APP_USER` | `IMPLEMENTED` — `app.get-application-closure` |
 
-### 待接入：现有策略可覆盖
+### 已实现：复用现有策略
 
 | UC | 接口（RPC — 外部 HTTP） | 策略 | 状态 |
 | --- | --- | --- | --- |
-| [UC-APP-002] | `CreateApplicationVersion` — `POST /app-center/v1/applications/{application_id}/versions` | `APP_USER` | `BACKLOG` |
-| [UC-APP-003] | `UpdateApplicationVersion` — `PUT /app-center/v1/applications/{application_id}/versions/{version_id}` | `APP_USER` | `BACKLOG` |
-| [UC-APP-004] | `SubmitApplicationVersionReview` — `POST /app-center/v1/applications/{application_id}/versions/{version_id}/reviews` | `APP_USER` | `BACKLOG` |
-| [UC-APP-006] | `RestoreRejectedApplicationVersionToDraft` — `POST /app-center/v1/applications/{application_id}/versions/{version_id}/reviews/{review_id}/draft-restoration` | `APP_USER` | `BACKLOG` |
-| [UC-APP-007] | `PlaceApprovedVersionInTestSlot` — `PUT /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/test-slot` | `APP_USER` | `BACKLOG` |
-| [UC-APP-008] | `CreateOrRotateTesterJoinLink` — `POST /app-center/v1/applications/{application_id}/tester-join-links` | `APP_USER` | `BACKLOG` |
-| [UC-APP-009] | `JoinApplicationAsTester` — `POST /app-center/v1/tester-join-links/{join_link_id}/memberships` | `APP_USER` | `BACKLOG` |
-| [UC-APP-010] | `RemoveApplicationTester` — `DELETE /app-center/v1/applications/{application_id}/tester-memberships/{membership_id}` | `APP_USER` | `BACKLOG` |
-| [UC-APP-011] | `RevokeTesterJoinLink` — `DELETE /app-center/v1/applications/{application_id}/tester-join-links/{join_link_id}` | `APP_USER` | `BACKLOG` |
-| [UC-APP-012] | `ResolveTestLaunchTarget` — `POST /app-center/v1/applications/{application_id}/test-launch:resolve` | `APP_USER` | `BACKLOG` |
-| [UC-APP-013] | `CreateApplicationProfileRevision` — `POST /app-center/v1/applications/{application_id}/profile-revisions` | `APP_USER` | `BACKLOG` |
-| [UC-APP-014] | `UpdateApplicationProfileRevision` — `PUT /app-center/v1/applications/{application_id}/profile-revisions/{profile_revision_id}` | `APP_USER` | `BACKLOG` |
-| [UC-APP-015] | `SubmitApplicationProfileRevisionReview` — `POST /app-center/v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews` | `APP_USER` | `BACKLOG` |
-| [UC-APP-016] | `DecideApplicationProfileRevisionReview` — `POST /app-center/v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision` | `APP_USER` | `BACKLOG` |
-| [UC-APP-018] | `RegisterOAuthClient` — `POST /app-center/v1/applications/{application_id}/oauth-registrations/{channel}/clients` | `APP_USER` | `BACKLOG` |
-| [UC-APP-018] | `GetApplicationOAuthRegistration` — `GET /app-center/v1/applications/{application_id}/oauth-registrations/{channel}` | `APP_USER` | `BACKLOG` |
-| [UC-APP-018] | `SetOAuthClientStatus` — `PUT /app-center/v1/oauth-clients/{client_id}/status` | `APP_USER` | `BACKLOG` |
-| [UC-APP-018] | `GetOAuthClientCredentialMetadata` — `GET /app-center/v1/oauth-clients/{client_id}/credential` | `APP_USER` | `BACKLOG` |
-| [UC-APP-018] | `RotateOAuthClientSecret` — `POST /app-center/v1/oauth-clients/{client_id}/credential-rotations` | `APP_USER` | `BACKLOG` |
-| [UC-APP-020] | `SetApprovedVersionInStableSlot` — `PUT /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot` | `APP_USER` | `BACKLOG` |
-| [UC-APP-020] | `ClearStableSlot` — `DELETE /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot` | `APP_USER` | `BACKLOG` |
-| [UC-APP-021] | `SetGreyRollout` — `PUT /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/grey-rollout` | `APP_USER` | `BACKLOG` |
-| [UC-APP-021] | `ClearGreyRollout` — `DELETE /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/grey-rollout` | `APP_USER` | `BACKLOG` |
-| [UC-APP-022] | `GetApplicationFilter` — `GET /app-center/v1/applications/{application_id}/filter` | `APP_USER` | `BACKLOG` |
-| [UC-APP-022] | `SetApplicationFilter` — `PUT /app-center/v1/applications/{application_id}/filter` | `APP_USER` | `BACKLOG` |
-| [UC-APP-022] | `ClearApplicationFilter` — `DELETE /app-center/v1/applications/{application_id}/filter` | `APP_USER` | `BACKLOG` |
-| [UC-APP-026] | `GetApplicationOwnership` — `GET /app-center/v1/applications/{application_id}/ownership` | `APP_USER` | `BACKLOG` |
-| [UC-APP-026] | `InitiateApplicationAdminTransfer` — `POST /app-center/v1/applications/{application_id}/admin-transfers` | `APP_USER` | `BACKLOG` |
-| [UC-APP-026] | `GetApplicationAdminTransfer` — `GET /app-center/v1/application-admin-transfers/{transfer_id}` | `APP_USER` | `BACKLOG` |
-| [UC-APP-026] | `AcceptApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:accept` | `APP_USER` | `BACKLOG` |
-| [UC-APP-026] | `RejectApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:reject` | `APP_USER` | `BACKLOG` |
-| [UC-APP-026] | `CancelApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:cancel` | `APP_USER` | `BACKLOG` |
+| [UC-APP-002] | `CreateApplicationVersion` — `POST /app-center/v1/applications/{application_id}/versions` | `APP_USER` | `IMPLEMENTED` — `app.create-application-version` |
+| [UC-APP-003] | `UpdateApplicationVersion` — `PUT /app-center/v1/applications/{application_id}/versions/{version_id}` | `APP_USER` | `IMPLEMENTED` — `app.update-application-version` |
+| [UC-APP-004] | `SubmitApplicationVersionReview` — `POST /app-center/v1/applications/{application_id}/versions/{version_id}/reviews` | `APP_USER` | `IMPLEMENTED` — `app.submit-application-version-review` |
+| [UC-APP-006] | `RestoreRejectedApplicationVersionToDraft` — `POST /app-center/v1/applications/{application_id}/versions/{version_id}/reviews/{review_id}/draft-restoration` | `APP_USER` | `IMPLEMENTED` — `app.restore-rejected-application-version-to-draft` |
+| [UC-APP-007] | `PlaceApprovedVersionInTestSlot` — `PUT /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/test-slot` | `APP_USER` | `IMPLEMENTED` — `app.place-approved-version-in-test-slot` |
+| [UC-APP-008] | `CreateOrRotateTesterJoinLink` — `POST /app-center/v1/applications/{application_id}/tester-join-links` | `APP_USER` | `IMPLEMENTED` — `app.create-or-rotate-tester-join-link` |
+| [UC-APP-009] | `JoinApplicationAsTester` — `POST /app-center/v1/tester-join-links/{join_link_id}/memberships` | `APP_USER` | `IMPLEMENTED` — `app.join-application-as-tester` |
+| [UC-APP-010] | `RemoveApplicationTester` — `DELETE /app-center/v1/applications/{application_id}/tester-memberships/{membership_id}` | `APP_USER` | `IMPLEMENTED` — `app.remove-application-tester` |
+| [UC-APP-011] | `RevokeTesterJoinLink` — `DELETE /app-center/v1/applications/{application_id}/tester-join-links/{join_link_id}` | `APP_USER` | `IMPLEMENTED` — `app.revoke-tester-join-link` |
+| [UC-APP-012] | `ResolveTestLaunchTarget` — `POST /app-center/v1/applications/{application_id}/test-launch:resolve` | `APP_USER` | `IMPLEMENTED` — `app.resolve-test-launch-target` |
+| [UC-APP-013] | `CreateApplicationProfileRevision` — `POST /app-center/v1/applications/{application_id}/profile-revisions` | `APP_USER` | `IMPLEMENTED` — `app.create-application-profile-revision` |
+| [UC-APP-014] | `UpdateApplicationProfileRevision` — `PUT /app-center/v1/applications/{application_id}/profile-revisions/{profile_revision_id}` | `APP_USER` | `IMPLEMENTED` — `app.update-application-profile-revision` |
+| [UC-APP-015] | `SubmitApplicationProfileRevisionReview` — `POST /app-center/v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews` | `APP_USER` | `IMPLEMENTED` — `app.submit-application-profile-revision-review` |
+| [UC-APP-016] | `DecideApplicationProfileRevisionReview` — `POST /app-center/v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision` | `APP_USER` | `IMPLEMENTED` — `app.decide-application-profile-revision-review` |
+| [UC-APP-018] | `RegisterOAuthClient` — `POST /app-center/v1/applications/{application_id}/oauth-registrations/{channel}/clients` | `APP_USER` | `IMPLEMENTED` — `app.register-oauth-client` |
+| [UC-APP-018] | `GetApplicationOAuthRegistration` — `GET /app-center/v1/applications/{application_id}/oauth-registrations/{channel}` | `APP_USER` | `IMPLEMENTED` — `app.get-application-oauth-registration` |
+| [UC-APP-018] | `SetOAuthClientStatus` — `PUT /app-center/v1/oauth-clients/{client_id}/status` | `APP_USER` | `IMPLEMENTED` — `app.set-oauth-client-status` |
+| [UC-APP-018] | `GetOAuthClientCredentialMetadata` — `GET /app-center/v1/oauth-clients/{client_id}/credential` | `APP_USER` | `IMPLEMENTED` — `app.get-oauth-client-credential-metadata` |
+| [UC-APP-018] | `RotateOAuthClientSecret` — `POST /app-center/v1/oauth-clients/{client_id}/credential-rotations` | `APP_USER` | `IMPLEMENTED` — `app.rotate-oauth-client-secret` |
+| [UC-APP-020] | `SetApprovedVersionInStableSlot` — `PUT /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot` | `APP_USER` | `IMPLEMENTED` — `app.set-approved-version-in-stable-slot` |
+| [UC-APP-020] | `ClearStableSlot` — `DELETE /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/stable-slot` | `APP_USER` | `IMPLEMENTED` — `app.clear-stable-slot` |
+| [UC-APP-021] | `SetGreyRollout` — `PUT /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/grey-rollout` | `APP_USER` | `IMPLEMENTED` — `app.set-grey-rollout` |
+| [UC-APP-021] | `ClearGreyRollout` — `DELETE /app-center/v1/applications/{application_id}/publications/{rpc_api_major}/grey-rollout` | `APP_USER` | `IMPLEMENTED` — `app.clear-grey-rollout` |
+| [UC-APP-022] | `GetApplicationFilter` — `GET /app-center/v1/applications/{application_id}/filter` | `APP_USER` | `IMPLEMENTED` — `app.get-application-filter` |
+| [UC-APP-022] | `SetApplicationFilter` — `PUT /app-center/v1/applications/{application_id}/filter` | `APP_USER` | `IMPLEMENTED` — `app.set-application-filter` |
+| [UC-APP-022] | `ClearApplicationFilter` — `DELETE /app-center/v1/applications/{application_id}/filter` | `APP_USER` | `IMPLEMENTED` — `app.clear-application-filter` |
+| [UC-APP-026] | `GetApplicationOwnership` — `GET /app-center/v1/applications/{application_id}/ownership` | `APP_USER` | `IMPLEMENTED` — `app.get-application-ownership` |
+| [UC-APP-026] | `InitiateApplicationAdminTransfer` — `POST /app-center/v1/applications/{application_id}/admin-transfers` | `APP_USER` | `IMPLEMENTED` — `app.initiate-application-admin-transfer` |
+| [UC-APP-026] | `GetApplicationAdminTransfer` — `GET /app-center/v1/application-admin-transfers/{transfer_id}` | `APP_USER` | `IMPLEMENTED` — `app.get-application-admin-transfer` |
+| [UC-APP-026] | `AcceptApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:accept` | `APP_USER` | `IMPLEMENTED` — `app.accept-application-admin-transfer` |
+| [UC-APP-026] | `RejectApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:reject` | `APP_USER` | `IMPLEMENTED` — `app.reject-application-admin-transfer` |
+| [UC-APP-026] | `CancelApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:cancel` | `APP_USER` | `IMPLEMENTED` — `app.cancel-application-admin-transfer` |
 
 ### 待设计/实现策略能力
 
-当前 App Proto 外部入口无 `POLICY_GAP`；剩余 32 条未接入方法均可由现有 `APP_USER` 策略表达。
+当前 43 条 App Proto 外部入口已全部进入 Gateway 精确目录，无 `BACKLOG` 或 `POLICY_GAP`。
 
 ## 明确不接入 Gateway 的内部 RPC
 
@@ -202,11 +202,10 @@
 
 ## 下一批实施切分建议
 
-1. **普通 App USER routes**：一次加入 32 个 `BACKLOG` route；策略完全一致，按服务分组补目录、digest、HTTP/native gRPC/gRPC-Web 契约与后端真实联合测试，不新增 Gateway UC。
-2. **普通 Auth routes**：加入 19 个 `BACKLOG` route；把 DIRECT Session allowlist 继续扩成精确目录能力，但仍保持逐方法白名单和坏凭据失败关闭。
-3. **特殊终端载体验收**：UC-GW-004/005/006 已实现；下一步开启相应 Auth/App feature flag，用真实 Traefik、Gateway、Auth、App 与 Mongo 补齐邮箱双分支、Prepare token 正文、注销用途隔离和 proof 真实拒绝的三协议联合测试。
-4. **OAuth/OIDC**：单独完成并接受 [UC-GW-002] 后再接 8 个 `OIDC_HTTP` method/path；不得和普通 Proto route 批次混开。
-5. 每批完成后以本文件为验收台账：代码和适配器边界完成时可先记 `IMPLEMENTED`，对应业务流的真实三协议联合验收后才记 `VERIFIED`，并记录 Gateway/API commit；不要用“后端已实现”代替 Gateway 联合验证。
+1. **Proto 业务流联合验收**：按 Auth/App feature flag 和依赖组分批打开真实后端，补齐 64 条 `IMPLEMENTED` route 的业务成功/拒绝、一次性 secret/token 响应与下游调用次数验收；不再新增 Gateway 策略类型。
+2. **特殊终端载体验收**：开启相应 Auth/App feature flag，用真实 Traefik、Gateway、Auth、App 与 Mongo 补齐邮箱双分支、Prepare token 正文、注销用途隔离和 proof 真实拒绝的三协议联合测试。
+3. **OAuth/OIDC**：单独完成并接受 [UC-GW-002] 后再接 8 个 `OIDC_HTTP` method/path；不得和普通 Proto route 批次混开。`x-iwut-access-token` 在此之前于所有已有 route 全局拒绝并清理。
+4. 每批完成后以本文件为验收台账：代码和适配器边界完成时可先记 `IMPLEMENTED`，对应业务流的真实三协议联合验收后才记 `VERIFIED`，并记录 Gateway/API commit；不要用“后端已实现”代替 Gateway 联合验证。
 
 ## 权威来源
 
@@ -217,7 +216,7 @@
 - [Auth Center API 路由与 HTTP 映射](../platform/contracts/auth-center-api-routing.md)
 - [App Center API 路由 v1](../platform/contracts/app-center-api-routing.md)
 - [OAuth/OIDC v1](../platform/contracts/oauth-oidc-v1.md)
-- 统一 API Proto `9f914c5` 的 `google.api.http` annotations；Gateway 当前目录 `293ebc9` 的 `config/routes.v2.yaml`。
+- 统一 API Proto `9f914c5` 的 `google.api.http` annotations；Gateway 当前目录 `7a3eb7c` 的 `config/routes.v2.yaml`。
 
 [UC-AUTH-001]: ../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md
 [UC-AUTH-002]: ../auth-center/use-cases/UC-AUTH-002-batch-get-developer-statuses.md

@@ -122,6 +122,16 @@ Gateway `0009947` 固定统一 API `9f914c5`，把 `routes.v1.yaml` 迁移为严
 
 部署联合验收至少需显式配置 `AUTH_USER_ENDPOINTS_ENABLED`、`AUTH_EMAIL_BINDING_ENABLED`、`AUTH_ACCOUNT_CLOSURE_ENABLED`、`AUTH_APPLICATION_CLOSE_REAUTH_ENABLED` 与 `APP_CENTER_APPLICATION_CLOSURE_ENABLED`，并满足邮件/HMAC、账号归属退出、身份签名及 App 关闭依赖。Gateway 不感知这些开关；后端关闭时的 404/UNIMPLEMENTED/UNAVAILABLE 不得误记为路由验收成功。
 
+## 2026-10-07 Auth/App Proto 外部 API 全量接入
+
+Gateway `7a3eb7c` 在固定 API `9f914c5` 上再新增 51 条普通策略 route：Auth 19 条（`PUBLIC` 2、`AUTH_DIRECT_SESSION` 10、`AUTH_USER` 7）与 App `APP_USER` 32 条。目录现有 87 条精确 Proto route，与 pinned descriptors 中全部 44 个 Auth、43 个 App `google.api.http` 外部方法闭合；每条 gRPC route 均有编译期类型化 unary adapter。Scope/DeveloperStatus/SystemPrincipal/identity/OAuth delegation/Auth application-closure/account-owner-exit 与 App OAuth provider/account-owner-exit 等内部 RPC 继续不登记。
+
+实现同时把 `x-iwut-access-token` 加入全局已知敏感载体：在 UC-GW-002 接受/实现前，所有已有 route 均在认证阶段拒绝，HTTP 请求/响应与 gRPC metadata 均清理，不把 OAuth access token 静默传给普通业务 upstream。DIRECT Session 仍为逐 RPC 有限白名单；App 细粒度 Developer/Reviewer/管理员授权仍由下游基于 `iwut-app-center` USER JWS 权威判断。
+
+`make check` 与 `make protocol-e2e` 在最终冻结内容上通过。真实 Traefik、Gateway、Auth、App、Mongo E2E 新增覆盖 Auth `ListOwnSessions` DIRECT 路由和 App `GetApplicationFilter` USER 路由，三协议均验证有效 Session 到达真实后端以及缺失 Session 失败关闭。其它 49 条新 route 由 descriptor/catalog/typed-adapter 闭合测试与 Auth/App 各 UC 后端测试覆盖，仍应在对应 feature flag 部署批次执行业务成功/拒绝联合验收。未 push，未生产部署。
+
+Auth 发布批次需按能力显式开启 `AUTH_USER_ENDPOINTS_ENABLED`、`AUTH_EMAIL_LOGIN_ENABLED`、`AUTH_DEVELOPER_APPLICATION_ENABLED`、`AUTH_SESSION_MANAGEMENT_ENABLED`、`AUTH_PLATFORM_ADMIN_ENDPOINTS_ENABLED`、`AUTH_ACCOUNT_MANAGEMENT_ENDPOINTS_ENABLED`、`AUTH_DEVELOPER_MANAGEMENT_ENDPOINTS_ENABLED`、`AUTH_DEVELOPER_WITHDRAWAL_ENABLED` 及相应邮件、OAuth manifest、owner-exit、身份签名/受信 caller 依赖。App 这 32 条无独立 feature flag，但仍依赖各 UC 的 migration、外部 provider 与业务数据就绪。
+
 ## 2026-10-03 应用审核权限路由扩展完成
 
 [UC-AUTH-004](../../auth-center/use-cases/UC-AUTH-004-manage-reviewer-permission.md) 新增两个显式应用审核权限方法，映射见 [Auth 路由契约](../../platform/contracts/auth-center-api-routing.md)。Gateway `6b3f0d9` 固定 API `758c426`，已追加静态 HTTP/原生 gRPC/gRPC-Web SESSION 路由、显式 unary 代理适配及生成的 Traefik 配置，目标 audience 仍为 iwut-auth-center，旧 reviewer-permission 路由保持版本权限语义。`make check` 与 `make protocol-e2e` 通过：真实 Traefik/Auth/Mongo 下覆盖两项独立权限、新旧接口混用、路径覆盖和权限不足。增量 COMPLETE，未 push 或生产部署。

@@ -22,7 +22,7 @@ Gateway 为终端到平台服务的请求提供路由选择、认证编排与转
 
 Traefik `v3.7.13` 保留 Edge、HTTP Router、TLS 与 gRPC-Web 终止职责。HTTP/JSON 的每条路由使用 route-specific ForwardAuth；原生 gRPC 与转换后的 gRPC-Web 进入 Gateway 精确 unary 前置代理，避免 ForwardAuth 拒绝时返回非 gRPC 响应。配置由严格的 `config/routes.v2.yaml` 驱动，具体边界见 ADR-GW-001/002。具有相同行为的新接口只扩充路由及测试，不为每条业务路径创建独立 UC。不设计 Gateway 数据库、Redis、事件总线、动态策略语言或路由后台。
 
-UC 正文中的 `BR-GWR-*` 是本 context 的规则权威；平台目录只保存真正跨系统的约定。UC-GW-001 首个实现工作包已 `COMPLETE`，UC-GW-003 已完成本地联合验证，UC-GW-004/005/006 已接受并由 Gateway `293ebc9` 实现；特殊业务成功/拒绝的真实三协议联合验收仍是发布门禁，详情见[实现状态](implements/README.md)。Gateway 工作包直接读取 UC、ADR 与它们点名的共享契约；当前 brief 生成器仍不生成 Gateway brief。UC-GW-002 仍为 `PROPOSED / NOT_STARTED`，ADR-GW-002/ADR-PLAT-004 已接受。现有 `tools/registry.py` 仍不能被当作已经检查 Gateway registry，Gateway registry 必须人工同步审查。
+UC 正文中的 `BR-GWR-*` 是本 context 的规则权威；平台目录只保存真正跨系统的约定。UC-GW-001 首个实现工作包已 `COMPLETE`，UC-GW-003 已完成本地联合验证，UC-GW-004/005/006 已接受并由 Gateway `293ebc9` 实现；Gateway `7a3eb7c` 又将全部 44 条 Auth 与 43 条 App Proto 外部方法纳入精确目录。各业务成功/拒绝的真实联合验收仍按 UC 是发布门禁，详情见[实现状态](implements/README.md)。Gateway 工作包直接读取 UC、ADR 与它们点名的共享契约；当前 brief 生成器仍不生成 Gateway brief。UC-GW-002 仍为 `PROPOSED / NOT_STARTED`，8 个 OAuth/OIDC 标准 HTTP 端点仍失败关闭；ADR-GW-002/ADR-PLAT-004 已接受。现有 `tools/registry.py` 仍不能被当作已经检查 Gateway registry，Gateway registry 必须人工同步审查。
 
 ## OAuth / OIDC 设计（2026-09-27，PROPOSED）
 
@@ -35,3 +35,5 @@ UC 正文中的 `BR-GWR-*` 是本 context 的规则权威；平台目录只保�
 [UC-GW-003](use-cases/UC-GW-003-attach-optional-user-identity.md) 为 App UC023/024 建立统一入口：没有 Session 时匿名转发，存在 Session 时调用 Auth UC010 换取目标 audience USER JWS；任何已提供但无效或歧义的凭据都失败关闭。Gateway `0009947` 已按 [ADR-GW-002](adr/ADR-GW-002-route-credential-and-identity-policy.md) 实现 v2 路由矩阵，并按 [ADR-PLAT-004](../platform/adr/ADR-PLAT-004-unified-api-integration-baseline.md) 固定共同 API `9f914c5`。本地真实 Auth/App 三协议 E2E 已通过；尚未 push 或生产部署。
 
 Gateway `293ebc9` 在同一 API 基线上把目录扩展为 36 条精确 route，实现 UC-GW-004/005/006 及三条配套入口。新特殊路由已通过单元、ForwardAuth、gRPC proxy、Traefik 生成与全量回归；现有真实 Auth/App 三协议 E2E 也已通过，但该 E2E 未覆盖邮箱、账号注销和应用关闭的新业务流。尚未 push 或生产部署。
+
+Gateway `7a3eb7c` 继续扩展为 87 条精确 Proto route，与固定 API 中 44 个 Auth、43 个 App 外部 annotation 方法闭合；同时固定 87 个 typed unary adapter，并在 UC-GW-002 实现前全局拒绝/清理 `x-iwut-access-token`。真实 Traefik、Gateway、Auth、App、Mongo E2E 已对新 Auth DIRECT 与 App USER 策略各选代表 route，通过 HTTP/JSON、原生 gRPC 与 gRPC-Web 验证有效/缺失 Session 边界。尚未 push 或生产部署。
