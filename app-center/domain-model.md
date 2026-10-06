@@ -49,7 +49,7 @@ CatalogResolver (domain/query service)
 
 ### Application
 
-Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`；[UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出 `lifecycleStatus` 和 `lifecycleRevision`；[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出与关闭正交的 `platformAvailabilityStatus` 和 `platformAvailabilityRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
+Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`；[UC-APP-027](use-cases/UC-APP-027-close-application.md) 增加 `lifecycleStatus` 和 `lifecycleRevision`；[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 增加与关闭正交的 `platformAvailabilityStatus` 和 `platformAvailabilityRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
 
 Application 提供其他聚合共同引用的 `applicationId` 和当前 `adminId`。版本序号与资料序号的分配器属于创建协调所需状态，不增加 Application 的公开业务含义。
 
@@ -137,7 +137,7 @@ UC-APP-015 已把 ApplicationProfileReview 定义为引用 ProfileRevision 的�
 
 批准资料需要原子协调 ApplicationProfileRevision、ApplicationProfileReview、`workingProfileRevisionId` 与 `currentPublishedProfileRevisionId`；拒绝也会清空工作指针。权威规则见 [BR-PRF-026](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-026)、[BR-PRF-030](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030) 与 [BR-PRF-032](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-032)。被拒绝内容的重新编辑不是领域迁移：网页端预填创建表单，App Center 按照普通创建处理一个新 ProfileRevision。
 
-公开资料的紧急隐藏不扩展为 ProfileRevision 的 REVOKED 状态。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格；暂停不改写资料指针或审核历史。
+公开资料的紧急隐藏不扩展为 ProfileRevision 的 REVOKED 状态。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格；暂停不改写资料指针或审核历史。
 
 ### ApplicationPublication
 

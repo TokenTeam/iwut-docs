@@ -57,14 +57,14 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 
 ## 当前尚未设计或明确后置的能力
 
-- Application 管理查询、受控改名和管理员日常可恢复归档；物理删除仍不是首版目标。不可逆关闭已由 UC-APP-027 实现，平台暂停/恢复已由 UC-APP-028 提案。
+- Application 管理查询、受控改名和管理员日常可恢复归档；物理删除仍不是首版目标。不可逆关闭已由 UC-APP-027 实现，平台暂停/恢复已由 UC-APP-028 接受并开始实现。
 - 协作者和角色。
 - 平台强制转让、争议仲裁和管理员紧急接管；普通双方确认式转让由 UC-APP-026 提案定义。
 - ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销。
 - versionLabel 语义比较和 SemVer 校验。
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
-- Application 管理员自助停用；平台紧急暂停/恢复不作为 ProfileRevision 状态，已由 UC-APP-028 提案并使用独立运维权限。
+- Application 管理员自助停用；平台紧急暂停/恢复不作为 ProfileRevision 状态，已由 UC-APP-028 接受并使用独立运维权限。
 - Tester 主动退出、test clear，以及独立于 UC-APP-024 普通 Catalog 的“我参与的测试”入口。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
 - Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。

@@ -1,0 +1,47 @@
+{
+  "uc": "UC-APP-028",
+  "note": "Implement reversible platform suspension as a lifecycle-orthogonal Application availability gate. Add independent OCC, exact suspend/restore permissions, atomic audit and durable alert outbox, keep ownership and dependent configuration intact, block Catalog/runtime/Tester Join and all five OAuth provider methods, and preserve existing online snapshot/delegation residual bounds. Restore only removes the platform gate and never repairs or enables invalid dependent configuration.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与依赖",
+    "输入、输出与 API 草图",
+    "正交状态模型",
+    "暂停流程",
+    "恢复流程",
+    "暂停期间的行为",
+    "OAuth 在线检查与残余窗口",
+    "领域与数据模型",
+    "错误语义",
+    "并发与验收场景",
+    "实现依赖与启用边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-003": ["决定", "Port 所有权", "自动化约束"],
+    "ADR-004": ["决定", "测试环境"],
+    "ADR-005": ["决定", "隐私与存在性隐藏"],
+    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "时间与有效期",
+      "错误边界"
+    ],
+    "platform/contracts/app-oauth-client-v1.md": [
+      "所有权与调用方",
+      "三种生命周期",
+      "Auth 专用接口",
+      "资格变化与失败",
+      "消费点与契约验收"
+    ],
+    "platform/contracts/oauth-delegation-v1.md": [
+      "链路与身份隔离",
+      "委托 JWS",
+      "撤销与时钟边界"
+    ]
+  }
+}

@@ -63,7 +63,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-025` | 协调账号归属退出与个人状态清理 | `ACCEPTED` | [UC-APP-025](use-cases/UC-APP-025-coordinate-account-owner-exit.md) | — | Auth 治理交付依赖，零归属屏障与注销个人状态清理。 |
 | `UC-APP-026` | 转让 Application 管理权 | `ACCEPTED` | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) | — | 发起—接受转让、配额原子移动、账号退出屏障及可选 CONFIDENTIAL secret 轮换。 |
 | `UC-APP-027` | 关闭 Application | `ACCEPTED` | [UC-APP-027](use-cases/UC-APP-027-close-application.md) | — | 不可逆 CLOSING/CLOSED、本地即时隔离、配额释放和持久 Auth 授权撤销收敛。 |
-| `UC-APP-028` | 暂停与恢复 Application | `PROPOSED` | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) | — | 平台运维精确权限、正交可用状态、运行/OAuth 在线门禁与可恢复配置保留。 |
+| `UC-APP-028` | 暂停与恢复 Application | `ACCEPTED` | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) | — | 平台运维精确权限、正交可用状态、运行/OAuth 在线门禁与可恢复配置保留。 |
 
 ## Business Rules
 

@@ -51,7 +51,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。
 
-管理视图、受控改名和管理员日常可恢复归档仍需后续用例；平台紧急暂停/恢复已经由 UC-APP-028 提案独立建模。
+管理视图、受控改名和管理员日常可恢复归档仍需后续用例；平台紧急暂停/恢复已经由 UC-APP-028 独立建模。
 
 这项能力不保存公开 displayName、简介、运行入口、发布槽位或 Tester 列表。
 
@@ -149,7 +149,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | 能力 | 已有设计证据 | 首版主要缺口 |
 | --- | --- | --- |
 | Application Ownership | `UC-APP-001`、`UC-APP-025`、`UC-APP-026`、`UC-APP-027` | 管理查询、改名和管理员日常归档 |
-| Platform Availability | `UC-APP-028` | 提案待接受；API、服务实现和真实 Auth/App 联合验收 |
+| Platform Availability | `UC-APP-028` | API、服务实现和真实 Auth/App 联合验收正在进行 |
 | Version Review | `UC-APP-002`–`UC-APP-006` | 查询、草稿放弃、批准资格撤销或紧急处置 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023` | test 清空、Application 级停止分发 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md)；`UC-APP-024` 的公开读取 | 受控 icon 资产为以后扩展 |

@@ -8,7 +8,7 @@
 
 由开发者在 App Center 中创建的一条应用记录。
 
-当前已接受模型包含 id、name、adminId 和 createdAt；UC026/027 分别提出 ownershipRevision 与 lifecycleStatus/lifecycleRevision；UC028 提出正交的 platformAvailabilityStatus/platformAvailabilityRevision。它不表示公开目录资料、OAuth client、可发布版本、审核对象或运行中的服务。
+当前已接受模型包含 id、name、adminId 和 createdAt；UC026/027 分别增加 ownershipRevision 与 lifecycleStatus/lifecycleRevision；UC028 增加正交的 platformAvailabilityStatus/platformAvailabilityRevision。它不表示公开目录资料、OAuth client、可发布版本、审核对象或运行中的服务。
 
 ## Application ID
 

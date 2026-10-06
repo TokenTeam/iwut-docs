@@ -1,6 +1,6 @@
 # UC-APP-028：暂停与恢复 Application
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -261,8 +261,9 @@ Auth 侧 [UC-AUTH-027](../../auth-center/use-cases/UC-AUTH-027-manage-applicatio
 - UC-AUTH-014 至 019 的真实跨服务回归，尤其是 refresh、UserInfo 和 delegation；
 - 部署显式启用的 `APP_CENTER_APPLICATION_OPERATIONS_ENABLED`，默认 false。关闭端点开关不得让已保存 SUSPENDED 记录失效；只要数据库存在 SUSPENDED，所有读路径和 worker 仍必须执行门禁。
 
-本用例进入 ACCEPTED 前应确认 API 字段号与路由、真实实现中的告警 outbox 复用点，以及 Auth/App 联合测试入口；业务状态、权限和残余窗口不再依赖新的产品决策。
+本用例已接受为 App/API 后端工作包。实现应固定 API 字段号与路由，复用或建立 durable alert outbox，并以真实 Auth/App 联合测试验证 OAuth 在线门禁；业务状态、权限和残余窗口不再依赖新的产品决策。
 
 ## 变更记录
 
 - 2026-10-06：建立首版提案；采用独立平台可用状态和 revision、精确 suspend/restore 权限、暂停期间保留配置并允许修复、恢复后重新执行现有资格、OAuth 在线失败和约 11 秒委托残余边界。
+- 2026-10-06：接受 App/API 后端工作包并开始实现；保持端点默认关闭，要求真实 Mongo 和 Auth/App 联合验收。

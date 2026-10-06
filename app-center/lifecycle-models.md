@@ -227,7 +227,7 @@ CLOSED 只表示 Auth 已保存永久 application tombstone 并返回持久回�
 
 ## Application 平台可用状态
 
-[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出与关闭生命周期正交的可恢复平台门禁：
+[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 定义与关闭生命周期正交的可恢复平台门禁：
 
 ```text
 AVAILABLE ── SUSPEND ──► SUSPENDED
@@ -244,7 +244,7 @@ Restore 只解除平台门禁，不代表当前存在有效 Stable、Profile、T
 生命周期缺口适合按依赖顺序补齐，但暂不在本文分配 UC 编号：
 
 1. 设计 test clear。
-2. Application 管理员日常可恢复归档；平台紧急 suspension/restore 已由 UC-APP-028 提案覆盖，不可逆关闭已由 UC-APP-027 覆盖。
+2. Application 管理员日常可恢复归档；平台紧急 suspension/restore 已由 UC-APP-028 覆盖，不可逆关闭已由 UC-APP-027 覆盖。
 3. 官方客户端 Filter 求值器与“我参与的测试”入口。
 4. 受控 icon 资产语义。
 5. APPROVED Version 的资格撤销及引用处置。
