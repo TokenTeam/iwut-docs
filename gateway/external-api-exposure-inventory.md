@@ -22,7 +22,7 @@
 | --- | --- |
 | `VERIFIED` | 已进入 `config/routes.v2.yaml`，并在 Gateway `0009947` 完成本地三协议联合验证。 |
 | `BACKLOG` | 尚未进入目录；已有 UC/ADR 足以决定行为，不需要为该 route 新写 Gateway UC。实施时仍须扩充精确 allowlist、生成物与测试。 |
-| `POLICY_GAP` | 当前 v2 运行时还不能表达或转发所需载体；先补齐既有 ADR-GW-002 语义及相应 Gateway UC 验收，再启用 route。 |
+| `POLICY_GAP` | 当前 v2 运行时还不能表达或转发所需载体；行为已分别由 UC-GW-004/005/006 提案，须接受、实现并验收后再启用 route。 |
 | `GW002` | 依赖仍为 `PROPOSED / NOT_STARTED` 的 UC-GW-002 与 `OIDC_HTTP` 专用适配，当前不得启用。 |
 | `INTERNAL_ONLY` | 服务间原生 gRPC；不得添加终端 HTTP、gRPC 或 gRPC-Web route。 |
 
@@ -95,8 +95,8 @@
 | [UC-AUTH-024] | `ConfirmDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:confirm` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
 | [UC-AUTH-024] | `CancelDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:cancel` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
 | [UC-AUTH-024] | `GetDeveloperWithdrawal` — `POST /auth-center/v1/users/me/developer-withdrawal:get` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
-| [UC-AUTH-025] | `BeginAccountClosure` — `POST /auth-center/v1/account-closures:begin` | `ACCOUNT_CLOSURE`（设备定位在 body） | `BACKLOG` |
-| [UC-AUTH-025] | `PrepareAccountClosure` — `POST /auth-center/v1/account-closures:prepare` | `ACCOUNT_CLOSURE`（设备证明在 body） | `BACKLOG` |
+| [UC-AUTH-025] | `BeginAccountClosure` — `POST /auth-center/v1/account-closures:begin` | `ACCOUNT_CLOSURE`（设备定位在 body） | `BACKLOG` — 与 [UC-GW-005] 五条注销 route 同批交付。 |
+| [UC-AUTH-025] | `PrepareAccountClosure` — `POST /auth-center/v1/account-closures:prepare` | `ACCOUNT_CLOSURE`（设备证明在 body） | `BACKLOG` — 与 [UC-GW-005] 五条注销 route 同批交付。 |
 | [UC-AUTH-026] | `BeginApplicationCloseReauth` — `POST /auth-center/v1/application-close-reauth:begin` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
 | [UC-AUTH-026] | `CompleteApplicationCloseReauth` — `POST /auth-center/v1/application-close-reauth:complete` | `AUTH_DIRECT_SESSION` | `BACKLOG` |
 
@@ -104,11 +104,11 @@
 
 | UC | 接口（RPC — 外部 HTTP） | 所需策略 | 状态与缺口 |
 | --- | --- | --- | --- |
-| [UC-AUTH-011] | `BeginSetEmail` — `POST /auth-center/v1/email-bindings` | `AUTH_OPTIONAL_DIRECT_SESSION` | `POLICY_GAP` — 注册可无 Session；绑定时保留 Session；坏 Session 不可匿名降级。 |
-| [UC-AUTH-011] | `CompleteSetEmail` — `POST /auth-center/v1/email-bindings/{operation_id}/completion` | `AUTH_OPTIONAL_DIRECT_SESSION` | `POLICY_GAP` — Gateway 只判断载体，不解析业务 mode。 |
-| [UC-AUTH-025] | `ConfirmAccountClosure` — `POST /auth-center/v1/account-closures:confirm` | `ACCOUNT_CLOSURE` + `x-iwut-closure-confirmation` | `POLICY_GAP` — 精确 terminal header 尚未启用。 |
-| [UC-AUTH-025] | `CancelAccountClosure` — `POST /auth-center/v1/account-closures:cancel` | `ACCOUNT_CLOSURE` + `x-iwut-closure-confirmation` | `POLICY_GAP` — 精确 terminal header 尚未启用。 |
-| [UC-AUTH-025] | `GetAccountClosure` — `POST /auth-center/v1/account-closures:get` | `ACCOUNT_CLOSURE` + `x-iwut-closure-receipt` | `POLICY_GAP` — receipt 与 confirmation 必须用途隔离。 |
+| [UC-AUTH-011] | `BeginSetEmail` — `POST /auth-center/v1/email-bindings` | `AUTH_OPTIONAL_DIRECT_SESSION` | `POLICY_GAP` — [UC-GW-004]；注册可无 Session，绑定时保留 Session，坏 Session 不可匿名降级。 |
+| [UC-AUTH-011] | `CompleteSetEmail` — `POST /auth-center/v1/email-bindings/{operation_id}/completion` | `AUTH_OPTIONAL_DIRECT_SESSION` | `POLICY_GAP` — [UC-GW-004]；Gateway 只判断载体，不解析业务 mode。 |
+| [UC-AUTH-025] | `ConfirmAccountClosure` — `POST /auth-center/v1/account-closures:confirm` | `ACCOUNT_CLOSURE` + `x-iwut-closure-confirmation` | `POLICY_GAP` — [UC-GW-005]；精确 terminal header 尚未启用。 |
+| [UC-AUTH-025] | `CancelAccountClosure` — `POST /auth-center/v1/account-closures:cancel` | `ACCOUNT_CLOSURE` + `x-iwut-closure-confirmation` | `POLICY_GAP` — [UC-GW-005]；精确 terminal header 尚未启用。 |
+| [UC-AUTH-025] | `GetAccountClosure` — `POST /auth-center/v1/account-closures:get` | `ACCOUNT_CLOSURE` + `x-iwut-closure-receipt` | `POLICY_GAP` — [UC-GW-005]；receipt 与 confirmation 必须用途隔离。 |
 
 ### OAuth/OIDC 标准端点
 
@@ -176,14 +176,14 @@
 | [UC-APP-026] | `AcceptApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:accept` | `APP_USER` | `BACKLOG` |
 | [UC-APP-026] | `RejectApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:reject` | `APP_USER` | `BACKLOG` |
 | [UC-APP-026] | `CancelApplicationAdminTransfer` — `POST /app-center/v1/application-admin-transfers/{transfer_id}:cancel` | `APP_USER` | `BACKLOG` |
-| [UC-APP-027] | `GetApplicationClosurePreview` — `GET /app-center/v1/applications/{application_id}/closure-preview` | `APP_USER` | `BACKLOG` |
-| [UC-APP-027] | `GetApplicationClosure` — `GET /app-center/v1/applications/{application_id}/closure` | `APP_USER` | `BACKLOG` |
+| [UC-APP-027] | `GetApplicationClosurePreview` — `GET /app-center/v1/applications/{application_id}/closure-preview` | `APP_USER` | `BACKLOG` — 可与 [UC-GW-006] 同批交付，但禁止 high-risk proof。 |
+| [UC-APP-027] | `GetApplicationClosure` — `GET /app-center/v1/applications/{application_id}/closure` | `APP_USER` | `BACKLOG` — 可与 [UC-GW-006] 同批交付，但禁止 high-risk proof。 |
 
 ### 待设计/实现策略能力
 
 | UC | 接口（RPC — 外部 HTTP） | 所需策略 | 状态与缺口 |
 | --- | --- | --- | --- |
-| [UC-APP-027] | `CloseApplication` — `POST /app-center/v1/applications/{application_id}:close` | `APP_HIGH_RISK` | `POLICY_GAP` — USER JWS 之外必须精确保留 `x-iwut-high-risk-proof`，禁止其他 terminal header。 |
+| [UC-APP-027] | `CloseApplication` — `POST /app-center/v1/applications/{application_id}:close` | `APP_HIGH_RISK` | `POLICY_GAP` — [UC-GW-006]；USER JWS 之外必须精确保留 `x-iwut-high-risk-proof`，禁止其他 terminal header。 |
 
 ## 明确不接入 Gateway 的内部 RPC
 
@@ -205,7 +205,7 @@
 
 1. **普通 App USER routes**：一次加入 34 个 `BACKLOG` route；策略完全一致，按服务分组补目录、digest、HTTP/native gRPC/gRPC-Web 契约与后端真实联合测试，不新增 Gateway UC。
 2. **普通 Auth routes**：加入 24 个 `BACKLOG` route；把 DIRECT Session allowlist 从两个硬编码方法扩成精确目录能力，但仍保持逐方法白名单和坏凭据失败关闭。
-3. **特殊终端载体**：实现 `AUTH_OPTIONAL_DIRECT_SESSION`、account-closure 两个用途隔离 header、App close high-risk proof。它们已经有 ADR-GW-002 的策略方向，但启用前要把具体验收补进 Gateway UC，并完成三协议测试。
+3. **特殊终端载体**：依次接受并实现 [UC-GW-004]、[UC-GW-005]、[UC-GW-006]，分别交付 `AUTH_OPTIONAL_DIRECT_SESSION`、account-closure 两个用途隔离 header、App close high-risk proof，并完成三协议测试。
 4. **OAuth/OIDC**：单独完成并接受 [UC-GW-002] 后再接 8 个 `OIDC_HTTP` method/path；不得和普通 Proto route 批次混开。
 5. 每批完成后以本文件为验收台账，把相应条目由 `BACKLOG` / `POLICY_GAP` / `GW002` 更新为 `VERIFIED`，并记录 Gateway/API commit；不要用“后端已实现”代替 Gateway 联合验证。
 
@@ -277,3 +277,6 @@
 [OAuth/OIDC v1]: ../platform/contracts/oauth-oidc-v1.md
 [Account owner exit v1]: ../platform/contracts/account-owner-exit-v1.md
 [UC-GW-002]: use-cases/UC-GW-002-authenticate-oauth-and-forward.md
+[UC-GW-004]: use-cases/UC-GW-004-forward-optional-session-to-auth.md
+[UC-GW-005]: use-cases/UC-GW-005-forward-account-closure-credentials.md
+[UC-GW-006]: use-cases/UC-GW-006-forward-application-close-proof.md

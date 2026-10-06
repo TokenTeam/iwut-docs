@@ -4,6 +4,9 @@
 | --- | --- | --- | --- |
 | [UC-GW-001](../use-cases/UC-GW-001-authenticate-and-forward.md) | `ACCEPTED` | `COMPLETE` | —（当前后端/本地部署工作包；生产公网发布仍为独立部署事项） |
 | [UC-GW-003](../use-cases/UC-GW-003-attach-optional-user-identity.md) | `ACCEPTED` | `VERIFIED_LOCAL` | API 与服务提交尚未 push；CI/发布候选需先发布统一基线。 |
+| [UC-GW-004](../use-cases/UC-GW-004-forward-optional-session-to-auth.md) | `PROPOSED` | `NOT_STARTED` | 可选 DIRECT Session 组合尚未实现。 |
+| [UC-GW-005](../use-cases/UC-GW-005-forward-account-closure-credentials.md) | `PROPOSED` | `NOT_STARTED` | terminal credential 必需性、用途隔离和精确下传尚未实现。 |
+| [UC-GW-006](../use-cases/UC-GW-006-forward-application-close-proof.md) | `PROPOSED` | `NOT_STARTED` | USER 身份交换与 required high-risk proof 组合尚未实现。 |
 
 2026-09-23：已建立 `worktrees/iwut-gateway-ddd` 的空白孤儿分支 `gateway/v1`，仅放工程设计入口。没有复制旧配置、启用公开路由或部署服务。OAuth2、Redis 和 Gateway 管理后台不属于当前首版实现。
 
@@ -104,6 +107,16 @@ Gateway `0009947` 固定统一 API `9f914c5`，把 `routes.v1.yaml` 迁移为严
 验收已通过 Gateway `make check`、`make protocol-e2e`，Auth `make check`，App quick verification 与定向 Mongo 空 Catalog 集成测试。协议 E2E 启动固定 Traefik、真实 Auth/Mongo、真实 App/Mongo 和 Gateway，覆盖 Auth 必需身份，以及 App 三个公开查询的匿名路径与 Catalog 的有效/无效 Session 路径；HTTP/JSON、原生 gRPC、gRPC-Web 均经过真实进程。OAuth Bearer、OIDC Basic/Portal Cookie 与委托交换仍在装载期失败关闭，UC-GW-002 未开始。
 
 以上提交尚未 push，因此状态为 `VERIFIED_LOCAL`，不能作为 CI/发布候选；未执行生产部署。
+
+## 2026-10-07 特殊终端凭据路由设计
+
+基于 Auth UC011/025、Auth UC026 与 App UC027，把当前 v2 无法表达的六条特殊 route 拆为三个 Gateway 行为用例：
+
+- [UC-GW-004](../use-cases/UC-GW-004-forward-optional-session-to-auth.md)：Begin/Complete EmailBinding 允许 Session 缺失；提供时只原样下传给 Auth，任何坏 Session 不匿名降级。
+- [UC-GW-005](../use-cases/UC-GW-005-forward-account-closure-credentials.md)：账号注销五条 route 作为闭合工作包；Confirm/Cancel 只允许 confirmation token，Get 只允许 receipt token，全部禁止通用身份混用。
+- [UC-GW-006](../use-cases/UC-GW-006-forward-application-close-proof.md)：CloseApplication 同时要求 Session→App USER JWS 和唯一 high-risk proof；身份交换成功后才向 App 下传，Gateway 不解析 proof claims。
+
+三项均为 `PROPOSED / NOT_STARTED`。设计复用已接受的 ADR-GW-002，不新增动态策略语言或任意 header passthrough；本轮未修改 Gateway worktree、API、路由配置、Traefik 生成物或部署。
 
 ## 2026-10-03 应用审核权限路由扩展完成
 
