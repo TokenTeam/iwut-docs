@@ -26,7 +26,7 @@
 | [UC-AUTH-024](../use-cases/UC-AUTH-024-withdraw-developer.md) | `ACCEPTED` | `COMPLETE` | Auth ab60f32/API 5144c8c；本人 Session 准备/确认/取消/查询、WITHDRAWN、永久 handle、独立 App provider、持久协调及回执丢失恢复；真实 Auth＋App 验收 | 公网默认关闭；名下应用转让/关闭仍为独立 UC，存在归属时明确阻止退出；Gateway/客户端独立交付 |
 | [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `ACCEPTED` | `COMPLETE` | Auth 95a3c3a/API 4babe5b；ACTIVE/DISABLED 专用设备证明、明确确认、CLOSED、永久占用、独立终止清单与离线恢复、分批清理及保留期、App 回执；真实 Mongo/HTTP/gRPC/双服务与恢复测试 | 公网默认关闭；生产数据清单、30 天备份/日志期限、独立清单恢复演练和无密钥受理仍是启用门禁，Gateway/客户端独立交付 |
 | [UC-AUTH-026](../use-cases/UC-AUTH-026-apply-application-closure.md) | `ACCEPTED` | `COMPLETE` | 永久 application tombstone/receipt、UC014–019 最终 gate、同 Session/设备 challenge32 P-256 reauth、5 分钟 app.close proof、Mongo/transport/config/Wire 与真实 App UC027 proof/Apply/Get/故障恢复联调；服务 `5d26cb3`、权限修复 `4f661e4`、API `1ba1b81` | 生产/Gateway 入口默认关闭；网络帧级丢包和双边进程重启演练独立交付 |
-| [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `PROPOSED` | `NOT_STARTED` | suspend/restore 两项独立权限、平台管理员授权但不自动获得操作权、共享权限版本和 App audience 投影提案 | 接受前需与 App Center 的平台暂停/恢复状态机、门禁和审计设计对齐；尚未生成 brief |
+| [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `ACCEPTED` | `IN_PROGRESS` | suspend/restore 两项独立权限、平台管理员授权但不自动获得操作权、共享权限版本和 App audience 投影契约 | Auth/API 后端实施中；App Center 暂停/恢复状态机与实际 consumer 联合验收独立交付 |
 
 ## 实现边界
 

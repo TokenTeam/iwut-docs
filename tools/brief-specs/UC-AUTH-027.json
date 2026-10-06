@@ -1,0 +1,39 @@
+{
+  "uc": "UC-AUTH-027",
+  "note": "Implement Auth/API management for the independent app.application.suspend and app.application.restore permissions. Reuse the shared principal permissionRevision and immutable audit, require current full platform-administrator authority for management, preserve the fixed administrator bundle, and project only granted operation permissions into iwut-app-center identities. Deliver strict HTTP/native gRPC and real Mongo/Wire verification. Do not implement the App Center Application suspension state machine, business commands, UI or Gateway rollout.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与依赖",
+    "输入与输出",
+    "API 契约",
+    "主流程",
+    "错误语义与运行约束",
+    "验收场景",
+    "实现依赖与交付边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "JOSE Header",
+      "Claims",
+      "时间与有效期",
+      "校验顺序",
+      "错误边界",
+      "密钥与轮换"
+    ],
+    "platform/contracts/auth-session-identity-issuance-v1.md": [
+      "内部 RPC",
+      "应用审核权限投影",
+      "签名与验签配置",
+      "与现有契约的衔接"
+    ],
+    "platform/contracts/auth-center-api-routing.md": [
+      "路由边界",
+      "JSON 与载体",
+      "部署开关与验收"
+    ]
+  }
+}

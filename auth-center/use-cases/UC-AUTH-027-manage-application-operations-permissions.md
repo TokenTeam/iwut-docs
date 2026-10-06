@@ -1,6 +1,6 @@
 # UC-AUTH-027：管理应用平台运维权限
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -53,7 +53,7 @@ ApplicationOperationsPermissions {
 
 授予目标首版要求 ACTIVE USER、已有激活邮箱且邮箱恢复部署就绪；这些条件与高权限账号的可恢复性有关，不表示邮箱是真实身份认证。撤销允许目标为 ACTIVE 或 DISABLED，不因邮箱缺失或邮件服务不可用受阻。grantBlockers 固定按 `ACCOUNT_DISABLED, EMAIL_REQUIRED, EMAIL_RECOVERY_UNAVAILABLE` 顺序返回适用于所查询目标的公共门禁；某项是否已经授予由对应 permission 的 `granted` 表达。提交时仍须重新检查。
 
-## API 提案
+## API 契约
 
 独立 package `auth_center.v1.application_operations_permission`，service `ApplicationOperationsPermissionService`：
 
@@ -156,12 +156,13 @@ App 的未来暂停/恢复命令必须分别检查精确权限并记录其自身
 9. HTTP/JSON、原生 gRPC、生成客户端、Gateway SESSION 路由、严格解码、no-store 和有界限流。
 10. 实际 App consumer 验证精确权限组合；业务暂停/恢复状态机由对应 App UC 单独完成联合验收。
 
-## 实现依赖与待决项
+## 实现依赖与交付边界
 
 Auth 侧可复用 UC004 的权限集合、共享 revision、审计 repository 与 UC021 的管理员在线复核，但必须使用独立 allowlist、API 和错误语义，不能扩大 UC004 的审核权限接口。UC010、trusted-identity-v1、Auth 路由契约和 App verifier allowlist 需要同步扩展。
 
-在转为 ACCEPTED 前，应与 App Center 的 Application suspension 用例共同确认：暂停状态模型、运行/目录/OAuth 门禁、恢复条件、CLOSING/CLOSED 交互，以及 App 业务审计字段。是否要求“恢复操作者不得是原暂停操作者”属于 App 治理策略，不由 Auth grant 模型预先决定。
+本用例已接受为 Auth/API 后端工作包。App Center 的 Application suspension 用例仍须独立确认暂停状态模型、运行/目录/OAuth 门禁、恢复条件、CLOSING/CLOSED 交互，以及 App 业务审计字段；不阻塞 Auth 先交付权限管理，但在实际 App consumer 完成前不能宣称平台暂停/恢复能力已交付。是否要求“恢复操作者不得是原暂停操作者”属于 App 治理策略，不由 Auth grant 模型预先决定。
 
 ## 变更记录
 
 - 2026-10-06：建立首版提案；固定 suspend/restore 两项独立权限、平台管理员管理但不自动获得操作权、共享 permissionRevision 和 App audience 最小投影。因 UC-AUTH-026 已用于 Application 关闭协议，本用例使用下一个可分配编号 UC-AUTH-027。
+- 2026-10-06：接受 Auth/API 后端工作包；App 暂停/恢复状态机继续独立设计和实现，实际 consumer 联合验收作为交付边界保留。

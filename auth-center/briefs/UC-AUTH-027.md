@@ -1,6 +1,6 @@
 <!-- GENERATED FILE — DO NOT EDIT. Regenerate with: -->
-<!-- python3 tools/gen_brief.py UC-AUTH-004 --spec tools/brief-specs/UC-AUTH-004.json -->
-# Brief — UC-AUTH-004：管理用户的应用审核权限
+<!-- python3 tools/gen_brief.py UC-AUTH-027 --spec tools/brief-specs/UC-AUTH-027.json -->
+# Brief — UC-AUTH-027：管理应用平台运维权限
 
 > **非权威派生制品。** 本文由脚本从 `docs/auth-center/` 与 spec 显式选择的 `docs/` 共享文档抽取，只用于给本次工作包提供输入。
 > 与源文件冲突时，一律以 §溯源 中列出的源文件为准；不要手工编辑本文，也不要把它当作第二权威。
@@ -9,10 +9,10 @@
 
 | 项 | 值 |
 | --- | --- |
-| Use Case | `UC-AUTH-004` 管理用户的应用审核权限 |
+| Use Case | `UC-AUTH-027` 管理应用平台运维权限 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
-| 本 UC 权威 BR | `BR-RVW-001`–`BR-RVW-004`（4 条） |
-| 外部引用 BR | `BR-ADM-005`（来自 `UC-AUTH-021`） |
+| 本 UC 权威 BR | `BR-AOP-001`–`BR-AOP-006`（6 条） |
+| 外部引用 BR | — |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/auth-center-api-routing.md`、`platform/contracts/auth-session-identity-issuance-v1.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -37,175 +37,163 @@
 
 ### 目标与范围
 
-> 平台管理员在 Auth Center 中分别授予或撤销用户的 `app.profile.review`（应用公开资料审核）与 `app.version.review`（应用版本审核）原子权限，使 Auth 后续签发的 trusted identity 准确反映当前授权，并留下不可变审计记录。
+平台管理员在 Auth Center 中分别授予或撤销用户的 `app.application.suspend` 与 `app.application.restore` 原子权限，使 App Center 能依据短期可信用户身份授权平台级 Application 暂停与恢复操作，并为每次权限变化留下不可变审计。
 
-本用例只管理这两项应用审核权限，每次命令只选择其中一项；不是任意权限写入口。它不决定 App Center 的审核结果，不提供利益冲突绕过，也不把 PLATFORM_ADMIN 自动等同于 reviewer。这两项是平台人员权限，不进入 OAuth Scope Catalog，也不能通过用户 OAuth consent 获得。既有文件路径、BR-RVW 编号与 legacy API 名称保留，以保持引用和客户端兼容。
+本用例只管理人员权限，不暂停或恢复任何 Application。Application 的平台暂停状态、恢复条件、运行与目录门禁、状态 revision 和业务审计由后续 App Center 用例拥有。Application 当前管理员对自己应用的转让、关闭、发布和未来可恢复归档继续依据 App Center 的 `adminId` 与对应用例授权，不需要也不能借此取得平台运维权限。
 
-### 参与者与 bootstrap
+本用例不提供任意权限编辑接口，不复用 `app.profile.review` 或 `app.version.review`，不把 Developer、Reviewer、Application 管理员或平台管理员自动转换为应用运维人员。两项权限不进入 OAuth Scope Catalog，不能由第三方应用申请，也不能通过用户 consent 获得。
 
-调用者必须是具有 `auth.reviewer.manage` 权限的 `PLATFORM_ADMIN` 用户。平台管理员统揽跨 bounded context 的人员权限治理，但每个能力仍使用独立原子权限。
+### 参与者与依赖
 
-PLATFORM_ADMIN 的完整集合、一次性 bootstrap 与后续授予/撤销由 [UC021](../use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-001) 和 [BR-ADM-005](../use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005) 唯一规定。主体仍为 USER；本用例仅消费 auth.reviewer.manage，不单独创建或修改管理资格，也不自动授予审核权限。首次 bootstrap 直接授予完整管理集合，无旧数据迁移。
+- **操作人**：ACTIVE USER，持有 audience=`iwut-auth-center` 的可信 USER JWS；JWS 包含 `auth.platform-admin.manage`，Auth 在线复核其当前完整平台管理员资格。
+- **目标用户**：明确 `subjectAuthId` 对应的 ACTIVE USER。SYSTEM、未知用户与 CLOSED 账号不能获得权限；Developer 或 Reviewer 资格不是前提。
+- **Auth Center**：唯一保存人员权限、共享 `permissionRevision` 和授权审计，并通过 UC010 投影到 App audience JWS。
+- **App Center**：只消费 audience=`iwut-app-center` 的已签名权限 claim，并在未来 Application suspension 用例中执行精确权限检查；不保存另一份 grant。
 
-### 输入与主流程
+依赖 [UC021](../use-cases/UC-AUTH-021-manage-platform-administrators.md) 的平台管理员资格和在线复核、[UC022](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md) 的账号状态与版本、[UC010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) 的可信身份签发，以及 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)。本用例接受后还需要一个独立 App Center 用例定义 Application 平台暂停与恢复；Auth 权限管理可以先实现，但不能据此宣称暂停能力已经交付。
+
+### 输入与输出
 
 ```text
-ManageApplicationReviewPermissionCommand {
+ManageApplicationOperationsPermission {
   subjectAuthId: AuthId
-  permission: "app.profile.review" | "app.version.review"
+  permission: "app.application.suspend" | "app.application.restore"
   action: GRANT | REVOKE
-  expectedRevision: int64
-  reason: string
+  expectedPermissionRevision: Int64  // 必填，正数
+  reason: String                     // 去除两端空白后 1..1024 UTF-8 bytes
+}
+
+GetApplicationOperationsPermissions {
+  subjectAuthId: AuthId
+}
+
+ApplicationOperationsPermission {
+  permission: String
+  granted: Bool
+  effective: Bool
+}
+
+ApplicationOperationsPermissions {
+  subjectAuthId: AuthId
+  accountStatus: ACTIVE | DISABLED
+  permissions: ApplicationOperationsPermission[2]
+  permissionRevision: Int64
+  grantBlockers: GrantBlocker[]
 }
 ```
 
-1. 从 trusted identity 取得调用者 authId 与 `auth.reviewer.manage`。
-2. 校验 permission 精确属于两项允许值，并确认目标是存在且可登录的 USER principal；SYSTEM principal 不能成为 reviewer。
-3. 校验 reason 为非空审计文本，expectedRevision 与当前权限记录一致。
-4. 只对选定 permission 执行 GRANT/REVOKE，保留另一项审核权限及所有其它权限；原子写入新集合、revision、updatedBy/updatedAt，并追加包含精确 permission 的不可变 audit event。
-5. 返回同一提交结果中的两项审核权限状态与新 permissionRevision。
+响应固定按 permission 字典序返回两项，即使均未授予也返回两个 `granted=false` 项。`effective` 表示当前账号为 ACTIVE 且已保存该项授权；DISABLED 用户保留 grant 事实但两项均不生效。查询不返回目标的其它权限、邮箱、Developer 状态、学生资料或 Session。
 
-针对所选 permission 的重复 GRANT/REVOKE 是冲突，不伪装成成功；另一项是否已授予不改变该判断。客户端在不确定结果时查询当前状态。
+授予目标首版要求 ACTIVE USER、已有激活邮箱且邮箱恢复部署就绪；这些条件与高权限账号的可恢复性有关，不表示邮箱是真实身份认证。撤销允许目标为 ACTIVE 或 DISABLED，不因邮箱缺失或邮件服务不可用受阻。grantBlockers 固定按 `ACCOUNT_DISABLED, EMAIL_REQUIRED, EMAIL_RECOVERY_UNAVAILABLE` 顺序返回适用于所查询目标的公共门禁；某项是否已经授予由对应 permission 的 `granted` 表达。提交时仍须重新检查。
 
-### 读取应用审核权限状态
+### API 契约
 
-`GetApplicationReviewPermissions(subjectAuthId)` 使用与写接口相同的管理员身份要求，返回目标 authId、两项权限各自的 granted 状态和一个共享的 permissionRevision。两项都必须返回，按 permission 字典序排序；都未授予时仍返回两项 false。响应来自同一一致快照，不把分别读取的状态拼接。只公开本能力的两项状态，不返回目标其它权限或学生资料。不存在、SYSTEM 或不可登录目标不得被当作普通 USER 返回。
+独立 package `auth_center.v1.application_operations_permission`，service `ApplicationOperationsPermissionService`：
 
-`GetReviewerPermission(subjectAuthId)` 继续作为旧兼容查询，只返回 app.version.review 对应的 reviewer 布尔值及同一个 permissionRevision；不把 reviewer 解释为任一审核权限的 OR，也不隐含 profile 权限。
-
-### 实现约定
-
-- Proto package 继续为 `auth_center.v1.reviewer_permission`，service 继续为 `ReviewerPermissionService`；保留 ManageReviewerPermission/GetReviewerPermission，并新增 ManageApplicationReviewPermission/GetApplicationReviewPermissions，线格式与兼容规则见下节。
-- 四个方法均使用 Gateway SESSION、audience=`iwut-auth-center`、外部前缀 `/auth-center`；原生 gRPC 和 gRPC-Web 使用同一精确方法授权。新方法必须单独加入 Auth 方法鉴权表及 Gateway 静态路由，不因 service 名相同自动放行。HTTP 映射见 [Auth 路由契约](../../platform/contracts/auth-center-api-routing.md)。
-- 写命令 `action` 使用 UNSPECIFIED/GRANT/REVOKE 枚举，UNSPECIFIED 拒绝；expectedRevision
-  必填且为正 int64，reason 去除两端空白后为非空 UTF-8 文本且不超过 1024 bytes。
-- 新命令的 permission 必填且只接受两项精确字符串；不修剪、忽略大小写、接受通配符或默认选择版本权限。auth.reviewer.manage、任意 OAuth scope 和未知 permission 均拒绝。旧命令的固定映射是兼容适配，不是新命令的缺省值。
-- 已验签 JWS 必须包含 `auth.reviewer.manage`；所有读写还须在线确认 actor 当前 ACTIVE、完整管理集合及 UC022 的账号版本；写入事务内再次复核。
-  body/path 不得指定或替代 actor。只修改选定审核权限，保留其它权限。
-- 权限写入、bootstrap 与 [UC010 的签发一致性](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004)
-  使用相同认证事务协调边界；已确认撤销后不能再签出含该权限的新 token。
-- 权限 revision 耗尽时拒绝变更，不溢出或回绕。审计插入失败导致权限更新一并回滚；提交结果未知返回不可用，不能伪装成功。
-- bootstrap CLI 使用明确的现有 authId 和 Mongo 配置，不启动服务监听，不依赖终端 JWS；审计必须显式区分运维 bootstrap 和已认证用户请求。
-
-### API 扩展与兼容
-
-新增方法复用现有 ReviewerPermissionAction 枚举（0=UNSPECIFIED、1=GRANT、2=REVOKE），不改变其数值。新增消息字段号固定如下，可执行 Proto 和生成物在实现工作包交付：
-
-```text
-ManageApplicationReviewPermissionRequest {
-  string subject_auth_id = 1;
-  string permission = 2;
-  ReviewerPermissionAction action = 3;
-  optional int64 expected_revision = 4;
-  string reason = 5;
-}
-GetApplicationReviewPermissionsRequest {
-  string subject_auth_id = 1;
-}
-ApplicationReviewPermission {
-  string permission = 1;
-  bool granted = 2;
-}
-ApplicationReviewPermissions {
-  string subject_auth_id = 1;
-  repeated ApplicationReviewPermission permissions = 2;
-  int64 permission_revision = 3;
-}
-```
-
-HTTP 路径字段绑定：两个新请求和旧 GetReviewerPermissionRequest 的 subject_auth_id 显式设置 `json_name = "subject_auth_id"`，与路径占位符一致，避免生成的 Kratos HTTP 客户端填空路径或额外发送 query。两个 GET 均无 JSON 请求体；旧 ManageReviewerPermissionRequest 及所有响应 JSON 名称保持不变。新写请求若在正文重复提供 subject，使用 subject_auth_id，最终仍以路径为准。
-
-两个新方法均返回 ApplicationReviewPermissions。Manage 的 optional expected_revision 必须有值；GET 无请求体、无 query。HTTP 新写入口是 `PUT /v1/users/{subject_auth_id}/application-review-permissions/{permission}`，读入口是 `GET /v1/users/{subject_auth_id}/application-review-permissions`。写正文仅需 action、expectedRevision、reason；路径绑定 subject_auth_id 和 permission，覆盖正文中的同名字段，不接受正文替换路径中的目标。采用标准 ProtoJSON 与 `body: "*"`，不另建 envelope；实际生成 HTTP 客户端必须参与验收。
-
-旧 ManageReviewerPermission/GetReviewerPermission 的完整 RPC 名、HTTP `/v1/users/{subject_auth_id}/reviewer-permission`、请求/响应字段号、ReviewerPermissionAction 和错误 reason 保持不变。旧 Manage 只适配到 permission=app.version.review；旧响应的 reviewer 只表示版本审核权限。不能给旧请求增加改变语义的可选 permission，更不能把旧 GRANT 扩大为同时授予两项。
-
-新旧方法共用一个领域命令、一份权限集合、一个 permissionRevision、同一事务栅栏和审计写入。旧入口撤销版本权限时必须保留 profile 权限。升级不得给现有版本 reviewer、管理员或 Developer 自动授予 profile 权限；历史记录未包含该权限即表示未授予，无需改写历史审计。若存储 validator 有权限枚举，显式升级其允许值，不建立第二套 profile grant 集合。
-
-### 数据模型
-
-- `auth_principals.permissions`：当前有效原子权限集合，元素唯一且稳定排序。
-- `auth_principals.permissionRevision`：正 int64，权限变化时增加。
-- `auth_permission_audit_events`：append-only 事件，包含 eventId、subjectAuthId、actorType、action、permission、reason、before/after、beforeRevision、afterRevision、occurredAt。普通管理请求 actorType=`USER`，actorAuthId 为已认证用户；运维初始化 actorType=`BOOTSTRAP_COMMAND`，不伪造 actorAuthId。
-- 初始化标记和管理资格审计由 UC021 拥有，不复用审核权限事件表达整组管理员授予。
-
-### API 与实现依赖
-
-管理 API 经 Gateway 使用 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)，不使用内部服务身份。可执行 Proto 与路由必须在实现工作包中单独加入。
-
-完整实现依赖普通 USER principal provision、Auth 用户身份签发与 Gateway 到 Auth 的受保护管理路由；在这些入口闭合前，可以实现 Domain/Mongo 核心，但不能暴露绕过认证的临时管理 RPC 或用数据库直改代替本用例。
-
-### 错误语义
-
-| 场景 | reason | HTTP / gRPC |
+| 方法 | Auth HTTP 路径 | 成功响应 |
 | --- | --- | --- |
-| 身份缺失/无效 | `USER_IDENTITY_REQUIRED` / `INVALID_USER_IDENTITY` | 401 / UNAUTHENTICATED |
-| 无管理权限、actor 非当前 ACTIVE USER | `REVIEWER_MANAGEMENT_FORBIDDEN` | 403 / PERMISSION_DENIED |
-| 目标不存在、SYSTEM 或不可登录 | `REVIEWER_SUBJECT_UNAVAILABLE` | 404 / NOT_FOUND |
-| 命令格式、permission、action、revision 或 reason 非法 | `INVALID_REVIEWER_PERMISSION_INPUT` | 400 / INVALID_ARGUMENT |
-| 重复动作、revision 不匹配 | `REVIEWER_PERMISSION_CONFLICT` | 409 / ABORTED |
-| revision 耗尽 | `PERMISSION_REVISION_EXHAUSTED` | 409 / ABORTED |
-| 存储损坏、数据库失败、提交结果未知 | `REVIEWER_PERMISSION_UNAVAILABLE` | 503 / UNAVAILABLE |
+| `ManageApplicationOperationsPermission` | `PUT /v1/users/{subject_auth_id}/application-operation-permissions/{permission}` | 200，完整两项状态 |
+| `GetApplicationOperationsPermissions` | `GET /v1/users/{subject_auth_id}/application-operation-permissions` | 200，完整两项状态 |
 
-bootstrap 重定向到另一目标时返回 `PLATFORM_ADMIN_BOOTSTRAP_CONSUMED` 并以非零退出码退出。
-首次成功输出 `{"authId":"...","applied":true}`，同目标重跑为 `applied:false`，不代表重新授予权限。
+Manage 的路径固定目标和 permission，正文只提交 action、expectedPermissionRevision 与 reason；正文不能替换路径身份。Get 无正文、无 query。两种方法同时提供 HTTP/JSON 与原生 gRPC，并以精确 full method 加入鉴权表。
 
-### 测试与验收
+Gateway 使用 SESSION 路由向 Auth 换取 audience=`iwut-auth-center` 的 USER JWS。Auth 只接受该可信身份，不接受 OAuth access token、App audience JWS、service JWS、直接 Session 或请求正文自报 actor。响应 `no-store`；拒绝未知或重复字段、非法枚举、query 和超过 16 KiB 的请求。
 
-- 非管理员、身份无效、SYSTEM/未知 subject 均被拒绝且不写审计。
-- 两项权限分别覆盖 GRANT/REVOKE；未知、空白、通配或管理 permission 拒绝且无写入。Developer 状态为 null 仍可获得任一审核权限。
-- 状态查询始终返回两项独立状态及同一 revision；用户的其它权限不披露。
-- 新旧入口混用、跨两项权限并发及共享 revision 冲突不丢失权限；旧 reviewer 布尔值始终仅表示版本权限。
-- 旧 Proto/生成 HTTP 客户端保持兼容；新 HTTP/gRPC 客户端的路径字段绑定、错误 reason 与 SESSION 认证一致。
-- 真实 UC010 签发及 App verifier/审核入口验证：仅 profile、仅 version、两项、零项四种组合，互不越权；profile-only 可进入资料审核资格检查，但不能进入版本审核，反之亦然。
-- 重复动作与 stale revision 冲突；并发最多一个成功。
-- 权限状态与 audit event 原子提交或全部回滚。
-- 平台管理员未显式获得目标审核权限时不能通过对应 App 审核入口；升级/bootstrap/Developer 开通不自动授予两项权限。
-- 分别撤销两项权限后，后续 UC010 新签发不包含被撤销项；另一项保留，与签发竞争有明确先后顺序；已签 JWS 仍遵循既有有效期及容差。
+### 主流程
 
-## 业务规则（UC-AUTH-004 权威正文）
+#### 授予或撤销
 
-<!-- 权威位置: use-cases/UC-AUTH-004-manage-reviewer-permission.md#br-rvw-001 -->
-### BR-RVW-001：Auth 权威所有权
+1. 验证可信身份、精确方法、参数与入口限额；确认 permission 严格属于两项 allowlist。
+2. 在 Auth 认证事务协调边界中在线确认操作人是 ACTIVE USER 且持有 UC021 完整平台管理员资格。
+3. 读取目标账号、权限集合、邮箱绑定与共享 `permissionRevision`；损坏数据失败关闭。
+4. 比较 expectedPermissionRevision。GRANT 复核目标 ACTIVE、激活邮箱和恢复就绪；REVOKE 只要求目标当前持有所选权限。
+5. 仅修改选定权限，保留另一项运维权限、两项审核权限、管理权限和其它合法权限；严格增加一次共享 revision。
+6. 权限更新与 append-only 审计在同一事务提交，成功后返回同一提交结果的完整两项状态。
 
-Auth Center 是平台人员权限的唯一权威。App Center 只消费已签名 `permissions` claim，不保存 grant，不直接读 Auth 数据库。UC004 的目标 allowlist 只有 app.profile.review 与 app.version.review，不能修改管理权限或任意其它 permission；同一账号可独立持有其中零项、一项或两项。
+重复 GRANT/REVOKE 或 stale revision 返回冲突，不增加 revision 或审计。事件 ID 在事务重试前生成并保持稳定；提交结果未知时返回不可用，客户端通过 Get 读取权威状态，不能盲目改用新 revision 重放。
 
-<!-- 权威位置: use-cases/UC-AUTH-004-manage-reviewer-permission.md#br-rvw-002 -->
-### BR-RVW-002：管理权与审核权限隔离
+#### 查询
 
-auth.reviewer.manage、app.profile.review 与 app.version.review 是三项独立权限。前者允许管理后两项，但不授予任何审核能力；后两项分别只允许公开资料审核和版本审核，也不能管理他人权限。授予或撤销其中一项不联动另一项。Developer 身份不隐含审核能力，reviewer 也不要求 Developer 资格；任何身份仍受 App Center 对应审核用例的利益冲突规则约束。
+只有当前有效的平台管理员可以查询。Get 对存在且结构合法的 ACTIVE 或 DISABLED USER 返回两项状态；不存在、SYSTEM、CLOSED 或损坏目标不伪装成普通未授权用户。鉴权先于目标读取，未授权调用者不能借错误差异枚举账号。
 
-<!-- 权威位置: use-cases/UC-AUTH-004-manage-reviewer-permission.md#br-rvw-003 -->
-### BR-RVW-003：乐观并发与不可变审计
+### 错误语义与运行约束
 
-每次有效变更严格增加目标用户共享的 permissionRevision，并记录 actor、subject、精确 permission、action、reason、before/after、时间。两项权限不各设 revision；即使修改不同权限，使用同一 expectedRevision 的并发命令也最多一个成功，另一方必须重读后决定是否重试。新旧入口均参与该 CAS，不能覆盖或丢失另一项权限。审计事件不可更新或删除。
+| 条件 | reason | HTTP / gRPC |
+| --- | --- | --- |
+| 缺少或无效可信用户身份 | `USER_IDENTITY_REQUIRED` / `INVALID_USER_IDENTITY` | 401 / UNAUTHENTICATED |
+| 操作人非当前有效平台管理员 | `APPLICATION_OPERATIONS_PERMISSION_FORBIDDEN` | 403 / PERMISSION_DENIED |
+| 参数、permission、action、revision 或 reason 非法 | `INVALID_APPLICATION_OPERATIONS_PERMISSION_REQUEST` | 400 / INVALID_ARGUMENT |
+| 目标不存在、SYSTEM、CLOSED 或不可管理 | `APPLICATION_OPERATIONS_PERMISSION_SUBJECT_UNAVAILABLE` | 404 / NOT_FOUND |
+| stale revision 或重复动作 | `APPLICATION_OPERATIONS_PERMISSION_CONFLICT` | 409 / ABORTED |
+| GRANT 目标禁用、无邮箱或恢复未就绪 | `APPLICATION_OPERATIONS_PERMISSION_GRANT_BLOCKED` | 409 / FAILED_PRECONDITION |
+| permissionRevision 耗尽 | `PERMISSION_REVISION_EXHAUSTED` | 409 / FAILED_PRECONDITION |
+| 入口限额 | `APPLICATION_OPERATIONS_PERMISSION_RATE_LIMITED` | 429 / RESOURCE_EXHAUSTED |
+| 数据损坏、存储故障或提交结果未知 | `APPLICATION_OPERATIONS_PERMISSION_UNAVAILABLE` | 503 / UNAVAILABLE |
 
-<!-- 权威位置: use-cases/UC-AUTH-004-manage-reviewer-permission.md#br-rvw-004 -->
-### BR-RVW-004：撤销传播上界
+入口使用独立默认关闭配置 `AUTH_APPLICATION_OPERATIONS_PERMISSION_ENDPOINTS_ENABLED`，启用时要求用户端点、身份签发和平台管理员能力已配置。限流按已认证 actorAuthId 分开读写计数，默认每分钟读 60、写 10，桶容量有界；不能按任意 subjectAuthId 建立无界状态。
 
-撤销后 Auth 不再签发包含该权限的新 token。已经签发并通过本地验签的 token 最多继续有效到 trusted-identity-v1 的 `exp`，因此权限撤销传播上界等于用户身份 token 的最大 TTL。首版不为“即时撤销”引入每请求 Auth introspection；若安全策略要求秒级强制失效，必须另立 ADR 选择 denylist/event push 或在线授权，而不能悄悄改变本地验签模型。
+### 验收场景
 
-## 外部引用的业务规则
+1. 分别授予、撤销两项权限，以及零项、仅 suspend、仅 restore、两项的完整状态投影。
+2. Reviewer、Developer、Application 管理员、SYSTEM 和没有完整管理员资格的用户均不能管理权限；平台管理员未显式获得操作权限时，App JWS 不含两项权限。
+3. 平台管理员向自己显式授权后只获得选定能力；授予一项不改变另一项或任何审核/管理权限。
+4. ACTIVE＋邮箱＋恢复就绪门禁；DISABLED/无邮箱目标不能 GRANT，但已有 grant 可以撤销。账号禁用时 grant 保留且不生效，恢复后仅新签发身份重新生效。
+5. 与 UC004、UC021 及另一项运维权限同时使用相同 expected revision 并发，最多一个成功且不丢失权限。
+6. 审计失败、事务重试和 unknown commit；真实变化只有一个事件，重复命令无事件。
+7. Auth 与 App audience 投影隔离；OAuth、service JWS、错误 audience、伪造权限、通配权限全部拒绝。
+8. 撤销与 UC010 签发竞争具有明确提交顺序；撤销后新 JWS 不含权限，旧 JWS 的残余窗口不超过既有 TTL/clock-skew 契约。
+9. HTTP/JSON、原生 gRPC、生成客户端、Gateway SESSION 路由、严格解码、no-store 和有界限流。
+10. 实际 App consumer 验证精确权限组合；业务暂停/恢复状态机由对应 App UC 单独完成联合验收。
 
-> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+### 实现依赖与交付边界
 
-### 来自 `UC-AUTH-021`
+Auth 侧可复用 UC004 的权限集合、共享 revision、审计 repository 与 UC021 的管理员在线复核，但必须使用独立 allowlist、API 和错误语义，不能扩大 UC004 的审核权限接口。UC010、trusted-identity-v1、Auth 路由契约和 App verifier allowlist 需要同步扩展。
 
-<!-- 权威位置: use-cases/UC-AUTH-021-manage-platform-administrators.md#br-adm-005 -->
-### BR-ADM-005：一次性管理员初始化
+本用例已接受为 Auth/API 后端工作包。App Center 的 Application suspension 用例仍须独立确认暂停状态模型、运行/目录/OAuth 门禁、恢复条件、CLOSING/CLOSED 交互，以及 App 业务审计字段；不阻塞 Auth 先交付权限管理，但在实际 App consumer 完成前不能宣称平台暂停/恢复能力已交付。是否要求“恢复操作者不得是原暂停操作者”属于 App 治理策略，不由 Auth grant 模型预先决定。
 
-使用单个 `auth_runtime/platform-admin-bootstrap` 消费标记，记录 subjectAuthId、eventId、occurredAt 和管理集合版本 1。不增加第二个治理初始化标记。该记录表示首次初始化已经消费，不是权限来源副本，不因管理员被撤销而清除。 原始 bootstrap 审计可受 UC025 的注销保留期清理约束；清理器只在原事件已满 180 天且原 subject 为合法 CLOSED 墓碑时，在同一 Auth 事务中设置此消费标记的 auditRetiredAt 并删除事件。消费校验在事件存在时仍严格核对；缺失事件仅在 auditRetiredAt 不早于 occurredAt+180 天、不晚于当前时间且 subject 仍为合法 CLOSED 时接受，任意缺失或损坏仍失败关闭。该收据不授予权限、不替代消费标记，不保存整份历史审计。
+## 业务规则（UC-AUTH-027 权威正文）
 
-首次部署使用显式停服运维命令，不启动监听，不接受远程匿名调用，不因 ENV 或普通启动自动授予：
+<!-- 权威位置: use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-001 -->
+### BR-AOP-001：精确运维权限与职责分离
 
-```text
-auth-center bootstrap-platform-admin --auth-id <existing-user-auth-id>
-```
+首版 allowlist 只有 `app.application.suspend` 和 `app.application.restore`。前者只允许未来 App 用例把可运行 Application 置为平台暂停，后者只允许按该用例的恢复门禁解除平台暂停；任一权限都不授予审核、发布、转让、关闭、归档、OAuth client 管理或人员授权能力。
 
-仅当消费标记不存在、没有任何四项管理权限记录时可首次执行。目标必须已有 ACTIVE USER、激活邮箱及恢复就绪能力；在一个事务中授予完整集合、增加一次 permissionRevision、写治理审计并消费标记。其他用户审核权限不影响初始化，不自动授予应用审核权限。
+两项权限独立授予。只持有 suspend 的值班人员不能恢复，只持有 restore 的人员不能制造暂停。App Center 不接受 `app.application.*`、`app.*` 或通用 `app.application.manage` 通配能力，也不能把其中一项推导为另一项。
 
-同一目标命令重跑且消费标记完整一致时，仅返回 applied=false 和原事件 ID，不再写权限、版本或审计；该检查先于目标当前邮箱/权限条件，所以后来撤销也不会被重跑恢复。不同目标或损坏标记拒绝。首次执行才返回 applied=true。后续授予必须走已认证管理 API。
+<!-- 权威位置: use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-002 -->
+### BR-AOP-002：平台管理员负责授权但不自动获得操作权
 
-本用例实施时直接调整 UC004 的首次 bootstrap 定义与实现，不增加 migrate 命令、旧状态转换或自动补齐权限。治理 API 要求初始化标记符合本集合版本；旧格式标记或部分管理权限记录按不兼容数据拒绝，不自动清除或修复。开发测试环境通过显式重建测试数据验证新流程；本文不授权删除任何现存数据，也不要求保留上线前测试库的升级兼容性。
+UC021 的平台管理员固定 bundle 不包含两项 App 运维权限。完整平台管理员可以通过本用例管理权限，但若要亲自暂停或恢复 Application，仍须显式向自己的 authId 授予对应权限。Developer、Reviewer、Application 当前管理员和 SYSTEM 均不因身份自动获得这两项权限。
+
+首版复用完整平台管理员资格作为管理授权，不增加 `auth.application-ops.manage`。若未来需要把人员权限管理员从平台管理员中拆分，应另立 UC 修改授权模型，不能把 App 操作权限本身当作授予他人的权限。
+
+<!-- 权威位置: use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-003 -->
+### BR-AOP-003：共享权限版本与原子审计
+
+两项运维权限与现有审核、管理权限共用 `auth_principals.permissions` 和正数 `permissionRevision`。每次真实变化严格增加一次 revision；不同权限管理用例对同一目标使用相同旧 revision 并发时最多一个成功，不得通过独立版本覆盖另一项变化。
+
+复用 `auth_permission_audit_events`，事件保存 eventId、actorAuthId、subjectAuthId、精确 permission、GRANT/REVOKE、reason、before/after、before/after revision 与 occurredAt。权限和审计同事务提交；审计失败全部回滚。不得记录邮箱、Session、学生信息或 JWS。
+
+<!-- 权威位置: use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-004 -->
+### BR-AOP-004：Audience 最小投影与撤销窗口
+
+UC010 的 `iwut-app-center` allowlist 增加两项运维权限；`iwut-auth-center` audience 不投影它们。Auth 仅从当前权威权限集合签发，App 只接受 audience 正确、签名和时间有效的 USER JWS，不接受 OAuth scope 或客户端自报 permission。
+
+撤销提交后 Auth 不再签发包含该权限的新 JWS。已经签出的 JWS 仍可能在 `exp` 与消费方 clock skew 范围内被 App 接受，传播上界沿用 UC010 当前默认 60 秒、可配置 1–300 秒的短期身份模型。首版不为此能力引入每请求 introspection、denylist 或 Redis；若未来要求立即撤权，必须通过独立 ADR 修改共同信任模型。
+
+<!-- 权威位置: use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-005 -->
+### BR-AOP-005：账号状态、恢复能力与授权事实
+
+只有 ACTIVE USER 且具备激活邮箱和部署就绪恢复能力时可以 GRANT。账号被禁用时保留两项 grant 事实但不生效，Auth 不向该账号签发新的可信身份；账号恢复后仍须重新登录，既有 grant 可再次投影。账号 CLOSED 后由 UC025 的清理和保留规则处理，不作为可查询运维人员继续存在。
+
+撤销不要求目标仍有邮箱或恢复能力，避免无法收紧权限。授予和撤销不改变 Developer、Reviewer、平台管理员、Session、设备凭据或 OAuth 状态。
+
+<!-- 权威位置: use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-006 -->
+### BR-AOP-006：Auth 授权与 App 业务状态分离
+
+Auth 只回答“哪个 USER 当前被授予哪项运维能力”。Application 是否 ACTIVE、已暂停、CLOSING/CLOSED、谁发起过暂停、是否满足恢复条件，以及暂停对目录、启动解析、审核和 OAuth 的影响，全部由 App Center 的 Application suspension 用例定义并持久化。
+
+App 的未来暂停/恢复命令必须分别检查精确权限并记录其自身业务审计；不能仅凭 Auth grant 修改数据库，也不能要求 Auth 持有 applicationId 状态。CLOSING/CLOSED 不得通过 restore 权限恢复，所有者自助归档不得复用平台 suspension 字段。
 
 ## 平台共享契约（按 spec 显式抽取）
 
@@ -337,6 +325,10 @@ IssuedUserIdentity {
 - 目标 audience 精确匹配预登记值；无空白修剪、URL 解释或客户端动态指定。首批值为 `iwut-auth-center` 和 `iwut-app-center`。
 - body、metadata、返回体均不得进入通用请求/响应日志；传输必须受保护。客户端 token 与服务 token 均不能透传给最终业务服务。
 
+#### 应用审核权限投影
+
+用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 `app.profile.review`、`app.version.review`、`app.application.suspend` 与 `app.application.restore`；Auth 管理权限不因此下发给 App。审核权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 管理，运维权限由 [UC027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) 管理；均复用现有 `permissions` claim 和签发 RPC。平台管理员不会被自动投影为 Reviewer 或 Application 运维人员。
+
 #### 签名与验签配置
 
 签发入口使用显式开关 `AUTH_IDENTITY_ISSUANCE_ENABLED`（默认 false）。开启要求现有 `AUTH_USER_ENDPOINTS_ENABLED=true`，且下述 signer 配置完整有效；关闭时不注册签发 RPC，不要求私钥，也不影响已有服务和用户接口。不得因为开关开启而放宽原有鉴权。
@@ -353,10 +345,6 @@ IssuedUserIdentity {
 - 本契约不改变 UC008 的幂等匿名 token 定向撤销例外，或 UC009 的有效 Session 授权；这两条 Gateway 路由均走 DIRECT，由 Auth 自己验证。
 - Auth 用户资料及 UC004 新旧管理入口均走 SESSION，得到 audience=`iwut-auth-center` 的用户 JWS；不能因目标是 Auth 而递归触发签发。
 - Gateway 只为外部用户请求编排身份。服务到服务调用继续使用独立 service JWS，不能借用某位用户的 Session。
-
-#### 应用审核权限投影
-
-用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 `app.profile.review`、`app.version.review`、`app.application.suspend` 与 `app.application.restore`；Auth 管理权限不因此下发给 App。审核权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 管理，运维权限由 [UC027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) 管理；均复用现有 `permissions` claim 和签发 RPC。平台管理员不会被自动投影为 Reviewer 或 Application 运维人员。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -466,8 +454,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-AUTH-004`（use-cases/UC-AUTH-004-manage-reviewer-permission.md）：变更记录
-- `UC-AUTH-021`（use-cases/UC-AUTH-021-manage-platform-administrators.md）：目标与范围、参与者与身份、输入与输出、API、主流程、错误语义与运行约束、测试与验收、实现依赖与联动、变更记录
+- `UC-AUTH-027`（use-cases/UC-AUTH-027-manage-application-operations-permissions.md）：主流程/授予或撤销、主流程/查询、变更记录
 - `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：治理工作包路由、UC020 同账号 Session 管理
 - `platform/contracts/auth-session-identity-issuance-v1.md`（docs 根级共享文档）：范围与权威来源、服务授权扩展、请求与凭据流向
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
@@ -476,8 +463,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-004-manage-reviewer-permission.md` | 162 | `98c33762540d` |
-| `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
+| `use-cases/UC-AUTH-027-manage-application-operations-permissions.md` | 168 | `bbbc21f935a1` |
 | `platform/contracts/auth-center-api-routing.md` | 125 | `3c4fa072811e` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `eb7024a3ea06` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

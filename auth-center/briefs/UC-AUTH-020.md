@@ -320,5 +320,5 @@ UC009 撤销当前认证凭据后，再用原 Session 重试会得到 SESSION_IN
 | `use-cases/UC-AUTH-020-manage-own-sessions.md` | 179 | `4854c03b98ef` |
 | `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
-| `platform/contracts/auth-center-api-routing.md` | 121 | `2a07a5e76c81` |
+| `platform/contracts/auth-center-api-routing.md` | 125 | `3c4fa072811e` |
 | `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |

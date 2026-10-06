@@ -58,7 +58,7 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
-| `iwut-app-center` | `app.profile.review`、`app.version.review` | 有合法非 null 状态时携带 |
+| `iwut-app-center` | `app.application.restore`、`app.application.suspend`、`app.profile.review`、`app.version.review` | 有合法非 null 状态时携带 |
 | `iwut-auth-center` | UC021/BR-ADM-001 固定四项管理权限 | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
@@ -142,3 +142,4 @@ UC004 的授权命令与 bootstrap、Developer 状态修改、OAuth2 委托权�
 - 2026-09-23：提出 Session 到可信身份签发用例；服务双重认证、最小 audience 投影、每请求在线确认，首版不引入 Redis。
 
 - 2026-10-03：App audience 增加 app.profile.review 精确投影，与 UC004 两项权限的独立管理和并发验收同步；新增能力尚待实现。
+- 2026-10-06：App audience 增加 app.application.suspend 与 app.application.restore 精确投影；权限由 UC027 独立管理，不改变平台管理员固定 bundle。

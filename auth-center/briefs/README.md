@@ -36,3 +36,4 @@ python3 tools/gen_brief.py --check --all
 查询契约同样进入溯源摘要、未纳入章节索引和漂移检查；修改选中的源文档后重新生成。设计已接受不等于依赖已交付，brief 中的实现依赖仍必须满足。
 
 - [UC-AUTH-020](UC-AUTH-020.md)：同 authId Session 只读列表、有界分页与明确目标集合的原子回收。
+- [UC-AUTH-027](UC-AUTH-027.md)：两项 Application 平台运维权限的独立授予/撤销、共享权限版本及 App audience 投影；不包含 App 暂停状态机。

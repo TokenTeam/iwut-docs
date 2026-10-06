@@ -383,5 +383,5 @@ profile.revision 使用 BSON int64，profile.updatedAt 使用 BSON datetime。�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 287 | `60af229c87c6` |
-| `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
+| `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
 | `auth-center/query-contracts/user-profile-editing.md` | 37 | `293a3acd318b` |
