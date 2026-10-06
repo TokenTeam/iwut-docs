@@ -50,8 +50,8 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（当前单 Application 解析范围；候选列表、详情、Filter 分发与前端独立交付） |
 | [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（当前普通 Catalog 后端范围；客户端 Filter 求值、“我参与的测试”、搜索与排名独立交付） |
 | [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `COMPLETE` | App b346cfa/API 1d7b87b；App 归属屏障、持久终局/个人清理、认证回查、0020 迁移、状态消费者、真实 Mongo 与 Auth＋App 验收 | 默认关闭；不含应用转让/关闭与生产部署 |
-| [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `IN_PROGRESS` | 发起—接受式管理员转让的领域、并发、安全与 API 已接受；依赖检查和 brief 已闭合 | Domain、API、0021 migration、跨能力事务与完整 Auth/App 验收进行中 |
-| [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `NOT_STARTED` | 不可逆 CLOSING/CLOSED、本地即时隔离、持久 Auth 撤销；Auth UC026、共享契约、[开工检查](UC-APP-027-readiness.md)和生成 brief 已闭合 | 等待 UC026 schema 后实现 Domain/API/migration、全部 ACTIVE gate、durable Auth 收敛和真实双服务验收 |
+| [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `COMPLETE` | Domain/API、0021 migration、共享 fence、配额/名称原子移动、KEEP/ROTATE、Tester link 撤销和真实 Auth/App 验收已交付；服务 `8f6159b`、API `f6841f2` | —（当前后端范围；通知、平台接管和 Application 关闭独立交付） |
+| [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `IN_PROGRESS` | 不可逆 CLOSING/CLOSED、本地即时隔离、持久 Auth 撤销；Auth UC026、共享契约、[开工检查](UC-APP-027-readiness.md)和生成 brief 已闭合 | Domain/API/0022 migration、全部 ACTIVE gate、durable Auth 收敛和真实双服务验收进行中 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC025 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。UC026 已接受并进入实现；UC027 仍需 Auth 消费方和近期重新认证证明契约闭合后接受并生成 brief。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -329,3 +329,9 @@ UC018 已在 Version OAuth 扩展之前独立交付，随后 UC002→003→004�
 App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gRPC 使用独立 service identity 权限；同账号屏障覆盖应用创建及 Tester 加入，保留永久退出封印，取消本次注销不得解除既有 Developer 退出封印。新增 0020 迁移、持久决定/重试及 App 个人状态清理；ACTIVE/DISABLED/CLOSED、WITHDRAWN 消费和历史审核处理同步验收。
 
 `make check-auth-app` 的 22 项检查均通过，报告 `.artifacts/verification/20261005T121507Z-mf6vlagz/report.json`；总门禁为 `source-changed`，唯一变化源是并行 Console 设计/AGENTS 导航所在的 docs 仓库，服务和 API 来源未变化。随后再次核验本轮 brief/registry/文档工具，不把该总门禁描述为无漂移通过。完整门禁固定 Auth UC024 `ab60f32`；后续针对最终 Auth `95a3c3a` 的真实 Auth–App 脚本再次通过，Auth 侧同时以本 App 版本完成退出、注销、回执丢失和恢复联调。此前迁移数量/并发 fixture 失败已修复并包含在最终完整门禁中。未 push，入口默认关闭；应用转让/关闭仍是独立能力。
+
+## 2026-10-06 UC026 管理权转让
+
+服务 `8f6159b`、独立 API `f6841f2` 均为本地提交。交付发起/接受/拒绝/取消/过期、ownershipRevision、真实 Auth 双人资格查询、账号 fence 字典序与 Application fence、双方配额/名称原子移动、显式 KEEP/ROTATE 和 Tester link `ADMIN_TRANSFER` 撤销；UC025 Prepare 同时消费有效入站 PENDING blocker。
+
+最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261006T113137Z-s0cgh25i/report.json`，`changed_sources=[]`；race、真实 Mongo/HTTP/gRPC 和真实 Auth source/target E2E 全部通过。第一轮完整门禁发现 Tester validator 与历史 Application validator 回归，修复后在最终稳定源码上重跑闭合。

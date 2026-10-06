@@ -109,6 +109,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-027 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；UC026 已启动，UC027 已通过开工检查但尚未开始实现。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-027 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；UC026 已完整交付，UC027 已通过开工检查并进入实现。
 
 OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付，UC-APP-020/021 已启用 STABLE/GREY。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有。
