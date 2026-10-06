@@ -60,4 +60,4 @@ HTTP 采用 ForwardAuth，native gRPC 与转换后的 gRPC-Web 保留合法 stat
 
 ## 依赖与实现边界
 
-依赖 UC-AUTH-019、UC-APP-018/019、目标资源的委托验证与业务权限；标准端点还依赖 UC014–018 和官方门户。沿用 ADR-GW-001 的 Traefik 版本与协议适配，不在本文升级版本或引入 Redis。新契约接受及实现验收前 UC-GW-001 的 OAUTH2 仍保持未启用。
+依赖 UC-AUTH-019、UC-APP-018/019、目标资源的委托验证与业务权限；标准端点还依赖 UC014–018 和官方门户。沿用 ADR-GW-001 的 Traefik 版本与协议适配，并使用 [ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md) 的精确 Bearer/Basic/Cookie/Session 载体矩阵；`OPTIONAL` 或 DIRECT 都不能把无效 OAuth/OIDC 凭据降级为匿名。跨服务验收还依赖 [ADR-PLAT-004](../../platform/adr/ADR-PLAT-004-unified-api-integration-baseline.md) 的共同 API revision。不在本文升级 Traefik 或引入 Redis。新契约接受及实现验收前 UC-GW-001 的 OAUTH2 仍保持未启用，且本次文档记录不启动实现。

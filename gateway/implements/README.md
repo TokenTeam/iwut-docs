@@ -3,6 +3,7 @@
 | 用例 | 设计 | 实现 | 缺口 |
 | --- | --- | --- | --- |
 | [UC-GW-001](../use-cases/UC-GW-001-authenticate-and-forward.md) | `ACCEPTED` | `COMPLETE` | —（当前后端/本地部署工作包；生产公网发布仍为独立部署事项） |
+| [UC-GW-003](../use-cases/UC-GW-003-attach-optional-user-identity.md) | `ACCEPTED` | `VERIFIED_LOCAL` | API 与服务提交尚未 push；CI/发布候选需先发布统一基线。 |
 
 2026-09-23：已建立 `worktrees/iwut-gateway-ddd` 的空白孤儿分支 `gateway/v1`，仅放工程设计入口。没有复制旧配置、启用公开路由或部署服务。OAuth2、Redis 和 Gateway 管理后台不属于当前首版实现。
 
@@ -82,6 +83,27 @@ Gateway `7ac853a` 固定 API `3912b55`，新增 Reviewer 管理与查询两条 S
 | Use Case | 设计状态 | 实现状态 | 主要交付 |
 | --- | --- | --- | --- |
 | [UC-GW-002](../use-cases/UC-GW-002-authenticate-oauth-and-forward.md) | `PROPOSED` | `NOT_STARTED` | 应用委托请求鉴权与转发 |
+
+## 2026-10-06 后续 Gateway 设计记录
+
+[ADR-GW-002](../adr/ADR-GW-002-route-credential-and-identity-policy.md) 提出新的路由凭据/身份交换矩阵；[ADR-PLAT-004](../../platform/adr/ADR-PLAT-004-unified-api-integration-baseline.md) 提出跨服务统一 API commit 门禁；UC-GW-002/003 均保持 `PROPOSED / NOT_STARTED`。本轮只记录设计，没有修改 Gateway worktree、API submodule、路由目录、Traefik 生成物或部署。
+
+后续实现应等待正在进行的 Application suspension/restore 与对应 Auth 权限设计、API 形状和共同基线稳定，并由用户另行启动。当前 Auth registry 的 `UC-AUTH-026` 已用于 Application 关闭收敛；若新的权限用例尚未登记，应按届时 registry 的 Next ID 分配，不能复用已有编号。
+
+## 2026-10-07 路由矩阵、应用运维路由与 UC-GW-003 本地完成
+
+Gateway `0009947` 固定统一 API `9f914c5`，把 `routes.v1.yaml` 迁移为严格的 `iwut.gateway.routes/v2` 凭据矩阵。Session 的禁止/可选/必需、USER 的从不/有 Session 时/必需交换、原始凭据保留和 OAuth 相关失败关闭由同一 domain/usecase 模型驱动 HTTP ForwardAuth、原生 gRPC 与 gRPC-Web。首批 23 条路由还包括 Auth UC-AUTH-027 的应用运维权限接口、App UC-APP-028 的查询/暂停/恢复接口，以及 App UC023/024 的三个可选身份公开查询。
+
+统一基线和消费者提交为：
+
+- API `9f914c5`，共同包含 Gateway `758c426`、Auth `359c6bc`、App `a1bf6dd`；
+- Auth `50dbbe7`，修正 optional `tester_membership_id` 消费并固定共同 API；
+- App `0d06bbf` 固定共同 API，`b93fb25` 修复空 Catalog 应返回空页而不是 500；
+- Gateway `0009947` 实现路由矩阵、路由扩展、生成配置和真实联合 E2E。
+
+验收已通过 Gateway `make check`、`make protocol-e2e`，Auth `make check`，App quick verification 与定向 Mongo 空 Catalog 集成测试。协议 E2E 启动固定 Traefik、真实 Auth/Mongo、真实 App/Mongo 和 Gateway，覆盖 Auth 必需身份，以及 App 三个公开查询的匿名路径与 Catalog 的有效/无效 Session 路径；HTTP/JSON、原生 gRPC、gRPC-Web 均经过真实进程。OAuth Bearer、OIDC Basic/Portal Cookie 与委托交换仍在装载期失败关闭，UC-GW-002 未开始。
+
+以上提交尚未 push，因此状态为 `VERIFIED_LOCAL`，不能作为 CI/发布候选；未执行生产部署。
 
 ## 2026-10-03 应用审核权限路由扩展完成
 

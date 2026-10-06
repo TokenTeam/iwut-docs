@@ -85,3 +85,7 @@ Developer 自助申请的有效 Session 接口、nullable 状态及 HTTP 路由�
 ## Application 关闭协调
 
 [Application 关闭协调 v1](contracts/application-closure-v1.md)（ACCEPTED）定义 App UC027 在本地不可逆关闭后，如何让 Auth 持久建立 applicationId 级授权撤销栅栏并通过幂等回执收敛；[Application 关闭近期认证证明 v1](contracts/application-close-reauth-proof-v1.md)（ACCEPTED）定义当前 Session 所属同一登记设备的新挑战及只能用于 `app.close` 的短期 JWS。Auth 提供方行为由 [UC-AUTH-026](../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md) 负责。
+
+## API 集成基线
+
+[ADR-PLAT-004](adr/ADR-PLAT-004-unified-api-integration-baseline.md)（ACCEPTED）规定跨服务交付在联合验收前，把各自临时分叉的 API 变更汇合为一个共同后代 commit，并让参与服务固定同一 revision。2026-10-07 首次应用形成 API `9f914c5`；它不改变“业务语义在 docs、可执行 Proto 在独立 API 仓库”的权威边界，也不因形成 API 基线自动开放 Gateway 路由。

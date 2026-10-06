@@ -5,19 +5,27 @@
 Gateway 为终端到平台服务的请求提供路由选择、认证编排与转发。首版保持薄层，不建立人员权限、用户资料或 Session 数据模型，也不直接访问 Auth MongoDB。
 
 - [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md)：按同一路由选择 DIRECT/SESSION 策略，认证成功后由 Router 转发；OAUTH2 保留但不启用。
+- [UC-GW-002](use-cases/UC-GW-002-authenticate-oauth-and-forward.md)：对应用 Bearer 做在线委托交换，并显式接入 OIDC 标准 HTTP 端点；当前为提案。
+- [UC-GW-003](use-cases/UC-GW-003-attach-optional-user-identity.md)：公开读取允许匿名，提供 Session 时必须完整验证并附加 USER JWS；已接受并完成本地实现验证。
 - [设计注册表](design-registry.md)：本 context 的 UC/BR 索引。
 - [实现状态](implements/README.md)：设计与实现分别跟踪。
 - [ADR-GW-001](adr/ADR-GW-001-runtime-routing-and-protocol-adapters.md)：固定 Go module、Traefik 版本、协议适配和路由目录。
+- [ADR-GW-002](adr/ADR-GW-002-route-credential-and-identity-policy.md)：把凭据载体、身份交换与下游保留拆成严格路由矩阵；已接受并实现非 OAuth 组合。
+- [ADR-PLAT-004](../platform/adr/ADR-PLAT-004-unified-api-integration-baseline.md)：跨服务完成前汇合并固定统一 API commit；已接受并首次应用。
 - [Auth 签发用例](../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md)与[共享调用契约](../platform/contracts/auth-session-identity-issuance-v1.md)：Gateway 的身份来源。
 
 代码位置为 `worktrees/iwut-gateway-ddd`，孤儿分支 `gateway/v1`。旧 `iwut-gateway` 和 `iwut-gateway-auth-forward` 不自动成为新设计的规范；本次保留旧工作区和其中的未提交修改。
 
-Traefik `v3.7.13` 保留 Edge、HTTP Router、TLS 与 gRPC-Web 终止职责。HTTP/JSON 的 SESSION 路由使用 ForwardAuth；原生 gRPC 与转换后的 gRPC-Web 进入 Gateway 精确 unary 前置代理，避免 ForwardAuth 拒绝时返回非 gRPC 响应。配置由严格的 `config/routes.v1.yaml` 驱动，具体边界见 ADR-GW-001。具有相同行为的新接口只扩充路由及测试，不为每条业务路径创建独立 UC。不设计 Gateway 数据库、Redis、事件总线、动态策略语言或路由后台。
+Traefik `v3.7.13` 保留 Edge、HTTP Router、TLS 与 gRPC-Web 终止职责。HTTP/JSON 的每条路由使用 route-specific ForwardAuth；原生 gRPC 与转换后的 gRPC-Web 进入 Gateway 精确 unary 前置代理，避免 ForwardAuth 拒绝时返回非 gRPC 响应。配置由严格的 `config/routes.v2.yaml` 驱动，具体边界见 ADR-GW-001/002。具有相同行为的新接口只扩充路由及测试，不为每条业务路径创建独立 UC。不设计 Gateway 数据库、Redis、事件总线、动态策略语言或路由后台。
 
-UC 正文中的 `BR-GWR-*` 是本 context 的规则权威；平台目录只保存真正跨系统的约定。UC-GW-001 首个实现工作包已 `COMPLETE`，覆盖详情和验收提交见[实现状态](implements/README.md)。UC-GW-001 工作包直接读取 UC、ADR 与它们点名的共享契约；新 UC-GW-002 尚为 PROPOSED，其进入实现前须决定工作包输入方式，不假定 App/Auth brief 生成器已经支持 Gateway。现有 `tools/registry.py` 仍不能被当作已经检查 Gateway registry，Gateway registry 必须人工同步审查。
+UC 正文中的 `BR-GWR-*` 是本 context 的规则权威；平台目录只保存真正跨系统的约定。UC-GW-001 首个实现工作包已 `COMPLETE`，UC-GW-003 已完成本地联合验证，覆盖详情和验收提交见[实现状态](implements/README.md)。Gateway 工作包直接读取 UC、ADR 与它们点名的共享契约；当前 brief 生成器仍不生成 Gateway brief。UC-GW-002 仍为 `PROPOSED / NOT_STARTED`，ADR-GW-002/ADR-PLAT-004 已接受。现有 `tools/registry.py` 仍不能被当作已经检查 Gateway registry，Gateway registry 必须人工同步审查。
 
 ## OAuth / OIDC 设计（2026-09-27，PROPOSED）
 
 整体顺序、现有能力和交付门禁见 [OAuth/OIDC 工作包总览](../auth-center/design-notes/oauth-oidc-delivery-plan.md)。以下条目尚未接受或实现，不改变已启用接口。
 
 - [UC-GW-002：应用委托请求鉴权与转发](use-cases/UC-GW-002-authenticate-oauth-and-forward.md)。
+
+## 可选身份公开读取（2026-10-07，ACCEPTED）
+
+[UC-GW-003](use-cases/UC-GW-003-attach-optional-user-identity.md) 为 App UC023/024 建立统一入口：没有 Session 时匿名转发，存在 Session 时调用 Auth UC010 换取目标 audience USER JWS；任何已提供但无效或歧义的凭据都失败关闭。Gateway `0009947` 已按 [ADR-GW-002](adr/ADR-GW-002-route-credential-and-identity-policy.md) 实现 v2 路由矩阵，并按 [ADR-PLAT-004](../platform/adr/ADR-PLAT-004-unified-api-integration-baseline.md) 固定共同 API `9f914c5`。本地真实 Auth/App 三协议 E2E 已通过；尚未 push 或生产部署。
