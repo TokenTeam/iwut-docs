@@ -475,6 +475,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `DeveloperStatusDirectory/BatchGetDeveloperStatuses` | `auth.developer-status.read` |
 | `SystemPrincipalDirectory/ResolveSystemPrincipal` | `auth.system-principal.resolve` |
 | `UserIdentityService/IssueUserIdentityFromSession` | `auth.identity.issue` |
+| `ApplicationClosureService/ApplyApplicationClosure` | `auth.application-closure.apply` |
+| `ApplicationClosureService/GetApplicationClosureStatus` | `auth.application-closure.read` |
 
 签发方法的完整名称、caller `identityAudiences` 扩展与用户 Session 双重认证见 [Session 签发契约](../../platform/contracts/auth-session-identity-issuance-v1.md)；只有方法 permission 不足以请求任意 audience。
 
@@ -506,7 +508,9 @@ Auth Center 必须提供 `AUTH_CENTER_SERVICE_CALLERS_B64`：以下 JSON UTF-8 b
     "permissions": [
       "auth.scope-catalog.read",
       "auth.developer-status.read",
-      "auth.system-principal.resolve"
+      "auth.system-principal.resolve",
+      "auth.application-closure.apply",
+      "auth.application-closure.read"
     ],
     "systemPrincipalPurposes": [
       "app-center.review-auto-rejection"
@@ -550,7 +554,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
-- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：App Center 固定授权映射、账号归属退出方法
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：App Center 固定授权映射、账号归属退出方法、Application 关闭方法
 
 ## 溯源
 
@@ -564,4 +568,4 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 | `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `ad992ad660ef` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
-| `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |
+| `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

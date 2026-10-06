@@ -1,0 +1,50 @@
+{
+  "uc": "UC-AUTH-026",
+  "note": "Implement Auth/API application closure consumption and app.close recent-auth proof. Add permanent applicationId tombstone with idempotent App service Apply/Get receipt; enforce it at UC014-019 final OAuth boundaries. Require the current Session's same registered device to sign a new challenge; issue a fixed 5-minute iwut-app-center proof bound to purpose, sub, applicationId, jti and auth_time. Include real Mongo races/unknown commits, HTTP/native gRPC proof endpoints, gRPC-only internal service and actual App integration. Do not implement App lifecycle, UI, Gateway or third-party session deletion.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与依赖",
+    "Application 关闭服务",
+    "近期认证签发",
+    "OAuth 与 OIDC 最终栅栏",
+    "持久化、审计与恢复",
+    "API、配置与错误",
+    "验收场景",
+    "实现依赖与交付边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/application-closure-v1.md": [
+      "目的与边界",
+      "服务身份",
+      "RPC 草图",
+      "Auth 持久事实",
+      "Auth 执行语义",
+      "错误与兼容",
+      "验收矩阵"
+    ],
+    "platform/contracts/application-close-reauth-proof-v1.md": [
+      "目的与边界",
+      "签发入口",
+      "新挑战和设备签名",
+      "Proof JWS",
+      "幂等、重放与消费",
+      "错误、限额与隐私",
+      "兼容与验收"
+    ],
+    "platform/contracts/trusted-service-identity-v1.md": [
+      "目的与范围",
+      "传输与 JOSE",
+      "Claims",
+      "Auth Center 固定授权映射",
+      "错误与轮换",
+      "契约测试要求"
+    ],
+    "platform/contracts/auth-device-session-v1.md": [
+      "基础编码",
+      "公钥与签名",
+      "Session 载体"
+    ]
+  }
+}

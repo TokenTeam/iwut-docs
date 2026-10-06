@@ -26,10 +26,10 @@
 - Application 级禁用应如何区分 admin 与 SysAdmin 权限，如何影响 Catalog、运行解析和现有 Publication，并允许怎样的重新启用？紧急隐藏公开资料归于此能力，不增加 ProfileRevision REVOKED 状态。
 - AI DRAFT 审核未来读取哪些内容、如何标识模型与策略版本、结论是建议还是门禁，以及怎样进入生命周期？当前不实现，也不增加 AI 状态或自动迁移。
 
-## 阻塞 UC-APP-027 接受的问题
+## UC-APP-027 已关闭的接受依赖
 
-- Auth Center 需要建立哪个消费方 UC，把 application closure tombstone 加入 authorize、code exchange、token/refresh 和在线 delegation 的最终检查边界，并与 [Application Closure v1](../platform/contracts/application-closure-v1.md) 对齐？
-- 近期重新认证证明由 Auth 哪个入口签发、使用何种稳定 claim/签名/防重放契约？普通 App USER JWS 的 iat 不能证明刚发生了新认证。UC027 已确定 proof 必须绑定 `purpose=app.close`、applicationId、sub、jti，且最大 5 分钟，但双方可执行契约尚未建立。
+- [UC-AUTH-026](../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md) 已把 application closure tombstone 纳入 authorize、code exchange、token/refresh、UserInfo 和在线 delegation 的最终检查边界，并与 [Application Closure v1](../platform/contracts/application-closure-v1.md) 对齐。
+- [Application 关闭近期认证证明 v1](../platform/contracts/application-close-reauth-proof-v1.md) 已固定当前 Session 所属同一登记设备的新 challenge/signature、`purpose=app.close`、applicationId、sub、jti、auth_time 和 5 分钟上限；普通 USER JWS `iat` 明确不能替代。
 
 ## 旧实现（已确认，不再开放）
 

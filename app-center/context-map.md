@@ -92,7 +92,7 @@ App Center Context
 - UC-APP-019 向 Auth 分别提供登录前运行配置和登录后用户授权上下文；运行 tuple 包含当前 profileRevisionId，展示资料只来自当前 APPROVED ProfileRevision，没有技术名称 fallback。Auth 拥有 consent、code、token 和 grant。
 - UC-APP-025 在 App 本地拥有账号归属退出 fence、决定与清理回执；Auth 拥有退出/关闭操作及其权威终局。
 - [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 在发起时新鲜检查目标、接受时新鲜批量检查源和目标的 Auth 状态；App 本地事务拥有转让终态、配额移动、名称冲突和 current admin 变化。它不要求 Auth 提供 revision 或 reservation，而是通过 UC025 的账号 fence 阻止退出终局竞态。
-- [UC-APP-027](use-cases/UC-APP-027-close-application.md) 在 App 本地拥有不可逆生命周期、即时运行 gate、配额释放和关闭收敛任务；Auth 依据 [Application Closure v1](../platform/contracts/application-closure-v1.md) 拥有永久授权 tombstone。两边以稳定 closureId 和持久回执收敛，不共享事务。Auth 还需建立近期重新认证证明的可执行契约，普通 App USER JWS 不能替代它。
+- [UC-APP-027](use-cases/UC-APP-027-close-application.md) 在 App 本地拥有不可逆生命周期、即时运行 gate、配额释放和关闭收敛任务；Auth 依据 [Application Closure v1](../platform/contracts/application-closure-v1.md) 与 [UC-AUTH-026](../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md) 拥有永久授权 tombstone。两边以稳定 closureId 和持久回执收敛，不共享事务。关闭 proof 由 Auth 按 [近期认证证明 v1](../platform/contracts/application-close-reauth-proof-v1.md) 对当前 Session 所属同一登记设备的新挑战签发；普通 USER JWS 不能替代它。
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。
 

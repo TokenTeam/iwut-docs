@@ -7,7 +7,7 @@
 
 ## 当前迭代
 
-当前已有十三个接受的用例（UC-AUTH-001 至 013）；设计接受与实现完成分别跟踪：
+当前已有二十六个接受的用例（UC-AUTH-001 至 026）；设计接受与实现完成分别跟踪。早期身份基础如下，OAuth 与治理工作的最新状态见本页后续入口和 [实现覆盖](implements/README.md)：
 
 - `UC-AUTH-001`：授权的内部服务读取 Auth 权威的 Scope Catalog 完整快照。
 - `UC-AUTH-002`：授权的内部服务按 Auth ID 批量读取当前 Developer 状态。
@@ -57,6 +57,7 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md)：暂停与恢复 Developer 资格草案，ACCEPTED。
 - [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md)：本人退出 Developer 资格草案，ACCEPTED。
 - [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md)：本人注销账号草案，ACCEPTED。
+- [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md)：消费 Application 关闭、建立永久 OAuth 栅栏并签发同设备近期认证 proof，ACCEPTED；[开工检查](implements/UC-AUTH-026-readiness.md)。
 
 - [UC-AUTH-022](use-cases/UC-AUTH-022-disable-and-restore-user-account.md)：账号禁用与恢复草案，账号版本保证旧 Session/token 不复活；依赖 UC021，ACCEPTED。
 
@@ -100,9 +101,9 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 设计使用 `PROPOSED`、`ACCEPTED`、`DEPRECATED`、`SUPERSEDED`；实现覆盖使用
 `NOT_STARTED`、`IN_PROGRESS`、`CORE_COMPLETE`、`COMPLETE`。设计状态和实现状态彼此独立。
 
-## OAuth / OIDC 设计（2026-09-27，PROPOSED）
+## OAuth / OIDC 设计
 
-整体顺序、现有能力和交付门禁见 [OAuth/OIDC 工作包总览](design-notes/oauth-oidc-delivery-plan.md)。以下条目尚未接受或实现，不改变已启用接口。
+整体顺序、现有能力和交付门禁见 [OAuth/OIDC 工作包总览](design-notes/oauth-oidc-delivery-plan.md)。以下条目均已接受，后端实现与部署边界以 [实现覆盖](implements/README.md) 为准。
 
 - [UC-AUTH-014：用户确认应用授权并签发授权码](use-cases/UC-AUTH-014-authorize-application.md)。
 - [UC-AUTH-015：兑换授权码并签发 OIDC 凭据](use-cases/UC-AUTH-015-exchange-authorization-code.md)。
@@ -114,3 +115,5 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 OAuth 最新分工：Auth 唯一管理 Application 级 sector/sub，各渠道/type 共享用户标识；client 与 grant 按渠道隔离，同应用同渠道的两类 client 及各 major 共用历史授权，token 仍各自绑定 client。版本变化不删除同意记录，访问使用当前有效交集，详见 [交付总览](design-notes/oauth-oidc-delivery-plan.md)。
 
 2026-10-05：UC021–025 已接受并生成 brief，独立 subagent 工作包开始实施；App UC025 提供归属屏障/个人清理前置能力。有应用者继续 BLOCKED，应用转让/关闭不在本轮，公网部署与无密钥受理需独立验收。
+
+2026-10-06：UC026 已接受并生成 brief。它为 App UC027 提供 applicationId 永久 tombstone、OAuth 014–019 最终栅栏，以及当前 Session 所属同一登记设备的新挑战证明；普通 USER JWS `iat` 不构成近期认证。Auth/API 后端与 App UC027 分属两个工作包，最终使用真实双服务联合验收。

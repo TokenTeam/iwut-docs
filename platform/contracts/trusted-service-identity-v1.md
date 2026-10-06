@@ -33,6 +33,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `DeveloperStatusDirectory/BatchGetDeveloperStatuses` | `auth.developer-status.read` |
 | `SystemPrincipalDirectory/ResolveSystemPrincipal` | `auth.system-principal.resolve` |
 | `UserIdentityService/IssueUserIdentityFromSession` | `auth.identity.issue` |
+| `ApplicationClosureService/ApplyApplicationClosure` | `auth.application-closure.apply` |
+| `ApplicationClosureService/GetApplicationClosureStatus` | `auth.application-closure.read` |
 
 签发方法的完整名称、caller `identityAudiences` 扩展与用户 Session 双重认证见 [Session 签发契约](auth-session-identity-issuance-v1.md)；只有方法 permission 不足以请求任意 audience。
 
@@ -78,7 +80,9 @@ Auth Center 必须提供 `AUTH_CENTER_SERVICE_CALLERS_B64`：以下 JSON UTF-8 b
     "permissions": [
       "auth.scope-catalog.read",
       "auth.developer-status.read",
-      "auth.system-principal.resolve"
+      "auth.system-principal.resolve",
+      "auth.application-closure.apply",
+      "auth.application-closure.read"
     ],
     "systemPrincipalPurposes": [
       "app-center.review-auto-rejection"
@@ -114,3 +118,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 ## 账号归属退出方法
 
 精确 full method、调用方向及权限以 [account-owner-exit-v1](account-owner-exit-v1.md#固定线格式与方法授权) 为准。Auth 接受 App 的 auth.account-owner-exit.read；App 接受 Auth 的 prepare/finish/read。它们不授予其他服务权限、不开放 HTTP 或通用 wildcard。
+
+## Application 关闭方法
+
+精确 full method、调用方向及权限以 [application-closure-v1](application-closure-v1.md#服务身份) 为准。Auth 只接受 App 的 `auth.application-closure.apply` / `auth.application-closure.read`；两项权限不授予 OAuth、账号退出或其他内部方法，不开放 HTTP、gRPC-Web 或 wildcard。

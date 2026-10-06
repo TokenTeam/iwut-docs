@@ -21,6 +21,7 @@
 | [UC-AUTH-017](../use-cases/UC-AUTH-017-get-oidc-user-info.md) | 标准 UserInfo，最小 sub/已授权邮箱 | AUTH015/018、激活邮箱事实 |
 | [UC-AUTH-018](../use-cases/UC-AUTH-018-revoke-application-authorization.md) | 本人查看、部分/全部收回；应用 token 撤销 | grant/token 模型、平台 Session |
 | [UC-AUTH-019](../use-cases/UC-AUTH-019-issue-delegation-context.md) | 在线 token 检查与可信委托签发 | AUTH015/018、APP019、资源策略 |
+| [UC-AUTH-026](../use-cases/UC-AUTH-026-apply-application-closure.md) | 消费 Application 关闭 tombstone，并为关闭签发同设备近期认证 proof | AUTH014–019、APP027、Session/设备凭据 |
 | [UC-GW-002](../../gateway/use-cases/UC-GW-002-authenticate-oauth-and-forward.md) | 标准 OIDC 路由、OAuth 入口与三协议转发 | AUTH019、资源服务委托验证器 |
 
 2026-10-03：App019 及其 OAuth Version 前置扩展已交付；Auth014–019 已接受且 Auth 后端实现已交付，具体验收状态见 [implements/README](../implements/README.md)。Gateway 与资源工作包仍单独交付。接受工作包时必须把依赖的跨系统契约一同纳入，避免各自猜测消息与身份格式。
@@ -53,6 +54,8 @@ App 不保存用户 consent，不自行定义 scope 含义；Auth 不直接读 A
 - [Traefik 契约](../../platform/contracts/oauth-delegation-v1.md)明确已有短期上下文及在途请求的撤销传播窗口；不承诺第三方应用会话/已取得数据同步删除。
 
 Auth014–019 的设计取舍已随实施请求接受并生成 brief；已有 SESSION/身份契约保持其原有权威性。
+
+Application 关闭不通过一次 App provider 失败推断，而由 UC-AUTH-026 持久保存 applicationId tombstone，并在 UC014–019 最终边界执行。关闭发起使用独立的 app.close proof：当前 Session 所属同一登记设备必须完成新 challenge/signature，普通 USER JWS 的签发时间不能替代。
 
 ## Scope 启用决定（2026-09-28）
 

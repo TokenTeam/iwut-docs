@@ -450,6 +450,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `DeveloperStatusDirectory/BatchGetDeveloperStatuses` | `auth.developer-status.read` |
 | `SystemPrincipalDirectory/ResolveSystemPrincipal` | `auth.system-principal.resolve` |
 | `UserIdentityService/IssueUserIdentityFromSession` | `auth.identity.issue` |
+| `ApplicationClosureService/ApplyApplicationClosure` | `auth.application-closure.apply` |
+| `ApplicationClosureService/GetApplicationClosureStatus` | `auth.application-closure.read` |
 
 签发方法的完整名称、caller `identityAudiences` 扩展与用户 Session 双重认证见 [Session 签发契约](../../platform/contracts/auth-session-identity-issuance-v1.md)；只有方法 permission 不足以请求任意 audience。
 
@@ -495,7 +497,9 @@ Auth Center 必须提供 `AUTH_CENTER_SERVICE_CALLERS_B64`：以下 JSON UTF-8 b
     "permissions": [
       "auth.scope-catalog.read",
       "auth.developer-status.read",
-      "auth.system-principal.resolve"
+      "auth.system-principal.resolve",
+      "auth.application-closure.apply",
+      "auth.application-closure.read"
     ],
     "systemPrincipalPurposes": [
       "app-center.review-auto-rejection"
@@ -539,6 +543,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Application 关闭方法
 
 ## 溯源
 
@@ -550,4 +555,4 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
 | `platform/contracts/auth-developer-status-v1.md` | 97 | `65d986d93af1` |
-| `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |
+| `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

@@ -51,7 +51,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（当前普通 Catalog 后端范围；客户端 Filter 求值、“我参与的测试”、搜索与排名独立交付） |
 | [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `COMPLETE` | App b346cfa/API 1d7b87b；App 归属屏障、持久终局/个人清理、认证回查、0020 迁移、状态消费者、真实 Mongo 与 Auth＋App 验收 | 默认关闭；不含应用转让/关闭与生产部署 |
 | [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `IN_PROGRESS` | 发起—接受式管理员转让的领域、并发、安全与 API 已接受；依赖检查和 brief 已闭合 | Domain、API、0021 migration、跨能力事务与完整 Auth/App 验收进行中 |
-| [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `PROPOSED` | `NOT_STARTED` | 不可逆 CLOSING/CLOSED、本地即时隔离、持久 Auth 撤销与并发提案已形成 | 待 Auth 消费方 UC、近期重新认证证明契约及设计评审；未生成 brief，未开始代码、API 或 migration 工作包 |
+| [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `NOT_STARTED` | 不可逆 CLOSING/CLOSED、本地即时隔离、持久 Auth 撤销；Auth UC026、共享契约、[开工检查](UC-APP-027-readiness.md)和生成 brief 已闭合 | 等待 UC026 schema 后实现 Domain/API/migration、全部 ACTIVE gate、durable Auth 收敛和真实双服务验收 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC025 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。UC026 已接受并进入实现；UC027 仍需 Auth 消费方和近期重新认证证明契约闭合后接受并生成 brief。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 

@@ -1,6 +1,6 @@
 # Application 关闭协调 v1
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目的与边界
 
@@ -8,7 +8,7 @@
 
 App Center 是 Application 生命周期、Publication、OAuth registration 和关闭流程的权威；Auth Center 是 consent grant、authorization code、token family、sector、pairwise sub 及授权执行的权威。双方不共享数据库，也不把远程调用放进本地事务。
 
-本契约不定义用户发起关闭的公网 API、近期重新认证证明格式、账号关闭或平台强制关闭。
+本契约不定义用户发起关闭的公网 API、账号关闭或平台强制关闭。近期重新认证格式见 [Application 关闭近期认证证明 v1](application-close-reauth-proof-v1.md)。
 
 ## 先决条件与生效点
 
@@ -132,4 +132,4 @@ v1 只允许追加可选字段和新的只读方法。改变幂等键、允许�
 ## 权威用例
 
 - App 提供方：[UC-APP-027](../../app-center/use-cases/UC-APP-027-close-application.md)。
-- Auth 消费方：尚待建立；在该 UC 接受并定位全部 Auth 最终检查点前，本契约和 UC-APP-027 均保持 PROPOSED。
+- Auth 消费方：[UC-AUTH-026](../../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md)。

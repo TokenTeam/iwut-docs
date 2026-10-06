@@ -1,0 +1,67 @@
+{
+  "uc": "UC-APP-027",
+  "note": "Implement irreversible Application ACTIVE to CLOSING to CLOSED lifecycle after UC026 transfer schema. Require current admin, fresh Auth status, ownership/lifecycle OCC, exact confirmation and app.close proof. Atomically release quota/owner obligation, terminate pending transfer/join link, disable OAuth slots, persist closure/outbox/proof consumption; gate every runtime and write path on ACTIVE. Converge with Auth through stable Apply/Get receipt and real two-service tests. Do not implement archive, restore, temporary disable, platform takeover, physical deletion or UI.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与前置依赖",
+    "输入、预览与身份",
+    "生命周期与可见行为",
+    "发起关闭流程",
+    "本地关闭事务",
+    "Auth 持久撤销与最终收敛",
+    "领域与数据模型",
+    "API 草图",
+    "并发与验收场景",
+    "实现前决策结论"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-003": ["决定", "Port 所有权", "自动化约束"],
+    "ADR-004": ["决定", "测试环境"],
+    "ADR-005": ["决定", "隐私与存在性隐藏"],
+    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/application-closure-v1.md": [
+      "目的与边界",
+      "先决条件与生效点",
+      "服务身份",
+      "RPC 草图",
+      "投递、查询与收敛",
+      "错误与兼容",
+      "验收矩阵"
+    ],
+    "platform/contracts/application-close-reauth-proof-v1.md": [
+      "目的与边界",
+      "Proof JWS",
+      "幂等、重放与消费",
+      "错误、限额与隐私",
+      "兼容与验收"
+    ],
+    "platform/contracts/account-owner-exit-v1.md": [
+      "范围与事实来源",
+      "App 原子屏障",
+      "Auth 协调与故障"
+    ],
+    "platform/contracts/auth-developer-status-v1.md": [
+      "目的与所有权",
+      "gRPC 方法",
+      "完整批量语义",
+      "错误边界"
+    ],
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "错误边界"
+    ],
+    "platform/contracts/trusted-service-identity-v1.md": [
+      "目的与范围",
+      "传输与 JOSE",
+      "Claims",
+      "Auth Center 固定授权映射",
+      "错误与轮换"
+    ]
+  }
+}

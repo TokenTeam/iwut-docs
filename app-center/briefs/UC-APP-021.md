@@ -793,7 +793,9 @@ Auth Center 必须提供 `AUTH_CENTER_SERVICE_CALLERS_B64`：以下 JSON UTF-8 b
     "permissions": [
       "auth.scope-catalog.read",
       "auth.developer-status.read",
-      "auth.system-principal.resolve"
+      "auth.system-principal.resolve",
+      "auth.application-closure.apply",
+      "auth.application-closure.read"
     ],
     "systemPrincipalPurposes": [
       "app-center.review-auto-rejection"
@@ -837,7 +839,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
-- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射、账号归属退出方法
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射、账号归属退出方法、Application 关闭方法
 
 ## 溯源
 
@@ -851,4 +853,4 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/trusted-identity-v1.md` | 138 | `e9d524a5a5e3` |
-| `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |
+| `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

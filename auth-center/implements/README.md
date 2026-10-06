@@ -25,6 +25,7 @@
 | [UC-AUTH-023](../use-cases/UC-AUTH-023-suspend-and-restore-developer.md) | `ACCEPTED` | `COMPLETE` | Auth 08fa346/API e4c01b3；独立资格治理 HTTP/gRPC、developerRevision、邮箱恢复门禁、原子审计、取消未决退出；普通登录保留，真实 Mongo/Wire、App 与 OAuth 状态消费验收 | 入口默认关闭；Gateway、客户端与生产治理规程独立交付 |
 | [UC-AUTH-024](../use-cases/UC-AUTH-024-withdraw-developer.md) | `ACCEPTED` | `COMPLETE` | Auth ab60f32/API 5144c8c；本人 Session 准备/确认/取消/查询、WITHDRAWN、永久 handle、独立 App provider、持久协调及回执丢失恢复；真实 Auth＋App 验收 | 公网默认关闭；名下应用转让/关闭仍为独立 UC，存在归属时明确阻止退出；Gateway/客户端独立交付 |
 | [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `ACCEPTED` | `COMPLETE` | Auth 95a3c3a/API 4babe5b；ACTIVE/DISABLED 专用设备证明、明确确认、CLOSED、永久占用、独立终止清单与离线恢复、分批清理及保留期、App 回执；真实 Mongo/HTTP/gRPC/双服务与恢复测试 | 公网默认关闭；生产数据清单、30 天备份/日志期限、独立清单恢复演练和无密钥受理仍是启用门禁，Gateway/客户端独立交付 |
+| [UC-AUTH-026](../use-cases/UC-AUTH-026-apply-application-closure.md) | `ACCEPTED` | `NOT_STARTED` | 权威 UC、application closure 与 app.close reauth proof 契约、[开工检查](UC-AUTH-026-readiness.md)、生成 brief | Auth/API tombstone、UC014–019 最终 gate、同设备 challenge/proof、真实 Mongo/Wire 及实际 App UC027 联调均待实现 |
 
 ## 实现边界
 

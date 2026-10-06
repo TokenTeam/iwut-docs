@@ -1,6 +1,6 @@
 # UC-APP-027：关闭 Application
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 目标与范围
 
@@ -30,10 +30,7 @@
 - **Auth Center**：签发绑定本次高风险操作的近期重新认证证明，并依据 [Application Closure v1](../../platform/contracts/application-closure-v1.md) 保存永久 Application 授权撤销事实。
 - **App Center**：拥有 Application 生命周期、当前管理员、配额、Publication、Tester、OAuth registration 和关闭过程。
 
-本提案进入 `ACCEPTED` 前必须补齐两个依赖：
-
-1. Auth Center 的关闭消费方 UC，明确 application closure tombstone 在授权、换码、发 token、refresh 和在线校验最终事务边界的执行位置。
-2. Auth 与 App 共用的近期重新认证证明契约。普通 App USER JWS 的 `iat` 只表示该身份上下文何时签发，不能证明用户刚完成密码、Passkey 或其他新认证，不能单独满足本用例。
+两个接受依赖已经闭合：[UC-AUTH-026](../../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md) 定位 application closure tombstone 在授权、换码、token、refresh、UserInfo 与在线委托最终边界的检查；[Application 关闭近期认证证明 v1](../../platform/contracts/application-close-reauth-proof-v1.md) 固定当前 Session 所属同一登记设备的新 challenge/signature 与 proof 格式。普通 App USER JWS 的 `iat` 仍只表示身份上下文签发时间，不能单独满足本用例。
 
 ## 输入、预览与身份
 
@@ -66,7 +63,7 @@ CloseApplicationCommand {
 }
 ```
 
-近期重新认证证明通过专用 metadata/header `x-iwut-high-risk-proof` 传递，不放进 URL、命令正文、日志或审计 payload。证明至少绑定：
+近期重新认证证明依据 [Application 关闭近期认证证明 v1](../../platform/contracts/application-close-reauth-proof-v1.md)，通过专用 metadata/header `x-iwut-high-risk-proof` 传递，不放进 URL、命令正文、日志或审计 payload。证明至少绑定：
 
 ```text
 iss, aud="iwut-app-center", sub=authId,
@@ -74,7 +71,7 @@ purpose="app.close", applicationId,
 jti, auth_time, iat, nbf, exp
 ```
 
-Auth 只在一次新的认证事件后签发；证明最大寿命和允许的 `auth_time` 年龄均为 5 分钟。App 验证签名、issuer、audience、purpose、subject、applicationId 和时间，并把 jti 唯一绑定到首次创建的 ApplicationClosure。相同 jti 对同一关闭结果的网络重试返回既有资源；把它用于其他 Application、其他操作或不同 closure 则作为重放拒绝。失败、过期、跨 Application、跨用户或只提供普通 USER JWS 都不能关闭。
+Auth 只在当前 Session 所属同一登记设备完成一次新的 challenge/signature 后签发；证明最大寿命和允许的 `auth_time` 年龄均为 5 分钟。App 验证签名、issuer、audience、typ/token_type、purpose、subject、applicationId 和时间，并把 jti 唯一绑定到首次创建的 ApplicationClosure。相同 jti 对同一关闭结果的网络重试返回既有资源；把它用于其他 Application、其他操作或不同 closure 则作为重放拒绝。失败、过期、跨 Application、跨用户或只提供普通 USER JWS 都不能关闭。
 
 ## 生命周期与可见行为
 
@@ -268,8 +265,9 @@ Close 成功使用 HTTP 202；重复请求返回现有 CLOSING/CLOSED，不重�
 
 本提案已经确定：关闭不可逆；CLOSING 即释放配额和 owner 义务；技术名称首版不释放；不删除历史、不批量改写 Membership/Review；不轮换 secret；本地禁用与 Auth application tombstone 双层生效；只有 Auth 回执推进 CLOSED。
 
-尚未满足的不是产品语义选择，而是跨服务可执行依赖：Auth 消费方 UC 与近期重新认证证明契约。两者完成并通过双方评审后，UC027 才能改为 ACCEPTED、生成 brief 和进入代码工作包。
+产品语义与跨服务依赖均已固定，可以生成 brief 并进入 App/API 后端实现。Auth/API 的 tombstone、OAuth 最终 gate 与 proof 签发是并行工作包；App 完整验收仍须使用真实 Auth 完成 Apply/Get 和 proof 消费联调，不能用永久 fake 替代。
 
 ## 变更记录
 
 - 2026-10-06：建立 UC-APP-027 提案；采用不可逆 CLOSING/CLOSED、本地即时隔离、配额与 owner 义务在 CLOSING 释放、历史保留、OAuth slot 禁用和 Auth application tombstone 持久收敛；明确近期重新认证证明与 Auth 消费方 UC 是接受前依赖。
+- 2026-10-06：Auth UC026 与两个共享契约接受；固定同一登记设备新挑战、5 分钟 app.close proof、Auth tombstone 最终栅栏与联合验收边界，UC-APP-027 接受并进入实现准备。

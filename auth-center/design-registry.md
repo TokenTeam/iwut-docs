@@ -8,10 +8,10 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-026` |
+| Use Case / Auth Center | `UC-AUTH-027` |
 | Business Rule / Account Lifecycle | `BR-ACC-015` |
 | Business Rule / Platform Administrator | `BR-ADM-009` |
-| Business Rule / OAuth Authorization | `BR-OAU-022` |
+| Business Rule / OAuth Authorization | `BR-OAU-029` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
 | Business Rule / Scope Catalog | `BR-SCP-006` |
 | Business Rule / Developer Status | `BR-DEV-023` |
@@ -51,6 +51,7 @@
 | `UC-AUTH-023` | 暂停与恢复 Developer 资格 | `ACCEPTED` | [UC-AUTH-023](use-cases/UC-AUTH-023-suspend-and-restore-developer.md) | — | 管理侧资格状态转换、独立版本及恢复门禁；尚未实现。 |
 | `UC-AUTH-024` | 本人退出 Developer 资格 | `ACCEPTED` | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md) | — | WITHDRAWN、永久 handle 占用及 App 归属屏障；尚未实现。 |
 | `UC-AUTH-025` | 本人注销账号 | `ACCEPTED` | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md) | — | 专用设备证明、不可恢复终止、最小保留及可重试清理；尚未实现。 |
+| `UC-AUTH-026` | 应用关闭授权收敛与近期认证 | `ACCEPTED` | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md) | — | App 关闭 tombstone、OAuth 最终栅栏和同设备新挑战 app.close proof；[brief](briefs/UC-AUTH-026.md)。 |
 
 ## Business Rules
 
@@ -261,3 +262,10 @@
 | `BR-OAU-019` | 路由许可与委托身份隔离 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-019) | — | — |
 | `BR-OAU-020` | 签发撤销一致性与在线依赖 | Authorization / Boundary | [UC-AUTH-019](use-cases/UC-AUTH-019-issue-delegation-context.md#br-oau-020) | — | — |
 | `BR-OAU-021` | Application 级 sector 与主体映射 | Identity / Privacy | [UC-AUTH-015](use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-021) | — | Auth 唯一拥有 sector/sub。 |
+| `BR-OAU-022` | 永久 Application 授权墓碑 | Lifecycle / Revocation | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-022) | — | — |
+| `BR-OAU-023` | 全部 OAuth 路径的最终闭合 | Authorization / Consistency | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-023) | — | — |
+| `BR-OAU-024` | 服务身份、幂等回执与未知结果 | Identity / Retry | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-024) | — | — |
+| `BR-OAU-025` | 同设备新挑战证明近期认证 | Authentication / Proof | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-025) | — | — |
+| `BR-OAU-026` | Proof 最小权力与固定时限 | Authorization / Time | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-026) | — | — |
+| `BR-OAU-027` | Proof 幂等与单次业务消费 | Retry / Replay | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-027) | — | — |
+| `BR-OAU-028` | 并发、故障关闭与审计边界 | Atomicity / Audit | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-028) | — | — |

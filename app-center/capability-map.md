@@ -47,7 +47,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 负责 Application 的稳定身份和管理权，是其他能力的共同根。创建配额属于这项能力，因为它约束 Developer 可以拥有多少个 Application，而不是版本或发布数量。
 
-当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 提出的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 提出的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。
+当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。
 
 管理视图、受控改名、可恢复归档和 Application 级临时/平台禁用仍需后续用例；UC027 仍待跨服务依赖完成和评审接受。
 
@@ -140,7 +140,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 
 | 能力 | 已有设计证据 | 首版主要缺口 |
 | --- | --- | --- |
-| Application Ownership | `UC-APP-001`、`UC-APP-025`；`UC-APP-026`、`UC-APP-027` 提案 | 管理查询、改名、归档、Application 级禁用；UC026/027 待评审接受与实现，UC027 还依赖 Auth 关闭消费方与近期认证证明契约 |
+| Application Ownership | `UC-APP-001`、`UC-APP-025`、`UC-APP-026`、`UC-APP-027` | 管理查询、改名、归档、Application 级禁用；UC026/027 已接受但尚待完成实现 |
 | Version Review | `UC-APP-002`–`UC-APP-006` | 查询、草稿放弃、批准资格撤销或紧急处置 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023` | test 清空、Application 级停止分发 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md)；`UC-APP-024` 的公开读取 | 受控 icon 资产为以后扩展 |

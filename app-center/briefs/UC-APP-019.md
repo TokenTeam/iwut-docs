@@ -341,7 +341,9 @@ Auth Center 必须提供 `AUTH_CENTER_SERVICE_CALLERS_B64`：以下 JSON UTF-8 b
     "permissions": [
       "auth.scope-catalog.read",
       "auth.developer-status.read",
-      "auth.system-principal.resolve"
+      "auth.system-principal.resolve",
+      "auth.application-closure.apply",
+      "auth.application-closure.read"
     ],
     "systemPrincipalPurposes": [
       "app-center.review-auto-rejection"
@@ -383,7 +385,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 - `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：目标与范围、已确认的设计选择、输入与身份、建立、调整或替换主流程、清空主流程、确定性分桶、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口、STABLE 扩展、GREY 扩展
-- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射、账号归属退出方法
+- `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射、账号归属退出方法、Application 关闭方法
 
 ## 溯源
 
@@ -394,4 +396,4 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 | `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `5d63fc0c10b4` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
-| `platform/contracts/trusted-service-identity-v1.md` | 116 | `b33b72ad4752` |
+| `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |
