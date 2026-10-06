@@ -51,9 +51,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（当前普通 Catalog 后端范围；客户端 Filter 求值、“我参与的测试”、搜索与排名独立交付） |
 | [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `COMPLETE` | App b346cfa/API 1d7b87b；App 归属屏障、持久终局/个人清理、认证回查、0020 迁移、状态消费者、真实 Mongo 与 Auth＋App 验收 | 默认关闭；不含应用转让/关闭与生产部署 |
 | [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `COMPLETE` | Domain/API、0021 migration、共享 fence、配额/名称原子移动、KEEP/ROTATE、Tester link 撤销和真实 Auth/App 验收已交付；服务 `8f6159b`、API `f6841f2` | —（当前后端范围；通知、平台接管和 Application 关闭独立交付） |
-| [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `IN_PROGRESS` | 不可逆 CLOSING/CLOSED、本地即时隔离、持久 Auth 撤销；Auth UC026、共享契约、[开工检查](UC-APP-027-readiness.md)和生成 brief 已闭合 | Domain/API/0022 migration、全部 ACTIVE gate、durable Auth 收敛和真实双服务验收进行中 |
+| [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `COMPLETE` | 不可逆 CLOSING/CLOSED、0022 migration、高风险 proof 消费、原子本地隔离、全部 ACTIVE gate、持久 Auth Apply/Get 收敛及真实双服务验收；服务 `90142d6`、API `b00b8e0` | —（当前后端范围；公网/Gateway 入口默认关闭） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC025 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。UC026 已接受并进入实现；UC027 仍需 Auth 消费方和近期重新认证证明契约闭合后接受并生成 brief。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC027 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -335,3 +335,11 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 服务 `8f6159b`、独立 API `f6841f2` 均为本地提交。交付发起/接受/拒绝/取消/过期、ownershipRevision、真实 Auth 双人资格查询、账号 fence 字典序与 Application fence、双方配额/名称原子移动、显式 KEEP/ROTATE 和 Tester link `ADMIN_TRANSFER` 撤销；UC025 Prepare 同时消费有效入站 PENDING blocker。
 
 最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261006T113137Z-s0cgh25i/report.json`，`changed_sources=[]`；race、真实 Mongo/HTTP/gRPC 和真实 Auth source/target E2E 全部通过。第一轮完整门禁发现 Tester validator 与历史 Application validator 回归，修复后在最终稳定源码上重跑闭合。
+
+## 2026-10-06 UC027 Application 关闭
+
+服务 `90142d6`、独立 API `b00b8e0` 均为本地提交，未 push。交付不可逆 `ACTIVE → CLOSING → CLOSED` 生命周期、0022 migration、同设备近期认证 proof 消费、关闭事务中的配额释放、PENDING 转让取消、Tester link 撤销和多渠道 OAuth slot 禁用；Version/Profile/Review/Publication/Filter/Tester/OAuth 管理、Catalog、运行解析与五个 Auth provider 入口都在最终边界复查 Application ACTIVE。
+
+持久 worker 通过 Auth `ApplyApplicationClosure`/`GetApplicationClosureStatus` 收敛永久 tombstone；关闭公网入口默认禁用，但已有 CLOSING worker 始终运行。实现严格校验 ApplicationClosure 与 Application 的 lifecycle/revision/receipt 组合，按 RPC 完成时间退避，并保留相同 proof JTI 的同一关闭幂等语义。
+
+最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261006T131951Z-ouxgbe98/report.json`，`changed_sources=[]`；Mongo/HTTP/gRPC race 用时 1106.496 秒，真实 Auth/App E2E 用时 16.913 秒。覆盖同 JTI 并发、关闭与 Filter 共享 fence 竞争、混合 PUBLIC/CONFIDENTIAL slot 的 epoch/revision、溢出全事务回滚、跨集合损坏拒绝，以及 Auth 中断时保持 CLOSING、恢复后收敛 CLOSED。真实 Auth 基线为服务 `4f661e4`（核心 `5d26cb3`）、API `1ba1b81`；网络回包丢失与重复 worker 由确定性 UseCase/Mongo 测试覆盖，未增加网络帧级丢包或双边进程重启 E2E。
