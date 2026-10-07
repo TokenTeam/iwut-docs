@@ -15,6 +15,7 @@
 | `auth-center/client-guides/` | 官方客户端的组合流程与体验建议 | **非权威**，引用 Auth UC/BR，不定义服务端业务规则 |
 | `auth-center/design-registry.md` | Auth Center 的 UC / BR 索引 | 索引，不复制规则正文 |
 | `auth-center/implements/` | Auth Center 实现覆盖与工作包状态 | 实现导航，不改变业务语义 |
+| `console/` | Developer Console、Admin Console 与共享 Web/BFF 的前端功能设计 | **权威**；只定义功能、交互语义与前端架构，不规定具体视觉样式，也不复制后端业务规则 |
 | `platform/` | 跨 bounded context 的共享决定与契约（信任、路由、gRPC-Web 等） | **权威**，放置边界见 `platform/README.md`；不登记进 app-center registry |
 | `app-center/briefs/*.md` | **生成物**，工作包设计输入 | **非权威**，冲突时以源文件为准 |
 | `auth-center/briefs/UC-AUTH-*.md` | **生成物**，Auth 工作包设计输入 | **非权威**，冲突时以源文件为准；README 是维护说明 |

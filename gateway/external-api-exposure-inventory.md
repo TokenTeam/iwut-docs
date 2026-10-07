@@ -20,7 +20,7 @@
 
 | 标记 | 含义 |
 | --- | --- |
-| `VERIFIED` | 已进入 `config/routes.v2.yaml`，并完成对应业务流的本地三协议联合验证。 |
+| `VERIFIED` | 已进入当前权威目录 `config/routes.v3.yaml`，并完成对应业务流的本地三协议联合验证。 |
 | `IMPLEMENTED` | 已进入 Gateway `7a3eb7c` 的精确目录，且单元、ForwardAuth、gRPC proxy、Traefik 生成与全量回归通过；对应业务流的真实联合验收仍按各 UC 发布门禁完成。 |
 | `BACKLOG` | 尚未进入目录；已有 UC/ADR 足以决定行为，不需要为该 route 新写 Gateway UC。实施时仍须扩充精确 allowlist、生成物与测试。 |
 | `POLICY_GAP` | Gateway 运行时无法表达所需凭据组合；当前清单无此状态条目。 |
@@ -216,7 +216,7 @@
 - [Auth Center API 路由与 HTTP 映射](../platform/contracts/auth-center-api-routing.md)
 - [App Center API 路由 v1](../platform/contracts/app-center-api-routing.md)
 - [OAuth/OIDC v1](../platform/contracts/oauth-oidc-v1.md)
-- 统一 API Proto `9f914c5` 的 `google.api.http` annotations；Gateway 当前目录 `7a3eb7c` 的 `config/routes.v2.yaml`。
+- 统一 API Proto `9f914c5` 的 `google.api.http` annotations；Gateway 当前未提交实现工作包的 `config/routes.v3.yaml`（基线 commit `7a3eb7c`）。
 
 [UC-AUTH-001]: ../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md
 [UC-AUTH-002]: ../auth-center/use-cases/UC-AUTH-002-batch-get-developer-statuses.md

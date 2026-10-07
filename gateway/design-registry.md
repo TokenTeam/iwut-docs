@@ -8,8 +8,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Gateway | `UC-GW-007` |
-| Business Rule / Gateway Routing | `BR-GWR-026` |
+| Use Case / Gateway | `UC-GW-008` |
+| Business Rule / Gateway Routing | `BR-GWR-031` |
 
 ## Use Cases
 
@@ -21,6 +21,7 @@
 | `UC-GW-004` | 向 Auth 自认证入口保留可选 Session | `ACCEPTED` | [UC-GW-004](use-cases/UC-GW-004-forward-optional-session-to-auth.md) | Gateway `293ebc9`；可选 Session 原样下传，不换 USER JWS。 |
 | `UC-GW-005` | 转发账号注销用途隔离凭据 | `ACCEPTED` | [UC-GW-005](use-cases/UC-GW-005-forward-account-closure-credentials.md) | Gateway `293ebc9`；confirmation/receipt 精确隔离，禁止通用凭据。 |
 | `UC-GW-006` | 携带用户身份与应用关闭高风险证明转发 | `ACCEPTED` | [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md) | Gateway `293ebc9`；Close 同时下传 App USER JWS 与唯一 proof。 |
+| `UC-GW-007` | 按路由编排 Console Session ForwardAuth | `ACCEPTED` | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md) | Developer/Admin surface 逐 Route 默认关闭；Gateway-owned chain 已本地验证，完整 Console 部署拓扑待验收。 |
 
 ## Business Rules
 
@@ -51,6 +52,11 @@
 | `BR-GWR-023` | 身份交换成功先于 proof 下传 | Identity / Ordering | [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md#br-gwr-023) |
 | `BR-GWR-024` | proof 对 Gateway 不透明且按 Route 最小转发 | Security / Boundary | [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md#br-gwr-024) |
 | `BR-GWR-025` | 高风险载体的三协议与隐私边界 | Transport / Privacy | [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md#br-gwr-025) |
+| `BR-GWR-026` | Console surface 逐 Route 显式启用且默认关闭 | Routing / Boundary | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md#br-gwr-026) |
+| `BR-GWR-027` | Console 适配服从既有 Session 与凭据矩阵 | Authentication / Boundary | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md#br-gwr-027) |
+| `BR-GWR-028` | 只有对应 BFF 能从 Cookie 产生唯一 Session | Identity / Boundary | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md#br-gwr-028) |
+| `BR-GWR-029` | BFF-owned 流程、响应 Cookie 与内部调用隔离 | Security / Boundary | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md#br-gwr-029) |
+| `BR-GWR-030` | HTTP-only、失败不抵达与真实隔离验收 | Transport / Verification | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md#br-gwr-030) |
 
 ## Architecture Decisions
 
