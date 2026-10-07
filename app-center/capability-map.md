@@ -51,7 +51,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。
 
-管理视图、受控改名和管理员日常可恢复归档仍需后续用例；平台紧急暂停/恢复已经由 UC-APP-028 独立建模。
+UC-APP-029 已提供当前管理员的 Application 列表和组合管理详情。受控改名和管理员日常可恢复归档仍需后续用例；平台紧急暂停/恢复已经由 UC-APP-028 独立建模。
 
 这项能力不保存公开 displayName、简介、运行入口、发布槽位或 Tester 列表。
 
@@ -67,7 +67,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 这份发布资格与渠道无关。TEST、GREY、STABLE 都只能选择已批准 Version，但选择和运行时资格由各自的 Publication 逻辑负责。
 
-已有设计覆盖版本创建、草稿更新、提交、批准或拒绝，以及拒绝后恢复草稿。管理查询、放弃未提交草稿，以及已批准版本失去资格后的处理仍需后续设计。
+已有设计覆盖版本创建、草稿更新、提交、批准或拒绝、拒绝后恢复草稿，以及 UC-APP-030 的 Reviewer 待审队列和审核详情。管理员版本历史查询、放弃未提交草稿，以及已批准版本失去资格后的处理仍需后续设计。
 
 这项能力不决定用户实际得到哪个版本，也不保存面向目录的公开资料。
 
@@ -89,7 +89,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 负责可公开展示资料的独立修订与审核。它与 ApplicationVersion 分离，因此修改 displayName、description 或 icon 不会制造新的运行版本。Profile Review 批准时自动成为当前公开资料，不再建立管理员手动发布步骤。
 
-已有设计覆盖 displayName、可空 description 和可空不透明 icon 字符串的资料草稿创建、更新、提交审核、批准或拒绝，以及批准时自动公开。[Profile Management Query Contract](query-contracts/profile-management.md) 已定义管理员和 Reviewer 的列表/详情读取语义。SUBMITTED 继续占用唯一工作修订位，不能并行创建下一份 DRAFT；REJECTED Revision 保持终态，网页端可预填旧内容后调用普通创建用例，但服务端不提供恢复/复制接口。首版还需要面向普通用户的当前公开资料查询；受控 icon 资产是以后可选扩展，不提供旧资料回滚。
+已有设计覆盖 displayName、可空 description 和可空不透明 icon 字符串的资料草稿创建、更新、提交审核、批准或拒绝，以及批准时自动公开。UC-APP-031 已交付 Reviewer 待审队列与审核详情；管理员 ProfileRevision 历史列表/详情仍停留在 [Profile Management Query Contract](query-contracts/profile-management.md) 的候选语义。SUBMITTED 继续占用唯一工作修订位，不能并行创建下一份 DRAFT；REJECTED Revision 保持终态，网页端可预填旧内容后调用普通创建用例，但服务端不提供恢复/复制接口。普通用户当前公开资料由 UC-APP-024 返回；受控 icon 资产是以后可选扩展，不提供旧资料回滚。
 
 紧急隐藏不属于资料修订撤销。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格。
 
@@ -148,11 +148,11 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 
 | 能力 | 已有设计证据 | 首版主要缺口 |
 | --- | --- | --- |
-| Application Ownership | `UC-APP-001`、`UC-APP-025`、`UC-APP-026`、`UC-APP-027` | 管理查询、改名和管理员日常归档 |
-| Platform Availability | `UC-APP-028` | API、服务实现和真实 Auth/App 联合验收正在进行 |
-| Version Review | `UC-APP-002`–`UC-APP-006` | 查询、草稿放弃、批准资格撤销或紧急处置 |
+| Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029` | 改名和管理员日常归档 |
+| Platform Availability | `UC-APP-028` | 可靠告警投递、自动恢复与批量运维不在首版 |
+| Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030` | 管理员版本历史查询、草稿放弃、批准资格撤销或紧急处置 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023` | test 清空、Application 级停止分发 |
-| Public Profile | `UC-APP-013`–`UC-APP-016`；[Profile Management Query Contract](query-contracts/profile-management.md)；`UC-APP-024` 的公开读取 | 受控 icon 资产为以后扩展 |
+| Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | 管理员 ProfileRevision 历史查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
 | Catalog & Resolution | `UC-APP-012` 的 test-only 解析、`UC-APP-022` 的 Filter 管理契约、`UC-APP-023` 的统一解析、`UC-APP-024` 的普通列表/详情 | “我参与的测试”独立入口 |
 | OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 与跨服务验证已完成；Auth grant/code/token 继续独立交付 |

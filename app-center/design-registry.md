@@ -15,11 +15,11 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-029` |
-| Business Rule / Application | `BR-APP-038` |
-| Business Rule / Application Profile | `BR-PRF-041` |
+| Use Case / App Center | `UC-APP-032` |
+| Business Rule / Application | `BR-APP-044` |
+| Business Rule / Application Profile | `BR-PRF-047` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
-| Business Rule / Review | `BR-REV-029` |
+| Business Rule / Review | `BR-REV-035` |
 | Business Rule / Publication | `BR-PUB-031` |
 | Business Rule / Tester | `BR-TST-037` |
 | Business Rule / Runtime Resolution | `BR-RUN-021` |
@@ -64,6 +64,9 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-026` | 转让 Application 管理权 | `ACCEPTED` | [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) | — | 发起—接受转让、配额原子移动、账号退出屏障及可选 CONFIDENTIAL secret 轮换。 |
 | `UC-APP-027` | 关闭 Application | `ACCEPTED` | [UC-APP-027](use-cases/UC-APP-027-close-application.md) | — | 不可逆 CLOSING/CLOSED、本地即时隔离、配额释放和持久 Auth 授权撤销收敛。 |
 | `UC-APP-028` | 暂停与恢复 Application | `ACCEPTED` | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) | — | 平台运维精确权限、正交可用状态、运行/OAuth 在线门禁与可恢复配置保留。 |
+| `UC-APP-029` | 查询我的 Application 列表与管理详情 | `ACCEPTED` | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md) | — | 当前管理员私有列表与一致管理快照。 |
+| `UC-APP-030` | 查询 ApplicationVersion 审核队列与审核详情 | `ACCEPTED` | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md) | — | 精确 Version Reviewer 权限、不可变快照与稳定待审队列。 |
+| `UC-APP-031` | 查询 ApplicationProfileRevision 审核队列与审核详情 | `ACCEPTED` | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md) | — | 精确 Profile Reviewer 权限、不可变资料快照与稳定待审队列。 |
 
 ## Business Rules
 
@@ -108,6 +111,12 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-APP-035` | 独立 OCC 与共享写栅栏 | Concurrency / Consistency | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-035) | — | — |
 | `BR-APP-036` | 原子审计、告警和隐私 | Audit / Operations / Privacy | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-036) | — | — |
 | `BR-APP-037` | 无自动恢复与失败关闭 | Availability / Consistency | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-037) | — | — |
+| `BR-APP-038` | 当前管理员私有读取 | Authorization / Privacy | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-038) | — | — |
+| `BR-APP-039` | 生命周期可见性 | Lifecycle / Query | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-039) | — | — |
+| `BR-APP-040` | 稳定私有分页 | Pagination / Privacy | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-040) | — | — |
+| `BR-APP-041` | 管理详情是组合读取投影 | Boundary / Query | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-041) | — | — |
+| `BR-APP-042` | 一致快照与失败关闭 | Consistency / Invariant | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-042) | — | — |
+| `BR-APP-043` | 管理最小披露 | Privacy / Security | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-043) | — | — |
 
 ### Application Profile (`BR-PRF`)
 
@@ -145,6 +154,12 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-PRF-030` | 批准后自动公开 | Lifecycle / Consistency | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030) | — | — |
 | `BR-PRF-031` | 拒绝终止修订且不改变当前公开资料 | Boundary / Lifecycle | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | — | — |
 | `BR-PRF-032` | Revision、审计与原子决定 | Concurrency / Audit / Consistency | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-032) | — | — |
+| `BR-PRF-041` | Profile Reviewer 查询精确授权 | Authorization / Separation | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-041) | — | — |
+| `BR-PRF-042` | 待处理资料队列资格 | Eligibility / Lifecycle | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-042) | — | — |
+| `BR-PRF-043` | 资料审核快照权威 | Snapshot / Invariant | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-043) | — | — |
+| `BR-PRF-044` | 利益冲突提示不替代决定检查 | Authorization / Consistency | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-044) | — | — |
+| `BR-PRF-045` | 稳定资料队列分页 | Pagination / Consistency | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-045) | — | — |
+| `BR-PRF-046` | 资料审核查询失败关闭 | Consistency / Invariant | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-046) | — | — |
 
 ### ApplicationVersion (`BR-VER`)
 
@@ -201,6 +216,12 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-REV-026` | 一次性恢复审计 | Audit / Invariant | [UC-APP-006](use-cases/UC-APP-006-restore-rejected-version-to-draft.md#br-rev-026) | — | — |
 | `BR-REV-027` | 原子恢复 | Consistency | [UC-APP-006](use-cases/UC-APP-006-restore-rejected-version-to-draft.md#br-rev-027) | — | — |
 | `BR-REV-028` | 不提前重新验证 | Command Semantics | [UC-APP-006](use-cases/UC-APP-006-restore-rejected-version-to-draft.md#br-rev-028) | — | — |
+| `BR-REV-029` | Reviewer 查询精确授权 | Authorization / Separation | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-029) | — | — |
+| `BR-REV-030` | 待处理队列资格 | Eligibility / Lifecycle | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-030) | — | — |
+| `BR-REV-031` | 审核快照权威 | Snapshot / Invariant | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-031) | — | — |
+| `BR-REV-032` | 利益冲突提示不替代写检查 | Authorization / Consistency | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-032) | — | — |
+| `BR-REV-033` | 稳定队列分页 | Pagination / Consistency | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-033) | — | — |
+| `BR-REV-034` | 审核查询一致性与失败关闭 | Consistency / Invariant | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-034) | — | — |
 
 ### Publication (`BR-PUB`)
 

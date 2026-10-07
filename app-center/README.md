@@ -35,6 +35,9 @@
 - `UC-APP-026`：当前管理员发起管理权转让，目标显式接受并原子接收 Application、配额占用和安全处置选择。
 - `UC-APP-027`：当前管理员经近期重新认证后不可逆关闭 Application，本地立即隔离并持久协调 Auth 授权撤销。
 - `UC-APP-028`：获得精确平台运维权限的人员暂停或恢复 Application；暂停统一阻止目录、启动、Tester 新增加入和 OAuth 在线资格，恢复后重新执行当前配置资格。
+- `UC-APP-029`：当前管理员查询自己的 Application 列表和组合管理详情。
+- `UC-APP-030`：Version Reviewer 查询待处理队列和不可变审核详情。
+- `UC-APP-031`：Profile Reviewer 查询待处理队列和不可变资料审核详情。
 
 Application 的稳定业务字段仍为：
 
@@ -57,7 +60,7 @@ UC-APP-028 提出独立的 `platformAvailabilityStatus` 与 `platformAvailabilit
 
 面向用户公开的资料由独立且需要审核的 ApplicationProfileRevision 表达，不属于 Application 创建字段。UC-APP-013 已建立 displayName、可空 description 和可空不透明 icon 字符串；受控资产能力留待以后显式扩展。
 
-UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术计数器，并为每个 Version 建立一对一依附的 ApplicationVersionOAuthConfig，但不增加 Application 业务字段。UC-APP-003 为 ApplicationVersion 增加 revision、updatedBy 和 updatedAt，并让依附 OAuth 配置共用该 revision。UC-APP-004 新增 ApplicationReview，UC-APP-005 为其增加一次性 decision，UC-APP-006 为被拒绝 Review 增加一次性 draftRestoration。UC-APP-007 新增按 RPC major 分区的 ApplicationPublication 与追加式 History。UC-APP-008 新增 Application 级 TesterJoinLink，UC-APP-009 新增最多 100 个 ACTIVE Tester 的 ApplicationTesterMembership，UC-APP-010 完成 Membership 的移除终态，UC-APP-011 完成加入链接的 MANUAL 撤销终态。UC-APP-012 只读组合这些事实并返回 TestLaunchDescriptor。UC-APP-013 新增 ApplicationProfileRevision，并为 Application 的持久化投影增加 nextProfileRevisionSequence 技术计数器；同一 Application 的 DRAFT 或 SUBMITTED 共享唯一工作修订位。UC-APP-014 完成资料草稿的完整替换和乐观并发语义；UC-APP-015 新增独立 ApplicationProfileReview snapshot，并把资料草稿迁移为 SUBMITTED；UC-APP-016 定义独立资料审核权限、一次性 decision、批准后自动公开和 REJECTED 终态，并在决定时释放工作位。UC-APP-018/019 设计 Application＋channel 级稳定 OAuth registration、独立 credential 和按发布上下文解析 Version 配置；UC-APP-020/021 在 Publication 内增加 Stable 和 Grey 运行配置；UC-APP-022 新增 Application 级 Filter 修订；UC-APP-023 只读组合现有 Tester、Publication 和 Version 事实，返回唯一的 LaunchTargetDescriptor；UC-APP-024 以 Stable 为普通公开资格基线，批量组合公开 Profile、唯一启动目标和 Filter；UC-APP-025 建立账号归属退出屏障；UC-APP-026 增加独立 ApplicationAdminTransfer 与 ownershipRevision；UC-APP-027 增加 ApplicationClosure、不可逆生命周期和 Auth 持久撤销协议。
+UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术计数器，并为每个 Version 建立一对一依附的 ApplicationVersionOAuthConfig，但不增加 Application 业务字段。UC-APP-003 为 ApplicationVersion 增加 revision、updatedBy 和 updatedAt，并让依附 OAuth 配置共用该 revision。UC-APP-004 新增 ApplicationReview，UC-APP-005 为其增加一次性 decision，UC-APP-006 为被拒绝 Review 增加一次性 draftRestoration。UC-APP-007 新增按 RPC major 分区的 ApplicationPublication 与追加式 History。UC-APP-008 新增 Application 级 TesterJoinLink，UC-APP-009 新增最多 100 个 ACTIVE Tester 的 ApplicationTesterMembership，UC-APP-010 完成 Membership 的移除终态，UC-APP-011 完成加入链接的 MANUAL 撤销终态。UC-APP-012 只读组合这些事实并返回 TestLaunchDescriptor。UC-APP-013 新增 ApplicationProfileRevision，并为 Application 的持久化投影增加 nextProfileRevisionSequence 技术计数器；同一 Application 的 DRAFT 或 SUBMITTED 共享唯一工作修订位。UC-APP-014 完成资料草稿的完整替换和乐观并发语义；UC-APP-015 新增独立 ApplicationProfileReview snapshot，并把资料草稿迁移为 SUBMITTED；UC-APP-016 定义独立资料审核权限、一次性 decision、批准后自动公开和 REJECTED 终态，并在决定时释放工作位。UC-APP-018/019 设计 Application＋channel 级稳定 OAuth registration、独立 credential 和按发布上下文解析 Version 配置；UC-APP-020/021 在 Publication 内增加 Stable 和 Grey 运行配置；UC-APP-022 新增 Application 级 Filter 修订；UC-APP-023 只读组合现有 Tester、Publication 和 Version 事实，返回唯一的 LaunchTargetDescriptor；UC-APP-024 以 Stable 为普通公开资格基线，批量组合公开 Profile、唯一启动目标和 Filter；UC-APP-025 建立账号归属退出屏障；UC-APP-026 增加独立 ApplicationAdminTransfer 与 ownershipRevision；UC-APP-027 增加 ApplicationClosure、不可逆生命周期和 Auth 持久撤销协议；UC-APP-028 增加平台暂停/恢复；UC-APP-029 提供当前管理员 Application 管理查询；UC-APP-030/031 分别提供 Version 与 Profile Reviewer 队列和审核详情。
 
 ## 文档入口
 
@@ -101,6 +104,10 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-025-coordinate-account-owner-exit.md](use-cases/UC-APP-025-coordinate-account-owner-exit.md)：协调账号归属退出与个人状态清理。
 - [UC-APP-026-transfer-application-administration.md](use-cases/UC-APP-026-transfer-application-administration.md)：发起并接受 Application 管理权转让。
 - [UC-APP-027-close-application.md](use-cases/UC-APP-027-close-application.md)：不可逆关闭 Application 并协调 Auth 永久撤销。
+- [UC-APP-028-suspend-and-restore-application.md](use-cases/UC-APP-028-suspend-and-restore-application.md)：暂停或恢复 Application 的平台在线资格。
+- [UC-APP-029-query-owned-application-management.md](use-cases/UC-APP-029-query-owned-application-management.md)：查询我的 Application 列表与管理详情。
+- [UC-APP-030-query-application-version-reviews.md](use-cases/UC-APP-030-query-application-version-reviews.md)：查询 ApplicationVersion 审核队列与审核详情。
+- [UC-APP-031-query-application-profile-reviews.md](use-cases/UC-APP-031-query-application-profile-reviews.md)：查询 ApplicationProfileRevision 审核队列与审核详情。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：已由 UC-APP-026 取代的早期设计说明。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。
@@ -112,6 +119,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-027 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；UC026 与 UC027 已完整交付。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-031 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；UC026 至 UC031 已完整交付。
 
 OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付，UC-APP-020/021 已启用 STABLE/GREY。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有。

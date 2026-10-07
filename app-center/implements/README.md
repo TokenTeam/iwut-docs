@@ -53,8 +53,11 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `COMPLETE` | Domain/API、0021 migration、共享 fence、配额/名称原子移动、KEEP/ROTATE、Tester link 撤销和真实 Auth/App 验收已交付；服务 `8f6159b`、API `f6841f2` | —（当前后端范围；通知、平台接管和 Application 关闭独立交付） |
 | [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `COMPLETE` | 不可逆 CLOSING/CLOSED、0022 migration、高风险 proof 消费、原子本地隔离、全部 ACTIVE gate、持久 Auth Apply/Get 收敛及真实双服务验收；服务 `90142d6`、API `b00b8e0` | —（当前后端范围；公网/Gateway 入口默认关闭） |
 | [UC-APP-028](../use-cases/UC-APP-028-suspend-and-restore-application.md) | `ACCEPTED` | `COMPLETE` | 正交 AVAILABLE/SUSPENDED 状态、0023 migration、双 revision OCC、原子审计/告警 outbox、精确运维权限、UC009/012/023/024 及五个 UC019 provider 门禁、HTTP/gRPC 和真实 Auth/App 验收已交付；服务 `cab3749`、API `a1bf6dd` | —（当前后端范围；可靠通知、自动恢复和批量运维仍不在本 UC 范围） |
+| [UC-APP-029](../use-cases/UC-APP-029-query-owned-application-management.md) | `ACCEPTED` | `COMPLETE` | 当前管理员私有 Application 列表与组合管理详情、生命周期/平台状态过滤、降序绑定 keyset、批量计数、Mongo snapshot、0024 索引、HTTP/gRPC 与 no-store；服务 `155e122`、API `1cea981` | —（当前 Application 管理摘要范围；版本/Profile 历史列表和 Tester 明细由独立查询补充） |
+| [UC-APP-030](../use-cases/UC-APP-030-query-application-version-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.version.review`、PENDING/ACTIVE 队列、SUSPENDED 保留、CLOSING/CLOSED 排除、不可变 snapshot、当前策略、利益冲突提示、升序 keyset、HTTP/gRPC；服务 `7cf1fc2`、API `0217177` | —（分配、锁单、SLA、通知和决定写入不属于本查询 UC） |
+| [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.profile.review`、资料待审队列与终态详情、不可变 snapshot/当前策略/完整冲突提示、快照失败关闭、0025 队列索引、HTTP/gRPC 与真实 Mongo 验收；服务 `c15aa59`、API `507e252` | —（管理员 ProfileRevision 历史列表/详情仍是独立工作包） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC028 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031 也已完成；UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -344,3 +347,10 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 持久 worker 通过 Auth `ApplyApplicationClosure`/`GetApplicationClosureStatus` 收敛永久 tombstone；关闭公网入口默认禁用，但已有 CLOSING worker 始终运行。实现严格校验 ApplicationClosure 与 Application 的 lifecycle/revision/receipt 组合，按 RPC 完成时间退避，并保留相同 proof JTI 的同一关闭幂等语义。
 
 最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261006T131951Z-ouxgbe98/report.json`，`changed_sources=[]`；Mongo/HTTP/gRPC race 用时 1106.496 秒，真实 Auth/App E2E 用时 16.913 秒。覆盖同 JTI 并发、关闭与 Filter 共享 fence 竞争、混合 PUBLIC/CONFIDENTIAL slot 的 epoch/revision、溢出全事务回滚、跨集合损坏拒绝，以及 Auth 中断时保持 CLOSING、恢复后收敛 CLOSED。真实 Auth 基线为服务 `4f661e4`（核心 `5d26cb3`）、API `1ba1b81`；网络回包丢失与重复 worker 由确定性 UseCase/Mongo 测试覆盖，未增加网络帧级丢包或双边进程重启 E2E。
+
+## 2026-10-07 UC029–031 管理与审核查询
+
+- UC029 服务 `155e122`、API `1cea981`：当前管理员可以查询私有 Application 列表和一次 Mongo snapshot 内构造的管理详情；列表按生命周期与平台可用状态过滤，游标绑定身份和过滤条件，详情批量组合版本、资料、发布、Tester、OAuth 和待处理转让/关闭摘要。新增 `0024_application_management_query` 索引。
+- UC030 服务 `7cf1fc2`、API `0217177`：具有精确 `app.version.review` 的 Reviewer 可以查询 PENDING 队列和单次审核详情。ACTIVE Application 入队，平台 SUSPENDED 保留，CLOSING/CLOSED 排除；摘要和详情使用不可变 Review snapshot，返回当前策略和完整利益冲突提示。
+- UC031 服务 `c15aa59`、API `507e252`：以相同查询边界交付 `app.profile.review` 队列和资料审核详情；PENDING Review 会复查 ProfileRevision 的 source revision 和 snapshot，一致性损坏整次返回 INTERNAL。新增 `0025_application_profile_review_query` 队列索引，并把启动 readiness 提升到该迁移。
+- 三项 API 均提供 HTTP 与原生 gRPC，响应为 `private, no-store`。开发期间三次 `make check` 19/19 通过；UC031 最终完整门禁证据在服务提交后的交付检查中记录。

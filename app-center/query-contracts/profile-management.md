@@ -1,6 +1,6 @@
 # Application Profile 管理与审核查询契约
 
-状态：`PROPOSED`
+状态：`PROPOSED`（管理员查询）；Reviewer 查询已由 UC-APP-031 接受并交付
 
 ## 定位
 
@@ -17,7 +17,7 @@ GetApplicationProfileReviewForReviewer
 
 这些查询不改变领域状态，不产生新的 ProfileRevision、ProfileReview、decision 或审计事实。它们也不定义 HTTP/RPC、JSON 序列化、数据库、索引、缓存或页面布局。
 
-状态、权限和不变量继续以 [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md)、[UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md)、[UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) 和 [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) 中的 `BR-PRF-*` 为权威正文。本契约如与 BR 冲突，以 BR 为准。
+管理员列表/详情仍是候选查询语义。Reviewer 队列/详情已由 [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) 及 `BR-PRF-041`–`046` 固化，本文只作导航，不再单独扩展其规则。状态、权限和不变量继续以 UC-APP-013–016、UC-APP-031 中的 `BR-PRF-*` 为权威正文；本契约如与 BR 冲突，以 BR 为准。
 
 ## 共享约定
 
@@ -71,7 +71,8 @@ Page<T> {
 
 ### 一致性
 
-- 列表可来自读投影，允许短暂滞后，并返回 `asOf`。
+- 尚未交付的管理员列表可来自读投影，允许短暂滞后，并返回 `asOf`。
+- UC-APP-031 的 Reviewer 单页和详情在同一个 MongoDB snapshot 中构造，不允许以投影滞后隐藏不变量损坏。
 - 详情查询从 App Center 权威事实构造单个内部一致的快照。
 - 查询结果不是写入授权。UC-APP-014、015 和 016 在执行时继续校验当前 admin、状态、revision、利益冲突和公开指针前置值。
 
@@ -195,13 +196,14 @@ ListPendingApplicationProfileReviews {
 }
 ```
 
-结果只包含查询时投影中 status=`PENDING` 的 ApplicationProfileReview，按 `submittedAt ASC, profileReviewId ASC` 排序，使较早提交稳定地排在前面。
+结果只包含 status=`PENDING` 且所属 Application 生命周期为 ACTIVE 的 ApplicationProfileReview；平台 SUSPENDED 不排除审核，CLOSING/CLOSED 排除。结果按 `submittedAt ASC, profileReviewId ASC` 排序，使较早提交稳定地排在前面。
 
 ```text
 PendingProfileReviewSummary {
   applicationId
   applicationName
   profileRevisionId
+  sequence
   profileReviewId
   attempt
   displayName
@@ -237,6 +239,8 @@ ReviewerProfileReviewDetail {
     applicationId
     name
     adminId
+    lifecycleStatus
+    platformAvailabilityStatus
   }
   profileRevision: {
     profileRevisionId
@@ -263,32 +267,24 @@ ReviewerProfileReviewDetail {
     eligible
     conflicts: (CURRENT_ADMIN | REVISION_CREATOR | REVIEW_SUBMITTER)[]
   }
-  decisionPreparation?: {
-    expectedProfileRevisionRevision
-    expectedCurrentPublishedProfileRevisionId: ApplicationProfileRevisionId | NONE
-    policyVersion
-    requiredChecks
+  currentPolicy: {
+    version
+    requiredCheckIds
   }
+  asOf
 }
 ```
 
-`decisionPreparation` 只在以下条件同时成立时返回：
+`currentPolicy` 来自查询时唯一 ACTIVE 的不可变 ProfileReviewPolicy。Reviewer 将实际阅读的 version 作为 `expectedPolicyVersion` 传给 UC-APP-016。如果在查询后发生策略、Revision、管理员或当前公开指针变化，UC-APP-016 通过自己的前置条件拒绝过期决定。
 
-- Review 在查询快照中是 PENDING。
-- ProfileRevision 在同一快照中是 SUBMITTED，且 Review/Revision 关系一致。
-- `decisionEligibility.eligible=true`。
-- 当前存在可用的 ACTIVE ProfileReviewPolicy。
-
-`policyVersion` 和 `requiredChecks` 来自同一份不可变 ProfileReviewPolicy。Reviewer 将实际阅读的 policyVersion 作为 `expectedPolicyVersion` 传给 UC-APP-016。如果在查询后发生策略、Revision、管理员或当前公开指针变化，UC-APP-016 通过自己的前置条件拒绝过期决定。
-
-已决定 Review 不返回 `decisionPreparation`，但保留 decision 供审计查看。查询本身不领取、锁定、分配或标记审核任务。
+已决定 Review 保留 decision 供审计查看。查询本身不领取、锁定、分配或标记审核任务。
 
 ## 明确不提供的查询行为
 
 - 没有“复制被拒绝 ProfileRevision”的服务端 Query。
 - 没有返回复制 token、sourceProfileRevisionId 或预绑定新草稿的查询。
 - 没有在查询时隐式创建 DRAFT、改变 Review 状态或写入“已读”审计。
-- 普通用户读取当前公开 Profile 不在本文档中；它属于后续 Catalog & Resolution 查询契约。
+- 普通用户读取当前公开 Profile 已由 UC-APP-024 的 Catalog 查询交付，不属于本文档。
 
 ## 验收要点
 

@@ -1,0 +1,17 @@
+{
+  "uc": "UC-APP-030",
+  "note": "Implement exact-permission ApplicationVersion review queue and detail reads with immutable snapshots, lifecycle filtering, conflict hints, policy metadata, stable keyset pagination and fail-closed consistency.",
+  "uc_sections": ["目标与范围", "身份与精确权限", "待处理队列", "审核详情", "一致性、分页与错误", "最小查询模型与索引", "API 草图", "验收场景", "实现依赖与交付边界"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-003": ["决定", "Port 所有权", "自动化约束"],
+    "ADR-004": ["决定", "测试环境"],
+    "ADR-005": ["决定", "隐私与存在性隐藏"],
+    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": ["目的与范围", "传输载体", "Claims", "错误边界"],
+    "platform/contracts/app-center-api-routing.md": ["路由映射", "gRPC-Web 终止", "契约测试要求"]
+  }
+}
