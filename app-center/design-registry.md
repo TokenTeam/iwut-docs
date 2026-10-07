@@ -26,7 +26,7 @@
 | Business Rule / Application Catalog | `BR-CAT-011` |
 | Business Rule / OAuth Client | `BR-OAC-014` |
 | Business Rule / Application Filter | `BR-FLT-011` |
-| Architecture Decision | `ADR-007` |
+| Architecture Decision | `ADR-008` |
 
 Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确认没有未登记的既有定义。
 
@@ -383,6 +383,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `ADR-004` | MongoDB 事务与 Schema 管理 | `ACCEPTED` | [ADR-004-mongodb-transactions-and-schema-management.md](adr/ADR-004-mongodb-transactions-and-schema-management.md) | — | 显式 migration、事务重试与真实副本集验证已成为实现基线。 |
 | `ADR-005` | 领域错误与 Transport 映射 | `ACCEPTED` | [ADR-005-domain-errors-and-transport-mapping.md](adr/ADR-005-domain-errors-and-transport-mapping.md) | — | 稳定 reason 与 HTTP/gRPC 映射已在现有纵切片统一使用。 |
 | `ADR-006` | Proto v1 与独立 API 仓库协作 | `ACCEPTED` | [ADR-006-proto-v1-and-api-repository.md](adr/ADR-006-proto-v1-and-api-repository.md) | — | — |
+| `ADR-007` | App Center 可观测性基线 | `ACCEPTED` | [ADR-007-observability-baseline.md](adr/ADR-007-observability-baseline.md) | — | 结构化日志、OTLP trace/metric、低基数标签及 HTTP/gRPC health。 |
 
 ## 注册表维护规则
 

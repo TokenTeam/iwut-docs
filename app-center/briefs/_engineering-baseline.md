@@ -10,7 +10,7 @@
 | 项 | 值 |
 | --- | --- |
 | 类型 | 跨能力工程基线（不绑定单个 UC） |
-| ADR | `ADR-003`、`ADR-004`、`ADR-005` |
+| ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-007` |
 | 变化频率 | 低；仅在架构决定变化时重新生成 |
 
 ## 遇到 brief 未覆盖的问题
@@ -175,6 +175,30 @@ Transport adapter 在一个集中映射表中把领域错误转换为：
 
 错误 details 采用明确 allowlist。字段校验可以返回安全字段名和约束类别，但不能回显任意用户内容或凭证。
 
+### ADR-007：App Center 可观测性基线（`ACCEPTED`）
+
+#### 决定
+
+App Center 建立以下首版基线：
+
+1. 进程日志使用 JSON Lines 输出到标准错误，至少包含时间、级别、消息和 `service.name=iwut-app-center`。请求日志只记录 transport、固定路由/RPC operation、稳定状态码、稳定 error reason、耗时以及存在时的 trace/span ID。
+2. HTTP 与 gRPC 服务入口使用 W3C Trace Context/Baggage 传播并创建 server span；原生 gRPC Auth client 继续传播同一上下文。Trace 和 metric 通过 OTLP gRPC 导出；未配置 collector endpoint 时 exporter 关闭，服务仍可启动。
+3. 请求总量和耗时只使用有界标签：transport kind、固定 operation、状态码和稳定 error reason。进程从实际注册的 HTTP route 与 gRPC service 建立 operation 白名单，未注册值统一折叠为每种 transport 的 `unmatched`。禁止把 `applicationId`、`authId`、`clientId`、URL、hostname、scope、自由文本或任何用户输入用作 metric label。
+4. Kratos 自带的标准 gRPC health service 保持无身份可访问。HTTP 同一监听器增加 `/livez` 和 `/readyz`：liveness 只表示进程能响应；readiness 在有界超时内重新验证 MongoDB 事务拓扑和最新 migration ledger。探针不返回内部错误正文。
+5. OTLP endpoint、TLS/plaintext、trace 采样比例、metric 导出周期和日志级别只在配置边界读取。显式非法值阻止启动。生产默认使用 TLS；本地 collector 可以显式开启 plaintext。
+6. exporter 初始化失败时，显式配置的服务启动失败。运行期间 collector 暂时不可达由 OTel exporter 有界重试，不影响业务请求；进程关闭时以固定超时 flush trace 和 metric。
+
+#### 数据最小化
+
+日志、span、metric 和探针都不得记录或附加以下内容：
+
+- JWS/JWT、Authorization header、OAuth secret 或 digest、Tester secret/tokenHash、完整加入 URL；
+- 请求或响应 body、任意用户 KV、资料正文、redirect URI 清单、完整 scope 清单；
+- MongoDB URI、私钥、公钥正文、caller registry 或其他配置 secret；
+- 自由文本暂停/关闭/审核理由和底层数据库错误正文。
+
+稳定 error reason、固定 operation、transport、状态码和 duration 可以进入日志、span 或 metric。现有领域审计记录仍由各 UC 的事务规则产生，技术 telemetry 不替代也不补写审计记录。
+
 ## 未纳入本 brief 的源小节
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
@@ -182,6 +206,7 @@ Transport adapter 在一个集中映射表中把领域错误转换为：
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
+- `ADR-007`（adr/ADR-007-observability-baseline.md）：背景、性能与可靠性、结果、验证、关联文档
 
 ## 溯源
 
@@ -190,3 +215,4 @@ Transport adapter 在一个集中映射表中把领域错误转换为：
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
+| `adr/ADR-007-observability-baseline.md` | 57 | `99db94b4d6b1` |

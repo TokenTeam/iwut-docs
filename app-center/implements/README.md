@@ -147,7 +147,7 @@ UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程
 - Auth 的 reviewer 权限签发/撤销生命周期。
 - Auth 普通 USER provision 与 trusted identity 签发。
 - test clear、Filter 和 Catalog 的后续设计。
-- CI/CD、可观测性和生产部署。
+- CI/CD 和生产部署。
 
 它们进入对应工作包前必须有明确契约，但不能提前渗入 Application 领域模型。
 
@@ -354,3 +354,9 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 - UC030 服务 `7cf1fc2`、API `0217177`：具有精确 `app.version.review` 的 Reviewer 可以查询 PENDING 队列和单次审核详情。ACTIVE Application 入队，平台 SUSPENDED 保留，CLOSING/CLOSED 排除；摘要和详情使用不可变 Review snapshot，返回当前策略和完整利益冲突提示。
 - UC031 服务 `c15aa59`、API `507e252`：以相同查询边界交付 `app.profile.review` 队列和资料审核详情；PENDING Review 会复查 ProfileRevision 的 source revision 和 snapshot，一致性损坏整次返回 INTERNAL。新增 `0025_application_profile_review_query` 队列索引，并把启动 readiness 提升到该迁移。
 - 三项 API 均提供 HTTP 与原生 gRPC，响应为 `private, no-store`。开发期间三次 `make check` 19/19 通过；UC031 最终完整门禁证据在服务提交后的交付检查中记录。
+
+## 2026-10-07 可观测性工程工作包
+
+- 依据 [ADR-007](../adr/ADR-007-observability-baseline.md) 追加 JSON 结构化日志、trace/span 关联、W3C 上下文传播、OTLP gRPC trace/metric 导出和低基数请求指标；未配置 collector 时 exporter 关闭且服务正常运行。
+- HTTP 增加 `/livez` 与动态 `/readyz`，后者在两秒内只读复查 MongoDB 事务拓扑和最新 migration；继续使用 Kratos 标准 gRPC health。探针和 telemetry 不改变领域、业务 API、Mongo schema 或审计事实。
+- 服务提交 `9ddebe4`，无 API 或 Mongo schema 变化。`make check-full` 21/21 通过，报告 `.artifacts/verification/20261007T132456Z-egzi7pkn/report.json`，`changed_sources=[]`；最后的真实 Mongo/HTTP/gRPC race 阶段用时 `1176.332s`。完整门禁不含真实 Auth 进程，Auth 下游 context propagation 由 native gRPC interceptor 单测和现有 consumer E2E 覆盖；跨进程 collector 验收留给部署环境。
