@@ -208,7 +208,7 @@ UC004 扩展已完成，设计继续 ACCEPTED。Auth `dc6acb1`（auth-center/v1�
 
 验收通过：
 
-- Auth `make check`、`make test-race`、`APP_CENTER_SOURCE_DIR=/tmp/iwut-app-review-fixture make test-mongo`；真实 Mongo 副本集覆盖跨权限并发 CAS、审计回滚、未知提交以及两项撤销与签发竞争。
+- Auth `make check`、`make test-race`、`APP_CENTER_IMAGE=docker.cnb.cool/tokenteam/iwut-app-center:latest make test-mongo`；当前测试默认使用该远程镜像，真实 Mongo 副本集覆盖跨权限并发 CAS、审计回滚、未知提交以及两项撤销与签发竞争。
 - 生产 Wire/HTTP/gRPC、生成 HTTP 客户端、无效 permission/严格 JSON/缺失 revision、旧接口撤销保留另一权限、查询不泄露其它能力。
 - 跨服务测试使用 App 已提交版本 `f0ffd06` / API `88f182d` 的独立快照，运行真实 App 进程和 verifier；Auth 正常授权并签发后验证零项/profile-only/version-only/两项组合。允许的审核入口对不存在的合法 review ID 返回 404，权限不符返回 403，证明能力门禁独立；不将该检查解释为真实业务审核成功。
 - Gateway `make check`、`make protocol-e2e`，经固定 Traefik、真实 Auth/Mongo 测试 HTTP、原生 gRPC 和 gRPC-Web，包含 Session 身份、伪造头清理、路径覆盖、独立授予及新旧 API 混用。
