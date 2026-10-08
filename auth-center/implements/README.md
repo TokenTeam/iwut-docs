@@ -27,6 +27,7 @@
 | [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `ACCEPTED` | `COMPLETE` | Auth 95a3c3a/API 4babe5b；ACTIVE/DISABLED 专用设备证明、明确确认、CLOSED、永久占用、独立终止清单与离线恢复、分批清理及保留期、App 回执；真实 Mongo/HTTP/gRPC/双服务与恢复测试 | 公网默认关闭；生产数据清单、30 天备份/日志期限、独立清单恢复演练和无密钥受理仍是启用门禁，Gateway/客户端独立交付 |
 | [UC-AUTH-026](../use-cases/UC-AUTH-026-apply-application-closure.md) | `ACCEPTED` | `COMPLETE` | 永久 application tombstone/receipt、UC014–019 最终 gate、同 Session/设备 challenge32 P-256 reauth、5 分钟 app.close proof、Mongo/transport/config/Wire 与真实 App UC027 proof/Apply/Get/故障恢复联调；服务 `5d26cb3`、权限修复 `4f661e4`、API `1ba1b81` | 生产/Gateway 入口默认关闭；网络帧级丢包和双边进程重启演练独立交付 |
 | [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `ACCEPTED` | `COMPLETE` | Auth `e110b97` / API `359c6bc`；suspend/restore 两项独立权限、HTTP/gRPC、当前管理员复核、邮箱恢复门禁、ACTIVE/DISABLED 语义、共享权限版本与原子审计、严格解码、有界限流及 App audience 投影；真实 Mongo/Wire 验收 | 公网开关默认关闭；Gateway 路由、客户端治理界面、App Center 暂停/恢复状态机与实际 consumer 联合验收独立交付 |
+| [UC-AUTH-028](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md) | `ACCEPTED` | `IN_PROGRESS` | 一字段一 scope、固定 `iwut_profile` claim、启动交叉校验与既有 UserInfo 在线投影设计已接受并生成 brief | Auth 实现、真实 Mongo/Wire/实际 App 联合验收；生产字段与映射清单独立配置 |
 
 ## 实现边界
 

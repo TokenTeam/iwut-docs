@@ -6,7 +6,7 @@
 
 提供 Authorization Code Flow，用 OIDC ID Token 表达应用登录结果，用独立的 opaque access token 表达委托访问。Auth 拥有登录、consent、grant 和 token；App 拥有 client 身份/secret，以及 ApplicationVersion 中受审核的 redirect URI 和 scopes；Traefik/Gateway 执行入口鉴权，资源服务执行业务授权。
 
-相关业务规则由 [UC-AUTH-014](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../../auth-center/use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) 至 [021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](oauth-delegation-v1.md)。
+相关业务规则由 [UC-AUTH-014](../../auth-center/use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../../auth-center/use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-AUTH-028](../../auth-center/use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) 至 [021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](oauth-delegation-v1.md)。
 
 ## 客户端配置
 
@@ -58,6 +58,8 @@ Scope 单一启用状态与 requestable 投影唯一由 [UC-AUTH-001 / BR-SCP-00
 
 App 继续使用已有 requestable 字段进行版本管理检查；Auth 的 authorize、code 兑换、refresh、UserInfo 和委托签发分别遵循 UC014–019 的当前目录检查。停用不会调用用户撤销用例或抹掉历史同意。目录故障使用依赖错误，Discovery 缓存或 App 旧快照不改变运行判断。
 
+`kind=USERINFO_PROFILE` 是 Auth 内部 Scope Catalog 元数据，不扩展跨服务 `ScopeDefinition` 线格式。其名称固定为 `profile.<fieldKey>`，audience 为空，并按 UC028 一对一映射 UC005 字段；App 仍只看到 name/requestable。该类 scope 与 PROTOCOL/RESOURCE 一起进入实际 enabled 集合，但只用于 UserInfo，不产生 Gateway 资源 audience 或委托路由。
+
 ## 授权请求与登录门户
 
 必填 `response_type=code`、client_id、精确 redirect_uri、含 `openid` 的 scope、state、nonce，以及产品扩展参数 `iwut_channel=TEST|GREY|STABLE`、正整数 `iwut_rpc_api_major`；PUBLIC 额外必填 code_challenge/code_challenge_method。channel 必须精确等于 client 登记渠道；major 只选择该渠道 App Center 的权威 Publication，不能覆盖 Version、回调或 scope。两者绑定到 code/token/family，后续资源请求、UserInfo 或 refresh 不接受改选。客户端每次新建至少 32 随机字节的 state、nonce；服务端接受 43–128 字符的 base64url 值，不把 nonce 当用户身份。PKCE verifier 为 RFC 7636 规定的 43–128 个 unreserved ASCII 字符；challenge 为 SHA-256 后无 padding 的 base64url，固定 43 字符。
@@ -96,6 +98,8 @@ client 必须用预先信任 issuer 的 discovery/JWKS 验签，检查算法、i
 
 pairwise sub 的业务所有权和持久化由 [BR-OAU-021](../../auth-center/use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-021) 定义：一个 Application 一个稳定 sector，所有 channel/type/major/Version 共用。Auth 从 App 验证 clientId→applicationId 后创建映射；App 不保存 sector/sub，用户和开发者不能自选其他应用的 sector。同一 sector 下 PUBLIC/CONFIDENTIAL 的 sub 相同，但 ID Token 的 aud 仍分别为各自 clientId，不能跨 client 使用 ID Token 登录。
 
+UserInfo 的资料扩展使用固定顶层自定义 claim `iwut_profile`，其值是完整 field key 到 JSON 标量的 object；每次只包含当前有效 `profile.<fieldKey>` scope 对应且用户当前已填写的字段。STRING/DATE 为 string、INTEGER 为 number、BOOLEAN 为 boolean；没有值时省略该 key，全部为空时省略 `iwut_profile`。该 claim 不进入 ID Token，不包含 revision/updatedAt，也不能覆盖 sub/email/email_verified。精确授权、故障与生命周期规则见 [UC-AUTH-028](../../auth-center/use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md)。Discovery 的 `claims_supported` 在交付后增加 `iwut_profile`，`scopes_supported` 只列实际 enabled 的资料 scope。
+
 ## 标准 sector 注册与回调清单
 
 Auth 配置专用稳定 HTTPS 域名后缀 `sectors.<platform-domain>`，为每个应用生成随机 UUID sectorId，并保存完整 URI，例如 `https://<sectorId>.sectors.example.org/redirect-uris.json`。**URI 的 hostname 才是标准 Sector Identifier**；不同 Application 必须不同 hostname，不能只靠同一 host 下不同路径实现隔离。所有该应用的 client 注册元数据使用同一个 sector_identifier_uri，按 `(authId, sectorId)` 的持久映射生成 sub。已分配的 host/URI 不随版本或环境密钥变化；需要稳定 DNS、TLS 和备份，不能临时重建。
@@ -124,7 +128,7 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 
 1. App 先扩展 UC-APP-002/003/004/005 的 Version 依附 oauthRedirects 创建、编辑、审核与策略，再由 UC-APP-018 提供 Application＋channel 级稳定 identity/credential，UC-APP-007/019 负责发布检查与运行资格快照。
 2. Auth 实现 UC-AUTH-014/015/017/018/019，门户与 Gateway 同步交付；UC-AUTH-016 是独立离线授权工作包，未启用时 discovery 必须去掉 refresh_token，拒绝 offline_access，不能部分宣称支持。
-3. 初版最小生产 scope 装载 `openid`、`email`、`offline_access`：Auth 维护稳定语义/用户可读说明/映射；App 版本仍须声明并通过原有审核。其他业务 scope 必须有已交付资源服务、scope→audience→route 映射；不接受开发 fixture。生产 Catalog 装载能力是实现依赖，不需要先做在线 Catalog 管理 UC。
+3. 初版最小生产 scope 装载 `openid`、`email`、`offline_access`：Auth 维护稳定语义/用户可读说明/映射；App 版本仍须声明并通过原有审核。资源 scope 必须有已交付资源服务、scope→audience→route 映射；USERINFO_PROFILE scope 必须有 UC028 已验证的一字段一 scope 映射和真实资料字段定义。不接受开发 fixture。生产 Catalog 装载能力是实现依赖，不需要先做在线 Catalog 管理 UC。
 4. Gateway OAUTH2、OIDC_HTTP 与资源服务委托验证通过真实三方联合测试后显式启用。当前 ACTIVE 契约继续有效，本文不使旧实现自动具备新能力。
 
 验收至少覆盖两种 client、confidential+PKCE、code/refresh 重放、nonce/state 错配、同一 clientId 的 Version/hostname/major 回调切换与未登记回调、登录前后 runtime tuple 变化、scope 越权、跨 major 历史授权保留、渠道授权隔离、仅新增 scope 重新 consent、同应用所有渠道/type 的 sub 一致及不同应用隔离、secret 轮换不撤销 grant/既有 token、App 停用、UserInfo 最小披露、HTTP/原生 gRPC/gRPC-Web，以及依赖故障时不转发。启用前还需实际 OIDC 客户端库互通测试；未通过认证不得宣称通过 OpenID Certification。

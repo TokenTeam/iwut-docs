@@ -849,6 +849,7 @@ message ScopeDefinition {
 - `scopes` 是该 revision 的完整集合；空目录编码为空 repeated field。
 - 每个 name 非空且唯一；列表按 name 的 Unicode code point 字典序排列。
 - `requestable` 固定投影 Auth 当前 `enabled`，状态定义唯一引用 [BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)。停用项仍返回，值为 false；不增加独立 runtimeEnabled 字段。
+- PROTOCOL、RESOURCE 与 UC028 的 USERINFO_PROFILE 都使用同一 `name/requestable` 投影；kind、resource audience、profile field 和 UserInfo claim 映射均为 Auth 内部元数据，不进入 v1。App 不能从 scope 名之外猜测或重建这些字段。
 - App 消费方继续把 `requestable = true` 的 name 用于版本申请、审核和发布规则的目录检查；它不是最终用户授权结果。Auth OAuth 路径直接检查自己的当前权威状态，不以 App 缓存或历史批准快照代替。
 - 消费方遇到未知追加字段时必须忽略，以保持向后兼容。
 
@@ -1012,6 +1013,6 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
-| `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
+| `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
 | `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

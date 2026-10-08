@@ -47,6 +47,7 @@ message ScopeDefinition {
 - `scopes` 是该 revision 的完整集合；空目录编码为空 repeated field。
 - 每个 name 非空且唯一；列表按 name 的 Unicode code point 字典序排列。
 - `requestable` 固定投影 Auth 当前 `enabled`，状态定义唯一引用 [BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)。停用项仍返回，值为 false；不增加独立 runtimeEnabled 字段。
+- PROTOCOL、RESOURCE 与 UC028 的 USERINFO_PROFILE 都使用同一 `name/requestable` 投影；kind、resource audience、profile field 和 UserInfo claim 映射均为 Auth 内部元数据，不进入 v1。App 不能从 scope 名之外猜测或重建这些字段。
 - App 消费方继续把 `requestable = true` 的 name 用于版本申请、审核和发布规则的目录检查；它不是最终用户授权结果。Auth OAuth 路径直接检查自己的当前权威状态，不以 App 缓存或历史批准快照代替。
 - 消费方遇到未知追加字段时必须忽略，以保持向后兼容。
 

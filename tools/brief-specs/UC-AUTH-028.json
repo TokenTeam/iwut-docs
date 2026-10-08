@@ -1,0 +1,36 @@
+{
+  "uc": "UC-AUTH-028",
+  "note": "Implement one-field-one-scope UserInfo disclosure on the existing OAuth runtime. Add immutable USERINFO_PROFILE metadata to the Auth-owned persistent scope catalog, cross-check it against the UC005 field catalog at startup, and project only current authorized values into the fixed iwut_profile claim. Preserve existing openid/email behavior, OAuth grants and Scope Catalog v1 wire shape. No new Proto, endpoint, ApplicationUserStorage, production field list, UI or Gateway parsing.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与依赖",
+    "输入与输出",
+    "主流程",
+    "业务规则",
+    "验收场景",
+    "实现依赖与交付边界",
+    "变更记录"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/oauth-oidc-v1.md": [
+      "范围与职责",
+      "公网端点与响应",
+      "Scope 启用与兼容投影",
+      "授权请求与登录门户",
+      "凭据与身份格式",
+      "错误、CORS 与限额",
+      "交付依赖与验收"
+    ],
+    "platform/contracts/auth-scope-catalog-v1.md": [
+      "目的与所有权",
+      "gRPC 方法",
+      "快照语义",
+      "调用方身份",
+      "错误边界",
+      "契约测试要求",
+      "兼容性"
+    ]
+  }
+}

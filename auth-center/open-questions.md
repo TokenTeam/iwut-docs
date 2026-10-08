@@ -55,11 +55,11 @@ session 如何建立，以及 Auth 如何签发 trusted-identity-v1。前两项�
 
 [UC-AUTH-005](use-cases/UC-AUTH-005-edit-own-user-profile.md) 资料编辑规则和配套读取契约已 ACCEPTED。以下事项仍需推进：
 
-- 首批实际字段及其用途；示例学校名称/入学年份不是已批准的收集清单。
+- 首批实际字段及其用途；示例学校名称/入学年份不是已批准的收集清单。UC028 已固定第三方披露机制，但不把测试映射变成生产字段清单。
 - 普通 USER 创建时的账号/资料初始化，以及既有主体记录的迁移工作包；本用例不在读取或编辑时静默修复。
 - 面向 Auth audience 的用户身份签发、Gateway 受保护路由、登录引导和客户端明确确认上传的交付。
 - 字段目录在线管理、停用与演进；当前首版部署装载与稳定性方向见 [BR-UPF-002](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-002)。
-- 第三方应用访问资料所需的字段到 scope 映射、用户 consent 与读取授权，另立用例，不由本人编辑接口替代。
+- 第三方应用访问资料已展开为 [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md)：一字段一 scope、用户 consent、固定 `iwut_profile` claim 与在线当前读取；ApplicationUserStorage 继续后移。
 
 
 ## 创建、登录与撤销的实现交付

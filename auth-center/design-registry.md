@@ -8,7 +8,7 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-028` |
+| Use Case / Auth Center | `UC-AUTH-029` |
 | Business Rule / Account Lifecycle | `BR-ACC-015` |
 | Business Rule / Application Operations Permission | `BR-AOP-007` |
 | Business Rule / Platform Administrator | `BR-ADM-009` |
@@ -18,7 +18,7 @@
 | Business Rule / Developer Status | `BR-DEV-023` |
 | Business Rule / System Principal | `BR-SYS-005` |
 | Business Rule / Reviewer Permission | `BR-RVW-005` |
-| Business Rule / User Profile | `BR-UPF-012` |
+| Business Rule / User Profile | `BR-UPF-017` |
 | Business Rule / User Registration | `BR-REG-009` |
 | Business Rule / Login and Session | `BR-LGN-025` |
 | Business Rule / Email Binding | `BR-EML-010` |
@@ -54,6 +54,7 @@
 | `UC-AUTH-025` | 本人注销账号 | `ACCEPTED` | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md) | — | 专用设备证明、不可恢复终止、最小保留及可重试清理；尚未实现。 |
 | `UC-AUTH-026` | 应用关闭授权收敛与近期认证 | `ACCEPTED` | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md) | — | App 关闭 tombstone、OAuth 最终栅栏和同设备新挑战 app.close proof；[brief](briefs/UC-AUTH-026.md)。 |
 | `UC-AUTH-027` | 管理应用平台运维权限 | `ACCEPTED` | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | — | 独立 suspend/restore 权限；平台管理员管理但不自动获得操作权，App 暂停状态机独立交付。 |
+| `UC-AUTH-028` | 向第三方应用披露用户资料字段 | `ACCEPTED` | [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md) | — | 一字段一 scope、固定 `iwut_profile` claim 与 UserInfo 在线当前投影；[brief](briefs/UC-AUTH-028.md)。 |
 
 ## Business Rules
 
@@ -170,6 +171,11 @@
 | `BR-UPF-009` | 无变化与结果不确定的重试 | Concurrency / Retry | [UC-AUTH-005](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-009) | — | — |
 | `BR-UPF-010` | 主体内嵌资料与单文档原子提交 | Persistence / Atomicity | [UC-AUTH-005](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-010) | — | — |
 | `BR-UPF-011` | 资料披露与操作记录 | Privacy / Observability | [UC-AUTH-005](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-011) | — | — |
+| `BR-UPF-012` | 一字段一 Scope 的稳定映射 | Catalog / Compatibility | [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-012) | — | — |
+| `BR-UPF-013` | 审核、同意与当前有效集合共同授权 | Authorization / Consent | [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-013) | — | — |
+| `BR-UPF-014` | 固定 claim 与最小当前值投影 | Projection / Privacy | [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-014) | — | — |
+| `BR-UPF-015` | 在线当前读取与生命周期传播 | Consistency / Lifecycle | [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-015) | — | — |
+| `BR-UPF-016` | 损坏、依赖故障与隐私边界 | Failure / Privacy | [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-016) | — | — |
 
 ### User Registration (`BR-REG`)
 

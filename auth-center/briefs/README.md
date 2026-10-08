@@ -37,3 +37,4 @@ python3 tools/gen_brief.py --check --all
 
 - [UC-AUTH-020](UC-AUTH-020.md)：同 authId Session 只读列表、有界分页与明确目标集合的原子回收。
 - [UC-AUTH-027](UC-AUTH-027.md)：两项 Application 平台运维权限的独立授予/撤销、共享权限版本及 App audience 投影；不包含 App 暂停状态机。
+- [UC-AUTH-028](UC-AUTH-028.md)：用户资料字段的一字段一 scope 映射及既有 UserInfo 的 `iwut_profile` 在线最小投影；不包含 ApplicationUserStorage 或生产字段清单。

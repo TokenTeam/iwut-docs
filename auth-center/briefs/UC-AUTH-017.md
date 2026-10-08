@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-017` 读取 OIDC 用户信息 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAU-012`–`BR-OAU-014`（3 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-UPF-012`（来自 `UC-AUTH-028`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/app-oauth-client-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/oauth-delegation-v1.md`、`platform/contracts/oauth-oidc-v1.md` |
 
@@ -55,6 +55,7 @@ GET/POST /userinfo，唯一 Authorization: Bearer access token。返回 applicat
 
 - 三渠道均遵循 UC019 的当前资格判断；STABLE 清空或 GREY 未命中/停止后拒绝读取，资格恢复按 UC016 的原凭据边界处理。
 - openid-only 只返回 sub；email 获批且用户同意后才返回当前激活邮箱。
+- 资料字段只按 UC028 的一字段一 scope 映射进入固定 `iwut_profile` claim；未映射或未授权字段不返回。
 - 未绑定、邮箱更换、资料 KV 伪造 email 均按权威源投影；不自动披露其他字段。
 - ID Token/Session 冒充 Bearer、跨用途 token、撤回/过期/family 撤销拒绝。
 - 同一 Application 的 subject 跨 channel/type/major/Version/redirect hostname 一致，其他 Application 不同；ID Token/UserInfo sub 完全相同。
@@ -63,7 +64,7 @@ GET/POST /userinfo，唯一 Authorization: Bearer access token。返回 applicat
 
 ### 依赖与实现边界
 
-依赖 UC015/018、UC011 激活邮箱事实、UC-APP-019。userinfo 标准 HTTP 适配器不经过 Session middleware，不能沿用本人资料查询直接返回全量资料。
+依赖 UC015/018、UC011 激活邮箱事实、UC-APP-019。资料字段扩展依赖 UC028；userinfo 标准 HTTP 适配器不经过 Session middleware，不能沿用本人资料查询直接返回全量资料。
 
 ## 业务规则（UC-AUTH-017 权威正文）
 
@@ -77,14 +78,29 @@ UserInfo 使用与 UC019 相同的有效 token 判断，但不递归调用委托
 <!-- 权威位置: use-cases/UC-AUTH-017-get-oidc-user-info.md#br-oau-013 -->
 ### BR-OAU-013：最小资料披露
 
-首版仅实现 openid→sub，email→当前激活邮箱的 email/email_verified=true；没有激活邮箱时同时省略两项。平台确认邮箱控制权不代表确认学生身份。资料 KV 中叫 email 的字段不能替代激活邮箱事实。
+基础投影为 openid→sub，email→当前激活邮箱的 email/email_verified=true；没有激活邮箱时同时省略两项。平台确认邮箱控制权不代表确认学生身份。资料 KV 中叫 email 的字段不能替代激活邮箱事实。
 
-不默认支持 profile scope，不遍历全部动态资料，不披露 authId、学校密码、学号、association 标识、developer/reviewer 状态。未来资料字段 scope 映射须明确字段语义、授权文案和数据来源，再增加接口投影。有效集合 E 有 email 才能返回邮箱，应用声明 email 或平台已绑定邮箱本身都不构成用户授权。
+不遍历全部动态资料，不披露 authId、学校密码、association 标识、developer/reviewer 状态。UC028 只允许显式 `USERINFO_PROFILE` scope 按 [BR-UPF-012 至 016](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-012) 投影对应资料字段；没有该映射和有效 scope 时保持上述基础响应。有效集合 E 有 email 才能返回邮箱，应用声明 email、平台已绑定邮箱或用户已填写资料本身都不构成用户授权。
 
 <!-- 权威位置: use-cases/UC-AUTH-017-get-oidc-user-info.md#br-oau-014 -->
 ### BR-OAU-014：资料读取的撤销与故障语义
 
 UserInfo 在 Auth 本地一致检查点确认授权和读取投影；撤销提交后开始的读取必须拒绝。App 快照边界沿用委托契约，不承诺跨库串行。响应 no-store；空资料按字段省略，不通过上传/抓取学校信息补齐。依赖错误失败关闭，不能降级输出未授权的缓存资料。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-AUTH-028`
+
+<!-- 权威位置: use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-012 -->
+### BR-UPF-012：一字段一 Scope 的稳定映射
+
+只有 Auth OAuth 目录中显式 `kind=USERINFO_PROFILE` 的条目可以披露 UC005 资料。每个条目精确映射一个 field key，scope 名固定为 `profile.<fieldKey>`，audience 必须为空；同一个 field key 和 scope 名均只能出现一次。
+
+启动装载必须把每个映射与同一次完整 ProfileFieldDefinition 视图核对，并将其 valueType 固定进 Auth 持久 Scope Catalog。未知 field key、名称不匹配、重复映射、错误 kind/audience、缺少 consent 文案或类型不一致均拒绝启动。运行期不从 App 声明、用户资料内容、测试 fixture 或旧 Auth 实现推导映射。
+
+已持久化 scope 的 kind、profileField 和 valueType 不得原地改变，字段 key 也不得改名或复用。新增可披露字段必须新增字段定义和新的 scope；不得给既有 scope 追加第二个字段。首版不提供在线删除或改绑命令；`enabled` 的变更仍遵循 BR-SCP-004。
 
 ## 平台共享契约（按 spec 显式抽取）
 
@@ -235,6 +251,7 @@ message ScopeDefinition {
 - `scopes` 是该 revision 的完整集合；空目录编码为空 repeated field。
 - 每个 name 非空且唯一；列表按 name 的 Unicode code point 字典序排列。
 - `requestable` 固定投影 Auth 当前 `enabled`，状态定义唯一引用 [BR-SCP-004](../use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)。停用项仍返回，值为 false；不增加独立 runtimeEnabled 字段。
+- PROTOCOL、RESOURCE 与 UC028 的 USERINFO_PROFILE 都使用同一 `name/requestable` 投影；kind、resource audience、profile field 和 UserInfo claim 映射均为 Auth 内部元数据，不进入 v1。App 不能从 scope 名之外猜测或重建这些字段。
 - App 消费方继续把 `requestable = true` 的 name 用于版本申请、审核和发布规则的目录检查；它不是最终用户授权结果。Auth OAuth 路径直接检查自己的当前权威状态，不以 App 缓存或历史批准快照代替。
 - 消费方遇到未知追加字段时必须忽略，以保持向后兼容。
 
@@ -383,7 +400,7 @@ token 校验不依赖原登录 Session 继续存在；用户退出平台 Session
 
 提供 Authorization Code Flow，用 OIDC ID Token 表达应用登录结果，用独立的 opaque access token 表达委托访问。Auth 拥有登录、consent、grant 和 token；App 拥有 client 身份/secret，以及 ApplicationVersion 中受审核的 redirect URI 和 scopes；Traefik/Gateway 执行入口鉴权，资源服务执行业务授权。
 
-相关业务规则由 [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) 至 [021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](../../platform/contracts/app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](../../platform/contracts/oauth-delegation-v1.md)。
+相关业务规则由 [UC-AUTH-014](../use-cases/UC-AUTH-014-authorize-application.md) 至 [019](../use-cases/UC-AUTH-019-issue-delegation-context.md)、[UC-AUTH-028](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md)、[UC-APP-018](../../app-center/use-cases/UC-APP-018-manage-oauth-client.md) 至 [021](../../app-center/use-cases/UC-APP-021-manage-grey-rollout.md) 拥有。跨服务 App 接口见 [App OAuth Client v1](../../platform/contracts/app-oauth-client-v1.md)，入口和下游身份见 [OAuth 委托上下文 v1](../../platform/contracts/oauth-delegation-v1.md)。
 
 #### 客户端配置
 
@@ -435,6 +452,8 @@ Scope 单一启用状态与 requestable 投影唯一由 [UC-AUTH-001 / BR-SCP-00
 
 App 继续使用已有 requestable 字段进行版本管理检查；Auth 的 authorize、code 兑换、refresh、UserInfo 和委托签发分别遵循 UC014–019 的当前目录检查。停用不会调用用户撤销用例或抹掉历史同意。目录故障使用依赖错误，Discovery 缓存或 App 旧快照不改变运行判断。
 
+`kind=USERINFO_PROFILE` 是 Auth 内部 Scope Catalog 元数据，不扩展跨服务 `ScopeDefinition` 线格式。其名称固定为 `profile.<fieldKey>`，audience 为空，并按 UC028 一对一映射 UC005 字段；App 仍只看到 name/requestable。该类 scope 与 PROTOCOL/RESOURCE 一起进入实际 enabled 集合，但只用于 UserInfo，不产生 Gateway 资源 audience 或委托路由。
+
 #### 授权请求与登录门户
 
 必填 `response_type=code`、client_id、精确 redirect_uri、含 `openid` 的 scope、state、nonce，以及产品扩展参数 `iwut_channel=TEST|GREY|STABLE`、正整数 `iwut_rpc_api_major`；PUBLIC 额外必填 code_challenge/code_challenge_method。channel 必须精确等于 client 登记渠道；major 只选择该渠道 App Center 的权威 Publication，不能覆盖 Version、回调或 scope。两者绑定到 code/token/family，后续资源请求、UserInfo 或 refresh 不接受改选。客户端每次新建至少 32 随机字节的 state、nonce；服务端接受 43–128 字符的 base64url 值，不把 nonce 当用户身份。PKCE verifier 为 RFC 7636 规定的 43–128 个 unreserved ASCII 字符；challenge 为 SHA-256 后无 padding 的 base64url，固定 43 字符。
@@ -473,6 +492,8 @@ client 必须用预先信任 issuer 的 discovery/JWKS 验签，检查算法、i
 
 pairwise sub 的业务所有权和持久化由 [BR-OAU-021](../use-cases/UC-AUTH-015-exchange-authorization-code.md#br-oau-021) 定义：一个 Application 一个稳定 sector，所有 channel/type/major/Version 共用。Auth 从 App 验证 clientId→applicationId 后创建映射；App 不保存 sector/sub，用户和开发者不能自选其他应用的 sector。同一 sector 下 PUBLIC/CONFIDENTIAL 的 sub 相同，但 ID Token 的 aud 仍分别为各自 clientId，不能跨 client 使用 ID Token 登录。
 
+UserInfo 的资料扩展使用固定顶层自定义 claim `iwut_profile`，其值是完整 field key 到 JSON 标量的 object；每次只包含当前有效 `profile.<fieldKey>` scope 对应且用户当前已填写的字段。STRING/DATE 为 string、INTEGER 为 number、BOOLEAN 为 boolean；没有值时省略该 key，全部为空时省略 `iwut_profile`。该 claim 不进入 ID Token，不包含 revision/updatedAt，也不能覆盖 sub/email/email_verified。精确授权、故障与生命周期规则见 [UC-AUTH-028](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md)。Discovery 的 `claims_supported` 在交付后增加 `iwut_profile`，`scopes_supported` 只列实际 enabled 的资料 scope。
+
 #### 标准 sector 注册与回调清单
 
 Auth 配置专用稳定 HTTPS 域名后缀 `sectors.<platform-domain>`，为每个应用生成随机 UUID sectorId，并保存完整 URI，例如 `https://<sectorId>.sectors.example.org/redirect-uris.json`。**URI 的 hostname 才是标准 Sector Identifier**；不同 Application 必须不同 hostname，不能只靠同一 host 下不同路径实现隔离。所有该应用的 client 注册元数据使用同一个 sector_identifier_uri，按 `(authId, sectorId)` 的持久映射生成 sub。已分配的 host/URI 不随版本或环境密钥变化；需要稳定 DNS、TLS 和备份，不能临时重建。
@@ -501,7 +522,7 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 
 1. App 先扩展 UC-APP-002/003/004/005 的 Version 依附 oauthRedirects 创建、编辑、审核与策略，再由 UC-APP-018 提供 Application＋channel 级稳定 identity/credential，UC-APP-007/019 负责发布检查与运行资格快照。
 2. Auth 实现 UC-AUTH-014/015/017/018/019，门户与 Gateway 同步交付；UC-AUTH-016 是独立离线授权工作包，未启用时 discovery 必须去掉 refresh_token，拒绝 offline_access，不能部分宣称支持。
-3. 初版最小生产 scope 装载 `openid`、`email`、`offline_access`：Auth 维护稳定语义/用户可读说明/映射；App 版本仍须声明并通过原有审核。其他业务 scope 必须有已交付资源服务、scope→audience→route 映射；不接受开发 fixture。生产 Catalog 装载能力是实现依赖，不需要先做在线 Catalog 管理 UC。
+3. 初版最小生产 scope 装载 `openid`、`email`、`offline_access`：Auth 维护稳定语义/用户可读说明/映射；App 版本仍须声明并通过原有审核。资源 scope 必须有已交付资源服务、scope→audience→route 映射；USERINFO_PROFILE scope 必须有 UC028 已验证的一字段一 scope 映射和真实资料字段定义。不接受开发 fixture。生产 Catalog 装载能力是实现依赖，不需要先做在线 Catalog 管理 UC。
 4. Gateway OAUTH2、OIDC_HTTP 与资源服务委托验证通过真实三方联合测试后显式启用。当前 ACTIVE 契约继续有效，本文不使旧实现自动具备新能力。
 
 验收至少覆盖两种 client、confidential+PKCE、code/refresh 重放、nonce/state 错配、同一 clientId 的 Version/hostname/major 回调切换与未登记回调、登录前后 runtime tuple 变化、scope 越权、跨 major 历史授权保留、渠道授权隔离、仅新增 scope 重新 consent、同应用所有渠道/type 的 sub 一致及不同应用隔离、secret 轮换不撤销 grant/既有 token、App 停用、UserInfo 最小披露、HTTP/原生 gRPC/gRPC-Web，以及依赖故障时不转发。启用前还需实际 OIDC 客户端库互通测试；未通过认证不得宣称通过 OpenID Certification。
@@ -514,13 +535,15 @@ PUBLIC token/UserInfo/revoke 的浏览器 CORS 只允许当前批准并发布 Ve
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
+- `UC-AUTH-028`（use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md）：目标与范围、参与者与依赖、输入与输出、主流程、验收场景、实现依赖与交付边界、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-017-get-oidc-user-info.md` | 54 | `60dcfc514b82` |
+| `use-cases/UC-AUTH-017-get-oidc-user-info.md` | 55 | `55c714e4233d` |
+| `use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md` | 130 | `ba199194713d` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
-| `platform/contracts/auth-scope-catalog-v1.md` | 94 | `4c1bae67fbf9` |
+| `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |
-| `platform/contracts/oauth-oidc-v1.md` | 134 | `b08d5fc257b6` |
+| `platform/contracts/oauth-oidc-v1.md` | 138 | `9c0b396eab0a` |
