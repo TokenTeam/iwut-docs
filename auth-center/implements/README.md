@@ -27,7 +27,7 @@
 | [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `ACCEPTED` | `COMPLETE` | Auth 95a3c3a/API 4babe5b；ACTIVE/DISABLED 专用设备证明、明确确认、CLOSED、永久占用、独立终止清单与离线恢复、分批清理及保留期、App 回执；真实 Mongo/HTTP/gRPC/双服务与恢复测试 | 公网默认关闭；生产数据清单、30 天备份/日志期限、独立清单恢复演练和无密钥受理仍是启用门禁，Gateway/客户端独立交付 |
 | [UC-AUTH-026](../use-cases/UC-AUTH-026-apply-application-closure.md) | `ACCEPTED` | `COMPLETE` | 永久 application tombstone/receipt、UC014–019 最终 gate、同 Session/设备 challenge32 P-256 reauth、5 分钟 app.close proof、Mongo/transport/config/Wire 与真实 App UC027 proof/Apply/Get/故障恢复联调；服务 `5d26cb3`、权限修复 `4f661e4`、API `1ba1b81` | 生产/Gateway 入口默认关闭；网络帧级丢包和双边进程重启演练独立交付 |
 | [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `ACCEPTED` | `COMPLETE` | Auth `e110b97` / API `359c6bc`；suspend/restore 两项独立权限、HTTP/gRPC、当前管理员复核、邮箱恢复门禁、ACTIVE/DISABLED 语义、共享权限版本与原子审计、严格解码、有界限流及 App audience 投影；真实 Mongo/Wire 验收 | 公网开关默认关闭；Gateway 路由、客户端治理界面、App Center 暂停/恢复状态机与实际 consumer 联合验收独立交付 |
-| [UC-AUTH-028](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md) | `ACCEPTED` | `IN_PROGRESS` | 一字段一 scope、固定 `iwut_profile` claim、启动交叉校验与既有 UserInfo 在线投影设计已接受并生成 brief | Auth 实现、真实 Mongo/Wire/实际 App 联合验收；生产字段与映射清单独立配置 |
+| [UC-AUTH-028](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md) | `ACCEPTED` | `COMPLETE` | Auth `aa1441d`；持久 USERINFO_PROFILE scope、一字段一 scope/类型固化、UC005 目录启动交叉校验、当前 profile 在线读取、固定 `iwut_profile` JSON 类型投影及 Discovery 声明；真实 Mongo/Wire/实际 App 验收 | 生产真实字段与映射清单、consent 文案及客户端资料编辑 UI 独立配置/验收；无新 Proto 或第三方端点 |
 
 ## 实现边界
 
@@ -295,3 +295,15 @@ UC027 保持 ACCEPTED。独立 API `359c6bc` 定义两个精确 HTTP/gRPC 方法
 - 验证通过 `make check`、`make test-race`、全量 `make test-mongo`；真实 Mongo 包约 234 秒，生产 Wire 包约 120 秒。Proto 漂移检查通过，临时 Mongo 容器已清理。
 
 COMPLETE 指 Auth/API 后端工作包。Gateway SESSION 路由、客户端管理界面以及 App 对 suspend/restore 权限的业务状态机仍按 UC 边界独立交付。
+
+## 2026-10-09 UC028 用户资料 UserInfo 投影交付
+
+UC028 先完成当前 UC/共享契约/代码依赖检查，以文档提交 `9ccf073` 接受设计并由脚本生成 brief；随后 Auth `aa1441d` 完成实现。独立 API 仓库没有变化：既有 `/userinfo` JSON 与 Scope Catalog v1 `name/requestable` 投影已经覆盖本用例。
+
+- OAuth 权威目录新增内部 `USERINFO_PROFILE` kind。scope 名固定为 `profile.<fieldKey>`、audience 为空；启动时对照 UC005 完整字段目录验证引用、唯一性和名称，并由 Auth 推导/持久化不可变 valueType。未知字段、重复映射、改绑、调用方提供类型或非资料 scope 携带映射元数据均失败关闭。
+- authorize/consent/code/refresh 继续使用现有有效 scope 交集。只有当前 token、grant、Version 与 enabled Catalog 共同允许的资料 scope 才触发 profile 读取；没有有效资料 scope 时不依赖 profile。Scope 停用不删除历史同意，恢复仍受原 token ceiling、期限和撤销约束。
+- UserInfo 在现有 pairwise `sub` 和激活邮箱之外，按当前 Auth 主体内嵌 profile 输出固定 `iwut_profile` object。STRING/DATE、INTEGER、BOOLEAN 分别保持 JSON string、number、boolean；缺失字段和全空 object 省略，revision/updatedAt、未授权字段及资料值不进入 token、日志或审计。
+- Mongo 专项覆盖四种类型、同一 access token 下资料修改即时可见、scope 停用后不读取损坏 profile、重新启用后损坏数据失败关闭，以及目录稳定映射。生产 Wire 与实际 App 流程通过 App API 声明/审核/发布资料 scope，完成 PUBLIC/CONFIDENTIAL consent、token、标准 OIDC 客户端和 `/userinfo` `iwut_profile` 验收。
+- 验证通过 `make check`、`make test-race`、`MONGODB_INTEGRATION_PORT=27061 ./scripts/test-mongo-integration.sh -race -run TestOAuth` 及原样 `MONGODB_INTEGRATION_PORT=27061 make test-mongo`。全量真实 Mongo 包约 247 秒，临时 Mongo 容器已清理；57 份 brief 漂移检查、registry 和 30 项文档工具测试通过。
+
+COMPLETE 指 Auth 后端能力。仓库测试字段 `basic.name` 只用于验收，不是生产字段清单；生产启用仍需显式装载真实 ProfileFieldDefinition/USERINFO_PROFILE 映射，审定 consent 文案并完成客户端体验验收。ApplicationUserStorage、字段目录在线管理、敏感字段分级和真实性验证保持后续用例。
