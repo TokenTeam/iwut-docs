@@ -25,7 +25,7 @@
 | 明确登记的聚合或服务端组合请求 | 对应 Console BFF | Browser → 共享 Traefik → BFF → Gateway/Auth/App |
 | 明确允许该 Console surface 使用的普通 HTTP/JSON API | Gateway 路由目录 | Browser → 共享 Traefik → Console Session ForwardAuth → 现有 Gateway ForwardAuth → Auth/App |
 
-BFF 自己调用 Gateway 时使用部署控制的内部入口，不再次经过 Browser Cookie 的 Console middleware chain，避免递归和匿名登录被残留 Console Cookie 污染。
+BFF 自己调用 Gateway 时使用部署控制的内部入口，不再次经过 Browser Cookie 的 Console middleware chain，避免递归和匿名登录被残留 Console Cookie 污染。该入口的 exact Router、API 前缀 deny 与 route-specific Gateway ForwardAuth chain 由 Gateway 从同一 Route Catalog 生成；Console deployment 只负责将监听限制在内部网络、向两个 BFF 注入 URL，并保证容器端口不被公网发布。BFF 发起调用时不得转发浏览器 Cookie。
 
 首版只把普通 HTTP/JSON 请求纳入此模式。原生 gRPC 与 gRPC-Web 继续遵循现有 Gateway 协议适配设计；若以后需要让浏览器 Cookie 驱动 gRPC-Web，必须另行设计凭据式 CORS、失败编码和同源边界。
 
@@ -41,8 +41,9 @@ Traefik Console Router（精确 Host + 精确 route）
   │
   ├─ 1. scrub-untrusted-console-headers
   │      删除客户端提供的 x-iwut-session、x-iwut-identity、
-  │      service/delegation identity、Authorization、已知 terminal credential
-  │      和不可信 Forwarded 别名；保留 Cookie 与必要浏览器请求元数据
+  │      service/delegation identity 和不可信 Forwarded 别名；
+  │      Authorization/terminal credential 不进入 BFF auth 子请求，
+  │      但保留在原请求上供 Gateway 凭据矩阵拒绝；保留 Cookie 与必要浏览器请求元数据
   │
   ├─ 2. 对应 BFF 的 Console Session ForwardAuth
   │      解密本 surface Cookie，校验请求来源，只返回 x-iwut-session
@@ -90,6 +91,8 @@ Developer BFF 和 Admin BFF 仍分别是各自 Console Cookie 的唯一权威：
 
 Console Session ForwardAuth 端点仅对 Traefik/部署内部网络开放，不作为 Browser API 发布。不得在 Gateway 与 BFF 中复制两套 Cookie 加密实现或让二者共同持有相同解密密钥。若未来要消除 BFF 容器，必须先以新 ADR 建立唯一的 Console Session Authority 及受保护的 mint/open/clear 内部契约。
 
+共享 Traefik 还提供一个仅供 BFF 调用的独立内部 entrypoint。它不匹配 Console Host、不调用任一 Console Session ForwardAuth，也不公开 `/internal/forward-auth`；只接受 Gateway Route Catalog 已登记的精确 HTTP/JSON method/path，未知 API 由内部 deny Router 关闭。该端口只在本地联合 E2E 显式发布，生产容器或编排不得把它暴露到公网负载均衡器。
+
 ### 请求来源与失败语义
 
 ForwardAuth 对 Browser API 使用方法相关的来源校验：
@@ -115,6 +118,7 @@ ForwardAuth 对 Browser API 使用方法相关的来源校验：
 6. 普通 backend 即使返回 `Set-Cookie` 也不能修改 Console Cookie；只有 BFF-owned Session 响应可以设置/清除它。
 7. Console ForwardAuth 基础设施 5xx 不清除 Cookie，且 Gateway ForwardAuth/业务 upstream 调用均为零；下游 `SESSION_INVALID` 触发客户端经 BFF 清理，网络/业务 5xx 不触发清理。
 8. 使用真实 Traefik、两个 BFF、现有 Gateway ForwardAuth、Auth 和记录调用的 backend 完成隔离 E2E；只直接调用 ForwardAuth handler 不构成验收。
+9. BFF 内部 entrypoint 对登记 Route 只调用一次 Gateway ForwardAuth、完全不调用 Console Session ForwardAuth；即使 BFF 不可用仍不会递归。携带 Cookie、未知 API 或 `/internal/forward-auth` 的内部请求均失败关闭且不抵达 backend。
 
 ## 结果
 

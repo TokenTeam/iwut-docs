@@ -21,7 +21,7 @@
 | `UC-GW-004` | 向 Auth 自认证入口保留可选 Session | `ACCEPTED` | [UC-GW-004](use-cases/UC-GW-004-forward-optional-session-to-auth.md) | Gateway `293ebc9`；可选 Session 原样下传，不换 USER JWS。 |
 | `UC-GW-005` | 转发账号注销用途隔离凭据 | `ACCEPTED` | [UC-GW-005](use-cases/UC-GW-005-forward-account-closure-credentials.md) | Gateway `293ebc9`；confirmation/receipt 精确隔离，禁止通用凭据。 |
 | `UC-GW-006` | 携带用户身份与应用关闭高风险证明转发 | `ACCEPTED` | [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md) | Gateway `293ebc9`；Close 同时下传 App USER JWS 与唯一 proof。 |
-| `UC-GW-007` | 按路由编排 Console Session ForwardAuth | `ACCEPTED` | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md) | Developer/Admin surface 逐 Route 默认关闭；Gateway-owned chain 已本地验证，完整 Console 部署拓扑待验收。 |
+| `UC-GW-007` | 按路由编排 Console Session ForwardAuth | `ACCEPTED` | [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md) | Developer/Admin surface 逐 Route 默认关闭；Gateway-owned 外部/私有 chain 已本地验证，UC-CONSOLE-001 真实登录/恢复/聚合拓扑待验收。 |
 
 ## Business Rules
 

@@ -10,7 +10,7 @@ Gateway 为终端到平台服务的请求提供路由选择、认证编排与转
 - [UC-GW-004](use-cases/UC-GW-004-forward-optional-session-to-auth.md)：Auth 双模式入口允许 Session 缺失，提供时原样保留且不得降级；已接受并实现。
 - [UC-GW-005](use-cases/UC-GW-005-forward-account-closure-credentials.md)：账号注销 confirmation/receipt 按精确方法用途隔离转发；已接受并实现。
 - [UC-GW-006](use-cases/UC-GW-006-forward-application-close-proof.md)：Application 关闭同时转发 App USER JWS 与高风险 proof；已接受并实现。
-- [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md)：按 Route/Host 为 Developer、Admin Console 编排 BFF Session ForwardAuth，再进入现有 Gateway 凭据链；已接受，Gateway-owned chain 与 Console Session/SPA 路由合并已本地验证，登录/恢复与 BFF 内部调用拓扑仍在进行。
+- [UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md)：按 Route/Host 为 Developer、Admin Console 编排 BFF Session ForwardAuth，再进入现有 Gateway 凭据链；已接受，Gateway-owned 外部/私有 chain 与 Console BFF/SPA 路由合并已本地验证，UC-CONSOLE-001 的重发/完整恢复及真实 Auth/邮件链路仍在进行。
 - [外部 API 接入清单](external-api-exposure-inventory.md)：从 Auth/App UC 与统一 API 派生全部终端 method/path，记录身份策略、当前 route 与待接入缺口。
 - [设计注册表](design-registry.md)：本 context 的 UC/BR 索引。
 - [实现状态](implements/README.md)：设计与实现分别跟踪。
@@ -25,7 +25,7 @@ Traefik `v3.7.13` 保留 Edge、HTTP Router、TLS 与 gRPC-Web 终止职责。HT
 
 UC 正文中的 `BR-GWR-*` 是本 context 的规则权威；平台目录只保存真正跨系统的约定。UC-GW-001 首个实现工作包已 `COMPLETE`，UC-GW-003 已完成本地联合验证，UC-GW-004/005/006 已接受并由 Gateway `293ebc9` 实现；Gateway `7a3eb7c` 又将全部 44 条 Auth 与 43 条 App Proto 外部方法纳入精确目录。各业务成功/拒绝的真实联合验收仍按 UC 是发布门禁，详情见[实现状态](implements/README.md)。Gateway 工作包直接读取 UC、ADR 与它们点名的共享契约；当前 brief 生成器仍不生成 Gateway brief。UC-GW-002 仍为 `PROPOSED / NOT_STARTED`，8 个 OAuth/OIDC 标准 HTTP 端点仍失败关闭；ADR-GW-002/ADR-PLAT-004 已接受。现有 `tools/registry.py` 仍不能被当作已经检查 Gateway registry，Gateway registry 必须人工同步审查。
 
-Console 混合流量由 [ADR-CONSOLE-004](../console/adr/ADR-CONSOLE-004-hybrid-bff-session-forward-auth.md) 决定前端/BFF 所有权，[UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md) 固定 Gateway 侧的逐 Route surface、精确 Host、middleware 顺序和失败不抵达语义。Gateway-owned Cookie→Session chain 已通过真实双 surface E2E，Console deployment composition 也已验证 Session `40000` Router、SPA/static `1000` Router、私有路径隔离及两份动态配置合并；该 UC 仍等待登录/恢复 exact Router 与 BFF→Gateway 非 Console 内部入口的完整拓扑验收，所以保持 `IN_PROGRESS`。
+Console 混合流量由 [ADR-CONSOLE-004](../console/adr/ADR-CONSOLE-004-hybrid-bff-session-forward-auth.md) 决定前端/BFF 所有权，[UC-GW-007](use-cases/UC-GW-007-compose-console-session-forward-auth.md) 固定 Gateway 侧的逐 Route surface、精确 Host、middleware 顺序和失败不抵达语义。Gateway-owned Cookie→Session chain 与 BFF 私有 exact/deny Router 已通过真实双 surface 共享 Traefik E2E；Console deployment composition 负责 BFF-owned/SPA 路由、内部端口网络隔离和 URL 注入。该 UC 仍等待 UC-CONSOLE-001 的显式重发/迟到响应协调、完整结果恢复及真实 Auth/邮件链路验收，所以保持 `IN_PROGRESS`。
 
 ## OAuth / OIDC 设计（2026-09-27，PROPOSED）
 

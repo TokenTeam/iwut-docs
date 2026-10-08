@@ -7,7 +7,7 @@
 | [UC-GW-004](../use-cases/UC-GW-004-forward-optional-session-to-auth.md) | `ACCEPTED` | `IMPLEMENTED` | 真实邮箱注册/绑定三协议联合验收与生产开关待完成。 |
 | [UC-GW-005](../use-cases/UC-GW-005-forward-account-closure-credentials.md) | `ACCEPTED` | `IMPLEMENTED` | 真实五方法三协议联合验收、Edge 脱敏与生产开关待完成。 |
 | [UC-GW-006](../use-cases/UC-GW-006-forward-application-close-proof.md) | `ACCEPTED` | `IMPLEMENTED` | 真实 proof 签发/消费及三协议业务拒绝联合验收与生产开关待完成。 |
-| [UC-GW-007](../use-cases/UC-GW-007-compose-console-session-forward-auth.md) | `ACCEPTED` | `IN_PROGRESS` | Gateway-owned route schema、surface/Host、Traefik chain 与真实双 surface E2E 已本地通过；等待 Console deployment-owned 完整拓扑验收。Gateway 核心不消费 Console Cookie。 |
+| [UC-GW-007](../use-cases/UC-GW-007-compose-console-session-forward-auth.md) | `ACCEPTED` | `IN_PROGRESS` | Gateway-owned route schema、surface/Host、外部与 BFF 私有 Traefik chain 及共享拓扑 E2E 已本地通过；等待 UC-CONSOLE-001 重发/完整恢复及真实 Auth/邮件链路验收。Gateway 核心不消费 Console Cookie。 |
 
 2026-09-23：已建立 `worktrees/iwut-gateway-ddd` 的空白孤儿分支 `gateway/v1`，仅放工程设计入口。没有复制旧配置、启用公开路由或部署服务。OAuth2、Redis 和 Gateway 管理后台不属于当前首版实现。
 
@@ -94,9 +94,9 @@ Gateway `7ac853a` 固定 API `3912b55`，新增 Reviewer 管理与查询两条 S
 
 该工作包为 `IN_PROGRESS`。已接受 route schema 升版、固定 Router 优先级与公共 API Host 隔离、首版特殊凭据排除范围，以及下游 `SESSION_INVALID` 统一经 BFF Session clear 路径清理。实现依赖两个 BFF 的私有 ForwardAuth endpoint 和部署 surface 配置；必须以真实 Traefik、两个 BFF、Gateway ForwardAuth、Auth/backend 验证隔离、绕过与失败不抵达。设计状态更新本身不表示 Gateway Go、route catalog、生成物或部署已经完成。
 
-实施所有权按包拆分：Gateway 包/生成器只交付普通 Console API exact Router、API deny Router 与 Session ForwardAuth 引用；BFF-owned `/api/*` 登录、Session、恢复、聚合 exact Router、SPA/static Router 和 BFF→Gateway 内部入口由 Console 部署 composition 交付。Console deployment composition 已验证当前 Session `40000` Router、SPA/static `1000` Router、私有路径隔离及与 Gateway 动态文件的合并装载；登录/恢复/聚合 exact Router 与 BFF→Gateway 非 Console 内部入口仍随 UC001 实现。完整部署验收前，UC-GW-007 保持 `IN_PROGRESS`，验收场景 6 不记为完成。
+实施所有权按包拆分：Gateway 包/生成器交付普通 Console API exact/deny Router、Session ForwardAuth 引用，以及从同一目录生成的 BFF→Gateway 私有 entrypoint exact/deny Router；Console deployment composition 交付 BFF-owned `/api/*` 登录、Session、恢复、聚合 exact Router、SPA/static Router，并负责内部端口不公网发布和 BFF URL 注入。共享 Traefik 已验证当前 capability/登录/Session `40000` Router、SPA/static `1000` Router、两份动态文件合并和 Gateway 私有入口非递归。UC001 未完成的显式重发/迟到响应协调、完整结果恢复及真实 Auth/邮件链路仍使 UC-GW-007 保持 `IN_PROGRESS`。
 
-2026-10-07 接受失败契约修订：BFF Session ForwardAuth 基础设施故障允许任意 HTTP `5xx`，不再要求精确 `503/504`；固定 Traefik `v3.7.13` 的连接拒绝实测为 `500`。发布门禁固定为失败关闭、Gateway ForwardAuth 与业务 upstream 零调用，并且响应不得设置或清除 Console Cookie。联合 E2E 已通过双 BFF 正常路径、surface/AAD 隔离、来源与 Forwarded 清理、Gateway/Auth 身份失败不抵达、匿名 OPTIONAL、坏/过期 Cookie 响应无 `Set-Cookie`、backend `Set-Cookie` 删除、backend `500` 保持，以及 BFF 连接拒绝 5xx 的零下游调用/无 `Set-Cookie`。`make check` 与 `make protocol-e2e` 通过。Gateway-owned chain 已完成本地验证；Console deployment composition 随后也验证了当前 Session `40000` Router、SPA/static `1000` Router 和共享文件 Provider 合并。BFF-owned 登录/恢复 exact Router 与 BFF→Gateway 内部入口仍待 UC001 实现，因此本 UC 继续保持 `IN_PROGRESS`。
+2026-10-07 接受失败契约修订：BFF Session ForwardAuth 基础设施故障允许任意 HTTP `5xx`，不再要求精确 `503/504`；固定 Traefik `v3.7.13` 的连接拒绝实测为 `500`。发布门禁固定为失败关闭、Gateway ForwardAuth 与业务 upstream 零调用，并且响应不得设置或清除 Console Cookie。联合 E2E 已通过双 BFF 正常路径、surface/AAD 隔离、来源与 Forwarded 清理、Gateway/Auth 身份失败不抵达、匿名 OPTIONAL、坏/过期 Cookie 响应无 `Set-Cookie`、backend `Set-Cookie` 删除、backend `500` 保持，以及 BFF 连接拒绝 5xx 的零下游调用/无 `Set-Cookie`。`make check` 与 `make protocol-e2e` 通过。2026-10-08 又加入 Gateway-owned `console-bff-internal` exact/deny Router，并以共享固定 Traefik 验证内部 Route 只经过 Gateway ForwardAuth、Cookie/未知/私有路径失败关闭且 BFF 下线不产生递归。Console 已在脏状态中接入 BFF Begin/Complete 与设备/邮箱页面分支，但显式重发/迟到响应协调、完整结果恢复及真实 Auth/邮件链路仍待 UC001 完成，因此本 UC 继续保持 `IN_PROGRESS`。
 
 ## 2026-10-06 后续 Gateway 设计记录
 
