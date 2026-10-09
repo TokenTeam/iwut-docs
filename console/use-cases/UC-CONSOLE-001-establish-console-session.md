@@ -231,8 +231,8 @@ ESTABLISHED -> SIGNED_OUT       (local expiry or confirmed SESSION_INVALID)
 | Auth 邮箱登录 API | UC-AUTH-012、Proto、实现与公开向量已存在 | 可以实现协议适配器和 BFF 客户端。 |
 | Gateway 邮箱登录路由 | Gateway `7a3eb7c` 已在统一 API `9f914c5` 上登记 Begin/Complete；87 条外部 Proto 路由及 typed adapter 闭合检查通过 | Gateway 不再阻塞邮箱主流程；仍需 Console 真实 E2E。 |
 | Auth 邮件投递 | 本地联调已通过启动时配置注入验证，当前 SMTP timeout 为 30 秒 | 可开展邮箱流程联调；生产配置与可用性仍需独立验收，Console 按 BR-CSE-006 分层超时。 |
-| TypeScript 生成客户端 | 已固定统一 API `9f914c5`，生成认证/邮箱登录消息与 `google.api` 依赖，并提供漂移检查和原生 fetch runtime | 登录端点的 BFF 编排仍待接入；不得绕过生成类型手写权威 DTO。 |
-| Console BFF 会话设施 | AES-256-GCM 封装、独立 `__Host-` Cookie、精确来源校验、Session 安全投影/清理与两个私有 ForwardAuth 已实现；Gateway `routes.v3.yaml` 的双 surface chain 已通过真实本地联合 E2E；Console deployment composition 已生成并合并验证 Session `40000` Router、SPA/static `1000` Router 与私有路径隔离 | BFF-owned 登录/恢复 exact Router、BFF→Gateway 非 Console 内部入口、Begin/Complete 事务绑定、恢复和完整登录 E2E 仍待完成。 |
+| TypeScript 生成客户端 | 已固定统一 API `9f914c5`，生成认证/邮箱登录消息与 `google.api` 依赖，并提供漂移检查、原生 fetch runtime 与四个登录方法的 ProtoJSON client | 设备与邮箱页面均已接入 BFF 契约；不得绕过生成类型手写权威 DTO。 |
+| Console BFF 会话设施 | AES-256-GCM 封装、独立 `__Host-` Cookie、精确来源校验、Session 安全投影/清理、两个私有 ForwardAuth、默认关闭的邮箱 capability 与设备/邮箱 Begin/Complete 编排已实现；加密 flow Cookie 将 Complete 绑定到 Begin；Gateway `routes.v3.yaml` 的双 surface chain 已通过真实本地联合 E2E；Console deployment composition 已生成并合并验证 capability/登录/Session `40000` Router、SPA/static `1000` Router 与私有路径隔离 | 设备与邮箱页面已接入；同 requestId Begin 恢复及 Complete 后设备探测已实现，显式重发/迟到响应协调和完整真实登录 E2E 仍待完成。 |
 
 部署能力必须来自 BFF 的只读服务端配置，不能由 query、`localStorage` 或页面调试开关启用。Gateway 路由存在不等于目标环境已启用 Auth 邮箱登录或邮件投递；未就绪时可以不展示入口或明确显示暂不可用。
 

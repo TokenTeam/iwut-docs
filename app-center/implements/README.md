@@ -338,7 +338,7 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 
 服务 `8f6159b`、独立 API `f6841f2` 均为本地提交。交付发起/接受/拒绝/取消/过期、ownershipRevision、真实 Auth 双人资格查询、账号 fence 字典序与 Application fence、双方配额/名称原子移动、显式 KEEP/ROTATE 和 Tester link `ADMIN_TRANSFER` 撤销；UC025 Prepare 同时消费有效入站 PENDING blocker。
 
-最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261006T113137Z-s0cgh25i/report.json`，`changed_sources=[]`；race、真实 Mongo/HTTP/gRPC 和真实 Auth source/target E2E 全部通过。第一轮完整门禁发现 Tester validator 与历史 Application validator 回归，修复后在最终稳定源码上重跑闭合。
+最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261006T113137Z-s0cgh25i/report.json`，`changed_sources=[]`；race、真实 Mongo/HTTP/gRPC 和真实 Auth/App E2E 全部通过。第一轮完整门禁发现 Tester validator 与历史 Application validator 回归，修复后在最终稳定源码上重跑闭合。
 
 ## 2026-10-06 UC027 Application 关闭
 

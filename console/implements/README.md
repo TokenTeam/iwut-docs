@@ -5,9 +5,9 @@
 | 工作包 | 设计 | 实现 | 缺口 |
 | --- | --- | --- | --- |
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
-| 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 加密 Cookie、安全 Session 投影、两个私有 ForwardAuth、Gateway surface chain 与共享 Traefik 配置合并验证已实现；登录编排与真实 Auth/邮件链路验收待完成 |
-| Developer Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、路由、Query 与 Session 入口空壳已实现；登录交互待接入，业务 UC 尚未分配 |
-| Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界与 Session 入口空壳已实现；登录交互待接入，审核业务 UC 尚未建立 |
+| 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 加密 Cookie、安全 Session 投影、私有 ForwardAuth、设备/邮箱 Begin/Complete BFF 编排、双登录页面状态机、Gateway surface chain 与共享 Traefik 配置合并验证已实现；重发协调与真实 Auth/邮件链路验收待完成 |
+| Developer Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、路由、Query、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，业务 UC 尚未分配 |
+| Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，审核业务 UC 尚未建立 |
 
 ## 代码位置
 
@@ -60,6 +60,12 @@ pnpm edge:e2e
 ## 2026-10-08 共享 Edge composition 增量
 
 Console 侧已增加共享 Traefik 的 BFF/SPA 动态配置生成器，并以固定 Traefik 镜像验证两份动态文件可合并装载、Session 与 SPA Router 按固定优先级命中、私有 ForwardAuth 不可公开访问、Gateway 链在 BFF 基础设施失败时保持失败关闭。BFF 登录/恢复调用 Gateway 的内部入口与真实 Auth/邮件 E2E 仍待 UC001 后续增量。
+
+同日后续增量新增两个 surface 共用的设备/邮箱登录 BFF 编排：四条固定同源 Begin/Complete 路径通过生成的 ProtoJSON 类型调用非 Console Gateway origin，完全不转发浏览器 Cookie 或 Session；BFF 用独立、加密、HttpOnly 的短期 flow Cookie 将 Complete 绑定到 Begin，校验 Auth challenge/Session 形状，并只在确定成功后写入对应 Console Session Cookie。共享 Traefik 已为四条路径生成优先级 `40000` 的精确 Router。浏览器页面状态机、签名接线、结果不确定恢复及真实 Auth/邮件 E2E 尚未完成，因此 UC001 继续保持 `IN_PROGRESS`。
+
+本机设备登录页面随后接入两个 Console：页面只读取不含私钥的 IndexedDB 凭据摘要，完整 challenge 的 protocol/purpose/service/application/operation/locator/expiry 全部通过后才要求凭据适配器签名；React state、Query cache 和表单均不接触 `CryptoKey`。目标 `AUTH_AUTHENTICATION_SERVICE_ID` 由 `VITE_AUTH_SERVICE_ID` 预配置，缺失或非法时入口失败关闭；成功响应更新安全 Session 投影与本机 credentialId。该组件测试使用 mock BFF，只验证浏览器分支，不能替代真实设备登录 E2E。邮箱页面和结果不确定恢复仍待实现。
+
+邮箱页面增量随后接入：BFF 以默认关闭的 `EMAIL_LOGIN_ENABLED` 发布只读 capability；浏览器严格复现平台 ASCII 邮箱规范，在 Begin 前生成并持久化 non-extractable P-256 密钥，使用 8 位字符串验证码并核对邮箱协议十字段签名上下文。Begin 网络结果不确定时页面保留原 requestId、邮箱和同一 localId 进行幂等重试；Complete 结果不确定时可先用同一公钥 fingerprint 走设备登录探测，也可保留原验证码重试。Playwright 已在两个真实浏览器 origin 上覆盖 Web Crypto/IndexedDB、签名和 Session 投影，但 BFF/Auth/SMTP 均为拦截响应，不能代替真实邮件验收。服务端 `resendAfter` 冷却后的显式重发、迟到响应竞争与完整真实链路仍待实现，因此 UC001 保持 `IN_PROGRESS`。
 
 ## 实现登记原则
 
