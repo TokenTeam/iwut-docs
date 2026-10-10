@@ -52,9 +52,17 @@ adminId 不是永久绑定创建者的字段：学生毕业等交接场景可以
 
 一次平台 SUSPEND 或 RESTORE 的不可变审计，记录 Application、操作人、reason、前后状态/revision 和时间。它不代替 Application 当前状态，也不向普通 Catalog 或 OAuth 客户端披露。
 
+## Application Archive State
+
+[UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) 定义的 `UNARCHIVED/ARCHIVED` 管理员归档状态。它与 Application Lifecycle 和 Platform Availability 正交：ARCHIVED 由当前管理员控制并统一阻止对外在线资格，但保留全部配置、配额和 owner 义务；Unarchive 只解除门禁并重新求值当前配置。
+
+## ApplicationArchiveEvent
+
+一次真实 ARCHIVE 或 UNARCHIVE 的不可变审计，记录 Application、当前管理员、前后状态/revision 和时间。它不代替 Application 当前状态，精确目标状态 no-op 不创建事件。
+
 ## name
 
-开发者为应用填写的技术名称。长度为 1–50，只允许英文字母、数字、`-`、`_`；保留输入大小写供管理界面和开发者识别，但同一 adminId 下按 ASCII lowercase 结果唯一。它不是面向普通用户的 displayName。
+开发者创建应用时填写的技术名称。长度为 1–50，只允许英文字母、数字、`-`、`_`；保留输入大小写供管理界面和开发者识别，但同一 adminId 下按 ASCII lowercase 结果唯一。技术名称创建后不可修改，也不是面向普通用户的 displayName；需要改变用户可见名称时创建新的 ApplicationProfileRevision。
 
 ## description
 

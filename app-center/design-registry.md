@@ -15,8 +15,8 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-032` |
-| Business Rule / Application | `BR-APP-044` |
+| Use Case / App Center | `UC-APP-034` |
+| Business Rule / Application | `BR-APP-059` |
 | Business Rule / Application Profile | `BR-PRF-047` |
 | Business Rule / ApplicationVersion | `BR-VER-019` |
 | Business Rule / Review | `BR-REV-035` |
@@ -67,6 +67,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-029` | 查询我的 Application 列表与管理详情 | `ACCEPTED` | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md) | — | 当前管理员私有列表与一致管理快照。 |
 | `UC-APP-030` | 查询 ApplicationVersion 审核队列与审核详情 | `ACCEPTED` | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md) | — | 精确 Version Reviewer 权限、不可变快照与稳定待审队列。 |
 | `UC-APP-031` | 查询 ApplicationProfileRevision 审核队列与审核详情 | `ACCEPTED` | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md) | — | 精确 Profile Reviewer 权限、不可变资料快照与稳定待审队列。 |
+| `UC-APP-032` | 修改 Application 技术名称 | `SUPERSEDED` | [归档提案](archive/UC-APP-032-rename-application.md) | [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 未实现；技术名称创建后不可修改，用户可见名称由 ProfileRevision.displayName 承担。 |
+| `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 
 ## Business Rules
 
@@ -117,6 +119,21 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-APP-041` | 管理详情是组合读取投影 | Boundary / Query | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-041) | — | — |
 | `BR-APP-042` | 一致快照与失败关闭 | Consistency / Invariant | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-042) | — | — |
 | `BR-APP-043` | 管理最小披露 | Privacy / Security | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md#br-app-043) | — | — |
+| `BR-APP-044` | 技术名称与稳定身份分离 | Field / Boundary | [UC-APP-032](archive/UC-APP-032-rename-application.md#br-app-044) | [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 随改名提案归档。 |
+| `BR-APP-045` | 改名权限与生命周期 | Authorization / Lifecycle | [UC-APP-032](archive/UC-APP-032-rename-application.md#br-app-045) | [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 随改名提案归档。 |
+| `BR-APP-046` | 独立 nameRevision 与 no-op | Concurrency / Command Semantics | [UC-APP-032](archive/UC-APP-032-rename-application.md#br-app-046) | [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 随改名提案归档。 |
+| `BR-APP-047` | 当前管理员名称空间唯一性 | Invariant / Consistency | [UC-APP-032](archive/UC-APP-032-rename-application.md#br-app-047) | [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 随改名提案归档。 |
+| `BR-APP-048` | 共享写栅栏与原子改名 | Concurrency / Consistency | [UC-APP-032](archive/UC-APP-032-rename-application.md#br-app-048) | [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 随改名提案归档。 |
+| `BR-APP-049` | 不可变名称变更审计 | Audit / Privacy | [UC-APP-032](archive/UC-APP-032-rename-application.md#br-app-049) | [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 随改名提案归档。 |
+| `BR-APP-050` | 影响边界与管理读取 | Boundary / Query | [UC-APP-032](archive/UC-APP-032-rename-application.md#br-app-050) | [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 随改名提案归档。 |
+| `BR-APP-051` | 归档、平台暂停与关闭分离 | Lifecycle / Separation | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-051) | — | — |
+| `BR-APP-052` | 当前管理员与 ACTIVE 前置 | Authorization / Lifecycle | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-052) | — | — |
+| `BR-APP-053` | 整 Application 在线门禁 | Availability / Security | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-053) | — | — |
+| `BR-APP-054` | 配置、配额与 owner 义务保留 | Boundary / Invariant | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-054) | — | — |
+| `BR-APP-055` | 重新上线必须重新求值 | Lifecycle / Validation | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-055) | — | — |
+| `BR-APP-056` | 独立 OCC、no-op 与共享写栅栏 | Concurrency / Consistency | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-056) | — | — |
+| `BR-APP-057` | 原子审计与有界残余 | Audit / Security | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-057) | — | — |
+| `BR-APP-058` | 管理可见性与最小披露 | Query / Privacy | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md#br-app-058) | — | — |
 
 ### Application Profile (`BR-PRF`)
 

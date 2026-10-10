@@ -112,6 +112,7 @@ adminId 表示当前管理关系。管理员转让成功后它可以改变，但
 - 保留输入的大小写用于管理界面和开发者识别，不自动 trim 或改写。
 - 唯一性比较使用 ASCII lowercase key；例如 `Course_App` 与 `course_app` 是同名。
 - 同名限制范围是同一 adminId；不同管理员可以使用同名应用。
+- name 在 Application 创建后不可修改。需要调整面向普通用户的名称时，应创建或更新 ApplicationProfileRevision.displayName；技术名称不会随公开资料变化。
 
 这与 GitHub 仓库路由的大小写不敏感语义相近；GitHub REST API 也明确说明 owner 和 repository path name 不区分大小写。这里不是对 GitHub 全部命名规则的逐项复制。
 
@@ -311,3 +312,4 @@ API 不接受或返回内部技术字段 `nameKey`、`nextVersionSequence`、`ne
 - 2026-09-20：初始配额允许通过 `APP_CENTER_INITIAL_APPLICATION_QUOTA` 配置，默认 10；配置只影响首次建档，已有配额仍是唯一权威。
 - 2026-09-20：设计进入 `ACCEPTED`；Domain、UseCase、MongoDB 持久化及事务集成测试达到 `CORE_COMPLETE`，Transport、Composition Root 与端到端验证单独跟踪。
 - 2026-09-21：API transport 工作包固定内部路径为 `POST /v1/applications`，外部 `/app-center/v1/applications` 与前缀剥离由平台路由契约定义；身份改为平台可信身份 JWS，错误 reason 与 ADR-005 对齐。
+- 2026-10-10：评审撤回 UC-APP-032 改名提案；明确 Application 技术名称创建后不可修改，用户可见名称继续由 ApplicationProfileRevision.displayName 承担。

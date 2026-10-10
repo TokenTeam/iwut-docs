@@ -328,8 +328,8 @@ Proto 可以复用 `app_center.v1.runtime_resolution.LaunchTargetDescriptor` 和
 ## 后续设计顺序
 
 1. “我参与的测试”列表，允许没有 Stable 的 test-only Application，且不执行 Filter。
-2. Application 管理查询与受控改名。
-3. Application 归档、管理员停止分发和平台 suspension，统一进入 Catalog、UC023 和 OAuth provider 资格。
+2. Application 管理查询已交付；技术名称创建后不可修改。
+3. 平台 suspension 已由 UC-APP-028 定义；管理员整 Application 归档由 UC-APP-033 统一进入 Catalog、UC023 和 OAuth provider 资格，单纯停止普通公开分发使用 Stable clear。
 4. 搜索、分类、推荐或排名只在出现真实产品需求后建立独立模型。
 
 ## 变更记录

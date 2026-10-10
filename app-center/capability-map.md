@@ -34,7 +34,7 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 | 能力 | 核心问题 | 主要业务事实 | 首版输出 |
 | --- | --- | --- | --- |
-| Application Ownership | 这个 Application 是谁管理的，如何安全转让，是否仍处于可管理状态？ | Application、adminId、ownershipRevision、lifecycle、技术名称、创建配额、ApplicationAdminTransfer 与 ApplicationClosure | 稳定 Application 身份、当前管理权与终止状态 |
+| Application Ownership | 这个 Application 是谁管理的，如何安全转让，是否仍处于可管理和管理员允许上线的状态？ | Application、adminId、ownershipRevision、lifecycle、archiveStatus/revision、技术名称、创建配额、ApplicationAdminTransfer、ApplicationClosure 与 ApplicationArchiveEvent | 稳定 Application 身份、当前管理权、终止状态与管理员归档门禁 |
 | Platform Availability | 平台是否暂时允许这个 ACTIVE Application 分发和通过在线授权资格？ | platformAvailabilityStatus/revision、ApplicationPlatformOperationEvent | 可恢复运行门禁与运维审计 |
 | Version Review | 哪个网页版本具备怎样的运行声明，它是否取得发布资格？ | ApplicationVersion、ApplicationReview、审核快照与决定 | 具备或不具备发布资格的 Version |
 | Runtime Publication | 对某个 RPC API major，服务端当前选择哪些 test/grey/stable 目标？ | ApplicationPublication、槽位、grey rollout、PublicationHistory | 服务端发布目标与可追溯变化 |
@@ -49,9 +49,9 @@ Capability 表示 App Center 能持续完成的一类业务职责，不等于一
 
 负责 Application 的稳定身份和管理权，是其他能力的共同根。创建配额属于这项能力，因为它约束 Developer 可以拥有多少个 Application，而不是版本或发布数量。
 
-当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。
+当前设计包括创建、账号归属退出屏障、[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 的发起—接受式管理员转让，以及 [UC-APP-027](use-cases/UC-APP-027-close-application.md) 的不可逆关闭。`adminId` 表达当前管理员而不是永久创建者；转让过程由独立 ApplicationAdminTransfer 保存，关闭过程由独立 ApplicationClosure 保存，并通过业务 revision 与共享写栅栏保护并发。技术名称依据 [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) 在创建后不可修改；用户可见名称由 ProfileRevision.displayName 承担。
 
-UC-APP-029 已提供当前管理员的 Application 列表和组合管理详情。受控改名和管理员日常可恢复归档仍需后续用例；平台紧急暂停/恢复已经由 UC-APP-028 独立建模。
+UC-APP-029 已提供当前管理员的 Application 列表和组合管理详情。[UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) 已接受管理员可恢复的整 Application 在线门禁；普通 Catalog 隐藏仍应使用 Stable clear。平台紧急暂停/恢复已经由 UC-APP-028 独立建模。
 
 这项能力不保存公开 displayName、简介、运行入口、发布槽位或 Tester 列表。
 
@@ -137,9 +137,9 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Version Review | Ownership 的当前 adminId；Identity 的 Developer/Reviewer 与 Scope Catalog | 管理和审核 Version |
 | Public Profile | Ownership 的当前 adminId；Identity 的 Developer/Reviewer | 管理和审核公开资料 |
 | Tester Management | Ownership 的当前 adminId；Identity 的 authId | 管理链接与 Membership |
-| Runtime Publication | Ownership、Platform Availability、Version Review、Tester Management | 检查管理权和发布资格，解析 test 资格与服务端槽位 |
-| OAuth Client Integration | Ownership、Platform Availability、Version Review、Runtime Publication、Tester Management | 管理 client 并为 Auth 解析登录前运行配置与登录后用户资格 |
-| Catalog & Resolution | Ownership、Platform Availability、Public Profile、Runtime Publication、Tester Management、Version Review | 构造内部一致的候选目录与启动目标 |
+| Runtime Publication | Ownership（含管理员归档门禁）、Platform Availability、Version Review、Tester Management | 检查管理权和发布资格，解析 test 资格与服务端槽位 |
+| OAuth Client Integration | Ownership（含管理员归档门禁）、Platform Availability、Version Review、Runtime Publication、Tester Management | 管理 client 并为 Auth 解析登录前运行配置与登录后用户资格 |
+| Catalog & Resolution | Ownership（含管理员归档门禁）、Platform Availability、Public Profile、Runtime Publication、Tester Management、Version Review | 构造内部一致的候选目录与启动目标 |
 | 官方客户端 | Catalog & Resolution 返回的候选与 Filter 规则；客户端本地用户信息 | 执行 Filter 并展示最终列表 |
 
 这张表描述领域事实流向。跨能力的一致性策略由后续领域模型和生命周期模型决定；它本身不隐含共享数据库或分布式事务要求。
@@ -148,10 +148,10 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 
 | 能力 | 已有设计证据 | 首版主要缺口 |
 | --- | --- | --- |
-| Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029` | 改名和管理员日常归档 |
+| Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029`、`UC-APP-033` | 管理员整应用归档已接受；技术名称明确保持不可变 |
 | Platform Availability | `UC-APP-028` | 可靠告警投递、自动恢复与批量运维不在首版 |
 | Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030` | 管理员版本历史查询、草稿放弃、批准资格撤销或紧急处置 |
-| Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023` | test 清空、Application 级停止分发 |
+| Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`；`UC-APP-033` 的整应用门禁 | test 清空 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | 管理员 ProfileRevision 历史查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
 | Catalog & Resolution | `UC-APP-012` 的 test-only 解析、`UC-APP-022` 的 Filter 管理契约、`UC-APP-023` 的统一解析、`UC-APP-024` 的普通列表/详情 | “我参与的测试”独立入口 |

@@ -19,6 +19,7 @@ DeveloperApplicationQuota                                      │
          ├─ 0..* ApplicationAdminTransfer (aggregate root)
          ├─ 0..1 ApplicationClosure (aggregate root)
          ├─ 0..* ApplicationPlatformOperationEvent (append-only audit)
+         ├─ 0..* ApplicationArchiveEvent (append-only audit)
          ├─ 1 ApplicationProfile (aggregate root)
          │     ├─ 0..* ApplicationProfileRevision
          │     └─ 0..1 currentPublishedProfileRevisionId
@@ -49,11 +50,15 @@ CatalogResolver (domain/query service)
 
 ### Application
 
-Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`；[UC-APP-027](use-cases/UC-APP-027-close-application.md) 增加 `lifecycleStatus` 和 `lifecycleRevision`；[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 增加与关闭正交的 `platformAvailabilityStatus` 和 `platformAvailabilityRevision`。公开资料不属于它，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
+Application 是稳定业务身份和当前管理权的聚合根。业务字段为 `id`、`name`、`adminId`、`createdAt`；[UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 增加只服务管理权 OCC 的正数 `ownershipRevision`；[UC-APP-027](use-cases/UC-APP-027-close-application.md) 增加 `lifecycleStatus` 和 `lifecycleRevision`；[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 增加与关闭正交的 `platformAvailabilityStatus` 和 `platformAvailabilityRevision`；[UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) 增加与二者正交的 `archiveStatus` 和 `archiveRevision`。技术名称依据 [BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) 创建后不可修改；公开资料不属于 Application，依据 [BR-APP-004](use-cases/UC-APP-001-create-application.md#br-app-004) 由独立资料模型表达。
 
 Application 提供其他聚合共同引用的 `applicationId` 和当前 `adminId`。版本序号与资料序号的分配器属于创建协调所需状态，不增加 Application 的公开业务含义。
 
-管理员转让只改变 adminId 并增加 ownershipRevision；申请过程由独立 ApplicationAdminTransfer 保存。关闭只推进 Application 生命周期；过程、Auth 回执与收敛状态由独立 ApplicationClosure 保存。暂停/恢复只改变平台可用状态，完整运维历史由 append-only ApplicationPlatformOperationEvent 保存。它们都不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
+管理员转让只改变 adminId 并增加 ownershipRevision；申请过程由独立 ApplicationAdminTransfer 保存。关闭只推进 Application 生命周期；过程、Auth 回执与收敛状态由独立 ApplicationClosure 保存。暂停/恢复只改变平台可用状态，完整运维历史由 append-only ApplicationPlatformOperationEvent 保存。归档/取消归档只改变 archiveStatus/archiveRevision，完整变化由 append-only ApplicationArchiveEvent 保存。它们都不会把 Version、Profile、Publication 或 Tester 实体搬入 Application。
+
+### ApplicationArchiveEvent
+
+ApplicationArchiveEvent 是 UC-APP-033 定义的一次真实归档状态变化审计，保存 applicationId、ARCHIVE/UNARCHIVE、前后状态、相邻 archiveRevision、操作者和发生时间。当前结果始终以 Application 为权威；事件只追加、不用于重放聚合，精确目标状态 no-op 不创建事件。
 
 ### ApplicationAdminTransfer
 
@@ -79,7 +84,7 @@ DeveloperApplicationQuota 以 `adminId` 为身份，表达一个 Developer 当�
 
 DeveloperApplicationQuota 自身的 `limit` 与 `usedCount` 是配额的唯一权威状态。缺少该聚合时，创建 Application 使用进程组装时注入的初始上限惰性建立它；该配置默认 10。已存在配额的 `limit` 不得被启动配置或创建路径覆盖，只能由未来的独立配额调整用例修改。具体配置契约、持久化形状由对应 UC 和 adapter 定义。
 
-创建 Application 时的名称占用、配额消费和 Application 创建具有一个业务一致性要求，权威规则见 [BR-APP-005](use-cases/UC-APP-001-create-application.md#br-app-005) 与 [BR-APP-006](use-cases/UC-APP-001-create-application.md#br-app-006)。管理员转让把一个占用从源配额原子移动到目标配额；目标容量不足或同名时拒绝，见 [BR-APP-016](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016)。不可逆关闭在进入 CLOSING 时释放一个配额占用但永久保留原命名空间技术名称，见 [BR-APP-025](use-cases/UC-APP-027-close-application.md#br-app-025)；未来归档是否释放配额仍需独立定义。
+创建 Application 时的名称占用、配额消费和 Application 创建具有一个业务一致性要求，权威规则见 [BR-APP-005](use-cases/UC-APP-001-create-application.md#br-app-005) 与 [BR-APP-006](use-cases/UC-APP-001-create-application.md#br-app-006)。管理员转让把一个占用从源配额原子移动到目标配额；目标容量不足或同名时拒绝，见 [BR-APP-016](use-cases/UC-APP-026-transfer-application-administration.md#br-app-016)。不可逆关闭在进入 CLOSING 时释放一个配额占用但永久保留原命名空间技术名称，见 [BR-APP-025](use-cases/UC-APP-027-close-application.md#br-app-025)；UC-APP-033 的可恢复归档不释放配额或 owner 义务。
 
 ### ApplicationVersion
 
@@ -192,6 +197,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 | ApplicationAdminTransfer | ApplicationAdminTransferId | ApplicationAdminTransfer | 引用一个 Application、源/目标管理员和发起时 ownershipRevision |
 | ApplicationClosure | ApplicationClosureId | ApplicationClosure | 一个 Application 至多一个；保存不可逆关闭与 Auth 回执 |
 | ApplicationPlatformOperationEvent | ApplicationPlatformOperationEventId | Application | 记录一次平台暂停或恢复；当前状态仍在 Application |
+| ApplicationArchiveEvent | ApplicationArchiveEventId | Application | UC-APP-033 定义的真实归档状态变更审计；当前状态仍在 Application |
 | ApplicationVersion | ApplicationVersionId | ApplicationVersion | 属于一个 Application；拥有多个 Review attempt |
 | ApplicationReview | ApplicationReviewId | ApplicationReview | 引用一个 Version；冻结 snapshot 并保存一次性决定 |
 | ApplicationVersionOAuthConfig | ApplicationVersionId | ApplicationVersion | 一对一依附 Version；与 Version 共用 revision 和审核生命周期 |
