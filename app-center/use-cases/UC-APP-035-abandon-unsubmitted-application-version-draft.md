@@ -1,6 +1,6 @@
 # UC-APP-035：放弃从未提交审核的 ApplicationVersion 草稿
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 设计结论
 
@@ -266,7 +266,7 @@ validator 要求所有字段存在、禁止额外字段，并验证 UUIDv7、正
 
 ## 实现依赖与交付边界
 
-若本提案被接受，实现至少需要：
+实现至少需要：
 
 - `iwut-app-center-api`：在现有 ApplicationVersion service 增加 abandon RPC、最小 abandonment response 和稳定 error reasons；
 - `iwut-app-center`：独立 command usecase/port、领域 abandonment 事实、MongoDB transaction adapter、HTTP/gRPC transport 与 composition wiring；
@@ -275,8 +275,9 @@ validator 要求所有字段存在、禁止额外字段，并验证 UUIDv7、正
 - 测试：资格边界、恢复后 DRAFT、OCC/no-op、标签再用、管理权转让/提交/编辑/关闭并发、损坏关系、回滚、HTTP/gRPC 与真实 MongoDB 验收；
 - 最终门禁：`make check-full`。
 
-本用例不需要 Auth schema/API 变化或真实 OAuth 流程，因此不以 `make check-auth-app` 作为最低验收层级。若实现需要删除 Review/Publication 历史、增加 `ABANDONED` reviewStatus、调用 Auth 或清理跨服务 grant/token，说明范围已偏离本提案，必须返回设计层重新评审。
+本用例不需要 Auth schema/API 变化或真实 OAuth 流程，因此不以 `make check-auth-app` 作为最低验收层级。若实现需要删除 Review/Publication 历史、增加 `ABANDONED` reviewStatus、调用 Auth 或清理跨服务 grant/token，说明范围已偏离本用例，必须返回设计层重新评审。
 
 ## 变更记录
 
 - 2026-10-10：建立 UC-APP-035 提案；产品确认通用“删除未发布版本”应收敛为放弃从未提交审核的 DRAFT，并保留最小不可变放弃记录。
+- 2026-10-10：产品审核通过，状态转为 ACCEPTED；固定仅放弃从未审核 DRAFT、最小 abandonment、身份不复用和标签可再用边界。

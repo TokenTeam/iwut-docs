@@ -26,7 +26,7 @@ DeveloperApplicationQuota                                      │
          ├─ 0..* ApplicationProfileReview (aggregate root, references ProfileRevision)
          ├─ 0..* ApplicationVersion (aggregate root)
          │     └─ 1 ApplicationVersionOAuthConfig (dependent entity/value)
-         ├─ 0..* ApplicationVersionAbandonment (immutable audit fact; proposed)
+         ├─ 0..* ApplicationVersionAbandonment (immutable audit fact)
          ├─ 0..* ApplicationReview (aggregate root, references Version)
          ├─ 0..1 ApplicationOAuthRegistration (aggregate root)
          │     ├─ 0..1 PUBLIC client identity
@@ -104,7 +104,7 @@ ApplicationReview 不放在 ApplicationVersion 聚合内部；二者通过 versi
 
 ApplicationPublication 只引用 Version，不属于该聚合；发布槽位变化也不改变 Version 的审核状态，参见 [BR-PUB-004](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-004)。
 
-[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 提议把“放弃从未提交草稿”建模为删除有效 ApplicationVersion 与 OAuth 配置，同时写入独立最小 `ApplicationVersionAbandonment`，而不是增加 `ABANDONED` reviewStatus。该事实只保留 versionId、applicationId、sequence、versionLabel、sourceRevision 与放弃审计；不保存运行内容，也不允许恢复或复用 versionId/sequence。只有从未存在任何 ApplicationReview 的 DRAFT 才能进入该结果。
+[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 把“放弃从未提交草稿”建模为删除有效 ApplicationVersion 与 OAuth 配置，同时写入独立最小 `ApplicationVersionAbandonment`，而不是增加 `ABANDONED` reviewStatus。该事实只保留 versionId、applicationId、sequence、versionLabel、sourceRevision 与放弃审计；不保存运行内容，也不允许恢复或复用 versionId/sequence。只有从未存在任何 ApplicationReview 的 DRAFT 才能进入该结果。
 
 ### ApplicationOAuthRegistration 与 OAuthClientCredential
 

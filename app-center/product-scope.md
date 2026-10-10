@@ -73,7 +73,7 @@ Application 确认永久终止时，当前管理员经近期重新认证和明�
 
 ### 2. Reviewer 作出审核决定
 
-管理员提交确定的资料或版本快照。具备相应权限且不存在利益冲突的 Reviewer 对快照批准或拒绝。运行版本拒绝后可以显式恢复原草稿；公开资料拒绝后由网页端预填旧内容，再创建拥有新身份的新 DRAFT。[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 提议允许管理员放弃从未产生 Review 的 Version 草稿，但不删除任何已有审核历史或仅仅“当前未发布”的 Version。
+管理员提交确定的资料或版本快照。具备相应权限且不存在利益冲突的 Reviewer 对快照批准或拒绝。运行版本拒绝后可以显式恢复原草稿；公开资料拒绝后由网页端预填旧内容，再创建拥有新身份的新 DRAFT。[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 允许管理员放弃从未产生 Review 的 Version 草稿，但不删除任何已有审核历史或仅仅“当前未发布”的 Version。
 
 资料审核通过后自动成为当前公开资料，不再要求管理员执行第二次发布操作，也不提供回滚到旧资料的入口。版本审核通过只产生运行版本的发布资格，仍由管理员决定是否放入 Test、Grey 或 Stable 槽位。
 
@@ -148,7 +148,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 | --- | --- | --- |
 | Application Ownership | 是 | 创建、账号退出屏障、显式接受式管理员转让、不可逆关闭，以及 UC-APP-028 提出的平台暂停/恢复；读取、改名和管理员日常可恢复归档继续独立设计 |
 | Public Profile | 是 | 资料草稿、审核、批准后自动公开和读取；icon 先作为不透明字符串 |
-| Version Review | 是 | Version 草稿、编辑、提交、决定、拒绝后恢复和查询；未提交草稿放弃为 UC035 提案 |
+| Version Review | 是 | Version 草稿、编辑、提交、决定、拒绝后恢复、查询和未提交草稿放弃 |
 | Tester Management | 是 | 加入链接、加入、移除、撤销链接和 test 目标解析 |
 | Runtime Publication | 是 | 按 RPC API major 的 test、grey、stable、回退和停止分发 |
 | Catalog & Resolution | 是 | 候选应用聚合、Filter 规则分发、客户端展示过滤和服务端发布目标解析 |

@@ -29,7 +29,7 @@ DRAFT ───────────► SUBMITTED
   └──── RESTORE ── REJECTED
 ```
 
-草稿内容更新是 `DRAFT -> DRAFT` 的真实修改；内容未变化的更新是 no-op。Test/Grey/Stable 槽位变化不会改变 Version 状态。[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 提议的 ABANDON 只适用于从未产生 Review attempt 的 DRAFT；它删除有效 Version 与 OAuth 配置并保留独立最小 abandonment 事实，不新增 `ABANDONED` reviewStatus。
+草稿内容更新是 `DRAFT -> DRAFT` 的真实修改；内容未变化的更新是 no-op。Test/Grey/Stable 槽位变化不会改变 Version 状态。[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 定义的 ABANDON 只适用于从未产生 Review attempt 的 DRAFT；它删除有效 Version 与 OAuth 配置并保留独立最小 abandonment 事实，不新增 `ABANDONED` reviewStatus。
 
 ### 当前迁移
 
@@ -37,7 +37,7 @@ DRAFT ───────────► SUBMITTED
 | --- | --- | --- | --- | --- |
 | Create Version | 不存在 | DRAFT | 分配身份、sequence 和初始 revision | [BR-VER-008](use-cases/UC-APP-002-create-application-version.md#br-ver-008)、[BR-VER-009](use-cases/UC-APP-002-create-application-version.md#br-ver-009) |
 | Replace Draft | DRAFT | DRAFT | 完整替换受审核内容；真实变化增加 revision | [BR-VER-010](use-cases/UC-APP-003-update-draft-application-version.md#br-ver-010)、[BR-VER-013](use-cases/UC-APP-003-update-draft-application-version.md#br-ver-013) |
-| Abandon Unsubmitted Draft | DRAFT 且无 Review | 不再是有效 Version | 删除当前内容与 OAuth 配置；保留最小不可变 abandonment；身份不复用 | [BR-VER-027](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-027)、[BR-VER-028](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-028)（PROPOSED） |
+| Abandon Unsubmitted Draft | DRAFT 且无 Review | 不再是有效 Version | 删除当前内容与 OAuth 配置；保留最小不可变 abandonment；身份不复用 | [BR-VER-027](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-027)、[BR-VER-028](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-028) |
 | Submit Review | DRAFT | SUBMITTED | 创建不可变 Review snapshot 与 PENDING attempt | [BR-REV-002](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-002)、[BR-REV-009](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-009) |
 | Approve Review | SUBMITTED | APPROVED | Review 与 Version 同时得到 APPROVED 结果 | [BR-REV-013](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-013) |
 | Reject Review | SUBMITTED | REJECTED | Review 与 Version 同时得到 REJECTED 结果 | [BR-REV-013](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-013) |

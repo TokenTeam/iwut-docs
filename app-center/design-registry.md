@@ -70,7 +70,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-032` | 修改 Application 技术名称 | `SUPERSEDED` | [归档提案](archive/UC-APP-032-rename-application.md) | [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 未实现；技术名称创建后不可修改，用户可见名称由 ProfileRevision.displayName 承担。 |
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 | `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
-| `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `PROPOSED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
+| `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `ACCEPTED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
 
 ## Business Rules
 
