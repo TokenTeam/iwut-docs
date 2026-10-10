@@ -133,7 +133,6 @@ OwnedApplicationVersionSummary {
   revision
   createdBy
   createdAt
-  updatedBy
   updatedAt
   latestReview?: {
     reviewId
@@ -183,7 +182,6 @@ OwnedApplicationVersionDetail {
     revision
     createdBy
     createdAt
-    updatedBy
     updatedAt
   }
   latestReview?: {
@@ -208,6 +206,8 @@ OwnedApplicationVersionDetail {
 `oauthRedirects` 是 Version 受审核内容的一部分，可以向当前管理员返回；它不包含 OAuth client secret、credential hash、grant 或 token。capabilities 与 scopes 返回 Version 保存的规范化值，本查询不调用 Auth Scope Catalog，也不声明这些 scope 在查询时仍允许被新版本申请。
 
 `latestReview` 取该 Version attempt 最大的 ApplicationReview。管理员需要 reviewId 才能针对最新拒绝执行 UC006，需要拒绝 reason 才能修改草稿后重新提交，因此这两项属于必要管理信息。管理员投影不返回 `decision.decidedBy`、review policy、confirmed checks、approval validation、完整 snapshot 或 Reviewer eligibility；这些事实继续属于 UC030 的受控 Reviewer 查询。
+
+管理员投影也不返回 ApplicationVersion.updatedBy。UC005 在审核决定后会把人工 Reviewer 或 SYSTEM principal 的 authId 写入该字段；将它放入列表或详情会绕过上述 Reviewer 身份最小披露。查询仍返回 revision 与 updatedAt，足以支持 OCC 和界面更新时间展示；createdBy 继续返回，因为它记录 Version 创建者而不是审核决定者。
 
 本用例不提供历史 attempts 数组。若未来需要管理员浏览完整审核时间线，应建立独立分页查询并明确 Reviewer 身份、内部策略和历史理由的披露边界，不能无界嵌入 Version 详情。
 
@@ -287,7 +287,7 @@ ApplicationVersion 与其 OAuth 配置共用 revision 和审核生命周期。�
 4. 管理权转让前后只有 snapshot 对应的管理员成功；旧 page token 不能被新管理员使用，新管理员也不能使用旧管理员 token。
 5. AVAILABLE/SUSPENDED、UNARCHIVED/ARCHIVED、ACTIVE/CLOSING/CLOSED 组合不删除历史读取权；这些状态不因查询而改变。
 6. 默认列表 sequence 降序、单状态过滤、pageSize 边界、稳定翻页、非法 token、换身份/换 Application/换 filter 均按契约工作。
-7. 列表保持轻量，详情返回完整 launchUrl、capabilities、scopes、OAuth redirects、revision 和审计字段；两者均不返回 secret/hash。
+7. 列表保持轻量，详情返回完整 launchUrl、capabilities、scopes、OAuth redirects、revision、createdBy 与时间字段；两者均不返回 updatedBy、secret/hash 或 Reviewer 身份。
 8. 初始 DRAFT 无 latestReview；SUBMITTED 映射最新 PENDING；APPROVED/REJECTED 映射匹配 decision；恢复后的 DRAFT 返回带 draftRestoration 的最新 REJECTED 摘要。
 9. REJECTED 详情返回最新 reviewId 和 reason，可作为用户发起 UC006 的输入来源，但 UC006 仍独立复查 latest attempt、状态和 revision。
 10. 修改或提交与查询并发时，单次结果来自一个一致 snapshot，不出现 Version 新 revision 配旧 OAuth 配置或旧 Review 指针。
@@ -322,7 +322,7 @@ ApplicationVersion 管理列表与详情只向 Application 当前保存的 admin
 <!-- 权威位置: use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-021 -->
 ### BR-VER-021：当前 Version 与最新 Review 投影分离
 
-详情的 Version 字段来自当前 ApplicationVersion 及其一对一 OAuth 配置；latestReview 只提供管理员继续管理所需的最新 attempt、决定理由和恢复时间摘要。它不得以 Review snapshot 替换当前 Version，也不得披露 Reviewer 身份、内部策略、检查项、approval validation、利益冲突或完整历史 attempts。
+详情的 Version 字段来自当前 ApplicationVersion 及其一对一 OAuth 配置；latestReview 只提供管理员继续管理所需的最新 attempt、决定理由和恢复时间摘要。它不得以 Review snapshot 替换当前 Version，也不得披露 ApplicationVersion.updatedBy、Reviewer 身份、内部策略、检查项、approval validation、利益冲突或完整历史 attempts。
 
 <!-- 权威位置: use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-022 -->
 ### BR-VER-022：稳定且绑定授权上下文的分页
@@ -342,7 +342,7 @@ Version、OAuth 配置和最新 Review 的归属、状态、revision、attempt �
 <!-- 权威位置: use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-025 -->
 ### BR-VER-025：查询最小披露且不构成写依据
 
-列表只返回导航与状态字段，详情返回当前管理员管理 Version 所需的完整运行声明和最小最新审核摘要；不得返回 secret/hash、Reviewer 内部事实、用户资料或完整审核历史。响应必须 `private, no-store`，且任何字段都不能替代写命令自己的最终授权、状态和 OCC 检查。
+列表只返回导航与状态字段，详情返回当前管理员管理 Version 所需的完整运行声明和最小最新审核摘要；不得返回 secret/hash、ApplicationVersion.updatedBy、Reviewer 内部事实、用户资料或完整审核历史。响应必须 `private, no-store`，且任何字段都不能替代写命令自己的最终授权、状态和 OCC 检查。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -683,7 +683,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-034-query-owned-application-versions.md` | 317 | `655ae9dd38bd` |
+| `use-cases/UC-APP-034-query-owned-application-versions.md` | 318 | `d580af070c83` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
