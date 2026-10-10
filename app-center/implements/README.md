@@ -56,9 +56,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-029](../use-cases/UC-APP-029-query-owned-application-management.md) | `ACCEPTED` | `COMPLETE` | 当前管理员私有 Application 列表与组合管理详情、生命周期/平台状态过滤、降序绑定 keyset、批量计数、Mongo snapshot、0024 索引、HTTP/gRPC 与 no-store；服务 `155e122`、API `1cea981` | —（当前 Application 管理摘要范围；版本/Profile 历史列表和 Tester 明细由独立查询补充） |
 | [UC-APP-030](../use-cases/UC-APP-030-query-application-version-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.version.review`、PENDING/ACTIVE 队列、SUSPENDED 保留、CLOSING/CLOSED 排除、不可变 snapshot、当前策略、利益冲突提示、升序 keyset、HTTP/gRPC；服务 `7cf1fc2`、API `0217177` | —（分配、锁单、SLA、通知和决定写入不属于本查询 UC） |
 | [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.profile.review`、资料待审队列与终态详情、不可变 snapshot/当前策略/完整冲突提示、快照失败关闭、0025 队列索引、HTTP/gRPC 与真实 Mongo 验收；服务 `c15aa59`、API `507e252` | —（管理员 ProfileRevision 历史列表/详情仍是独立工作包） |
-| [UC-APP-033](../use-cases/UC-APP-033-archive-and-unarchive-application.md) | `ACCEPTED` | `IN_PROGRESS` | 权威设计与生成 brief 已接受；实现工作包已启动 | Application 归档 Domain/UseCase、0026 migration、审计/OCC、API、管理投影、全部在线消费者门禁与 Auth/App 联合验收 |
+| [UC-APP-033](../use-cases/UC-APP-033-archive-and-unarchive-application.md) | `ACCEPTED` | `COMPLETE` | 独立 archive status/revision、0026 migration、原子审计/OCC、HTTP/gRPC API、UC029 私有管理投影、UC009/012/023/024 与五个 UC019 OAuth Provider 在线门禁、转让/关闭并发语义及真实 Auth OAuth 归档/恢复验收；服务 `c1c43a4`、API `c0dc59b` | —（当前 App Center 后端范围；前端与生产部署独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031 也已完成；UC033 已进入实现。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031 及 UC033 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -361,3 +361,11 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 - 依据 [ADR-007](../adr/ADR-007-observability-baseline.md) 追加 JSON 结构化日志、trace/span 关联、W3C 上下文传播、OTLP gRPC trace/metric 导出和低基数请求指标；未配置 collector 时 exporter 关闭且服务正常运行。
 - HTTP 增加 `/livez` 与动态 `/readyz`，后者在两秒内只读复查 MongoDB 事务拓扑和最新 migration；继续使用 Kratos 标准 gRPC health。探针和 telemetry 不改变领域、业务 API、Mongo schema 或审计事实。
 - 服务提交 `9ddebe4`，无 API 或 Mongo schema 变化。`make check-full` 21/21 通过，报告 `.artifacts/verification/20261007T132456Z-egzi7pkn/report.json`，`changed_sources=[]`；最后的真实 Mongo/HTTP/gRPC race 阶段用时 `1176.332s`。完整门禁不含真实 Auth 进程，Auth 下游 context propagation 由 native gRPC interceptor 单测和现有 consumer E2E 覆盖；跨进程 collector 验收留给部署环境。
+
+## 2026-10-10 UC033 Application 归档与取消归档
+
+- 服务提交 `a570fb3`、`8f0535f`、`c1c43a4`，独立 API 提交 `c0dc59b`，均已本地提交、未 push。当前管理员可对 ACTIVE Application 执行可恢复的整应用归档；归档保留 Version、Profile、Publication、Tester、OAuth client、Filter 和其他配置，不等同于关闭或删除。
+- 归档状态与 lifecycle、平台 AVAILABLE/SUSPENDED 正交，使用独立 archive revision 做 OCC；状态变化与不可变审计事件在同一事务提交，重复同目标命令为 no-op。`0026_application_archival` migration、validator、索引和 readiness 已闭合。取消归档只解除归档门禁，所有在线入口会按调用时的当前 lifecycle、平台状态、发布事实和资格重新求值，不恢复旧快照。
+- UC009、UC012、UC023、UC024 及 UC019 的五个 Auth-only OAuth Provider 方法共享最终在线门禁；UC029 管理列表/详情仍可看到已归档 Application 并返回归档投影。管理员 HTTP/gRPC 响应保持 `private, no-store`。测试覆盖 no-op、OCC、迁移、事务回滚、转让先后顺序、关闭先后顺序、CLOSING/CLOSED 拒绝恢复及归档期间管理权变化。
+- 真实 Auth OAuth 黑盒验收证明：归档前 authorize、code exchange、refresh、UserInfo 与 delegation 正常；归档后新授权、存量 code、存量 refresh token、UserInfo 与 delegation 立即失败，12 秒后仍失败；取消归档后以当前事实重新授权成功。UC033 专项报告目录为服务工作树 `.artifacts/integration/run-yoHUNR3R`。
+- 最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261010T050246Z-ojfoehuf/report.json`，`changed_sources=[]`；Mongo/HTTP/gRPC race 用时 `1375.312s`，已发布 Auth 镜像 E2E 用时 `17.625s`。验收固定服务 `c1c43a4`、API `c0dc59b`、文档 `1adf46f`；因 Wire 1.2 与 Go 1.26 工具链不兼容，本轮使用 Go 1.25.5，业务源码与生成物检查均通过。
