@@ -58,9 +58,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.profile.review`、资料待审队列与终态详情、不可变 snapshot/当前策略/完整冲突提示、快照失败关闭、0025 队列索引、HTTP/gRPC 与真实 Mongo 验收；服务 `c15aa59`、API `507e252` | —（管理员 ProfileRevision 历史列表/详情仍是独立工作包） |
 | [UC-APP-033](../use-cases/UC-APP-033-archive-and-unarchive-application.md) | `ACCEPTED` | `COMPLETE` | 独立 archive status/revision、0026 migration、原子审计/OCC、HTTP/gRPC API、UC029 私有管理投影、UC009/012/023/024 与五个 UC019 OAuth Provider 在线门禁、转让/关闭并发语义及真实 Auth OAuth 归档/恢复验收；服务 `c1c43a4`、API `c0dc59b` | —（当前 App Center 后端范围；前端与生产部署独立交付） |
 | [UC-APP-034](../use-cases/UC-APP-034-query-owned-application-versions.md) | `ACCEPTED` | `COMPLETE` | 当前管理员 Version 列表/详情、四种审核状态与全生命周期历史可见性、最新 Review 最小投影、HMAC 防篡改绑定 keyset、Mongo snapshot、0027 查询索引、HTTP/gRPC 与真实 MongoDB 验收；服务 `90cc40e`、API `592b351` | —（当前 ApplicationVersion 管理查询范围；平台跨 Application 检索、完整 Review 历史与写命令独立交付） |
-| [UC-APP-035](../use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | `ACCEPTED` | `NOT_STARTED` | 已接受放弃从未提交审核 DRAFT 的设计边界 | 待 brief 生成与实现交付 |
+| [UC-APP-035](../use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | `ACCEPTED` | `COMPLETE` | 当前管理员放弃从未审核 DRAFT、revision 幂等、最小不可变 abandonment、Version/OAuth 原子删除、身份序号不复用与标签再用、共享 fence 并发顺序、0028 migration、HTTP/gRPC 与真实 MongoDB 验收；服务 `caa193b`、API `e1bc059` | —（当前 App Center 后端范围；已审核 Version 处置、恢复、批量清理与前端独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 及 UC034 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 至 UC035 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -379,3 +379,12 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 - 列表按 `(sequence, versionId)` 降序 keyset 分页；token 绑定调用者、Application、reviewStatus、排序键和版本，并由现有必需的 Service Identity 私钥材料经独立 domain 派生的 HMAC-SHA-256 key 防篡改。单页在一个 MongoDB majority snapshot 中确认当前管理员并批量读取 Version、OAuth 配置和最新 Review；`0027_application_version_management_query` 增加状态过滤索引并提升 readiness。
 - 列表只返回导航与状态摘要；详情返回当前 launch URL、capabilities、scopes、OAuth redirects、revision、createdBy、时间字段及最小最新 Review 摘要。缺 OAuth 配置、跨 Application 关系、Review/Version 状态或 revision/restoration 不一致会使整页或详情失败关闭。HTTP 与原生 gRPC 均返回 `private, no-store`。
 - UC034 专项真实 Mongo + HTTP/gRPC race 报告为 `.artifacts/integration/run-YNAjmaTs`。最终 `make check-full` 21/21 通过，报告 `.artifacts/verification/20261010T070822Z-65t55z3o/report.json`，`changed_sources=[]`；最后的 Mongo/HTTP/gRPC race 全量阶段用时 `1511.001s`。验收固定服务 `90cc40e`、API `592b351`、文档 `f4134cf`，使用 Go 1.25.5。
+
+## 2026-10-10 UC035 放弃未提交 ApplicationVersion 草稿
+
+- 设计接受提交为 `ac4c984`，独立 API 提交为 `e1bc059`，服务实现提交为 `84e572b`，验收补强提交为 `caa193b`；均已本地提交、未 push。当前管理员可放弃 `reviewStatus=DRAFT` 且从未产生任何 ApplicationReview 的 Version，不要求当前 Developer 资格；平台暂停和管理员归档不阻止清理，CLOSING/CLOSED 拒绝写入。
+- `0028_application_version_abandonment` 建立严格 validator 与唯一索引。首次成功在同一 MongoDB majority transaction 中写入不含运行内容的最小 abandonment，并删除恰好一份有效 Version 与一对一 OAuth 配置；versionId/sequence 永不复用，原 versionLabel 可由新身份重新使用。相同 source revision 重试返回 `changed=false`，不再次推进 Clock、ID 或共享 coordination fence。
+- SUBMITTED、APPROVED、REJECTED 及存在 Review 的恢复后 DRAFT 均不可放弃；缺失 OAuth、跨 Application Review、当前 Publication、PublicationHistory、active/tombstone 重叠等关系损坏失败关闭。真实 Mongo 并发覆盖双放弃、编辑、提交、管理员转让、Application 关闭及同标签新建的线性化顺序。UC029 计数与 UC034 列表/详情排除已放弃 Version，并对 active/tombstone 重叠失败关闭。
+- HTTP DELETE 使用强 `If-Match`，拒绝 body/query；原生 gRPC 使用 `expectedRevision`。成功、no-op 和领域错误均返回 `private, no-store`，响应不披露被删除运行内容、`abandonedBy` 或内部存储事实。实现未调用 Auth、Scope Catalog 或 URL preflight，未增加 `ABANDONED` 状态、恢复或批量能力。
+- API Proto 检查、全量 Go test/vet、Wire/格式检查及 `make test-race` 通过。UC035 定向 Mongo、ledger、HTTP/gRPC E2E race 报告目录为 `.artifacts/integration/run-ow5UguUX`；最终完整 Mongo + HTTP/gRPC E2E race 报告目录为 `.artifacts/integration/run-xnnZ1YdI`，Mongo 用时 `1477.586s`、E2E 用时 `128.452s`。文档 30 项测试、brief freshness 与 324 行 registry 在正确 workspace 布局下通过。
+- `make check-full` 的前 10 项门禁通过，但现有验证器把 docs 克隆到 `/tmp/iwut-docs-*`，而生成器按 `<workspace>/docs` 定位，导致 docs-tests 错误查找 `/tmp/docs` 后停止；报告为 `.artifacts/verification/20261010T101046Z-0bcl9e8n/report.json`。该 runner 布局问题不改变上述源码、文档与完整真实 Mongo/E2E 验收结果，且本工作包未修改正在由其他任务处理的验证脚本。

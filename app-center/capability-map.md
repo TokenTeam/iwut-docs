@@ -67,7 +67,7 @@ UC-APP-029 已提供当前管理员的 Application 列表和组合管理详情�
 
 这份发布资格与渠道无关。TEST、GREY、STABLE 都只能选择已批准 Version，但选择和运行时资格由各自的 Publication 逻辑负责。
 
-已有设计覆盖版本创建、草稿更新、提交、批准或拒绝、拒绝后恢复草稿，以及 UC-APP-030 的 Reviewer 待审队列和审核详情。[UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) 已接受当前管理员的 Version 列表与当前详情查询。[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 已接受放弃从未提交审核的 DRAFT；通用“未发布版本删除”被明确排除，已批准版本失去资格后的处理仍需后续设计。
+已有设计覆盖版本创建、草稿更新、提交、批准或拒绝、拒绝后恢复草稿，以及 UC-APP-030 的 Reviewer 待审队列和审核详情。[UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) 已实现当前管理员的 Version 列表与当前详情查询。[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 已实现放弃从未提交审核的 DRAFT；通用“未发布版本删除”被明确排除，已批准版本失去资格后的处理仍需后续设计。
 
 这项能力不决定用户实际得到哪个版本，也不保存面向目录的公开资料。
 
@@ -150,7 +150,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | --- | --- | --- |
 | Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029`、`UC-APP-033` | 管理员整应用归档已接受；技术名称明确保持不可变 |
 | Platform Availability | `UC-APP-028` | 可靠告警投递、自动恢复与批量运维不在首版 |
-| Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030`、`UC-APP-034`–`UC-APP-035` | 草稿放弃待实现；批准资格撤销或紧急处置 |
+| Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030`、`UC-APP-034`–`UC-APP-035` | 批准资格撤销或紧急处置 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`；`UC-APP-033` 的整应用门禁 | test 清空 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | 管理员 ProfileRevision 历史查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
