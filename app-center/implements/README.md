@@ -57,9 +57,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-030](../use-cases/UC-APP-030-query-application-version-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.version.review`、PENDING/ACTIVE 队列、SUSPENDED 保留、CLOSING/CLOSED 排除、不可变 snapshot、当前策略、利益冲突提示、升序 keyset、HTTP/gRPC；服务 `7cf1fc2`、API `0217177` | —（分配、锁单、SLA、通知和决定写入不属于本查询 UC） |
 | [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.profile.review`、资料待审队列与终态详情、不可变 snapshot/当前策略/完整冲突提示、快照失败关闭、0025 队列索引、HTTP/gRPC 与真实 Mongo 验收；服务 `c15aa59`、API `507e252` | —（管理员 ProfileRevision 历史列表/详情仍是独立工作包） |
 | [UC-APP-033](../use-cases/UC-APP-033-archive-and-unarchive-application.md) | `ACCEPTED` | `COMPLETE` | 独立 archive status/revision、0026 migration、原子审计/OCC、HTTP/gRPC API、UC029 私有管理投影、UC009/012/023/024 与五个 UC019 OAuth Provider 在线门禁、转让/关闭并发语义及真实 Auth OAuth 归档/恢复验收；服务 `c1c43a4`、API `c0dc59b` | —（当前 App Center 后端范围；前端与生产部署独立交付） |
-| [UC-APP-034](../use-cases/UC-APP-034-query-owned-application-versions.md) | `ACCEPTED` | `IN_PROGRESS` | 权威设计已接受，生成 brief 与实现工作包已启动 | 当前管理员 Version 列表/详情、最新 Review 最小投影、绑定 keyset、0027 查询索引、HTTP/gRPC 与真实 MongoDB 验收 |
+| [UC-APP-034](../use-cases/UC-APP-034-query-owned-application-versions.md) | `ACCEPTED` | `COMPLETE` | 当前管理员 Version 列表/详情、四种审核状态与全生命周期历史可见性、最新 Review 最小投影、HMAC 防篡改绑定 keyset、Mongo snapshot、0027 查询索引、HTTP/gRPC 与真实 MongoDB 验收；服务 `90cc40e`、API `592b351` | —（当前 ApplicationVersion 管理查询范围；平台跨 Application 检索、完整 Review 历史与写命令独立交付） |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031 及 UC033 也已完成；UC034 已进入实现。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 及 UC034 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
@@ -370,3 +370,11 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 - UC009、UC012、UC023、UC024 及 UC019 的五个 Auth-only OAuth Provider 方法共享最终在线门禁；UC029 管理列表/详情仍可看到已归档 Application 并返回归档投影。管理员 HTTP/gRPC 响应保持 `private, no-store`。测试覆盖 no-op、OCC、迁移、事务回滚、转让先后顺序、关闭先后顺序、CLOSING/CLOSED 拒绝恢复及归档期间管理权变化。
 - 真实 Auth OAuth 黑盒验收证明：归档前 authorize、code exchange、refresh、UserInfo 与 delegation 正常；归档后新授权、存量 code、存量 refresh token、UserInfo 与 delegation 立即失败，12 秒后仍失败；取消归档后以当前事实重新授权成功。UC033 专项报告目录为服务工作树 `.artifacts/integration/run-yoHUNR3R`。
 - 最终 `make check-auth-app` 22/22 通过，报告 `.artifacts/verification/20261010T050246Z-ojfoehuf/report.json`，`changed_sources=[]`；Mongo/HTTP/gRPC race 用时 `1375.312s`，已发布 Auth 镜像 E2E 用时 `17.625s`。验收固定服务 `c1c43a4`、API `c0dc59b`、文档 `1adf46f`；因 Wire 1.2 与 Go 1.26 工具链不兼容，本轮使用 Go 1.25.5，业务源码与生成物检查均通过。
+
+## 2026-10-10 UC034 ApplicationVersion 管理查询
+
+- 设计接受提交为 `726baef`，随后以 `f4134cf` 修正最小披露边界：管理员查询不返回 `ApplicationVersion.updatedBy`、Reviewer 身份、内部策略、检查项或完整审核历史。独立 API 提交为 `48e28a6`、`592b351`，服务实现提交为 `eb401a4`，游标安全修正提交为 `90cc40e`；均已本地提交、未 push。
+- 当前 Application 管理员可以分页查询该 Application 下 DRAFT、SUBMITTED、APPROVED、REJECTED 的全部 Version，并读取任一 Version 的当前权威详情。查询不要求 APPROVED Developer；AVAILABLE/SUSPENDED、UNARCHIVED/ARCHIVED、ACTIVE/CLOSING/CLOSED 均保留历史读取能力，但非当前管理员、Reviewer、SYSTEM、平台运维人员和不存在资源统一隐藏为 NOT_FOUND。
+- 列表按 `(sequence, versionId)` 降序 keyset 分页；token 绑定调用者、Application、reviewStatus、排序键和版本，并由现有必需的 Service Identity 私钥材料经独立 domain 派生的 HMAC-SHA-256 key 防篡改。单页在一个 MongoDB majority snapshot 中确认当前管理员并批量读取 Version、OAuth 配置和最新 Review；`0027_application_version_management_query` 增加状态过滤索引并提升 readiness。
+- 列表只返回导航与状态摘要；详情返回当前 launch URL、capabilities、scopes、OAuth redirects、revision、createdBy、时间字段及最小最新 Review 摘要。缺 OAuth 配置、跨 Application 关系、Review/Version 状态或 revision/restoration 不一致会使整页或详情失败关闭。HTTP 与原生 gRPC 均返回 `private, no-store`。
+- UC034 专项真实 Mongo + HTTP/gRPC race 报告为 `.artifacts/integration/run-YNAjmaTs`。最终 `make check-full` 21/21 通过，报告 `.artifacts/verification/20261010T070822Z-65t55z3o/report.json`，`changed_sources=[]`；最后的 Mongo/HTTP/gRPC race 全量阶段用时 `1511.001s`。验收固定服务 `90cc40e`、API `592b351`、文档 `f4134cf`，使用 Go 1.25.5。
