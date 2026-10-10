@@ -26,6 +26,7 @@ DeveloperApplicationQuota                                      │
          ├─ 0..* ApplicationProfileReview (aggregate root, references ProfileRevision)
          ├─ 0..* ApplicationVersion (aggregate root)
          │     └─ 1 ApplicationVersionOAuthConfig (dependent entity/value)
+         ├─ 0..* ApplicationVersionAbandonment (immutable audit fact; proposed)
          ├─ 0..* ApplicationReview (aggregate root, references Version)
          ├─ 0..1 ApplicationOAuthRegistration (aggregate root)
          │     ├─ 0..1 PUBLIC client identity
@@ -102,6 +103,8 @@ ApplicationVersion
 ApplicationReview 不放在 ApplicationVersion 聚合内部；二者通过 versionId、attempt 和 sourceVersionRevision 建立关系。Version 聚合保存自己的内容、依附 OAuth 配置、reviewStatus、revision 与审计事实。
 
 ApplicationPublication 只引用 Version，不属于该聚合；发布槽位变化也不改变 Version 的审核状态，参见 [BR-PUB-004](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-004)。
+
+[UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) 提议把“放弃从未提交草稿”建模为删除有效 ApplicationVersion 与 OAuth 配置，同时写入独立最小 `ApplicationVersionAbandonment`，而不是增加 `ABANDONED` reviewStatus。该事实只保留 versionId、applicationId、sequence、versionLabel、sourceRevision 与放弃审计；不保存运行内容，也不允许恢复或复用 versionId/sequence。只有从未存在任何 ApplicationReview 的 DRAFT 才能进入该结果。
 
 ### ApplicationOAuthRegistration 与 OAuthClientCredential
 
@@ -199,6 +202,7 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 | ApplicationPlatformOperationEvent | ApplicationPlatformOperationEventId | Application | 记录一次平台暂停或恢复；当前状态仍在 Application |
 | ApplicationArchiveEvent | ApplicationArchiveEventId | Application | UC-APP-033 定义的真实归档状态变更审计；当前状态仍在 Application |
 | ApplicationVersion | ApplicationVersionId | ApplicationVersion | 属于一个 Application；拥有多个 Review attempt |
+| ApplicationVersionAbandonment | ApplicationVersionAbandonmentId | ApplicationVersionAbandonment | 属于一个 Application；引用已经移出有效数据且永不复用的 Version 身份 |
 | ApplicationReview | ApplicationReviewId | ApplicationReview | 引用一个 Version；冻结 snapshot 并保存一次性决定 |
 | ApplicationVersionOAuthConfig | ApplicationVersionId | ApplicationVersion | 一对一依附 Version；与 Version 共用 revision 和审核生命周期 |
 | ApplicationOAuthRegistration | ApplicationId | ApplicationOAuthRegistration | 属于一个 Application；保存两种可选稳定 client identity |

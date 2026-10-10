@@ -15,10 +15,10 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-035` |
+| Use Case / App Center | `UC-APP-036` |
 | Business Rule / Application | `BR-APP-059` |
 | Business Rule / Application Profile | `BR-PRF-047` |
-| Business Rule / ApplicationVersion | `BR-VER-026` |
+| Business Rule / ApplicationVersion | `BR-VER-034` |
 | Business Rule / Review | `BR-REV-035` |
 | Business Rule / Publication | `BR-PUB-031` |
 | Business Rule / Tester | `BR-TST-037` |
@@ -70,6 +70,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-032` | 修改 Application 技术名称 | `SUPERSEDED` | [归档提案](archive/UC-APP-032-rename-application.md) | [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 未实现；技术名称创建后不可修改，用户可见名称由 ProfileRevision.displayName 承担。 |
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 | `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
+| `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `PROPOSED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
 
 ## Business Rules
 
@@ -208,6 +209,14 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-VER-023` | 一致快照与管理权边界 | Consistency / Authorization | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-023) | — | — |
 | `BR-VER-024` | 关系损坏失败关闭 | Consistency / Invariant | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-024) | — | — |
 | `BR-VER-025` | 查询最小披露且不构成写依据 | Privacy / Boundary | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-025) | — | — |
+| `BR-VER-026` | 当前管理员可以清理未提交草稿 | Authorization / Lifecycle | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-026) | — | — |
+| `BR-VER-027` | 从未提交是可放弃的唯一内容边界 | Lifecycle / Invariant | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-027) | — | — |
+| `BR-VER-028` | 有效内容删除与最小放弃事实分离 | Audit / Boundary | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-028) | — | — |
+| `BR-VER-029` | Version 身份不复用而标签可以重新使用 | Identity / Invariant | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-029) | — | — |
+| `BR-VER-030` | revision 前置条件与确定性幂等 | Concurrency / Idempotency | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-030) | — | — |
+| `BR-VER-031` | 原子删除与关系损坏失败关闭 | Consistency / Integrity | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-031) | — | — |
+| `BR-VER-032` | 共享写栅栏定义并发顺序 | Concurrency / Consistency | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-032) | — | — |
+| `BR-VER-033` | 不可恢复与最小披露 | Privacy / Lifecycle | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md#br-ver-033) | — | — |
 
 ### Review (`BR-REV`)
 
