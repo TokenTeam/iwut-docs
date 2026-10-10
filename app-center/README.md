@@ -113,6 +113,7 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-030-query-application-version-reviews.md](use-cases/UC-APP-030-query-application-version-reviews.md)：查询 ApplicationVersion 审核队列与审核详情。
 - [UC-APP-031-query-application-profile-reviews.md](use-cases/UC-APP-031-query-application-profile-reviews.md)：查询 ApplicationProfileRevision 审核队列与审核详情。
 - [UC-APP-033-archive-and-unarchive-application.md](use-cases/UC-APP-033-archive-and-unarchive-application.md)：当前管理员归档或重新上线整个 Application。
+- [UC-APP-034-query-owned-application-versions.md](use-cases/UC-APP-034-query-owned-application-versions.md)：当前管理员查询所管理 Application 的 Version 列表与详情。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：已由 UC-APP-026 取代的早期设计说明。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。
@@ -124,6 +125,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-031 均为 `ACCEPTED`；UC-APP-017 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准：UC-APP-002 至 UC-APP-005 仍受其登记的 Auth 生产依赖影响而为 `IN_PROGRESS`；UC026 至 UC031 已完整交付。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-031 及 UC-APP-033、UC-APP-034 均为 `ACCEPTED`；UC-APP-017、UC-APP-032 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准。
 
 OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付，UC-APP-020/021 已启用 STABLE/GREY。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有。

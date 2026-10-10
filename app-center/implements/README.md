@@ -57,8 +57,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-030](../use-cases/UC-APP-030-query-application-version-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.version.review`、PENDING/ACTIVE 队列、SUSPENDED 保留、CLOSING/CLOSED 排除、不可变 snapshot、当前策略、利益冲突提示、升序 keyset、HTTP/gRPC；服务 `7cf1fc2`、API `0217177` | —（分配、锁单、SLA、通知和决定写入不属于本查询 UC） |
 | [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.profile.review`、资料待审队列与终态详情、不可变 snapshot/当前策略/完整冲突提示、快照失败关闭、0025 队列索引、HTTP/gRPC 与真实 Mongo 验收；服务 `c15aa59`、API `507e252` | —（管理员 ProfileRevision 历史列表/详情仍是独立工作包） |
 | [UC-APP-033](../use-cases/UC-APP-033-archive-and-unarchive-application.md) | `ACCEPTED` | `COMPLETE` | 独立 archive status/revision、0026 migration、原子审计/OCC、HTTP/gRPC API、UC029 私有管理投影、UC009/012/023/024 与五个 UC019 OAuth Provider 在线门禁、转让/关闭并发语义及真实 Auth OAuth 归档/恢复验收；服务 `c1c43a4`、API `c0dc59b` | —（当前 App Center 后端范围；前端与生产部署独立交付） |
+| [UC-APP-034](../use-cases/UC-APP-034-query-owned-application-versions.md) | `ACCEPTED` | `IN_PROGRESS` | 权威设计已接受，生成 brief 与实现工作包已启动 | 当前管理员 Version 列表/详情、最新 Review 最小投影、绑定 keyset、0027 查询索引、HTTP/gRPC 与真实 MongoDB 验收 |
 
-UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031 及 UC033 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
+UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031 及 UC033 也已完成；UC034 已进入实现。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 

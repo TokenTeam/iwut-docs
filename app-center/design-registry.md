@@ -15,10 +15,10 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-034` |
+| Use Case / App Center | `UC-APP-035` |
 | Business Rule / Application | `BR-APP-059` |
 | Business Rule / Application Profile | `BR-PRF-047` |
-| Business Rule / ApplicationVersion | `BR-VER-019` |
+| Business Rule / ApplicationVersion | `BR-VER-026` |
 | Business Rule / Review | `BR-REV-035` |
 | Business Rule / Publication | `BR-PUB-031` |
 | Business Rule / Tester | `BR-TST-037` |
@@ -69,6 +69,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-031` | 查询 ApplicationProfileRevision 审核队列与审核详情 | `ACCEPTED` | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md) | — | 精确 Profile Reviewer 权限、不可变资料快照与稳定待审队列。 |
 | `UC-APP-032` | 修改 Application 技术名称 | `SUPERSEDED` | [归档提案](archive/UC-APP-032-rename-application.md) | [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 未实现；技术名称创建后不可修改，用户可见名称由 ProfileRevision.displayName 承担。 |
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
+| `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
 
 ## Business Rules
 
@@ -200,6 +201,13 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-VER-016` | 权限与更新原子性 | Authorization / Consistency | [UC-APP-003](use-cases/UC-APP-003-update-draft-application-version.md#br-ver-016) | — | — |
 | `BR-VER-017` | 草稿审计粒度 | Audit Policy | [UC-APP-003](use-cases/UC-APP-003-update-draft-application-version.md#br-ver-017) | — | — |
 | `BR-VER-018` | 版本化 OAuth 回调 | Field / Security / Invariant | [UC-APP-002](use-cases/UC-APP-002-create-application-version.md#br-ver-018) | — | — |
+| `BR-VER-019` | 当前管理员私有版本读取 | Authorization / Privacy | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-019) | — | — |
+| `BR-VER-020` | 全部状态与历史生命周期可见 | Lifecycle / Query | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-020) | — | — |
+| `BR-VER-021` | 当前 Version 与最新 Review 投影分离 | Boundary / Privacy | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-021) | — | — |
+| `BR-VER-022` | 稳定且绑定授权上下文的分页 | Pagination / Authorization | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-022) | — | — |
+| `BR-VER-023` | 一致快照与管理权边界 | Consistency / Authorization | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-023) | — | — |
+| `BR-VER-024` | 关系损坏失败关闭 | Consistency / Invariant | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-024) | — | — |
+| `BR-VER-025` | 查询最小披露且不构成写依据 | Privacy / Boundary | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md#br-ver-025) | — | — |
 
 ### Review (`BR-REV`)
 
