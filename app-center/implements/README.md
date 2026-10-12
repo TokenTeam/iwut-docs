@@ -100,6 +100,7 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 - `0031_my_test_application_query` 增加本人 ACTIVE 扫描索引并升级 readiness。游标绑定 caller/规范化 major-capabilities/kind/位置，500 消费扫描、空页 token、跨边界重复 ACTIVE、响应字节预算无跳项与单个合法大项均通过真实 Mongo 测试；不保存可用性，不调用 Auth/Scope/DNS，不写 fence/审计。
 - 最终 `make check-full` / backend 21/21 通过，报告 `.artifacts/verification/20261012T092018Z-09yn1z7x/report.json`，`changed_sources=[]`；真实 Mongo race `1666.881s`、HTTP/gRPC E2E `131.387s`。冻结服务 `cda84cd`、API `aee1dc6`、文档 `5da81da`，使用 Go 1.25.5。真实测试涵盖 clear/replace/Profile 批准/remove/rejoin/suspend/archive/close/账号清理的提交前后双向 snapshot、必要关系与 BSON/时间损坏、存储失败、实际生成 HTTP client、两协议错误/no-store 和隐私字段白名单。
 - UC036 → UC037 → UC038 已按顺序实现、复核、验收闭合。服务/API 源与验收报告保存在持久工作区；原工作区的未提交修改继续保留，三项设计状态仍为 ACCEPTED，当前后端实现状态均为 COMPLETE。
+- 原 `iwut-app-center` 工作区已安全快进到 `cda84cd`，API 固定为 `aee1dc6`。恢复原六项未提交修改后，主工作区补充 quick 19/19 通过、`changed_sources=[]`，报告 `.artifacts/verification/20261012T101409Z-idbmahr0/report.json`；业务源码与完整验收提交一致，未提交验证 overlay 与被测持久工作区逐文件一致，AGENTS 仅保留用户原有的已发布 Auth 镜像说明差异。原修改另保留具名 stash 备份，未 push。
 - 复核记录一个既有非本轮阻断的工程问题：HTTP telemetry 白名单按 route path 注册，而生成 handler 的 operation 是 RPC full method，现有 HTTP 请求可能被折叠为 `http.unmatched`。当前隐私与低基数边界不变；本轮未扩大范围修复该观测性问题。
 
 ## 局部阅读协议
