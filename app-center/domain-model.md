@@ -186,6 +186,8 @@ ApplicationTesterJoinLink 和 ApplicationTesterMembership 是生命周期独立�
 
 Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生新 membershipId，参见 [BR-TST-016](use-cases/UC-APP-009-join-application-as-tester.md#br-tst-016)。历史记录可以独立读取；聚合执行命令时只需要装载保护当前不变量所需的状态。
 
+[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 提案定义 Tester 管理只读投影：容量/当前链接、Membership episode 与链接历史。不增加实体或状态，不恢复凭证；分页、关系校验与披露边界以 BR-TST-037–043 为准。
+
 ### ApplicationFilter 与 ApplicationFilterRevision
 
 ApplicationFilter 是每个 Application 至多一个的公开展示策略协调聚合。它保存 currentFilterRevisionId、revision、nextSequence 和最近更新审计；聚合不存在等价于 revision 0 的 `ALLOW_ALL`。

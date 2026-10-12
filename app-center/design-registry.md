@@ -15,13 +15,13 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-037` |
+| Use Case / App Center | `UC-APP-038` |
 | Business Rule / Application | `BR-APP-059` |
 | Business Rule / Application Profile | `BR-PRF-047` |
 | Business Rule / ApplicationVersion | `BR-VER-034` |
 | Business Rule / Review | `BR-REV-035` |
 | Business Rule / Publication | `BR-PUB-037` |
-| Business Rule / Tester | `BR-TST-037` |
+| Business Rule / Tester | `BR-TST-044` |
 | Business Rule / Runtime Resolution | `BR-RUN-021` |
 | Business Rule / Application Catalog | `BR-CAT-011` |
 | Business Rule / OAuth Client | `BR-OAC-014` |
@@ -73,6 +73,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `ACCEPTED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
 
 | `UC-APP-036` | 清空测试发布槽位 | `PROPOSED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | 指定 major 的 Test clear、共享 OCC、EMPTY、审计与在线资格；待产品审核。 |
+
+| `UC-APP-037` | 查询 Application Tester 管理视图 | `PROPOSED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 当前管理员容量、Membership 与链接历史私有读取；待产品审核。 |
 
 ## Business Rules
 
@@ -341,6 +343,14 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-TST-034` | 并发线性化 | Concurrency | [UC-APP-011](use-cases/UC-APP-011-revoke-tester-join-link.md#br-tst-034) | — | — |
 | `BR-TST-035` | 与 Tester Membership 独立 | Boundary | [UC-APP-011](use-cases/UC-APP-011-revoke-tester-join-link.md#br-tst-035) | — | — |
 | `BR-TST-036` | 边界、审计与隐私 | Boundary / Audit / Privacy | [UC-APP-011](use-cases/UC-APP-011-revoke-tester-join-link.md#br-tst-036) | — | — |
+
+| `BR-TST-037` | 当前管理员私有 Tester 读取 | Authorization / Lifecycle | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-037) | — | — |
+| `BR-TST-038` | 容量与当前链接来自权威快照 | Query / Consistency | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-038) | — | — |
+| `BR-TST-039` | Membership episode 历史查询 | Query / Lifecycle | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-039) | — | — |
+| `BR-TST-040` | 链接历史与凭证最小披露 | Privacy / Security | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-040) | — | — |
+| `BR-TST-041` | 私有分页绑定管理权 | Pagination / Authorization | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-041) | — | — |
+| `BR-TST-042` | 只读一致性与关系损坏失败关闭 | Consistency / Invariant | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-042) | — | — |
+| `BR-TST-043` | 查询不替代命令检查 | Boundary / Caching | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-043) | — | — |
 
 ### Runtime Resolution (`BR-RUN`)
 

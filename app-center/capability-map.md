@@ -99,7 +99,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 负责 Application 级 Tester 加入链接、Membership episode、100 人容量和移除历史。Tester 资格不绑定 Version 或 RPC API major；实际 test 目标由 Runtime Publication 解析。
 
-已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。Tester 管理视图、主动退出是否进入首版，以及 test-only Application 的列表体验仍需确定。
+已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 提案定义当前管理员的容量概览、Membership 和链接历史分页；主动退出是否进入首版，以及 test-only Application 的列表体验仍需确定。
 
 这项能力不实现二维码界面，也不把 Tester 状态保存到 Auth。
 
@@ -153,7 +153,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030`、`UC-APP-034`–`UC-APP-035` | 批准资格撤销或紧急处置 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`；`UC-APP-033` 的整应用门禁；`UC-APP-036` 提案 | Test clear 待审核/实现 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | 管理员 ProfileRevision 历史查询；受控 icon 资产为以后扩展 |
-| Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
+| Tester Management | `UC-APP-008`–`UC-APP-011`；`UC-APP-037` 提案 | 管理查询待审核/实现；主动退出待定 |
 | Catalog & Resolution | `UC-APP-012` 的 test-only 解析、`UC-APP-022` 的 Filter 管理契约、`UC-APP-023` 的统一解析、`UC-APP-024` 的普通列表/详情 | “我参与的测试”独立入口 |
 | OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 与跨服务验证已完成；Auth grant/code/token 继续独立交付 |
 
