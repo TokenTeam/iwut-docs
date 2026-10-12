@@ -99,7 +99,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 负责 Application 级 Tester 加入链接、Membership episode、100 人容量和移除历史。Tester 资格不绑定 Version 或 RPC API major；实际 test 目标由 Runtime Publication 解析。
 
-已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 的当前管理员容量概览、Membership 和链接历史分页已实现并验收，REMOVED 分页保留后端、界面可不展示；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已接受本人参与列表与纯 Test 可用性，正在串行实现。主动退出是否进入首版仍待决定。
+已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 的当前管理员容量概览、Membership 和链接历史分页已实现并验收，REMOVED 分页保留后端、界面可不展示；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 的本人参与列表与纯 Test 可用性也已实现并验收。主动退出是否进入首版仍待决定。
 
 这项能力不实现二维码界面，也不把 Tester 状态保存到 Auth。
 
@@ -116,7 +116,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 服务端产物是“候选 Application + 已解析启动目标 + Filter 规则”，不是客户端最终展示列表。客户端使用本地用户信息执行 Filter 后形成最终列表；App Center 不接收这些本地字段，也不保存用户级 Filter 求值结果。
 
-[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已完成单 Application 统一解析，[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 已完成 Stable-backed 普通目录。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已接受本人 ACTIVE Membership 候选，包含 test-only 和 stable-backed 应用，纯 Test 解析且不执行 Filter；正常无目标保留参与卡片，在线门禁隐藏，待串行实现。
+[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已完成单 Application 统一解析，[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 已完成 Stable-backed 普通目录。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已完成本人 ACTIVE Membership 候选查询，包含 test-only 和 stable-backed 应用，纯 Test 解析且不执行 Filter；正常无目标保留参与卡片，在线门禁隐藏。
 
 ### OAuth Client Integration
 
@@ -154,7 +154,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`、`UC-APP-033`、`UC-APP-036` | —（当前发布管理后端范围） |
 | Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | 管理员 ProfileRevision 历史查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011`、`UC-APP-037` | 主动退出待定；管理查询后端已实现 |
-| Catalog & Resolution | `UC-APP-012`、`UC-APP-022`–`UC-APP-024`、`UC-APP-038` | “我参与的测试”待实现 |
+| Catalog & Resolution | `UC-APP-012`、`UC-APP-022`–`UC-APP-024`、`UC-APP-038` | —（当前目录/解析后端范围） |
 | OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 与跨服务验证已完成；Auth grant/code/token 继续独立交付 |
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。

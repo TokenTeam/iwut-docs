@@ -61,6 +61,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-035](../use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | `ACCEPTED` | `COMPLETE` | 当前管理员放弃从未审核 DRAFT、revision 幂等、最小不可变 abandonment、Version/OAuth 原子删除、身份序号不复用与标签再用、共享 fence 并发顺序、0028 migration、HTTP/gRPC 与真实 MongoDB 验收；服务 `caa193b`、API `e1bc059` | —（当前 App Center 后端范围；已审核 Version 处置、恢复、批量清理与前端独立交付） |
 | [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major Test clear、共享 OCC/fence、EMPTY 保留、不可变 History、0029 migration、保留 Tester/其他槽位、运行读取兼容、HTTP/gRPC 与真实 Auth 验收；服务 `f3a6539` / `b94611e`、API `3398bf4` | —（当前后端范围；前端独立交付） |
 | [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `COMPLETE` | 管理员 Tester 容量/当前链接概览、ACTIVE/REMOVED/ALL episode 和 ACTIVE/REVOKED/ALL 链接分页、签名 ownership-bound keyset、只读 snapshot、0030 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cf71c0b`、API `a0c214f` | —（当前后端范围；REMOVED 前端入口不要求交付，用户资料和新写能力不在本 UC） |
+| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `COMPLETE` | 本人 ACTIVE 参与列表/详情、公开 Profile 与四类可用性、纯 Test 无 Filter、共享 UC012 批量核心、签名 runtime-bound 分页、500 扫描/响应预算、0031 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cda84cd`、API `aee1dc6` | —（当前后端范围；前端、主动退出和新的 Auth/Tester 写能力独立交付） |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 至 UC035 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -72,7 +73,7 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 | --- | --- | --- | --- |
 | [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `COMPLETE` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
 | [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `COMPLETE` | 当前管理员容量概览、Membership 与加入链接历史；REMOVED 分页后端保留 |
-| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `IN_PROGRESS` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
+| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `COMPLETE` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
 
 三项设计于 2026-10-12 获产品接受，brief 生成后按 UC036 → UC037 → UC038 串行实现；每项复核与验收完成后才激活下一项。
 
@@ -91,6 +92,15 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 - `0030_application_tester_management_query` 增加四个显式查询索引并升级 readiness。规范小写持久化 UUID、同时间 ID 排序、ownership/filter/query/caller 游标绑定、合法长 opaque authId 的有界游标、来源/替代关系、lookahead 损坏、重复 ACTIVE/ID/BSON key、时间范围及存储失败分类均已验收。
 - 最终 `make check-full` / backend 21/21 通过，报告 `.artifacts/verification/20261012T071848Z-bxaua0em/report.json`，`changed_sources=[]`；真实 Mongo race `1461.418s`、HTTP/gRPC E2E `124.740s`。冻结服务 `cf71c0b`、API `a0c214f`、文档 `aafb0ae`，使用 Go 1.25.5；定向测试验证生成 HTTP client、两协议 no-store/400/404/500/503、12 种保留状态组合，以及加入/移除/轮换/撤销/转让/关闭/个人清理期间的只读一致快照。
 - 037 已复核完成，038 按既有 ACCEPTED brief 激活。前端、主动退出、Auth 用户资料披露和新的 Tester 写命令均未进入本轮范围；五项原验证 overlay 仍保留、未提交。
+
+### 2026-10-12 UC038 完成与串行工作包闭合
+
+- 服务 `cda84cd`、API `8d71ed3` / `aee1dc6` 均为本地提交、未 push。BR-CAT-011–017 已覆盖本人 ACTIVE 候选、在线门禁、公开 Profile、四类可用性、最小本人参与投影、纯 Test 不回退、无 Filter、签名宿主绑定分页、只读 snapshot 和清空/移除/恢复后的可见性。
+- 独立 `TestApplicationCatalogService` 提供列表与详情。缺资料/无 Test/缺能力保留卡片，不返回技术名称、未批准资料或不可用目标；暂停/归档/CLOSING/CLOSED 隐藏整项。分阶段批量读取不为已排除 gate 加载私有来源/资料/运行内容，READY 复用 UC012 descriptor。UC012 与 UC038 共用纯 Test 核心，并补足 UC012 原先缺少的 Version OAuth/Review 一致性读取，保留既有单目标 RPC 的无目标/缺能力错误。
+- `0031_my_test_application_query` 增加本人 ACTIVE 扫描索引并升级 readiness。游标绑定 caller/规范化 major-capabilities/kind/位置，500 消费扫描、空页 token、跨边界重复 ACTIVE、响应字节预算无跳项与单个合法大项均通过真实 Mongo 测试；不保存可用性，不调用 Auth/Scope/DNS，不写 fence/审计。
+- 最终 `make check-full` / backend 21/21 通过，报告 `.artifacts/verification/20261012T092018Z-09yn1z7x/report.json`，`changed_sources=[]`；真实 Mongo race `1666.881s`、HTTP/gRPC E2E `131.387s`。冻结服务 `cda84cd`、API `aee1dc6`、文档 `5da81da`，使用 Go 1.25.5。真实测试涵盖 clear/replace/Profile 批准/remove/rejoin/suspend/archive/close/账号清理的提交前后双向 snapshot、必要关系与 BSON/时间损坏、存储失败、实际生成 HTTP client、两协议错误/no-store 和隐私字段白名单。
+- UC036 → UC037 → UC038 已按顺序实现、复核、验收闭合。服务/API 源与验收报告保存在持久工作区；原工作区的未提交修改继续保留，三项设计状态仍为 ACCEPTED，当前后端实现状态均为 COMPLETE。
+- 复核记录一个既有非本轮阻断的工程问题：HTTP telemetry 白名单按 route path 注册，而生成 handler 的 operation 是 RPC full method，现有 HTTP 请求可能被折叠为 `http.unmatched`。当前隐私与低基数边界不变；本轮未扩大范围修复该观测性问题。
 
 ## 局部阅读协议
 
