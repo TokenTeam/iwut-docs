@@ -59,6 +59,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-033](../use-cases/UC-APP-033-archive-and-unarchive-application.md) | `ACCEPTED` | `COMPLETE` | 独立 archive status/revision、0026 migration、原子审计/OCC、HTTP/gRPC API、UC029 私有管理投影、UC009/012/023/024 与五个 UC019 OAuth Provider 在线门禁、转让/关闭并发语义及真实 Auth OAuth 归档/恢复验收；服务 `c1c43a4`、API `c0dc59b` | —（当前 App Center 后端范围；前端与生产部署独立交付） |
 | [UC-APP-034](../use-cases/UC-APP-034-query-owned-application-versions.md) | `ACCEPTED` | `COMPLETE` | 当前管理员 Version 列表/详情、四种审核状态与全生命周期历史可见性、最新 Review 最小投影、HMAC 防篡改绑定 keyset、Mongo snapshot、0027 查询索引、HTTP/gRPC 与真实 MongoDB 验收；服务 `90cc40e`、API `592b351` | —（当前 ApplicationVersion 管理查询范围；平台跨 Application 检索、完整 Review 历史与写命令独立交付） |
 | [UC-APP-035](../use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | `ACCEPTED` | `COMPLETE` | 当前管理员放弃从未审核 DRAFT、revision 幂等、最小不可变 abandonment、Version/OAuth 原子删除、身份序号不复用与标签再用、共享 fence 并发顺序、0028 migration、HTTP/gRPC 与真实 MongoDB 验收；服务 `caa193b`、API `e1bc059` | —（当前 App Center 后端范围；已审核 Version 处置、恢复、批量清理与前端独立交付） |
+| [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major Test clear、共享 OCC/fence、EMPTY 保留、不可变 History、0029 migration、保留 Tester/其他槽位、运行读取兼容、HTTP/gRPC 与真实 Auth 验收；服务 `f3a6539` / `b94611e`、API `3398bf4` | —（当前后端范围；前端独立交付） |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 至 UC035 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -68,11 +69,20 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 
 | Use Case | 设计状态 | 实现状态 | 审核范围 |
 | --- | --- | --- | --- |
-| [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
-| [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `NOT_STARTED` | 当前管理员容量概览、Membership 与加入链接历史；REMOVED 分页后端保留 |
+| [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `COMPLETE` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
+| [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `IN_PROGRESS` | 当前管理员容量概览、Membership 与加入链接历史；REMOVED 分页后端保留 |
 | [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `NOT_STARTED` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
 
 三项设计于 2026-10-12 获产品接受，brief 生成后按 UC036 → UC037 → UC038 串行实现；每项复核与验收完成后才激活下一项。
+
+### 2026-10-12 UC036 完成与 UC037 激活
+
+- UC036 业务源码提交 `f3a6539`，恢复后的 API 提交 `3398bf4`、服务 gitlink 提交 `b94611e`，均为本地提交、未 push。BR-PUB-031–036 已覆盖：管理员/Developer/lifecycle 门禁、OCC 先于 no-op、无操作不推进 Clock/ID/fence、原子清空与 History、回滚/溢出、旧目标失效仍可清空、保留其他槽位和 Tester、并发线性化及运行/OAuth 读取。
+- `0029_test_publication_clear` 扩展严格 History validator。四种 `0/100 ACTIVE Tester × 无/有 ACTIVE link` 组合均通过真实 Mongo 测试；清空只改变指定 major 的 Test，不删除 Membership、链接、OAuth client 或 Version。UC012 不回退，UC023 可回退，UC024 普通目录保持 Stable 资格。
+- 最终 `check-auth-app` / cross-service 22/22 通过，报告 `.artifacts/verification/20261012T061950Z-glyatprd/report.json`，`changed_sources=[]`；真实 Mongo race `1223.385s`、HTTP/gRPC E2E `116.787s`、已发布 Auth 通用 E2E `8.669s`。UC036 专项真实 Auth 报告目录 `.artifacts/integration/run-pFmEOTiF`，测试 `7.689s`，证明 Test 授权/code/refresh/UserInfo/delegation 清空后失效，其他 major/Stable/Grey 不受影响，重设后原 Tester 可继续使用。
+- 验收冻结服务 `b94611e`、API `3398bf4`、文档 `910a691`，使用 Go 1.25.5 与 Auth 镜像 `sha256:902dbad234b21951be12c01719bf06f2f5223c7445c6bb8832231405bd821c04`。持久工作区为 `.codex-worktrees/app-center-uc036-038-recovered`；临时目录清理后以保存的服务提交恢复 API/生成物并重新完整验收，不把已丢失的旧报告当作当前交付证据。
+- 工程修正 `d7900ef` 已闭合 UC035 遗留的 docs clone 布局问题，并将 Mongo 包超时调整到 45 分钟；五项既有验证文件修改继续保留、未纳入本工作包提交。
+- UC037 的 ACCEPTED brief 已就绪，按既有审核边界激活；UC038 尚未开工。REMOVED/ALL 分页只保留后端能力，不增加前端历史入口要求。
 
 ## 局部阅读协议
 

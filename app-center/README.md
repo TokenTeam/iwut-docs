@@ -120,9 +120,9 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-033-archive-and-unarchive-application.md](use-cases/UC-APP-033-archive-and-unarchive-application.md)：当前管理员归档或重新上线整个 Application。
 - [UC-APP-034-query-owned-application-versions.md](use-cases/UC-APP-034-query-owned-application-versions.md)：当前管理员查询所管理 Application 的 Version 列表与详情。
 - [UC-APP-035-abandon-unsubmitted-application-version-draft.md](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md)：当前管理员放弃从未提交审核的 DRAFT Version。
-- [UC-APP-036-clear-test-publication-slot.md](use-cases/UC-APP-036-clear-test-publication-slot.md)：清空 Test 槽位提案。
-- [UC-APP-037-query-application-tester-management.md](use-cases/UC-APP-037-query-application-tester-management.md)：Tester 管理查询提案。
-- [UC-APP-038-query-my-test-applications.md](use-cases/UC-APP-038-query-my-test-applications.md)：“我参与的测试”列表与详情提案。
+- [UC-APP-036-clear-test-publication-slot.md](use-cases/UC-APP-036-clear-test-publication-slot.md)：清空 Test 槽位。
+- [UC-APP-037-query-application-tester-management.md](use-cases/UC-APP-037-query-application-tester-management.md)：Tester 管理查询。
+- [UC-APP-038-query-my-test-applications.md](use-cases/UC-APP-038-query-my-test-applications.md)：“我参与的测试”列表与详情。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：已由 UC-APP-026 取代的早期设计说明。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。
