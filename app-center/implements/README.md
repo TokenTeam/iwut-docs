@@ -60,6 +60,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-034](../use-cases/UC-APP-034-query-owned-application-versions.md) | `ACCEPTED` | `COMPLETE` | 当前管理员 Version 列表/详情、四种审核状态与全生命周期历史可见性、最新 Review 最小投影、HMAC 防篡改绑定 keyset、Mongo snapshot、0027 查询索引、HTTP/gRPC 与真实 MongoDB 验收；服务 `90cc40e`、API `592b351` | —（当前 ApplicationVersion 管理查询范围；平台跨 Application 检索、完整 Review 历史与写命令独立交付） |
 | [UC-APP-035](../use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | `ACCEPTED` | `COMPLETE` | 当前管理员放弃从未审核 DRAFT、revision 幂等、最小不可变 abandonment、Version/OAuth 原子删除、身份序号不复用与标签再用、共享 fence 并发顺序、0028 migration、HTTP/gRPC 与真实 MongoDB 验收；服务 `caa193b`、API `e1bc059` | —（当前 App Center 后端范围；已审核 Version 处置、恢复、批量清理与前端独立交付） |
 | [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major Test clear、共享 OCC/fence、EMPTY 保留、不可变 History、0029 migration、保留 Tester/其他槽位、运行读取兼容、HTTP/gRPC 与真实 Auth 验收；服务 `f3a6539` / `b94611e`、API `3398bf4` | —（当前后端范围；前端独立交付） |
+| [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `COMPLETE` | 管理员 Tester 容量/当前链接概览、ACTIVE/REMOVED/ALL episode 和 ACTIVE/REVOKED/ALL 链接分页、签名 ownership-bound keyset、只读 snapshot、0030 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cf71c0b`、API `a0c214f` | —（当前后端范围；REMOVED 前端入口不要求交付，用户资料和新写能力不在本 UC） |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 至 UC035 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -70,8 +71,8 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 | Use Case | 设计状态 | 实现状态 | 审核范围 |
 | --- | --- | --- | --- |
 | [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `COMPLETE` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
-| [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `IN_PROGRESS` | 当前管理员容量概览、Membership 与加入链接历史；REMOVED 分页后端保留 |
-| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `NOT_STARTED` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
+| [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `COMPLETE` | 当前管理员容量概览、Membership 与加入链接历史；REMOVED 分页后端保留 |
+| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `IN_PROGRESS` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
 
 三项设计于 2026-10-12 获产品接受，brief 生成后按 UC036 → UC037 → UC038 串行实现；每项复核与验收完成后才激活下一项。
 
@@ -83,6 +84,13 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 - 验收冻结服务 `b94611e`、API `3398bf4`、文档 `910a691`，使用 Go 1.25.5 与 Auth 镜像 `sha256:902dbad234b21951be12c01719bf06f2f5223c7445c6bb8832231405bd821c04`。持久工作区为 `.codex-worktrees/app-center-uc036-038-recovered`；临时目录清理后以保存的服务提交恢复 API/生成物并重新完整验收，不把已丢失的旧报告当作当前交付证据。
 - 工程修正 `d7900ef` 已闭合 UC035 遗留的 docs clone 布局问题，并将 Mongo 包超时调整到 45 分钟；五项既有验证文件修改继续保留、未纳入本工作包提交。
 - UC037 的 ACCEPTED brief 已就绪，按既有审核边界激活；UC038 尚未开工。REMOVED/ALL 分页只保留后端能力，不增加前端历史入口要求。
+
+### 2026-10-12 UC037 完成与 UC038 激活
+
+- 服务 `cf71c0b`、API `7512655` / `a0c214f` 均为本地提交、未 push。BR-TST-037–043 已覆盖当前管理员私有读取、全部保留状态历史、权威容量与当前链接、episode/链接历史、最小披露、签名游标与只读 snapshot；不查询 Auth 资料，不返回凭证或历史操作人，不增加写权限。
+- `0030_application_tester_management_query` 增加四个显式查询索引并升级 readiness。规范小写持久化 UUID、同时间 ID 排序、ownership/filter/query/caller 游标绑定、合法长 opaque authId 的有界游标、来源/替代关系、lookahead 损坏、重复 ACTIVE/ID/BSON key、时间范围及存储失败分类均已验收。
+- 最终 `make check-full` / backend 21/21 通过，报告 `.artifacts/verification/20261012T071848Z-bxaua0em/report.json`，`changed_sources=[]`；真实 Mongo race `1461.418s`、HTTP/gRPC E2E `124.740s`。冻结服务 `cf71c0b`、API `a0c214f`、文档 `aafb0ae`，使用 Go 1.25.5；定向测试验证生成 HTTP client、两协议 no-store/400/404/500/503、12 种保留状态组合，以及加入/移除/轮换/撤销/转让/关闭/个人清理期间的只读一致快照。
+- 037 已复核完成，038 按既有 ACCEPTED brief 激活。前端、主动退出、Auth 用户资料披露和新的 Tester 写命令均未进入本轮范围；五项原验证 overlay 仍保留、未提交。
 
 ## 局部阅读协议
 

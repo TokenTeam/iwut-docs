@@ -150,6 +150,8 @@ UC036 被接受并实现后，最近 CLEAR_TEST_VERSION 与空 Test 必须一致
 
 按 ApplicationId 二进制升序扫描当前 authId 的 ACTIVE Membership，确保同一 Application 最多一项。pageToken 表示最后已消费的 ApplicationId，不使用 offset 或最近使用/名称/可用性排序。
 
+本查询读取的持久化 UUID ID 使用现有正常写入生成的规范小写 UUIDv7 字符串；固定格式的 simple 字符串顺序等价于 UUID 二进制顺序。已读非规范表示按 StateInconsistent 失败，不规范化、重排或修复历史记录；API path UUID 的既有解析与规范化行为不变。
+
 token 必须签名或等效防篡改，并绑定版本、可信 authId、规范化 major/capabilities 指纹、查询种类和最后扫描位置；建立独立于 UC037/UC034 的签名 domain。换用户、换 major、改变 capability 集合、篡改位置或非法 canonical 编码拒绝；重复/重排 capabilities 规范化后可继续，pageSize 可改变。token 不承载资格，每页重新读取 ACTIVE Membership 和在线门禁。
 
 pageSize 默认20、范围1–100。不返回 totalCount。首版每页最多扫描500个 ACTIVE candidate，响应预算建议3 MiB：到扫描上限可返回少于 pageSize 甚至空页并提供 nextPageToken；到字节预算时 token 停在最后已消费项之前或之处，不能越过尚未返回的合法 item。单个合法 item 必须能单独返回。
@@ -208,6 +210,7 @@ application_tester_memberships:
 
 - 2026-10-12：在 UC036/037 提案完成后建立本人测试参与查询提案；建议在线 ACTIVE Membership 保留暂不可用卡片，门禁隐藏、纯 Test 目标和无 Filter。
 - 2026-10-12：产品审核通过，状态转为 ACCEPTED；按本人资格、正常不可用卡片、在线门禁隐藏和纯 Test 解析边界交付。
+- 2026-10-12：开工复核明确规范小写持久化 UUID 的读取边界，保持索引 keyset 与 UUID 二进制顺序一致，不改变 API UUID 解析行为。
 
 ## 业务规则（UC-APP-038 权威正文）
 
@@ -753,7 +756,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-038-query-my-test-applications.md` | 214 | `a67eafb9221d` |
+| `use-cases/UC-APP-038-query-my-test-applications.md` | 217 | `e3db8b35da72` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
 | `use-cases/UC-APP-028-suspend-and-restore-application.md` | 269 | `155e654469e7` |
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
