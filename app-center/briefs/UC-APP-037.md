@@ -146,6 +146,8 @@ overview 的容量不随分页变化；列表页不返回 totalCount，也不复
 
 Membership 按 `(joinedAt DESC, membershipId DESC)`，JoinLink 按 `(createdAt DESC, joinLinkId DESC)` keyset 分页，时间使用存储精度，UUID 按稳定二进制顺序。相同时间通过 ID 定位，ALL 不按状态分段。
 
+本查询读取的持久化 UUID ID 使用规范小写 UUIDv7 字符串，固定格式下的 simple 字符串顺序与 UUID 二进制顺序等价。现有正常写入已经生成该格式；读到非规范大小写或其他非规范表示时按 StateInconsistent 失败，不在查询中规范化、重排或修复历史记录。此存储校验不改变 API path UUID 的既有解析与规范化行为，也不要求修改相邻写用例的业务语义。
+
 token 至少绑定格式版本、可信调用者、Application、当前 ownershipRevision、查询种类、规范化 status filter、最后排序键，且以服务端密钥签名或等效机制防篡改；不能只用可重算 fingerprint。实现可复用 UC034 的域隔离 HMAC 方案，但必须为本查询种类建立独立 domain。canonical 编码、有界 token 长度和验签失败统一 InvalidTesterManagementPageToken。
 
 每页重新验证可信身份与当前管理员；token 不携带授权结论。换调用者/Application/filter/查询类型、修改位置、或转让后复用旧 ownershipRevision 都拒绝。改变 pageSize 允许继续翻页。每页内部 snapshot 一致，跨页不冻结状态；新加入、移除、轮换、账号清理可能影响后续页，旧页不能作为同步日志。
@@ -210,6 +212,7 @@ Membership 形状和来源依据 [BR-TST-012](../use-cases/UC-APP-009-join-appli
 
 - 2026-10-12：在 UC036 提案完成后建立 Tester 管理查询提案；建议容量概览、episode/链接历史分页和不可恢复凭证的最小披露边界。
 - 2026-10-12：产品审核通过，状态转为 ACCEPTED；REMOVED/ALL 分页保留后端契约，首版界面不要求展示历史入口。
+- 2026-10-12：实现复核明确规范小写持久化 UUID 的读取边界，确保索引 keyset 顺序等价于 UUID 二进制顺序；非规范记录失败关闭，不改变 API UUID 解析或写用例语义。
 
 ## 业务规则（UC-APP-037 权威正文）
 
@@ -719,7 +722,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-037-query-application-tester-management.md` | 216 | `f2d2bac6c26d` |
+| `use-cases/UC-APP-037-query-application-tester-management.md` | 219 | `a3f5c7f757cc` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
 | `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `7e93553d9cdd` |
 | `use-cases/UC-APP-029-query-owned-application-management.md` | 151 | `bf56cdb407d2` |
