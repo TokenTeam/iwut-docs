@@ -143,7 +143,7 @@ every real change
 
 | 行为 | 影响 | 当前或目标 |
 | --- | --- | --- |
-| Set/Replace Test | 只改变 testVersionId | 当前已有设置/替换；clear 待设计 |
+| Set/Replace Test | 只改变 testVersionId | UC007 已实现；[UC036](use-cases/UC-APP-036-clear-test-publication-slot.md) 提案补齐 clear |
 | Set/Adjust/Replace Grey | 设置目标 Version、万分比与稳定 cohort | UC-APP-021 已实现 |
 | Clear Grey | 停止灰度选择，保留 stable | UC-APP-021 已实现 |
 | Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 已接受；允许直接设置，不强制先经过 test/grey |

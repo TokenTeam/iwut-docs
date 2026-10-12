@@ -81,7 +81,7 @@ UC-APP-029 已提供当前管理员的 Application 列表和组合管理详情�
 
 三个槽位在设置 Version 时一致要求同一 Application 的 APPROVED Version，再叠加各自规则。TEST 是已审核的小范围用户分发，还要求当前已批准 Public Profile；开发版 iWUT Client 直接打开任意 URL 属于客户端开发预览，不进入三个槽位，也不产生发布或 OAuth 资格。
 
-Test、Stable 与 Grey 的设置路径均已实现；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 定义 stable 设置、替换、清空、回退语义和 EMPTY Publication，[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 定义 Stable 基线、确定性 cohort、比例调整、清空和 GREY OAuth。首版还需要 test 清空、Application 级停止分发和统一服务端解析。
+Test、Stable 与 Grey 的设置路径均已实现；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 定义 stable 设置、替换、清空、回退语义和 EMPTY Publication，[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 定义 Grey 管理。[UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 提案补齐 Test clear；Application 整体门禁和统一服务端解析已由 UC028、UC033、UC023 实现。
 
 Runtime Publication 不读取客户端本地用户字段，也不执行 Filter。
 
@@ -151,7 +151,7 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029`、`UC-APP-033` | 管理员整应用归档已接受；技术名称明确保持不可变 |
 | Platform Availability | `UC-APP-028` | 可靠告警投递、自动恢复与批量运维不在首版 |
 | Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030`、`UC-APP-034`–`UC-APP-035` | 批准资格撤销或紧急处置 |
-| Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`；`UC-APP-033` 的整应用门禁 | test 清空 |
+| Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`；`UC-APP-033` 的整应用门禁；`UC-APP-036` 提案 | Test clear 待审核/实现 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | 管理员 ProfileRevision 历史查询；受控 icon 资产为以后扩展 |
 | Tester Management | `UC-APP-008`–`UC-APP-011` | 管理查询；主动退出和 test-only 列表体验待定 |
 | Catalog & Resolution | `UC-APP-012` 的 test-only 解析、`UC-APP-022` 的 Filter 管理契约、`UC-APP-023` 的统一解析、`UC-APP-024` 的普通列表/详情 | “我参与的测试”独立入口 |

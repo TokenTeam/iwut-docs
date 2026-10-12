@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义三十三个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–035 已接受：
+当前已经定义三十四个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–035 已接受，UC-APP-036 为待审核提案：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -41,6 +41,7 @@
 - `UC-APP-033`：当前管理员归档或重新上线 ACTIVE Application；归档统一阻止对外在线资格但保留全部配置与 owner 义务。
 - `UC-APP-034`：当前管理员查询所管理 Application 的 Version 列表与当前详情。
 - `UC-APP-035`：当前管理员放弃从未产生 Review 的 DRAFT Version，删除有效内容并保留最小不可变 abandonment。
+- `UC-APP-036`（PROPOSED）：当前管理员清空 exact-major Test 槽位，保留 Tester、其他槽位与 EMPTY Publication。
 
 Application 的稳定业务字段仍为：
 
@@ -117,6 +118,7 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-033-archive-and-unarchive-application.md](use-cases/UC-APP-033-archive-and-unarchive-application.md)：当前管理员归档或重新上线整个 Application。
 - [UC-APP-034-query-owned-application-versions.md](use-cases/UC-APP-034-query-owned-application-versions.md)：当前管理员查询所管理 Application 的 Version 列表与详情。
 - [UC-APP-035-abandon-unsubmitted-application-version-draft.md](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md)：当前管理员放弃从未提交审核的 DRAFT Version。
+- [UC-APP-036-clear-test-publication-slot.md](use-cases/UC-APP-036-clear-test-publication-slot.md)：清空 Test 槽位提案。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：已由 UC-APP-026 取代的早期设计说明。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。

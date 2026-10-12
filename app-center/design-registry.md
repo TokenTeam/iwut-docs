@@ -15,12 +15,12 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-036` |
+| Use Case / App Center | `UC-APP-037` |
 | Business Rule / Application | `BR-APP-059` |
 | Business Rule / Application Profile | `BR-PRF-047` |
 | Business Rule / ApplicationVersion | `BR-VER-034` |
 | Business Rule / Review | `BR-REV-035` |
-| Business Rule / Publication | `BR-PUB-031` |
+| Business Rule / Publication | `BR-PUB-037` |
 | Business Rule / Tester | `BR-TST-037` |
 | Business Rule / Runtime Resolution | `BR-RUN-021` |
 | Business Rule / Application Catalog | `BR-CAT-011` |
@@ -71,6 +71,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 | `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
 | `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `ACCEPTED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
+
+| `UC-APP-036` | 清空测试发布槽位 | `PROPOSED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | 指定 major 的 Test clear、共享 OCC、EMPTY、审计与在线资格；待产品审核。 |
 
 ## Business Rules
 
@@ -291,6 +293,13 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-PUB-028` | 清空与损坏状态 | Lifecycle / Invariant | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-028) | — | — |
 | `BR-PUB-029` | Grey 变化原子性 | Consistency / Concurrency | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-029) | — | — |
 | `BR-PUB-030` | 不隐式提升或扩散 | Boundary | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-030) | — | — |
+
+| `BR-PUB-031` | Test 清空权限与生命周期 | Authorization / Lifecycle | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-031) | — | — |
+| `BR-PUB-032` | 精确清空与依附状态保留 | Boundary / Invariant | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-032) | — | — |
+| `BR-PUB-033` | 共享 OCC 与空槽位 no-op | Concurrency / Idempotency | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-033) | — | — |
+| `BR-PUB-034` | Test 清空原子审计 | Consistency / Audit | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-034) | — | — |
+| `BR-PUB-035` | 减少分发不依赖目标复检 | Validation / Availability | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-035) | — | — |
+| `BR-PUB-036` | 清空后的解析与并发顺序 | Resolution / Concurrency | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-036) | — | — |
 
 ### Tester (`BR-TST`)
 

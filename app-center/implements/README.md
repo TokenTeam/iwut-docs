@@ -64,6 +64,14 @@ UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
+## 待审核工作包
+
+| Use Case | 设计状态 | 实现状态 | 审核范围 |
+| --- | --- | --- | --- |
+| [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `PROPOSED` | `NOT_STARTED` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
+
+这些提案待产品审核后转为 ACCEPTED、生成 brief，再开始实现。
+
 ## 局部阅读协议
 
 设计完整性用于支持按需定位，不表示每个实现者都要通读全部文档。开始一个工作包时只建立以下工作集：

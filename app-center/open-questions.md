@@ -21,7 +21,7 @@
 - 上线应用数量如何提升配额：固定公式、人工审核还是二者结合？
 - CreateApplication 是否需要幂等键？当前名称唯一规则已能阻止同名重复创建，暂不增加幂等键。
 - reviewer decision 当前写入后不可修改。资料审核不建立系统内申诉渠道，开发者需要直接联系平台；若未来确有纠错需求，应设计独立、可审计行为，不原地改写 decision。
-- test 槽位清空是普通管理员行为，还是在存在活跃 tester 时需要额外确认？
+- [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 建议允许当前 APPROVED 管理员在有 ACTIVE Tester 时直接清空指定 major 的 Test，保留 Membership；待产品审核。
 - AI DRAFT 审核未来读取哪些内容、如何标识模型与策略版本、结论是建议还是门禁，以及怎样进入生命周期？当前不实现，也不增加 AI 状态或自动迁移。
 
 ## UC-APP-027 已关闭的接受依赖

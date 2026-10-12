@@ -166,6 +166,8 @@ ApplicationPublicationHistory 是不可修改的操作审计记录，不是 even
 
 ApplicationVersion 的 APPROVED 状态只表达渠道无关的发布资格，不把 Version 自动放入任何槽位。TEST、GREY、STABLE 各自选择已批准 Version 并执行自己的资格规则；设置 Version 时共享相同的批准约束。TEST 额外要求当前已批准 ApplicationProfile，并在运行解析时结合 Tester Membership。开发版客户端直开任意 URL 不创建 ApplicationPublication，也不能绕过 Version 或 Profile 审核。
 
+[UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 提案增加 CLEAR_TEST_VERSION History，保留空 Publication 和 Tester Membership；权限、OCC 与清空字段组合以 BR-PUB-031–036 为准，接受前不改变现行实现依据。
+
 ### ApplicationTesterAccess
 
 ApplicationTesterAccess 是每个 Application 的测试访问协调聚合：
