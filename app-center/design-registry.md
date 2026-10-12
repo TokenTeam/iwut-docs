@@ -15,7 +15,7 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-038` |
+| Use Case / App Center | `UC-APP-039` |
 | Business Rule / Application | `BR-APP-059` |
 | Business Rule / Application Profile | `BR-PRF-047` |
 | Business Rule / ApplicationVersion | `BR-VER-034` |
@@ -23,7 +23,7 @@
 | Business Rule / Publication | `BR-PUB-037` |
 | Business Rule / Tester | `BR-TST-044` |
 | Business Rule / Runtime Resolution | `BR-RUN-021` |
-| Business Rule / Application Catalog | `BR-CAT-011` |
+| Business Rule / Application Catalog | `BR-CAT-018` |
 | Business Rule / OAuth Client | `BR-OAC-014` |
 | Business Rule / Application Filter | `BR-FLT-011` |
 | Architecture Decision | `ADR-008` |
@@ -71,10 +71,9 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 | `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
 | `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `ACCEPTED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
-
 | `UC-APP-036` | 清空测试发布槽位 | `PROPOSED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | 指定 major 的 Test clear、共享 OCC、EMPTY、审计与在线资格；待产品审核。 |
-
 | `UC-APP-037` | 查询 Application Tester 管理视图 | `PROPOSED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 当前管理员容量、Membership 与链接历史私有读取；待产品审核。 |
+| `UC-APP-038` | 查询我参与的测试 Application | `PROPOSED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 本人 ACTIVE Membership、可用性卡片与纯 Test 目标；待产品审核。 |
 
 ## Business Rules
 
@@ -295,7 +294,6 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-PUB-028` | 清空与损坏状态 | Lifecycle / Invariant | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-028) | — | — |
 | `BR-PUB-029` | Grey 变化原子性 | Consistency / Concurrency | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-029) | — | — |
 | `BR-PUB-030` | 不隐式提升或扩散 | Boundary | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-030) | — | — |
-
 | `BR-PUB-031` | Test 清空权限与生命周期 | Authorization / Lifecycle | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-031) | — | — |
 | `BR-PUB-032` | 精确清空与依附状态保留 | Boundary / Invariant | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-032) | — | — |
 | `BR-PUB-033` | 共享 OCC 与空槽位 no-op | Concurrency / Idempotency | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md#br-pub-033) | — | — |
@@ -343,7 +341,6 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-TST-034` | 并发线性化 | Concurrency | [UC-APP-011](use-cases/UC-APP-011-revoke-tester-join-link.md#br-tst-034) | — | — |
 | `BR-TST-035` | 与 Tester Membership 独立 | Boundary | [UC-APP-011](use-cases/UC-APP-011-revoke-tester-join-link.md#br-tst-035) | — | — |
 | `BR-TST-036` | 边界、审计与隐私 | Boundary / Audit / Privacy | [UC-APP-011](use-cases/UC-APP-011-revoke-tester-join-link.md#br-tst-036) | — | — |
-
 | `BR-TST-037` | 当前管理员私有 Tester 读取 | Authorization / Lifecycle | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-037) | — | — |
 | `BR-TST-038` | 容量与当前链接来自权威快照 | Query / Consistency | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-038) | — | — |
 | `BR-TST-039` | Membership episode 历史查询 | Query / Lifecycle | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-039) | — | — |
@@ -391,6 +388,13 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-CAT-008` | 一致快照与失败关闭 | Consistency / Invariant | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-008) | — | — |
 | `BR-CAT-009` | 批量只读热路径 | Performance / Boundary | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-009) | — | — |
 | `BR-CAT-010` | 最小披露与私有缓存 | Privacy / Caching | [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md#br-cat-010) | — | — |
+| `BR-CAT-011` | 本人 ACTIVE Membership 候选 | Authorization / Eligibility | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md#br-cat-011) | — | — |
+| `BR-CAT-012` | 参与记录与可运行状态分离 | Query / Availability | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md#br-cat-012) | — | — |
+| `BR-CAT-013` | 纯 Test 目标且不执行 Filter | Resolution / Boundary | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md#br-cat-013) | — | — |
+| `BR-CAT-014` | 最小参与投影 | Query / Privacy | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md#br-cat-014) | — | — |
+| `BR-CAT-015` | 身份与宿主绑定的分页 | Pagination / Security | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md#br-cat-015) | — | — |
+| `BR-CAT-016` | 测试查询只读快照与失败关闭 | Consistency / Invariant | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md#br-cat-016) | — | — |
+| `BR-CAT-017` | 清空、移除和门禁后的可见性 | Lifecycle / Query | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md#br-cat-017) | — | — |
 
 ### OAuth Client (`BR-OAC`)
 

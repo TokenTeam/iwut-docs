@@ -173,6 +173,8 @@ else:
 
 普通用户目录还需要当前已发布 Profile。Filter 不参与上述服务端槽位解析：服务端随候选 Application 返回 Filter 规则，客户端使用本地用户信息决定最终展示。
 
+[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 提案将 Test clear/尚未发布与参与资格分离：在线 ACTIVE Membership 保留暂不可启动卡片；移除后隐藏，重新加入使用新 episode；暂停、归档和关闭仍隐藏整个测试 item。该提案不新增持久化 lifecycle 状态。
+
 ## 三个生命周期的关系
 
 ```text

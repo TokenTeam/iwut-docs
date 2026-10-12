@@ -70,6 +70,7 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 | --- | --- | --- | --- |
 | [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `PROPOSED` | `NOT_STARTED` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
 | [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `PROPOSED` | `NOT_STARTED` | 当前管理员容量概览、Membership 与加入链接历史、私有分页与最小披露 |
+| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `PROPOSED` | `NOT_STARTED` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
 
 这些提案待产品审核后转为 ACCEPTED、生成 brief，再开始实现。
 

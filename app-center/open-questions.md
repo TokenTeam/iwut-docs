@@ -46,7 +46,7 @@
 
 ## 已确认的后续设计方向
 
-- Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。
+- Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已形成待审核提案，建议包含本人 ACTIVE 的全部在线参与关系，正常无目标保留卡片、门禁隐藏，纯 Test 解析且不执行 Filter。
 - Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
 - 管理员日常停止某个渠道使用 clear；平台紧急处置使用 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 的 Application 级 suspension，不销毁原槽位配置。
 - [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) 已接受管理员日常整 Application 归档：统一阻止 Catalog、启动、Tester Join 与 OAuth 在线 provider，但保留配额、owner 义务和全部配置；普通 Catalog 隐藏继续使用 Stable clear。

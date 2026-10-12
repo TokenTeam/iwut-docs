@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义三十五个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–035 已接受，UC-APP-036–037 为待审核提案：
+当前已经定义三十六个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–035 已接受，UC-APP-036–038 为待审核提案：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -43,6 +43,7 @@
 - `UC-APP-035`：当前管理员放弃从未产生 Review 的 DRAFT Version，删除有效内容并保留最小不可变 abandonment。
 - `UC-APP-036`（PROPOSED）：当前管理员清空 exact-major Test 槽位，保留 Tester、其他槽位与 EMPTY Publication。
 - `UC-APP-037`（PROPOSED）：当前管理员读取 Tester 容量、Membership episode 与加入链接元数据历史。
+- `UC-APP-038`（PROPOSED）：用户查询本人 ACTIVE 测试参与列表与详情，取得纯 Test 目标或暂不可用卡片。
 
 Application 的稳定业务字段仍为：
 
@@ -121,6 +122,7 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-035-abandon-unsubmitted-application-version-draft.md](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md)：当前管理员放弃从未提交审核的 DRAFT Version。
 - [UC-APP-036-clear-test-publication-slot.md](use-cases/UC-APP-036-clear-test-publication-slot.md)：清空 Test 槽位提案。
 - [UC-APP-037-query-application-tester-management.md](use-cases/UC-APP-037-query-application-tester-management.md)：Tester 管理查询提案。
+- [UC-APP-038-query-my-test-applications.md](use-cases/UC-APP-038-query-my-test-applications.md)：“我参与的测试”列表与详情提案。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：已由 UC-APP-026 取代的早期设计说明。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。

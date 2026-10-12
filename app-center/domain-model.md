@@ -256,6 +256,8 @@ CatalogResolver 是跨聚合的只读组合服务。它读取 Application、已�
 
 [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 以兼容 Stable 作为普通公开候选基线，在同一只读页面或详情快照中组合当前公开 Profile、UC023 目标和当前 Filter。它不成为这些事实的新权威来源，也不保存客户端 Filter 求值结果或物化 Catalog item。
 
+[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 提案以本人 ACTIVE Membership 为测试参与候选，复用 UC012 的纯 Test 运行校验并投影当前公开 Profile、availability 与可空 Test descriptor。availability 只为查询结果，不成为 Application 或 Membership 新状态；规则见 BR-CAT-011–017。
+
 ### ReviewPolicyProvider 与发布资格检查
 
 ReviewPolicyProvider 与 ProfileReviewPolicyProvider 分别提供版本化的运行版本审核策略和公开资料审核策略；ScopeCatalog 和 LaunchURLSubmissionPolicy 提供外部校验事实。它们是领域端口或策略服务，不是聚合内实体。
