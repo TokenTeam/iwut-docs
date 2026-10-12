@@ -759,7 +759,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
 | `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
 | `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 312 | `32bcd54ca110` |
-| `use-cases/UC-APP-036-clear-test-publication-slot.md` | 176 | `ee3e0a6ce93b` |
+| `use-cases/UC-APP-036-clear-test-publication-slot.md` | 180 | `e0aa209d3e5f` |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |

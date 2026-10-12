@@ -113,12 +113,15 @@ CLEAR_TEST_VERSION {
 | --- | --- | --- |
 | 缺失/非法 Developer 身份 | 既有 DeveloperIdentity 错误 | 401 / UNAUTHENTICATED |
 | Developer 非 APPROVED，或非当前管理员 | DEVELOPER_APPROVAL_REQUIRED / APPLICATION_ADMIN_REQUIRED | 403 / PERMISSION_DENIED |
-| 非法路径、major、revision 或 HTTP 输入 | 既有输入错误 | 400 / INVALID_ARGUMENT |
+| 非法 applicationId | INVALID_APPLICATION_ID（Publication namespace 新增） | 400 / INVALID_ARGUMENT |
+| 非法 major、revision 或 HTTP 输入 | 既有 major/revision 输入错误 | 400 / INVALID_ARGUMENT |
 | Application 或 exact Publication 不存在 | APPLICATION_PUBLICATION_NOT_FOUND | 404 / NOT_FOUND |
 | revision 不匹配 | APPLICATION_PUBLICATION_REVISION_CONFLICT | 409 / ABORTED |
 | CLOSING/CLOSED | APPLICATION_PUBLICATION_NOT_ALLOWED（新增） | 422 / FAILED_PRECONDITION |
 | Publication 自身结构损坏 | APPLICATION_PUBLICATION_STATE_INCONSISTENT | 500 / INTERNAL |
 | 存储、ID、Clock 或技术字段溢出 | 既有 INTERNAL | 500 / INTERNAL |
+
+UC036 的 path 校验独立于旧 Publication 命令的兼容错误分类；不把非法 Application ID 映射为 VersionNotFound，不改变既有 set/Stable/Grey clear 的错误行为。新增稳定 reason 与既有 enum 字段号兼容追加。
 
 ## 业务规则
 
@@ -174,3 +177,4 @@ clear 提交后的新权威读取不再取得该 major 的 Test 目标，纯 Tes
 
 - 2026-10-12：建立提案；建议允许有 ACTIVE Tester 时清空、保留全部 Membership，并沿用 Publication clear 的权限、query OCC 与审计。
 - 2026-10-12：产品审核通过，状态转为 ACCEPTED；按 UC036 → UC037 → UC038 串行实现与验收。
+- 2026-10-12：实施契约澄清：为已经接受的非法 Application ID 返回 400 语义追加 INVALID_APPLICATION_ID reason，限定 UC036，保留旧命令分类。
