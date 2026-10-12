@@ -1,6 +1,6 @@
 # UC-APP-037：查询 Application Tester 管理视图
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 设计结论
 
@@ -8,7 +8,7 @@
 
 只读权限沿用 [UC029](UC-APP-029-query-owned-application-management.md) 和 [UC034](UC-APP-034-query-owned-application-versions.md)：不要求 APPROVED Developer，暂停、归档或关闭后仍可读取保留历史。写命令继续验证各自的 Developer、管理员和 lifecycle 条件。
 
-Tester 标识返回 opaque testerAuthId，不查询姓名、邮箱、学号或其他 Auth 用户资料。加入 secret/hash/joinUrl 均不返回，遗失的链接依 [BR-TST-004](UC-APP-008-create-or-rotate-tester-join-link.md#br-tst-004) 只能轮换。本提案待产品审核。
+Tester 标识返回 opaque testerAuthId，不查询姓名、邮箱、学号或其他 Auth 用户资料。加入 secret/hash/joinUrl 均不返回，遗失的链接依 [BR-TST-004](UC-APP-008-create-or-rotate-tester-join-link.md#br-tst-004) 只能轮换。产品已审核接受本设计。
 
 ## 目标与范围
 
@@ -19,6 +19,8 @@ Tester 标识返回 opaque testerAuthId，不查询姓名、邮箱、学号或�
 3. ListApplicationTesterJoinLinks：默认 ALL，可过滤 ACTIVE 或 REVOKED 的链接历史分页。
 
 一条列表项已含全部本 UC 可披露字段，首版不另设详情 RPC。管理员通过 membershipId 精确移除一个 episode，通过 joinLinkId 撤销或 expectedActiveJoinLinkId 轮换；这些动作仍分别由 UC010/011/008 实现。
+
+REMOVED/ALL 分页保留为后端能力。首版界面以 ACTIVE 管理为主，不要求提供 REMOVED 历史入口；前端是否展示不改变后端分页和权限契约。
 
 不负责主动退出、黑名单、邀请有效期、恢复旧 episode、链接 credential 恢复、用户搜索、Auth 资料批量披露、通知或平台跨 Application 查询。查询不检查 Test 槽位和宿主兼容性，Tester 资格属于 Application 而不是 Version/major。
 
@@ -189,6 +191,10 @@ JoinLink:   (applicationId, status, createdAt DESC, joinLinkId DESC)
 
 接受后按当时 migration ledger 分配编号并升级 readiness，不新增业务集合。签名 key 只在配置/adapter 边界，查询不得持有明文加入凭证。UC036 的 Test clear 不影响本管理查询，两个用例只在实现顺序上相邻。
 
+## 引用规则与实现输入
+
+Membership 形状和来源依据 [BR-TST-012](UC-APP-009-join-application-as-tester.md#br-tst-012)、[BR-TST-014](UC-APP-009-join-application-as-tester.md#br-tst-014)、[BR-TST-016](UC-APP-009-join-application-as-tester.md#br-tst-016)、[BR-TST-023](UC-APP-010-remove-application-tester.md#br-tst-023)；链接形状依据 [BR-TST-003](UC-APP-008-create-or-rotate-tester-join-link.md#br-tst-003)、[BR-TST-005](UC-APP-008-create-or-rotate-tester-join-link.md#br-tst-005)、[BR-TST-031](UC-APP-011-revoke-tester-join-link.md#br-tst-031)。私有历史与转让沿用 [BR-APP-039](UC-APP-029-query-owned-application-management.md#br-app-039) 和 [BR-APP-015](UC-APP-026-transfer-application-administration.md#br-app-015)。
+
 ## 验收与交付边界
 
 1. 当前管理员无需 APPROVED 可读；其他角色、旧管理员及不存在 Application 的错误不泄漏资源。
@@ -207,3 +213,4 @@ JoinLink:   (applicationId, status, createdAt DESC, joinLinkId DESC)
 ## 变更记录
 
 - 2026-10-12：在 UC036 提案完成后建立 Tester 管理查询提案；建议容量概览、episode/链接历史分页和不可恢复凭证的最小披露边界。
+- 2026-10-12：产品审核通过，状态转为 ACCEPTED；REMOVED/ALL 分页保留后端契约，首版界面不要求展示历史入口。

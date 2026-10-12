@@ -1,6 +1,6 @@
 # UC-APP-038：查询我参与的测试 Application
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 设计结论
 
@@ -8,9 +8,9 @@
 
 候选来自当前用户的 Membership，不要求 Stable。已有 Stable 的 Application 也可出现在此入口；它与 [UC024 普通 Catalog](UC-APP-024-query-public-application-catalog.md) 独立，两个入口的候选资格和使用目的不同。
 
-本提案建议保留“已经参与、暂时不可启动”的卡片，因为 [UC009](UC-APP-009-join-application-as-tester.md) 允许先加入、后设置 Test，[UC036](UC-APP-036-clear-test-publication-slot.md) 建议清空时保留 Membership。用户应能区分失去资格与等待开发者发布。资料尚未公开时不使用技术名称或未审核资料作为替代。
+保留“已经参与、暂时不可启动”的卡片，因为 [UC009](UC-APP-009-join-application-as-tester.md) 允许先加入、后设置 Test，[UC036](UC-APP-036-clear-test-publication-slot.md) 清空时保留 Membership。用户应能区分失去资格与等待开发者发布。资料尚未公开时不使用技术名称或未审核资料作为替代。
 
-暂停、归档、CLOSING/CLOSED 仍遵守既有在线门禁：列表隐藏、详情统一 NOT_FOUND，不返回占位卡片或目标。ACTIVE Membership 保留不意味着绕过这些门禁。提案待产品审核。
+暂停、归档、CLOSING/CLOSED 仍遵守既有在线门禁：列表隐藏、详情统一 NOT_FOUND，不返回占位卡片或目标。ACTIVE Membership 保留不意味着绕过这些门禁。产品已审核接受本设计。
 
 ## 目标与范围
 
@@ -190,6 +190,10 @@ application_tester_memberships:
 
 接受后生成 brief，交付独立 API、Catalog query port/read model、批量 snapshot adapter、索引、HTTP/gRPC 和真实 Mongo E2E；最低门禁 `make check-full`。查询不改变 Auth runtime provider 或签发规则，不需新增 Auth API。UC036/037 与本 UC 按请求顺序设计；实现可复用 036 的新 History 支持，037 的管理员读权不能替代本人资格。
 
+## 引用规则与实现输入
+
+批量纯 Test 解析复用 [BR-RUN-001](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-001)、[BR-RUN-002](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-002)、[BR-RUN-003](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-003)、[BR-RUN-004](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-004)、[BR-RUN-005](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-005)、[BR-RUN-006](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-006)、[BR-RUN-007](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-007)、[BR-RUN-008](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-008)；公开资料批准一致性依据 [BR-PRF-030](UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)。在线门禁复用 [BR-APP-031](UC-APP-028-suspend-and-restore-application.md#br-app-031)、[BR-APP-053](UC-APP-033-archive-and-unarchive-application.md#br-app-053)，Test clear 复用 [BR-PUB-036](UC-APP-036-clear-test-publication-slot.md#br-pub-036)。
+
 ## 验收场景
 
 1. 普通 USER 显式加入 test-only 或 stable-backed Application 后可在此入口看到；无 Membership 的管理员/Reviewer、匿名和其他用户不能取得卡片。
@@ -207,3 +211,4 @@ application_tester_memberships:
 ## 变更记录
 
 - 2026-10-12：在 UC036/037 提案完成后建立本人测试参与查询提案；建议在线 ACTIVE Membership 保留暂不可用卡片，门禁隐藏、纯 Test 目标和无 Filter。
+- 2026-10-12：产品审核通过，状态转为 ACCEPTED；按本人资格、正常不可用卡片、在线门禁隐藏和纯 Test 解析边界交付。

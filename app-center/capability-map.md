@@ -81,7 +81,7 @@ UC-APP-029 已提供当前管理员的 Application 列表和组合管理详情�
 
 三个槽位在设置 Version 时一致要求同一 Application 的 APPROVED Version，再叠加各自规则。TEST 是已审核的小范围用户分发，还要求当前已批准 Public Profile；开发版 iWUT Client 直接打开任意 URL 属于客户端开发预览，不进入三个槽位，也不产生发布或 OAuth 资格。
 
-Test、Stable 与 Grey 的设置路径均已实现；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 定义 stable 设置、替换、清空、回退语义和 EMPTY Publication，[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 定义 Grey 管理。[UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 提案补齐 Test clear；Application 整体门禁和统一服务端解析已由 UC028、UC033、UC023 实现。
+Test、Stable 与 Grey 的设置路径均已实现；[UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) 定义 stable 管理，[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 定义 Grey 管理。[UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 已接受 Test clear，待串行实现；Application 整体门禁和统一服务端解析已由 UC028、UC033、UC023 实现。
 
 Runtime Publication 不读取客户端本地用户字段，也不执行 Filter。
 
@@ -99,7 +99,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 负责 Application 级 Tester 加入链接、Membership episode、100 人容量和移除历史。Tester 资格不绑定 Version 或 RPC API major；实际 test 目标由 Runtime Publication 解析。
 
-已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 提案定义当前管理员的容量概览、Membership 和链接历史分页；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 提案定义本人参与列表与纯 Test 可用性。主动退出是否进入首版仍待决定。
+已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 已接受当前管理员容量概览、Membership 和链接历史分页，REMOVED 分页保留后端、界面可不展示；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已接受本人参与列表与纯 Test 可用性。主动退出是否进入首版仍待决定。
 
 这项能力不实现二维码界面，也不把 Tester 状态保存到 Auth。
 
@@ -116,7 +116,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 服务端产物是“候选 Application + 已解析启动目标 + Filter 规则”，不是客户端最终展示列表。客户端使用本地用户信息执行 Filter 后形成最终列表；App Center 不接收这些本地字段，也不保存用户级 Filter 求值结果。
 
-[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已完成单 Application 的统一发布目标解析，固定 `TEST > GREY > STABLE`、匿名 Stable、能力回退与损坏状态失败关闭。[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 已完成 Stable-backed 普通候选列表与详情。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 提案另由本人 ACTIVE Membership 建立候选，包含 test-only 和 stable-backed 应用，纯 Test 解析且不执行 Filter；正常无目标保留参与卡片，在线门禁隐藏。
+[UC-APP-023](use-cases/UC-APP-023-resolve-unified-launch-target.md) 已完成单 Application 统一解析，[UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 已完成 Stable-backed 普通目录。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已接受本人 ACTIVE Membership 候选，包含 test-only 和 stable-backed 应用，纯 Test 解析且不执行 Filter；正常无目标保留参与卡片，在线门禁隐藏，待串行实现。
 
 ### OAuth Client Integration
 
@@ -151,10 +151,10 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029`、`UC-APP-033` | 管理员整应用归档已接受；技术名称明确保持不可变 |
 | Platform Availability | `UC-APP-028` | 可靠告警投递、自动恢复与批量运维不在首版 |
 | Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030`、`UC-APP-034`–`UC-APP-035` | 批准资格撤销或紧急处置 |
-| Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`；`UC-APP-033` 的整应用门禁；`UC-APP-036` 提案 | Test clear 待审核/实现 |
+| Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`、`UC-APP-033`、`UC-APP-036` | Test clear 待实现 |
 | Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | 管理员 ProfileRevision 历史查询；受控 icon 资产为以后扩展 |
-| Tester Management | `UC-APP-008`–`UC-APP-011`；`UC-APP-037` 提案 | 管理查询待审核/实现；主动退出待定 |
-| Catalog & Resolution | `UC-APP-012`、`UC-APP-022`–`UC-APP-024`；`UC-APP-038` 提案 | “我参与的测试”待审核/实现 |
+| Tester Management | `UC-APP-008`–`UC-APP-011`、`UC-APP-037` | 管理查询待实现；主动退出待定 |
+| Catalog & Resolution | `UC-APP-012`、`UC-APP-022`–`UC-APP-024`、`UC-APP-038` | “我参与的测试”待实现 |
 | OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 与跨服务验证已完成；Auth grant/code/token 继续独立交付 |
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。

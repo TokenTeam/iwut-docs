@@ -6,7 +6,7 @@
 
 ## 当前迭代
 
-当前已经定义三十六个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–035 已接受，UC-APP-036–038 为待审核提案：
+当前已经定义三十六个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–038 已接受：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -41,9 +41,9 @@
 - `UC-APP-033`：当前管理员归档或重新上线 ACTIVE Application；归档统一阻止对外在线资格但保留全部配置与 owner 义务。
 - `UC-APP-034`：当前管理员查询所管理 Application 的 Version 列表与当前详情。
 - `UC-APP-035`：当前管理员放弃从未产生 Review 的 DRAFT Version，删除有效内容并保留最小不可变 abandonment。
-- `UC-APP-036`（PROPOSED）：当前管理员清空 exact-major Test 槽位，保留 Tester、其他槽位与 EMPTY Publication。
-- `UC-APP-037`（PROPOSED）：当前管理员读取 Tester 容量、Membership episode 与加入链接元数据历史。
-- `UC-APP-038`（PROPOSED）：用户查询本人 ACTIVE 测试参与列表与详情，取得纯 Test 目标或暂不可用卡片。
+- `UC-APP-036`：当前管理员清空 exact-major Test 槽位，保留 Tester、其他槽位与 EMPTY Publication。
+- `UC-APP-037`：当前管理员读取 Tester 容量、Membership episode 与加入链接元数据历史。
+- `UC-APP-038`：用户查询本人 ACTIVE 测试参与列表与详情，取得纯 Test 目标或暂不可用卡片。
 
 Application 的稳定业务字段仍为：
 
@@ -134,6 +134,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-031 及 UC-APP-033 至 UC-APP-035 均为 `ACCEPTED`；UC-APP-017、UC-APP-032 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-031 及 UC-APP-033 至 UC-APP-038 均为 `ACCEPTED`；UC-APP-017、UC-APP-032 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准。
 
 OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付，UC-APP-020/021 已启用 STABLE/GREY。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有。

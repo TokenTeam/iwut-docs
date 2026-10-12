@@ -166,7 +166,7 @@ ApplicationPublicationHistory 是不可修改的操作审计记录，不是 even
 
 ApplicationVersion 的 APPROVED 状态只表达渠道无关的发布资格，不把 Version 自动放入任何槽位。TEST、GREY、STABLE 各自选择已批准 Version 并执行自己的资格规则；设置 Version 时共享相同的批准约束。TEST 额外要求当前已批准 ApplicationProfile，并在运行解析时结合 Tester Membership。开发版客户端直开任意 URL 不创建 ApplicationPublication，也不能绕过 Version 或 Profile 审核。
 
-[UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 提案增加 CLEAR_TEST_VERSION History，保留空 Publication 和 Tester Membership；权限、OCC 与清空字段组合以 BR-PUB-031–036 为准，接受前不改变现行实现依据。
+[UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 已接受 CLEAR_TEST_VERSION History、保留空 Publication 和 Tester Membership；权限、OCC 与清空字段组合以 BR-PUB-031–036 为准。
 
 ### ApplicationTesterAccess
 
@@ -186,7 +186,7 @@ ApplicationTesterJoinLink 和 ApplicationTesterMembership 是生命周期独立�
 
 Membership 是一次 episode。REMOVED 历史不会恢复，重新加入产生新 membershipId，参见 [BR-TST-016](use-cases/UC-APP-009-join-application-as-tester.md#br-tst-016)。历史记录可以独立读取；聚合执行命令时只需要装载保护当前不变量所需的状态。
 
-[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 提案定义 Tester 管理只读投影：容量/当前链接、Membership episode 与链接历史。不增加实体或状态，不恢复凭证；分页、关系校验与披露边界以 BR-TST-037–043 为准。
+[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 已接受 Tester 管理只读投影：容量/当前链接、Membership episode 与链接历史。不增加实体或状态，不恢复凭证；分页、关系校验与披露边界以 BR-TST-037–043 为准。
 
 ### ApplicationFilter 与 ApplicationFilterRevision
 
@@ -256,7 +256,7 @@ CatalogResolver 是跨聚合的只读组合服务。它读取 Application、已�
 
 [UC-APP-024](use-cases/UC-APP-024-query-public-application-catalog.md) 以兼容 Stable 作为普通公开候选基线，在同一只读页面或详情快照中组合当前公开 Profile、UC023 目标和当前 Filter。它不成为这些事实的新权威来源，也不保存客户端 Filter 求值结果或物化 Catalog item。
 
-[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 提案以本人 ACTIVE Membership 为测试参与候选，复用 UC012 的纯 Test 运行校验并投影当前公开 Profile、availability 与可空 Test descriptor。availability 只为查询结果，不成为 Application 或 Membership 新状态；规则见 BR-CAT-011–017。
+[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已接受本人 ACTIVE Membership 测试参与候选，复用 UC012 的纯 Test 运行校验并投影当前公开 Profile、availability 与可空 Test descriptor。availability 只为查询结果，不成为 Application 或 Membership 新状态；规则见 BR-CAT-011–017。
 
 ### ReviewPolicyProvider 与发布资格检查
 

@@ -64,15 +64,15 @@ UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 
 
 API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
-## 待审核工作包
+## 当前串行工作包
 
 | Use Case | 设计状态 | 实现状态 | 审核范围 |
 | --- | --- | --- | --- |
-| [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `PROPOSED` | `NOT_STARTED` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
-| [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `PROPOSED` | `NOT_STARTED` | 当前管理员容量概览、Membership 与加入链接历史、私有分页与最小披露 |
-| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `PROPOSED` | `NOT_STARTED` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
+| [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `IN_PROGRESS` | Test clear、保留 Tester、共享 OCC、History 与在线读取兼容 |
+| [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `NOT_STARTED` | 当前管理员容量概览、Membership 与加入链接历史；REMOVED 分页后端保留 |
+| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `NOT_STARTED` | 本人 ACTIVE 参与列表/详情、纯 Test、无目标卡片、gate 隐藏与无 Filter |
 
-这些提案待产品审核后转为 ACCEPTED、生成 brief，再开始实现。
+三项设计于 2026-10-12 获产品接受，brief 生成后按 UC036 → UC037 → UC038 串行实现；每项复核与验收完成后才激活下一项。
 
 ## 局部阅读协议
 

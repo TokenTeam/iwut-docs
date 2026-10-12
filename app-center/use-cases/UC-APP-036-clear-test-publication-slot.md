@@ -1,6 +1,6 @@
 # UC-APP-036：清空测试发布槽位
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
 ## 设计结论
 
@@ -8,7 +8,7 @@
 
 本提案沿用 [UC020 Stable clear](UC-APP-020-manage-stable-publication-slot.md#清空主流程) 与 [UC021 Grey clear](UC-APP-021-manage-grey-rollout.md) 的共享 revision 和不可变 History。存在 ACTIVE Tester 不阻止清空，也不要求服务端额外确认；管理员可以在界面确认其操作，但人数不能成为新的领域前置条件。再设置 Test 后，既有 ACTIVE Tester 继续具有测试资格。
 
-本提案待产品审核；接受前不作为实现依据。
+产品已审核接受本设计，可生成 brief 并开始实现。
 
 ## 目标与范围
 
@@ -152,6 +152,10 @@ Publication 必须已存在且正 expected revision 精确匹配，检查 revisi
 
 clear 提交后的新权威读取不再取得该 major 的 Test 目标，纯 Test 失败，统一解析按既有 Grey/Stable 规则继续。变更与所有槽位写入、转让和关闭具有明确先后顺序；不得从旧 History 恢复 Test，或破坏其他槽位的 History 校验。
 
+## 引用规则与实现输入
+
+实现沿用 [BR-PUB-014](UC-APP-020-manage-stable-publication-slot.md#br-pub-014)、[BR-PUB-017](UC-APP-020-manage-stable-publication-slot.md#br-pub-017)、[BR-PUB-018](UC-APP-020-manage-stable-publication-slot.md#br-pub-018) 的共享 OCC、EMPTY 与原子性；转让/关闭依据 [BR-APP-015](UC-APP-026-transfer-application-administration.md#br-app-015)、[BR-APP-022](UC-APP-027-close-application.md#br-app-022)、[BR-APP-027](UC-APP-027-close-application.md#br-app-027)；在线读取分别遵守 [BR-RUN-003](UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-003)、[BR-RUN-016](UC-APP-023-resolve-unified-launch-target.md#br-run-016) 和 [BR-CAT-001](UC-APP-024-query-public-application-catalog.md#br-cat-001)。这些引用只导航既有规则，不扩大本命令范围。
+
 ## 验收与交付边界
 
 1. 清空 test-only、Test+Stable、Test+Grey+Stable 仅影响指定 Test；全空保留身份/revision，其他 major 不变。
@@ -164,8 +168,9 @@ clear 提交后的新权威读取不再取得该 major 的 Test 目标，纯 Tes
 8. HTTP/gRPC 输入、成功/no-op/错误/no-store 与生成客户端均验证。
 9. 真实 Mongo + App/Auth E2E 覆盖 clear 前后 TEST authorize、待兑换 code、refresh、UserInfo/delegation 的当前门禁；其他 major、STABLE/GREY 正常；重新 set 按当前资格恢复。
 
-接受后生成 brief，再由实现工作包交付 API、Domain/UseCase/Port、Mongo 事务/迁移、所有受影响读取与双服务验收。最终门禁为 `make check-auth-app`，因为此命令改变 Auth 消费的运行资格；当前只完成设计。
+生成 brief 后由实现工作包交付 API、Domain/UseCase/Port、Mongo 事务/迁移、所有受影响读取与双服务验收。最终门禁为 `make check-auth-app`，因为此命令改变 Auth 消费的运行资格。
 
 ## 变更记录
 
 - 2026-10-12：建立提案；建议允许有 ACTIVE Tester 时清空、保留全部 Membership，并沿用 Publication clear 的权限、query OCC 与审计。
+- 2026-10-12：产品审核通过，状态转为 ACCEPTED；按 UC036 → UC037 → UC038 串行实现与验收。

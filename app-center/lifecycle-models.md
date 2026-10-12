@@ -143,7 +143,7 @@ every real change
 
 | 行为 | 影响 | 当前或目标 |
 | --- | --- | --- |
-| Set/Replace Test | 只改变 testVersionId | UC007 已实现；[UC036](use-cases/UC-APP-036-clear-test-publication-slot.md) 提案补齐 clear |
+| Set/Replace Test | 只改变 testVersionId | UC007 已实现；[UC036](use-cases/UC-APP-036-clear-test-publication-slot.md) 已接受 clear |
 | Set/Adjust/Replace Grey | 设置目标 Version、万分比与稳定 cohort | UC-APP-021 已实现 |
 | Clear Grey | 停止灰度选择，保留 stable | UC-APP-021 已实现 |
 | Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 已接受；允许直接设置，不强制先经过 test/grey |
@@ -173,7 +173,7 @@ else:
 
 普通用户目录还需要当前已发布 Profile。Filter 不参与上述服务端槽位解析：服务端随候选 Application 返回 Filter 规则，客户端使用本地用户信息决定最终展示。
 
-[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 提案将 Test clear/尚未发布与参与资格分离：在线 ACTIVE Membership 保留暂不可启动卡片；移除后隐藏，重新加入使用新 episode；暂停、归档和关闭仍隐藏整个测试 item。该提案不新增持久化 lifecycle 状态。
+[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 将 Test clear/尚未发布与参与资格分离：在线 ACTIVE Membership 保留暂不可启动卡片；移除后隐藏，重新加入使用新 episode；暂停、归档和关闭仍隐藏整个测试 item。不新增持久化 lifecycle 状态。
 
 ## 三个生命周期的关系
 

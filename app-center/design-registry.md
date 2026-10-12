@@ -71,9 +71,9 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 | `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
 | `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `ACCEPTED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
-| `UC-APP-036` | 清空测试发布槽位 | `PROPOSED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | 指定 major 的 Test clear、共享 OCC、EMPTY、审计与在线资格；待产品审核。 |
-| `UC-APP-037` | 查询 Application Tester 管理视图 | `PROPOSED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 当前管理员容量、Membership 与链接历史私有读取；待产品审核。 |
-| `UC-APP-038` | 查询我参与的测试 Application | `PROPOSED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 本人 ACTIVE Membership、可用性卡片与纯 Test 目标；待产品审核。 |
+| `UC-APP-036` | 清空测试发布槽位 | `ACCEPTED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | 已接受 Test clear、共享 OCC、EMPTY、审计与在线资格；串行实现。 |
+| `UC-APP-037` | 查询 Application Tester 管理视图 | `ACCEPTED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 已接受容量与私有历史查询；REMOVED 分页后端保留、界面可不展示。 |
+| `UC-APP-038` | 查询我参与的测试 Application | `ACCEPTED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 已接受本人 ACTIVE 参与、暂不可用卡片、门禁隐藏与纯 Test。 |
 
 ## Business Rules
 

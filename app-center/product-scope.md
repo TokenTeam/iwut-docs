@@ -194,7 +194,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 
 以下问题会改变尚未具体化的能力边界，应在对应 UC 开始前确认：
 
-1. **测试参与查询提案**：[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 建议按本人 ACTIVE Membership 查询 test-only 和 stable-backed 应用；无公开资料/兼容 Test 时保留不可用卡片，移除后不可见，暂停/归档/关闭遵守在线门禁隐藏。分页、纯 Test 目标与无 Filter 边界已写成待审核提案。
+1. **测试参与查询已接受**：[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 按本人 ACTIVE Membership 查询 test-only 和 stable-backed 应用；无公开资料/兼容 Test 时保留不可用卡片，移除后不可见，暂停/归档/关闭遵守在线门禁隐藏。实现按既定串行工作包交付。
 2. **UC028 的交付细节**：业务状态、权限和 OAuth 残余窗口已经接受；当前实现需固定 API 字段号、告警 outbox 复用点并完成真实 Auth/App 联合测试。
 3. **受控图标资产**：当前 icon 只是可空不透明字符串；何时升级为受控资产、由谁拥有并如何迁移，等待真实需求后决定，不阻塞首版资料审核。
 4. **Filter 客户端交付**：App Center 规则模型与管理流程已由 UC-APP-022 确定；官方客户端仍需实现求值器、共享向量和管理 UI。

@@ -21,7 +21,7 @@
 - 上线应用数量如何提升配额：固定公式、人工审核还是二者结合？
 - CreateApplication 是否需要幂等键？当前名称唯一规则已能阻止同名重复创建，暂不增加幂等键。
 - reviewer decision 当前写入后不可修改。资料审核不建立系统内申诉渠道，开发者需要直接联系平台；若未来确有纠错需求，应设计独立、可审计行为，不原地改写 decision。
-- [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 建议允许当前 APPROVED 管理员在有 ACTIVE Tester 时直接清空指定 major 的 Test，保留 Membership；待产品审核。
+- [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 已接受允许当前 APPROVED 管理员在有 ACTIVE Tester 时清空指定 major 的 Test，保留 Membership。
 - AI DRAFT 审核未来读取哪些内容、如何标识模型与策略版本、结论是建议还是门禁，以及怎样进入生命周期？当前不实现，也不增加 AI 状态或自动迁移。
 
 ## UC-APP-027 已关闭的接受依赖
@@ -46,7 +46,7 @@
 
 ## 已确认的后续设计方向
 
-- Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已形成待审核提案，建议包含本人 ACTIVE 的全部在线参与关系，正常无目标保留卡片、门禁隐藏，纯 Test 解析且不执行 Filter。
+- Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已接受本人 ACTIVE 在线参与查询，正常无目标保留卡片、门禁隐藏，纯 Test 解析且不执行 Filter。
 - Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
 - 管理员日常停止某个渠道使用 clear；平台紧急处置使用 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 的 Application 级 suspension，不销毁原槽位配置。
 - [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) 已接受管理员日常整 Application 归档：统一阻止 Catalog、启动、Tester Join 与 OAuth 在线 provider，但保留配额、owner 义务和全部配置；普通 Catalog 隐藏继续使用 Stable clear。
