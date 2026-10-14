@@ -1,6 +1,6 @@
 # Application Profile 管理与审核查询契约
 
-状态：`PROPOSED`（管理员查询）；Reviewer 查询已由 UC-APP-031 接受并交付
+状态：`ACCEPTED`；管理员查询由 UC-APP-039 接受，Reviewer 查询由 UC-APP-031 接受并交付
 
 ## 定位
 
@@ -9,15 +9,15 @@
 本文档包含四个查询：
 
 ```text
-ListApplicationProfileRevisionsForAdmin
-GetApplicationProfileRevisionForAdmin
+ListApplicationProfileRevisions
+GetApplicationProfileRevision
 ListPendingApplicationProfileReviews
 GetApplicationProfileReviewForReviewer
 ```
 
 这些查询不改变领域状态，不产生新的 ProfileRevision、ProfileReview、decision 或审计事实。它们也不定义 HTTP/RPC、JSON 序列化、数据库、索引、缓存或页面布局。
 
-管理员列表/详情仍是候选查询语义。Reviewer 队列/详情已由 [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) 及 `BR-PRF-041`–`046` 固化，本文只作导航，不再单独扩展其规则。状态、权限和不变量继续以 UC-APP-013–016、UC-APP-031 中的 `BR-PRF-*` 为权威正文；本契约如与 BR 冲突，以 BR 为准。
+管理员列表/详情已由 [UC-APP-039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) 及 BR-PRF-047–056 接受。Reviewer 队列/详情由 [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) 及 BR-PRF-041–046 固化。本文作查询导航，业务语义以对应 UC/BR 为唯一权威；不重复维护另一套投影定义。
 
 ## 共享约定
 
@@ -46,7 +46,7 @@ Reviewer 查询只接受包含 `app.profile.review` 的可信身份。`app.versi
 
 ### 身份隐藏
 
-管理员查询中，Application 不存在、ProfileRevision 不属于 Application，或调用者不是当前 admin，都返回同一类 `ApplicationProfileNotFound` 结果，避免向非管理员暴露资料是否存在。
+管理员查询中，Application 不存在、ProfileRevision 不属于 Application，或调用者不是当前 admin，都返回同一类 `ApplicationProfileManagementNotFound` 结果，避免向非管理员暴露资料是否存在。
 
 Reviewer 查询先检查可信身份和 `app.profile.review`，再读取审核事实。缺少权限返回 `ApplicationProfileReviewPermissionRequired`；Review 不存在或引用路径不一致返回 `ApplicationProfileReviewNotFound`。
 
@@ -71,115 +71,18 @@ Page<T> {
 
 ### 一致性
 
-- 尚未交付的管理员列表可来自读投影，允许短暂滞后，并返回 `asOf`。
+- UC-APP-039 管理员列表与详情在同一个 MongoDB majority read-only snapshot 中构造，不使用滞后投影。
 - UC-APP-031 的 Reviewer 单页和详情在同一个 MongoDB snapshot 中构造，不允许以投影滞后隐藏不变量损坏。
 - 详情查询从 App Center 权威事实构造单个内部一致的快照。
 - 查询结果不是写入授权。UC-APP-014、015 和 016 在执行时继续校验当前 admin、状态、revision、利益冲突和公开指针前置值。
 
 ## 管理员查询
 
-### ListApplicationProfileRevisionsForAdmin
+[ListApplicationProfileRevisions](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md#列表投影) 提供状态过滤、私有签名 keyset、完整内容摘要、当前工作/公开指针与最小最新审核摘要。
 
-用途：为 Application 管理页提供公开资料修订列表。
+[GetApplicationProfileRevision](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md#详情与审核历史) 提供完整当前内容、createdBy/必要时间、协调状态、最新 Review 与一页可遍历的审核历史。REJECTED 原文保留，前端重新编辑仍调用普通创建命令。
 
-输入：
-
-```text
-ListApplicationProfileRevisionsForAdmin {
-  applicationId
-  reviewStatus?: DRAFT | SUBMITTED | APPROVED | REJECTED
-  page: PageRequest
-}
-```
-
-结果按 `sequence DESC` 排序；sequence 在单个 Application 内唯一，因此排序稳定。
-
-```text
-AdminProfileRevisionSummary {
-  profileRevisionId
-  sequence
-  reviewStatus
-  displayName
-  description
-  icon
-  revision
-  createdAt
-  updatedAt
-  isCurrentWorkingRevision
-  isCurrentPublished
-  latestReview?: {
-    profileReviewId
-    attempt
-    status
-    submittedAt
-    decidedAt?
-    outcome?
-  }
-}
-```
-
-description 返回完整纯文本，不由查询契约截断。页面如需摘要，由展示层处理。
-
-### GetApplicationProfileRevisionForAdmin
-
-用途：查看修订内容、审核历史和当前协调状态；该结果也是网页端重新编辑被拒绝内容的数据来源。
-
-输入：
-
-```text
-GetApplicationProfileRevisionForAdmin {
-  applicationId
-  profileRevisionId
-}
-```
-
-返回：
-
-```text
-AdminProfileRevisionDetail {
-  applicationId
-  profileRevisionId
-  sequence
-  reviewStatus
-  revision
-  content: {
-    displayName
-    description
-    icon
-  }
-  audit: {
-    createdBy
-    createdAt
-    updatedBy
-    updatedAt
-    submittedBy?
-    submittedAt?
-  }
-  profileState: {
-    workingProfileRevisionId?
-    currentPublishedProfileRevisionId?
-  }
-  reviews: AdminProfileReviewSummary[]
-}
-
-AdminProfileReviewSummary {
-  profileReviewId
-  attempt
-  status
-  sourceRevision
-  submittedAt
-  decision?: {
-    outcome
-    reason?
-    policyVersion
-    decidedAt
-  }
-}
-```
-
-`reviews` 按 `attempt ASC` 返回完整历史。管理员视图返回可向开发者展示的审核结果和 reason，不返回 `confirmedCheckIds`、Reviewer 内部备注或其他内部审核信息。
-
-对 REJECTED Revision，结果照常包含完整 `content`。网页端可以将其复制到本地表单，然后调用 [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) 创建全新 DRAFT。该查询不返回复制 token，也不生成服务端恢复能力，与 [BR-PRF-031](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) 保持一致。
+管理员查询的生命周期可见性、ownership-bound token、历史分页、2 MiB 响应预算、错误和隐私字段以 UC039 为准；不返回 updatedBy/submittedBy/Reviewer 身份、snapshot 正文、内部检查或当前 policy。历史不作为一份无界数组返回。所有响应 private, no-store，查询没有写副作用。
 
 ## Reviewer 查询
 
@@ -292,6 +195,6 @@ ReviewerProfileReviewDetail {
 - 非当前 admin 无法通过管理员查询区分 Application 或 Revision 是否存在。
 - 具有 `app.profile.review` 的 Reviewer 可以读取 PENDING 队列和审核详情，并看到查询时的利益冲突提示。
 - Reviewer 详情在可决定时返回构造 UC-APP-016 Command 所需的并发前置值和审核策略。
-- 列表排序和 cursor 分页在并发插入下保持稳定；详情内的 Review、Revision、Profile 指针和策略来自一个内部一致快照。
+- 列表排序和 cursor 分页在并发插入下保持稳定；管理员详情内的 Review、Revision、Profile 指针来自一个一致快照，Reviewer 详情另外包括其权限允许读取的当前策略。
 - 所有查询都是无副作用的读取；最终写入权限与并发检查仍由对应 Command UC 承担。
 - icon 作为可空不透明字符串原样返回；查询层不验证其指向内容，也不获取外部资产。

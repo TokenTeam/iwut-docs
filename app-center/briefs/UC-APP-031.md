@@ -504,7 +504,7 @@ Reviewer 查询只接受包含 `app.profile.review` 的可信身份。`app.versi
 
 ##### 身份隐藏
 
-管理员查询中，Application 不存在、ProfileRevision 不属于 Application，或调用者不是当前 admin，都返回同一类 `ApplicationProfileNotFound` 结果，避免向非管理员暴露资料是否存在。
+管理员查询中，Application 不存在、ProfileRevision 不属于 Application，或调用者不是当前 admin，都返回同一类 `ApplicationProfileManagementNotFound` 结果，避免向非管理员暴露资料是否存在。
 
 Reviewer 查询先检查可信身份和 `app.profile.review`，再读取审核事实。缺少权限返回 `ApplicationProfileReviewPermissionRequired`；Review 不存在或引用路径不一致返回 `ApplicationProfileReviewNotFound`。
 
@@ -529,7 +529,7 @@ Page<T> {
 
 ##### 一致性
 
-- 尚未交付的管理员列表可来自读投影，允许短暂滞后，并返回 `asOf`。
+- UC-APP-039 管理员列表与详情在同一个 MongoDB majority read-only snapshot 中构造，不使用滞后投影。
 - UC-APP-031 的 Reviewer 单页和详情在同一个 MongoDB snapshot 中构造，不允许以投影滞后隐藏不变量损坏。
 - 详情查询从 App Center 权威事实构造单个内部一致的快照。
 - 查询结果不是写入授权。UC-APP-014、015 和 016 在执行时继续校验当前 admin、状态、revision、利益冲突和公开指针前置值。
@@ -656,4 +656,4 @@ ReviewerProfileReviewDetail {
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
-| `app-center/query-contracts/profile-management.md` | 297 | `47b372725ffa` |
+| `app-center/query-contracts/profile-management.md` | 200 | `a88418222366` |

@@ -1,0 +1,37 @@
+{
+  "uc": "UC-APP-039",
+  "note": "Implement accepted private administrator ProfileRevision list/detail queries with retained-state access, original REJECTED content, paged review history, ownership-bound signed cursors, one read-only majority snapshot, strict source checks and dual-protocol 2 MiB budget.",
+  "uc_sections": [
+    "设计结论",
+    "目标与范围",
+    "参与者与授权",
+    "查询输入与 API 草图",
+    "列表投影",
+    "详情与审核历史",
+    "一致性、游标与响应预算",
+    "隐私与错误",
+    "验收矩阵与交付边界",
+    "既有规则依赖"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

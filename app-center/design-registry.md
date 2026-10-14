@@ -15,9 +15,9 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-039` |
+| Use Case / App Center | `UC-APP-040` |
 | Business Rule / Application | `BR-APP-059` |
-| Business Rule / Application Profile | `BR-PRF-047` |
+| Business Rule / Application Profile | `BR-PRF-057` |
 | Business Rule / ApplicationVersion | `BR-VER-034` |
 | Business Rule / Review | `BR-REV-035` |
 | Business Rule / Publication | `BR-PUB-037` |
@@ -74,6 +74,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-036` | 清空测试发布槽位 | `ACCEPTED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | 已接受 Test clear、共享 OCC、EMPTY、审计与在线资格；串行实现。 |
 | `UC-APP-037` | 查询 Application Tester 管理视图 | `ACCEPTED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 已接受容量与私有历史查询；REMOVED 分页后端保留、界面可不展示。 |
 | `UC-APP-038` | 查询我参与的测试 Application | `ACCEPTED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 已接受本人 ACTIVE 参与、暂不可用卡片、门禁隐藏与纯 Test。 |
+| `UC-APP-039` | 查询我的 ApplicationProfileRevision 列表与详情 | `ACCEPTED` | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | — | 管理员私有历史查询已接受；实现中。 |
 
 ## Business Rules
 
@@ -182,6 +183,16 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-PRF-044` | 利益冲突提示不替代决定检查 | Authorization / Consistency | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-044) | — | — |
 | `BR-PRF-045` | 稳定资料队列分页 | Pagination / Consistency | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-045) | — | — |
 | `BR-PRF-046` | 资料审核查询失败关闭 | Consistency / Invariant | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-046) | — | — |
+| `BR-PRF-047` | 当前管理员私有资料读取 | Authorization / Privacy | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-047) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-048` | 全部修订状态与保留生命周期可见 | Visibility / Lifecycle | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-048) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-049` | 当前修订与历史审核投影分离 | Projection / Boundary | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-049) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-050` | 签名且绑定管理权的资料分页 | Pagination / Security | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-050) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-051` | 一致读取与管理权边界 | Consistency / Ownership | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-051) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-052` | 必要资料关系损坏失败关闭 | Consistency / Invariant | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-052) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-053` | 拒绝修订原文读取与独立重建 | Retention / Boundary | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-053) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-054` | 管理员查询最小披露 | Privacy / Boundary | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-054) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-055` | 只读与私有缓存边界 | Query / Privacy | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-055) | — | 继承 UC039 ACCEPTED。 |
+| `BR-PRF-056` | 完整有界响应与不跳项续页 | Response / Pagination | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-056) | — | 继承 UC039 ACCEPTED。 |
 
 ### ApplicationVersion (`BR-VER`)
 
