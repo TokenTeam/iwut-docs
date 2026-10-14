@@ -89,7 +89,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 负责可公开展示资料的独立修订与审核。它与 ApplicationVersion 分离，因此修改 displayName、description 或 icon 不会制造新的运行版本。Profile Review 批准时自动成为当前公开资料，不再建立管理员手动发布步骤。
 
-已有设计覆盖 displayName、可空 description 和可空不透明 icon 字符串的资料草稿创建、更新、提交审核、批准或拒绝，以及批准时自动公开。UC-APP-031 已交付 Reviewer 待审队列与审核详情；[UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) 已接受管理员 ProfileRevision 历史列表/详情及有界审核历史，正在实施。SUBMITTED 继续占用唯一工作修订位，不能并行创建下一份 DRAFT；REJECTED Revision 保持终态，网页端可预填旧内容后调用普通创建用例，但服务端不提供恢复/复制接口。普通用户当前公开资料由 UC-APP-024 返回；受控 icon 资产是以后可选扩展，不提供旧资料回滚。
+已有设计覆盖 displayName、可空 description 和可空不透明 icon 字符串的资料草稿创建、更新、提交审核、批准或拒绝，以及批准时自动公开。UC-APP-031 已交付 Reviewer 待审队列与审核详情；[UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) 已交付并完成管理员 ProfileRevision 历史列表/详情及有界审核历史的完整后端验收。SUBMITTED 继续占用唯一工作修订位，不能并行创建下一份 DRAFT；REJECTED Revision 保持终态，网页端可预填旧内容后调用普通创建用例，但服务端不提供恢复/复制接口。普通用户当前公开资料由 UC-APP-024 返回；受控 icon 资产是以后可选扩展，不提供旧资料回滚。
 
 紧急隐藏不属于资料修订撤销。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格。
 
@@ -99,7 +99,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 负责 Application 级 Tester 加入链接、Membership episode、100 人容量和移除历史。Tester 资格不绑定 Version 或 RPC API major；实际 test 目标由 Runtime Publication 解析。
 
-已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 的当前管理员容量概览、Membership 和链接历史分页已实现并验收，REMOVED 分页保留后端、界面可不展示；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 的本人参与列表与纯 Test 可用性也已实现并验收。主动退出是否进入首版仍待决定。
+已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 的当前管理员容量概览、Membership 和链接历史分页已实现并验收，REMOVED 分页保留后端、界面可不展示；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 的本人参与列表与纯 Test 可用性也已实现并验收。用户已把主动退出纳入串行范围；[UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) 提出本人指定 episode 退出、保留状态清理、幂等与再加入边界，当前 PROPOSED，等待审核。
 
 这项能力不实现二维码界面，也不把 Tester 状态保存到 Auth。
 
