@@ -65,7 +65,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `COMPLETE` | 管理员 Tester 容量/当前链接概览、ACTIVE/REMOVED/ALL episode 和 ACTIVE/REVOKED/ALL 链接分页、签名 ownership-bound keyset、只读 snapshot、0030 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cf71c0b`、API `a0c214f` | —（当前后端范围；REMOVED 前端入口不要求交付，用户资料和新写能力不在本 UC） |
 | [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `COMPLETE` | 本人 ACTIVE 参与列表/详情、公开 Profile 与四类可用性、纯 Test 无 Filter、共享 UC012 批量核心、签名 runtime-bound 分页、500 扫描/响应预算、0031 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cda84cd`、API `aee1dc6` | —（当前后端范围；前端、主动退出和新的 Auth/Tester 写能力独立交付） |
 | [UC-APP-039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | `ACCEPTED` | `COMPLETE` | 管理员全部保留状态的资料修订列表/详情、原文与审核历史、ownership-bound 游标、只读 snapshot、2 MiB 双协议预算、0032 与完整验收；服务 `3bc2d8c`、API `10c95e3` | —（当前后端范围；前端/Gateway 独立交付） |
-| [UC-APP-040](../use-cases/UC-APP-040-leave-application-as-tester.md) | `ACCEPTED` | `IN_PROGRESS` | Tester 本人指定 episode 主动退出设计已接受 | 生成 UC040 brief，实施 App API/后端与完整验收 |
+| [UC-APP-040](../use-cases/UC-APP-040-leave-application-as-tester.md) | `ACCEPTED` | `COMPLETE` | 本人指定 episode 退出、保留状态、幂等审计、原子容量、最小私有响应、API/Wire 与真实 Mongo/HTTP/gRPC 完整验收 | Gateway/客户端由用户分派，见 UC040 交接记录 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 至 UC035 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -443,4 +443,25 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 - `0032_application_profile_management_query` 部署资料状态/序号查询索引并提升 readiness；ledger、现有精确索引断言、幂等及 sequential 升级链同步到 32 项。启动不隐式迁移。
 - Go 1.25.5 `make check-full` / backend 23/23 通过，`changed_sources=[]`；服务工作树报告 `.artifacts/verification/20261014T142903Z-_pn42yj5/report.json`。Mongo race 1726.549s、HTTP/gRPC E2E race 142.414s，最终阶段 1735.472s。被测服务 `cda84cd` + 最终未提交内容、API `10c95e3`、committed docs `e0690d4`；后续上述提交只保存相同源码，无测试后代码变更。真实 Auth tier 未运行，当前工作未改变 Auth 契约。
 - 验收入口：服务 `internal/profile/usecase/management_query_test.go`、`internal/adapter/mongo/profile_management_cursor_test.go`、`profile_management_repository_integration_test.go`、`internal/adapter/transport/profile_management_service_test.go` 和 `cmd/app-center/profile_management_e2e_integration_test.go`。完整 tier 同时保持既有管理、审核、目录及运行消费测试通过。
-- UC002–005 的真实签发/生产 Scope/Reviewer 联合验收仍为 IN_PROGRESS，按串行审计交接用户分派相邻服务。UC040 已接受并开始实现；客户端目录与其他暂缓项不进入本次实现。
+- UC002–005 的真实签发/生产 Scope/Reviewer 联合验收仍为 IN_PROGRESS，按串行审计交接用户分派相邻服务。UC040 已接受并完成 App/API 实现与完整验收；客户端目录与其他暂缓项不进入本次实现。
+
+
+## 2026-10-15 UC040 Tester 主动退出测试
+
+- 用户接受设计后生成 UC040 brief（设计提交 `ed2ba36`），App 实现提交 `8026075`，独立 API 提交 `a1cf9d8`。均为本地提交，未 push 或部署。只实现 App 后端与 App API，复用 Membership schema、ACTIVE 唯一索引、派生人数和 Application coordination fence；没有新增迁移、终态、计数副本或历史模型。
+- BR-TST-044/045：可信 USER 只退出指定 applicationId/membershipId 的本人 episode，不要求 Developer 资格。不存在、跨应用、他人或已清理的 episode 统一 404；身份校验先于业务输入。UseCase、真实 Mongo 和真实双协议测试覆盖这些边界。
+- BR-TST-046/047：ACTIVE → REMOVED 保存本人 removedBy、App Clock removedAt 和全部加入事实；已 REMOVED 不读取新业务 Clock、不重写审计。保留的 ACTIVE/CLOSING/CLOSED、AVAILABLE/SUSPENDED、UNARCHIVED/ARCHIVED 组合、无公开资料/Test 及撤销来源均可退出。单元测试证明 no-clock；真实 Mongo 覆盖全部 12 个状态组合和原管理员审计保持。
+- BR-TST-048/049：majority transaction 最终复查本人目标，共用既有 Application 栅栏；一次终止释放一个名额。真实受控事务覆盖双退出、管理员移除、Join 先后、容量竞争和治理/清理栅栏冲突；真实账号 Prepare/Finish/Cleanup 证明退出不改变账号屏障、不绕过 Join 禁令、不重建已清理 episode。UC038、UC012 和 UC019 后续读取不再消费旧资格；有效重新加入获得新 membershipId，旧请求不影响它。
+- BR-TST-050/051：请求仅包含两个目标 ID，HTTP 不接受正文/query，原生 gRPC 拒绝未知字段。返回 left 与最小 Membership ID/status/时间，隐藏 actor、容量、来源与凭证；成功、幂等和全部业务错误 private, no-store。必要来源、BSON/UTF-8、时间/审计、唯一性、计数及栅栏损坏失败关闭；真实写失败回滚根栅栏和 episode。真实 HTTP、原生 gRPC、实际生成 HTTP client 及 500/503 传输测试通过。
+- Go 1.25.5 `make check-full` / backend 23/23 通过，`changed_sources=[]`。报告位于 App 工作树 `.artifacts/verification/20261014T162515Z-ft4dmx_2/report.json`，UTC 2026-10-14 16:25:15–16:59:28；Mongo race 2026.662s，HTTP/gRPC E2E race 156.634s，最终阶段 2034.040s。被测服务为 `3bc2d8c` + 最终 staged/dirty 内容、API `a1cf9d8`、committed docs `ed2ba36`；随后 `8026075` 只提交相同源码，没有测试后代码修改。未执行真实 Auth tier，本工作没有改变 Auth 契约。
+- 验收入口：`internal/tester/usecase/exit_test.go`，`internal/adapter/mongo/application_tester_exit_repository_integration_test.go`、`tester_exit_account_barrier_integration_test.go`、`tester_exit_consumers_integration_test.go`，`internal/adapter/transport/tester_exit_contract_test.go`、`tester_exit_service_test.go`，`cmd/app-center/tester_exit_e2e_integration_test.go`。全量 tier 同时保持既有 UC009/010/011/012/019/025/037/038 验收通过。
+
+### UC040 相邻服务交接（用户分派）
+
+| 负责方 | 已交付契约与接入事项 |
+| --- | --- |
+| Gateway | 外部 `POST /app-center/v1/applications/{application_id}/tester-memberships/{membership_id}:leave`，只剥离 `/app-center`；内部路径由 App Proto 定义。可信 USER，沿用既有写操作 USER/CSRF 流程，不要求 Developer APPROVED。HTTP 无正文/query，透传 private,no-store 和标准错误。原生 RPC 为 `/app_center.v1.tester_membership.TesterMembership/LeaveApplicationAsTester`，gRPC-Web 仍由 Traefik 终止。 |
+| 客户端/Console | 以 UC038 取得的 membershipId 定位退出按钮；保留 applicationId/membershipId 做相同目标重试，处理 left=true/false 后刷新当前参与事实。迟到结果只对应原 episode，不能删除重新加入的新卡片。不可用应用仍遵循 UC038 可见性，首版无新增离线列表/历史接口。退出不承诺强制断开运行页面或即时撤销 Auth 会话。 |
+| Auth 联合验收 | UC002–005 的真实 USER 签发、生产 Scope、Reviewer grant/revoke 联合验收仍为 IN_PROGRESS，沿用串行审计交接；UC040 未新增 Auth 实现要求。 |
+
+App 本轮获准串行工作已完成。客户端普通目录/Filter 求值、版本批准撤销、可靠告警投递和受控 icon 继续暂缓；相邻服务代码由用户安排其他 agent。

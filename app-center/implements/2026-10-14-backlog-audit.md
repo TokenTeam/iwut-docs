@@ -1,6 +1,6 @@
 # 2026-10-14 App Center 串行工作与相邻服务交接
 
-状态：`UC040_IN_PROGRESS`
+状态：`APP_SCOPE_COMPLETE`
 
 ## 执行边界
 
@@ -13,7 +13,7 @@
 | 1 | 核对 UC002–005 实现与验收 | 已完成证据核对；保留 IN_PROGRESS | 不把提供方完成或局部跨服务测试解释为完整用户旅程验收；具体剩余验证见下文 |
 | 2 | HTTP 可观测性归类修复 | COMPLETE；服务 ba85225 / check-full 23/23 | 与生成 handler 的 RPC operation 对齐，保持有界白名单；真实 HTTP 回归与 make check-full |
 | 3 | [管理员公开资料修订查询 UC039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | ACCEPTED / COMPLETE，服务 3bc2d8c、API 10c95e3 | 资料私有列表/详情、审核历史、签名游标、0032 与双协议预算完成；最终 check-full 23/23 |
-| 4 | [Tester 主动退出测试 UC040](../use-cases/UC-APP-040-leave-application-as-tester.md) | ACCEPTED / IN_PROGRESS | 用户已接受本人指定 episode、保留状态、终态/再加入和容量语义，开始 App API/后端实现 |
+| 4 | [Tester 主动退出测试 UC040](../use-cases/UC-APP-040-leave-application-as-tester.md) | ACCEPTED / COMPLETE | App API/后端及完整验收通过；Gateway/客户端交接见 implements README |
 | 5 | App Center 验收与交付收尾 | 待顺序启动 | 完成适用门禁及覆盖记录；相邻服务阻塞交接给用户 |
 
 ## UC002–005 证据核对
@@ -83,3 +83,10 @@ UC002 的“后续接口工作”等历史文字仍描述提供方未完成。�
 Gateway/Console 可按以下已完成的 App 契约交接：两个 GET `/v1/applications/{application_id}/profile-revisions` 及其 `/{profile_revision_id}` 详情，现有 ApplicationProfileRevision 服务的 List/Get RPC；可信 USER/current admin，开发者资格不是读取门禁。列表 query 为 reviewStatus/pageSize/pageToken，详情为 reviewPageSize/reviewPageToken；private,no-store、最小字段、413/RESOURCE_EXHAUSTED 和严格签名分页。App 不修改相邻服务代码，实际外部路由和页面由用户分派。
 
 UC040 的审核重点为本人指定 episode、保留生命周期均允许减少资格、原审计幂等与有效链接重新加入。用户已于 2026-10-15 接受，生成 brief 并实施 App API/后端；Gateway/客户端由用户安排其他 agent，提供已接受契约作为交接输入。
+
+
+## 2026-10-15 UC040 最终交付
+
+用户接受后的 UC040 已实现：服务 `8026075`、API `a1cf9d8`，设计接受基线 `ed2ba36`。Go 1.25.5 `make check-full` / backend 23/23 通过，`changed_sources=[]`，报告 `.artifacts/verification/20261014T162515Z-ft4dmx_2/report.json`。BR-TST-044–051 覆盖、被测内容指纹和具体 Gateway/客户端接入事项见 [UC040 交付记录](README.md#2026-10-15-uc040-tester-主动退出测试)。所有原有未提交内容保留，App/API 本地提交，未 push 或部署。
+
+本次获准的 App 串行工作已闭合。UC002–005 真实 USER/生产 Scope/Reviewer 联合验收继续保留 IN_PROGRESS，交给用户分派相邻服务；客户端目录/Filter、批准撤销、可靠告警与受控 icon 保持暂缓。后续新增 UC/BR 或业务改动仍须先供用户审核。
