@@ -1,6 +1,6 @@
 # 2026-10-14 App Center 串行工作与相邻服务交接
 
-状态：`WAITING_UC040_REVIEW`
+状态：`UC040_IN_PROGRESS`
 
 ## 执行边界
 
@@ -13,7 +13,7 @@
 | 1 | 核对 UC002–005 实现与验收 | 已完成证据核对；保留 IN_PROGRESS | 不把提供方完成或局部跨服务测试解释为完整用户旅程验收；具体剩余验证见下文 |
 | 2 | HTTP 可观测性归类修复 | COMPLETE；服务 ba85225 / check-full 23/23 | 与生成 handler 的 RPC operation 对齐，保持有界白名单；真实 HTTP 回归与 make check-full |
 | 3 | [管理员公开资料修订查询 UC039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | ACCEPTED / COMPLETE，服务 3bc2d8c、API 10c95e3 | 资料私有列表/详情、审核历史、签名游标、0032 与双协议预算完成；最终 check-full 23/23 |
-| 4 | [Tester 主动退出测试 UC040](../use-cases/UC-APP-040-leave-application-as-tester.md) | PROPOSED / NOT_STARTED，已暂停待用户审核 | 审核本人指定 episode、保留状态、终态/再加入和容量语义；未生成 brief 或实现 |
+| 4 | [Tester 主动退出测试 UC040](../use-cases/UC-APP-040-leave-application-as-tester.md) | ACCEPTED / IN_PROGRESS | 用户已接受本人指定 episode、保留状态、终态/再加入和容量语义，开始 App API/后端实现 |
 | 5 | App Center 验收与交付收尾 | 待顺序启动 | 完成适用门禁及覆盖记录；相邻服务阻塞交接给用户 |
 
 ## UC002–005 证据核对
@@ -73,7 +73,7 @@ UC002 的“后续接口工作”等历史文字仍描述提供方未完成。�
 - 被测基线为服务 `cda84cd` + 本轮未提交工程修改、API `aee1dc6`、克隆的本地 committed docs `df10243`。新审核草案和 registry 在工程验收完成后建立，只声明 PROPOSED，不作为这次后端业务验收的输入。
 - 首次 sandbox quick gate 因测试临时 Git commit 继承个人 GPG 签名、无法访问签名 agent 而失败。完整验收通过进程级 `commit.gpgsign=false` 重跑，未改个人 Git 配置。Go cache 使用 `/tmp/iwut-app-center-go-cache`，Docker/Mongo 使用隔离测试资源。
 - 原有未提交业务/验证文件逐文件 hash 保持不变；仅 AGENTS 的 Current work package 按本次授权更新。没有修改 Auth/Gateway/Console 代码、API 子模块、部署或 push。
-- UC039 已由用户接受，待确认说明已删除；契约、registry、brief 与工作包已同步，后端完整验收完成。下一项 UC040 已建立 PROPOSED 草案，当前暂停等待用户审核。
+- UC039 已由用户接受，待确认说明已删除；契约、registry、brief 与工作包已同步，后端完整验收完成。下一项 UC040 已建立 PROPOSED 草案，2026-10-15 用户接受，开始实现。
 
 
 ## UC039 最终交付与下一审核点
@@ -82,4 +82,4 @@ UC002 的“后续接口工作”等历史文字仍描述提供方未完成。�
 
 Gateway/Console 可按以下已完成的 App 契约交接：两个 GET `/v1/applications/{application_id}/profile-revisions` 及其 `/{profile_revision_id}` 详情，现有 ApplicationProfileRevision 服务的 List/Get RPC；可信 USER/current admin，开发者资格不是读取门禁。列表 query 为 reviewStatus/pageSize/pageToken，详情为 reviewPageSize/reviewPageToken；private,no-store、最小字段、413/RESOURCE_EXHAUSTED 和严格签名分页。App 不修改相邻服务代码，实际外部路由和页面由用户分派。
 
-UC040 的审核重点为本人指定 episode、保留生命周期均允许减少资格、原审计幂等与有效链接重新加入。草案尚未接受，不生成 brief、API 或实现；Gateway/客户端的未来交接也以用户接受后的契约为准。
+UC040 的审核重点为本人指定 episode、保留生命周期均允许减少资格、原审计幂等与有效链接重新加入。用户已于 2026-10-15 接受，生成 brief 并实施 App API/后端；Gateway/客户端由用户安排其他 agent，提供已接受契约作为交接输入。

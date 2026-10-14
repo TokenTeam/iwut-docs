@@ -75,7 +75,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-037` | 查询 Application Tester 管理视图 | `ACCEPTED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 已接受容量与私有历史查询；REMOVED 分页后端保留、界面可不展示。 |
 | `UC-APP-038` | 查询我参与的测试 Application | `ACCEPTED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 已接受本人 ACTIVE 参与、暂不可用卡片、门禁隐藏与纯 Test。 |
 | `UC-APP-039` | 查询我的 ApplicationProfileRevision 列表与详情 | `ACCEPTED` | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | — | 管理员私有查询后端 COMPLETE；API/完整验收见 implements。 |
-| `UC-APP-040` | Tester 主动退出 Application 测试 | `PROPOSED` | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) | — | 用户纳入串行范围；本人指定 episode 退出、历史/幂等/容量与保留状态设计待审核。 |
+| `UC-APP-040` | Tester 主动退出 Application 测试 | `ACCEPTED` | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) | — | 用户纳入串行范围；本人指定 episode 退出、历史/幂等/容量与保留状态设计已接受。 |
 
 ## Business Rules
 
@@ -360,14 +360,14 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-TST-041` | 私有分页绑定管理权 | Pagination / Authorization | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-041) | — | — |
 | `BR-TST-042` | 只读一致性与关系损坏失败关闭 | Consistency / Invariant | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-042) | — | — |
 | `BR-TST-043` | 查询不替代命令检查 | Boundary / Caching | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md#br-tst-043) | — | — |
-| `BR-TST-044` | 本人退出授权 | Authorization | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-044) | — | PROPOSED；待用户审核。 |
-| `BR-TST-045` | 精确 episode 与统一隐藏 | Identity / Privacy | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-045) | — | PROPOSED；待用户审核。 |
-| `BR-TST-046` | 退出终态与幂等审计 | Lifecycle / Idempotency | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-046) | — | PROPOSED；待用户审核。 |
-| `BR-TST-047` | 保留状态允许退出 | Lifecycle / Boundary | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-047) | — | PROPOSED；待用户审核。 |
-| `BR-TST-048` | 原子释放容量与并发协调 | Atomicity / Concurrency | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-048) | — | PROPOSED；待用户审核。 |
-| `BR-TST-049` | 重新加入与消费边界 | Boundary / Lifecycle | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-049) | — | PROPOSED；待用户审核。 |
-| `BR-TST-050` | 退出最小披露与私有响应 | Privacy / Caching | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-050) | — | PROPOSED；待用户审核。 |
-| `BR-TST-051` | 必要退出来源损坏失败关闭 | Invariant / Integrity | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-051) | — | PROPOSED；待用户审核。 |
+| `BR-TST-044` | 本人退出授权 | Authorization | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-044) | — | ACCEPTED；2026-10-15 用户接受。 |
+| `BR-TST-045` | 精确 episode 与统一隐藏 | Identity / Privacy | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-045) | — | ACCEPTED；2026-10-15 用户接受。 |
+| `BR-TST-046` | 退出终态与幂等审计 | Lifecycle / Idempotency | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-046) | — | ACCEPTED；2026-10-15 用户接受。 |
+| `BR-TST-047` | 保留状态允许退出 | Lifecycle / Boundary | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-047) | — | ACCEPTED；2026-10-15 用户接受。 |
+| `BR-TST-048` | 原子释放容量与并发协调 | Atomicity / Concurrency | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-048) | — | ACCEPTED；2026-10-15 用户接受。 |
+| `BR-TST-049` | 重新加入与消费边界 | Boundary / Lifecycle | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-049) | — | ACCEPTED；2026-10-15 用户接受。 |
+| `BR-TST-050` | 退出最小披露与私有响应 | Privacy / Caching | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-050) | — | ACCEPTED；2026-10-15 用户接受。 |
+| `BR-TST-051` | 必要退出来源损坏失败关闭 | Invariant / Integrity | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md#br-tst-051) | — | ACCEPTED；2026-10-15 用户接受。 |
 
 ### Runtime Resolution (`BR-RUN`)
 

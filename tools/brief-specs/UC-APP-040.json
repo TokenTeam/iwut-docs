@@ -1,0 +1,37 @@
+{
+  "uc": "UC-APP-040",
+  "note": "Implement accepted USER self-exit for an exact owned tester episode, retained lifecycle access, immutable removal audit, shared-fence atomic capacity release, minimal private responses and strict necessary-source validation.",
+  "uc_sections": [
+    "设计结论",
+    "目标与范围",
+    "身份、目标与生命周期",
+    "命令与 API 草图",
+    "主流程与原子边界",
+    "并发、再加入与资格消费",
+    "必要来源与错误",
+    "既有规则依赖",
+    "验收矩阵",
+    "实现与相邻服务交付边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "路由映射",
+      "gRPC-Web 终止",
+      "契约测试要求"
+    ]
+  }
+}

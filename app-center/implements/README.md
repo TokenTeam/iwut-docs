@@ -65,7 +65,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 | [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `COMPLETE` | 管理员 Tester 容量/当前链接概览、ACTIVE/REMOVED/ALL episode 和 ACTIVE/REVOKED/ALL 链接分页、签名 ownership-bound keyset、只读 snapshot、0030 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cf71c0b`、API `a0c214f` | —（当前后端范围；REMOVED 前端入口不要求交付，用户资料和新写能力不在本 UC） |
 | [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `COMPLETE` | 本人 ACTIVE 参与列表/详情、公开 Profile 与四类可用性、纯 Test 无 Filter、共享 UC012 批量核心、签名 runtime-bound 分页、500 扫描/响应预算、0031 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cda84cd`、API `aee1dc6` | —（当前后端范围；前端、主动退出和新的 Auth/Tester 写能力独立交付） |
 | [UC-APP-039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | `ACCEPTED` | `COMPLETE` | 管理员全部保留状态的资料修订列表/详情、原文与审核历史、ownership-bound 游标、只读 snapshot、2 MiB 双协议预算、0032 与完整验收；服务 `3bc2d8c`、API `10c95e3` | —（当前后端范围；前端/Gateway 独立交付） |
-| [UC-APP-040](../use-cases/UC-APP-040-leave-application-as-tester.md) | `PROPOSED` | `NOT_STARTED` | Tester 本人指定 episode 主动退出的设计草案已准备 | 等用户审核；未生成 brief、未改 API/后端 |
+| [UC-APP-040](../use-cases/UC-APP-040-leave-application-as-tester.md) | `ACCEPTED` | `IN_PROGRESS` | Tester 本人指定 episode 主动退出设计已接受 | 生成 UC040 brief，实施 App API/后端与完整验收 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 至 UC035 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
@@ -443,4 +443,4 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 - `0032_application_profile_management_query` 部署资料状态/序号查询索引并提升 readiness；ledger、现有精确索引断言、幂等及 sequential 升级链同步到 32 项。启动不隐式迁移。
 - Go 1.25.5 `make check-full` / backend 23/23 通过，`changed_sources=[]`；服务工作树报告 `.artifacts/verification/20261014T142903Z-_pn42yj5/report.json`。Mongo race 1726.549s、HTTP/gRPC E2E race 142.414s，最终阶段 1735.472s。被测服务 `cda84cd` + 最终未提交内容、API `10c95e3`、committed docs `e0690d4`；后续上述提交只保存相同源码，无测试后代码变更。真实 Auth tier 未运行，当前工作未改变 Auth 契约。
 - 验收入口：服务 `internal/profile/usecase/management_query_test.go`、`internal/adapter/mongo/profile_management_cursor_test.go`、`profile_management_repository_integration_test.go`、`internal/adapter/transport/profile_management_service_test.go` 和 `cmd/app-center/profile_management_e2e_integration_test.go`。完整 tier 同时保持既有管理、审核、目录及运行消费测试通过。
-- UC002–005 的真实签发/生产 Scope/Reviewer 联合验收仍为 IN_PROGRESS，按串行审计交接用户分派相邻服务。下一项 UC040 为 PROPOSED/NOT_STARTED，等待用户审核；客户端目录与其他暂缓项不进入本次实现。
+- UC002–005 的真实签发/生产 Scope/Reviewer 联合验收仍为 IN_PROGRESS，按串行审计交接用户分派相邻服务。UC040 已接受并开始实现；客户端目录与其他暂缓项不进入本次实现。

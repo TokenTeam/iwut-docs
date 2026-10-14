@@ -99,7 +99,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 负责 Application 级 Tester 加入链接、Membership episode、100 人容量和移除历史。Tester 资格不绑定 Version 或 RPC API major；实际 test 目标由 Runtime Publication 解析。
 
-已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 的当前管理员容量概览、Membership 和链接历史分页已实现并验收，REMOVED 分页保留后端、界面可不展示；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 的本人参与列表与纯 Test 可用性也已实现并验收。用户已把主动退出纳入串行范围；[UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) 提出本人指定 episode 退出、保留状态清理、幂等与再加入边界，当前 PROPOSED，等待审核。
+已有设计覆盖链接创建与轮换、自助加入、管理员移除和链接撤销。[UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) 的当前管理员容量概览、Membership 和链接历史分页已实现并验收，REMOVED 分页保留后端、界面可不展示；[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 的本人参与列表与纯 Test 可用性也已实现并验收。用户已把主动退出纳入串行范围；[UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) 提出本人指定 episode 退出、保留状态清理、幂等与再加入边界，已于 2026-10-15 接受，App API/后端实现进行中。
 
 这项能力不实现二维码界面，也不把 Tester 状态保存到 Auth。
 

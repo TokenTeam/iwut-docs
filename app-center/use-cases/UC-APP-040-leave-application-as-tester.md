@@ -1,10 +1,10 @@
 # UC-APP-040：Tester 主动退出 Application 测试
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
 
-## 审核重点
+## 设计结论
 
-| 决定 | 本提案建议 |
+| 决定 | 已接受决定 |
 | --- | --- |
 | 谁可以退出 | 已验证 USER 只能退出自己的指定 Membership episode；不要求 Developer 资格、管理员或 Reviewer 权限 |
 | 退出目标 | 使用 applicationId + membershipId；重复或迟到请求不影响后来重新加入的新 episode |
@@ -171,10 +171,12 @@ left=true 表示本命令完成了该 episode 的 ACTIVE → REMOVED；left=fals
 
 ## 实现与相邻服务交付边界
 
-本草案等待用户审核，尚未生成实施 brief、改动 API 或启动实现。接受后才创建 UC040 spec/brief 和声明工作包，再实现 Tester Domain/UseCase/port、Mongo、传输层与 Wire。复用现有 Membership schema、唯一索引、容量统计和 coordination fence；不预先创建新状态、计数或历史模型。
+用户于 2026-10-15 接受本设计。创建 UC040 spec/brief 和声明工作包，并实现 Tester Domain/UseCase/port、Mongo、传输层与 Wire。复用现有 Membership schema、唯一索引、容量统计和 coordination fence；不预先创建新状态、计数或历史模型。
 
 App 本任务负责后端及 App API。Gateway 的 exact route/USER/CSRF 策略和客户端按钮、迟到响应协调、刷新参与卡片由用户交给其他 agent；本任务只提供契约和交接说明。客户端普通目录/Filter 求值、版本批准撤销、可靠告警投递与受控 icon 仍暂缓。
 
 ## 变更记录
 
 - 2026-10-14：用户授权纳入 Tester 主动退出，在 UC039 完整验收后建立本 PROPOSED 串行工作设计；等待审核，不实现。
+
+- 2026-10-15：用户接受设计并授权开始实现；状态转为 ACCEPTED，生成实施 brief。
