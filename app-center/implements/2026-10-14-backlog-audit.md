@@ -12,7 +12,7 @@
 | --- | --- | --- | --- |
 | 1 | 核对 UC002–005 实现与验收 | 已完成证据核对；保留 IN_PROGRESS | 不把提供方完成或局部跨服务测试解释为完整用户旅程验收；具体剩余验证见下文 |
 | 2 | HTTP 可观测性归类修复 | COMPLETE；check-full 23/23 | 与生成 handler 的 RPC operation 对齐，保持有界白名单；真实 HTTP 回归与 make check-full |
-| 3 | [管理员公开资料修订查询 UC039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | PROPOSED / NOT_STARTED，已暂停待用户审核 | 明确管理员列表/详情、历史与隐私边界；审核通过后再生成 brief、实现 API/后端并验收 |
+| 3 | [管理员公开资料修订查询 UC039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | ACCEPTED / IN_PROGRESS，用户已于 2026-10-14 接受 | UC039、查询契约和 brief 已接受；API/后端实现与定向测试已完成，完整门禁待运行 |
 | 4 | Tester 主动退出测试 | 待顺序启动 | 先审核本人退出、episode 历史、幂等/重新加入、容量与运行资格语义，再实现 |
 | 5 | App Center 验收与交付收尾 | 待顺序启动 | 完成适用门禁及覆盖记录；相邻服务阻塞交接给用户 |
 
@@ -61,7 +61,7 @@
 
 ## 待用户审核的设计点
 
-管理员 ProfileRevision 查询目前只有 PROPOSED Query Contract。应明确跨管理员隐藏、Application 所有保留状态的读取、不可变历史/当前内容区分、完整 Review 历史的响应预算、分页游标 ownership 绑定，以及最小披露边界，再建立正式 UC。旧契约拟返回的 updatedBy 等字段与 UC034 的最小披露风格不同，不能直接照搬后实施。
+管理员 ProfileRevision 查询已通过 UC039 审核，ACCEPTED Query Contract 明确所有保留状态可读、跨管理员隐藏、当前内容与历史分离、签名 ownership-bound 游标、最小披露和双协议 2 MiB 预算。正在实施与验收。
 
 UC002 的“后续接口工作”等历史文字仍描述提供方未完成。修正这些 UC 原文属于用户要求的审核暂停范围；本次核对只修实现记录，不修改 UC/BR 或生成的 brief。
 
@@ -73,4 +73,4 @@ UC002 的“后续接口工作”等历史文字仍描述提供方未完成。�
 - 被测基线为服务 `cda84cd` + 本轮未提交工程修改、API `aee1dc6`、克隆的本地 committed docs `df10243`。新审核草案和 registry 在工程验收完成后建立，只声明 PROPOSED，不作为这次后端业务验收的输入。
 - 首次 sandbox quick gate 因测试临时 Git commit 继承个人 GPG 签名、无法访问签名 agent 而失败。完整验收通过进程级 `commit.gpgsign=false` 重跑，未改个人 Git 配置。Go cache 使用 `/tmp/iwut-app-center-go-cache`，Docker/Mongo 使用隔离测试资源。
 - 原有未提交业务/验证文件逐文件 hash 保持不变；仅 AGENTS 的 Current work package 按本次授权更新。没有修改 Auth/Gateway/Console 代码、API 子模块、部署或 push。
-- 当前暂停于 UC039 草案审核：下一步待用户接受后同步候选 Query Contract、生成 brief 并实施。Tester 主动退出保持下一串行工作，未提前建立或实现新语义。
+- UC039 已由用户接受，待确认说明已删除；契约、registry、brief 与工作包已同步，当前实施与验收中。Tester 主动退出保持下一串行工作，设计准备后再暂停审核。
