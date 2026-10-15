@@ -29,6 +29,8 @@
 
 [未知结果与真实 UI 恢复验收](2026-10-16-unknown-result-and-ui-recovery.md) 已交付实际Begin原请求恢复、两次DEVICE认证失败后原EMAIL成功，以及Mongo提交回执丢失两个分支；修复UI对Begin5xx的未知结果分类，联合真实测试13项通过。迟到Begin与真实私有DOM/cache矩阵仍待补，UC001/fencing不关闭。
 
+[真实浏览器失败报告隐私护栏](2026-10-16-real-report-privacy.md) 已交付：合成定位器/hook/API回归保持4失败/1通过，当前标准报告无随机输入材料；共用fixture后重新拉取latest，13项真实测试再次全通过。不以隐藏诊断替代失败状态，不改变上述真实验收的完成边界。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
