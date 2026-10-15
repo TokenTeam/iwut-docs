@@ -1,6 +1,6 @@
 # UC002：Application 累计分页与正式错误恢复
 
-状态：`ACCEPTED / IN_PROGRESS`，2026-10-16，按用户持续授权自行决定。本包开始实施，仍须独立红绿与真实验证；保留既有App详情404 no-store缺口。
+状态：`ACCEPTED / IN_PROGRESS`，2026-10-16，按用户持续授权自行决定。增量已实现并完成独立红绿和真实验证，完整门禁因App错误响应缓存头仍未通过；不关闭本包或上层UC。
 
 ## 已核对的问题
 
@@ -41,3 +41,11 @@
 本轮重新pull的Auth/App/Gateway image ID分别为`sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、`sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、`sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，均与上一轮相同；Mongo/Traefik仍沿用该轮已打印固定标识。不编译后端；下一步无参数完整门禁，不能用focused替代。
 
 只读源码定位（App工作区commit `c6332708ed9a89accb229f569ee44f98fd7487b2`，未修改/编译）：`internal/adapter/transport/server.go`的`createdResponseEncoder`第532行只为两个成功管理DTO设置private/no-store；`credentialSafeErrorEncoder`及`middleware.go`的私有操作预设头覆盖Version/Profile/Tester等，但没有Application Management分类。这解释成功200有头而领域400/404缺头的同类症状，建议App拥有者补齐错误/鉴权/绑定失败链并保持两RPC契约。镜像没有OCI revision标签，不能把本地源码commit冒称本轮镜像的构建revision；实际镜像缺头结论仍以前述浏览器响应断言为准，不归因于Gateway工具缺失。
+
+### 无参数完整门禁终态
+
+产品`2c55fe1`、真实准备/专项`22e815c`冻结后，运行无参数`pnpm test:real`，轮次`iwut-console-real-837977`。真实类型与报告隐私护栏通过，39项浏览器终态为**37通过/2失败**，10.1分钟，最终exit1；每轮重新pull，五个镜像标识与focused相同。没有在运行中修改产品、helper、runner或spec，没有编译后端或删除断言。
+
+两项失败仅为缓存头：转让场景Application GET404原3条no-store断言；新增token场景五个HTTP400各缺private与no-store的10条断言。两失败项中的其余功能、权限隐藏、合法续读、两方Session/设备及无DELETE断言均已执行通过。新增实际React20+5/首批重置/空详情与独立原生/React正文断流恢复两项通过，原36项中的其它35项也通过，含双origin各32签发、真实双副本/提交丢回执、生命周期三阶段、资料3项、Tester4项和Version4项。完整门禁仍为失败，不把“其它功能通过”写成全部验收完成。
+
+focused与完整轮次终态后，额外查询`docker ps -a --filter name=iwut-console-real`及匹配network，均为空，包含停止容器也无遗留。Console和本隔离docs分支保存本地提交，未push；本地/远程legacy均保持`e68851e343bd0e077e5ccd0b680fe6813216ced0`。后续新App镜像须补齐Get404/List400等错误头后重新pull并跑无参数全量；与此同时下一独立[资格下降与角色读取包](2026-10-16-qualification-and-role-read-boundaries.md)已接受但尚未实施，UC001/fencing及UC006–007不因此关闭。
