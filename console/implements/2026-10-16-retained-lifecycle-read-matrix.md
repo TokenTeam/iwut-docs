@@ -16,7 +16,7 @@
 
 每App准备最小合法Version+一对一OAuth、Profile及Tester历史，保持领域关系而非只满足BSON。平台状态须有匹配revision/event及必要outbox，归档保持其revision/audit；CLOSING/CLOSED必须有同App匹配closure，source revision与lifecycle revision对应，adminId/ownershipRevision保持。App fixture阶段迁移须在隔离Mongo事务中CAS固定四App/当前阶段，CLOSING阶段只一次把该账号usedCount从4改0，不让CLOSED再扣；这是read-fixture一致性维护，不是正式关闭命令证据。
 
-关闭历史保留Version/Profile/Review与ACTIVE Membership；原ACTIVE链接应改为REVOKED/APPLICATION_CLOSURE，不为了页面方便保留可用加入链接。本包无OAuth registration/待转让时不凭空制造它们；不能省略合法closure去迎合详情错误。关闭worker保持关闭，不能因fixture nextAttemptAt意外发出协议调用。
+关闭历史保留Version/Profile/Review与ACTIVE Membership；原ACTIVE链接应改为REVOKED/APPLICATION_CLOSURE，不为了页面方便保留可用加入链接。本包无OAuth registration/待转让时不凭空制造它们；不能省略合法closure去迎合详情错误。已核对实现：关闭端点开关不停止closure worker，worker仍每秒轮询，但只选择PENDING且nextAttemptAt不晚于当前时刻的记录。本包CLOSING固定nextAttemptAt为2100-01-01，并在phase自检中确认attempt=0和原状态未被改写，使fixture不入本轮due集合、不会触发跨服务协调；不修改后端或假称worker关闭。
 
 ## 最小验证矩阵
 
@@ -26,3 +26,9 @@
 4. 测试control仅本轮loopback随机bearer、固定phase和空JSON，内部持有固定四App；禁止任意ID、URL、认证材料或Mongo语句。真实spec沿用报告隐私fixture，不接入产品QueryClient，不拦截或伪造业务响应。
 
 先以真实镜像暴露分支差异；若需改产品，先补对应失败回归再修复。每轮重新pull已发布latest、轮内固定digest，不编译相邻后端。focused、普通/类型/生成检查、无参数全量、资源清理与本地提交分层记录；完整门禁继续保留已知App404 no-store断言。
+
+## 已核对的前端缺口与实施决定
+
+当前生命周期默认选项显示“全部”，实际发送空lifecycleStatuses数组，后端按UC029只返回ACTIVE/CLOSING。改为明确“默认（正常、关闭中）”，保留原请求语义及显式CLOSED选择，不为了文案把默认查询改为三状态。平台/归档缺省仍是真正不限制。
+
+当前详情忽略固定API已返回的closure。按UC002已有范围补最小关闭历史摘要：closureId、状态、Auth撤销回执状态与开始/完成时间，ACTIVE无closure不显示；不补查receipt/proof/内部task，不把读取摘要解释为发起/恢复关闭权限。先取组件RED再实现，随后真实fixture只验证App返回历史事实的呈现，不把合成APPLIED字段记为Auth撤销验收。
