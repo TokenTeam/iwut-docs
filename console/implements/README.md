@@ -21,7 +21,7 @@
 
 [UC001 邮箱重发与浏览器恢复控制增量](2026-10-16-login-recovery-controls.md) 已自行接受并交付，真实 SMTP 重发后登录验证通过。页面回调隔离与 Cookie 的跨请求顺序不是同一保证；[登录 flow fencing 缺口](../query-contracts/login-flow-fencing.md) 独立保持 OPEN，UC001 整体仍为 IN_PROGRESS。
 
-[ADR-CONSOLE-005](../adr/ADR-CONSOLE-005-durable-session-and-login-fencing.md) 已接受共享持久 Session 与不同代认证 carrier；[持久状态原子核心工作包](2026-10-16-durable-session-core.md) 实施中，尚未替换现有 BFF。缺口只有在新协议接线和真实跨副本/浏览器故障门禁完成后才能关闭。
+[ADR-CONSOLE-005](../adr/ADR-CONSOLE-005-durable-session-and-login-fencing.md) 已接受共享持久 Session 与不同代认证 carrier；[持久状态原子核心工作包](2026-10-16-durable-session-core.md) 已实现并通过 16 项真实 Mongo 测试，尚未替换现有 BFF。缺口只有在新协议接线和真实跨副本/浏览器故障门禁完成后才能关闭。
 
 ## UC-CONSOLE-002 首个实现工作包
 
