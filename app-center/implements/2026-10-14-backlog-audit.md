@@ -10,11 +10,11 @@
 
 | 顺序 | 工作事项 | 当前状态 | 完成边界 |
 | --- | --- | --- | --- |
-| 1 | 核对 UC002–005 实现与验收 | UC002 COMPLETE；UC003–005 IN_PROGRESS | 2026-10-15 真实 Gateway/Auth 创建版本接入闭合；登录/Console 独立验收，具体证据与剩余验证见下文 |
+| 1 | 核对 UC002–005 实现与验收 | COMPLETE（当前后端接入范围） | 2026-10-15 真实 Gateway/Auth 创建、编辑、提交与决定联合验收 28/28；登录/Console 独立验收 |
 | 2 | HTTP 可观测性归类修复 | COMPLETE；服务 ba85225 / check-full 23/23 | 与生成 handler 的 RPC operation 对齐，保持有界白名单；真实 HTTP 回归与 make check-full |
 | 3 | [管理员公开资料修订查询 UC039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | ACCEPTED / COMPLETE，服务 3bc2d8c、API 10c95e3 | 资料私有列表/详情、审核历史、签名游标、0032 与双协议预算完成；最终 check-full 23/23 |
 | 4 | [Tester 主动退出测试 UC040](../use-cases/UC-APP-040-leave-application-as-tester.md) | ACCEPTED / COMPLETE | App API/后端及完整验收通过；Gateway/客户端交接见 implements README |
-| 5 | App Center 验收与交付收尾 | 待顺序启动 | 完成适用门禁及覆盖记录；相邻服务阻塞交接给用户 |
+| 5 | App Center 验收与交付收尾 | 当前后端验收 COMPLETE | UC003–005 服务 f9d944b；Gateway ab0d448；Console 六份 PROPOSED 草案待用户审核 |
 
 ## UC002–005 证据核对
 
@@ -28,16 +28,16 @@
 - UC033/036 专项配置生产 OAuth manifest，App API 完成 Version 创建、提交和批准，然后验证实际 Auth OAuth 行为；其 USER JWS 仍由测试签名，未覆盖 UC003 的草稿编辑。
 - Auth 2026-10-03 的双审核权限跨服务验收验证真实 Auth 签发、权限隔离与 App verifier。允许访问的合法不存在 Review 返回 404，权限不符返回 403；它没有对真实 PENDING Review 完成业务审核。
 
-### 尚需闭合的验收
+### 联合验收状态（2026-10-15 更新）
 
 | 用例 | 待补联合场景 |
 | --- | --- |
 | UC002 | 2026-10-15 已闭合：真实 Auth 持久 Catalog/Session→USER 签发、Gateway 三协议及目录 TTL/故障/回退/恢复；[验收记录](2026-10-15-uc002-gateway-auth.md)，服务 `15250b9`、cross-service 28/28 |
-| UC003 | 在同一链路编辑真实 DRAFT，覆盖 Scope 变更、OCC/no-op、OAuth 配置同步与失败无部分写入；现有跨服务门禁未执行该场景 |
-| UC004 | 对上述编辑后的 Version 提交真实不可变 snapshot，验证目录变化、scope 失效和提交失败边界 |
-| UC005 | Auth 实际 grant/revoke Reviewer 权限并签发 USER，批准/拒绝真实 PENDING Review；验证权限撤销、两项权限隔离、Developer 暂停自动拒绝与 SYSTEM attribution |
+| UC003 | 已闭合：真实链路 Scope 变更、完整替换/no-op/OCC、OAuth 同步及强制写失败回滚 |
+| UC004 | 已闭合：编辑后 Version 提交、三协议创建 PENDING、不可变 snapshot、目录 revision/停用/故障、Review 插入回滚 |
+| UC005 | 已闭合：真实 Auth grant/revoke/USER，真实 PENDING 批准/拒绝、权限隔离/冲突、依赖故障与决定回滚、真实 Developer/SYSTEM 自动拒绝 |
 
-当前 UC002 后端接入范围为 COMPLETE；UC003–005 仍为 IN_PROGRESS。新增验收应先复用现有 ACCEPTED 契约；若需要 Auth 新行为或 UC 语义修订，则暂停并交接，不修改 Auth 代码。
+当前 UC002–005 后端接入范围均为 COMPLETE；[UC003–005 最终记录](2026-10-15-uc003-005-gateway-auth.md) 为服务 f9d944b、cross-service 28/28、changed_sources=[]。新增验收继续复用 ACCEPTED 契约；新 Auth 行为或 UC 语义修订仍须暂停审核。
 
 ## 相邻服务交接事项（供用户分派）
 
@@ -89,4 +89,4 @@ UC040 的审核重点为本人指定 episode、保留生命周期均允许减少
 
 用户接受后的 UC040 已实现：服务 `8026075`、API `a1cf9d8`，设计接受基线 `ed2ba36`。Go 1.25.5 `make check-full` / backend 23/23 通过，`changed_sources=[]`，报告 `.artifacts/verification/20261014T162515Z-ft4dmx_2/report.json`。BR-TST-044–051 覆盖、被测内容指纹和具体 Gateway/客户端接入事项见 [UC040 交付记录](README.md#2026-10-15-uc040-tester-主动退出测试)。所有原有未提交内容保留，App/API 本地提交，未 push 或部署。
 
-本次获准的 App 串行工作已闭合。2026-10-15 用户另行授权推进 UC002，真实 Gateway/Auth 联合验收已完成；UC003–005 的草稿编辑、提交和 Reviewer 联合验收继续保留 IN_PROGRESS。客户端目录/Filter、批准撤销、可靠告警与受控 icon 保持暂缓。后续新增 UC/BR 或业务改动仍须先供用户审核。
+本次获准的 App 串行工作已闭合。2026-10-15 用户另行授权推进 UC002–005，真实 Gateway/Auth 联合验收已全部完成。Gateway 接入已委派并交付；Console 只读管理及审核页面六份草案已委派起草，保持 PROPOSED，未实施页面。客户端目录/Filter、批准撤销、可靠告警与受控 icon 保持暂缓。后续新增 UC/BR 或业务改动仍须先供用户审核。
