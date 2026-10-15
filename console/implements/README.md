@@ -6,12 +6,44 @@
 | --- | --- | --- | --- |
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
 | 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 加密 Cookie、安全 Session 投影、私有 ForwardAuth、设备/邮箱 Begin/Complete BFF 编排、双登录页面状态机、Gateway surface chain 与共享 Traefik 配置合并验证已实现；重发协调与真实 Auth/邮件链路验收待完成 |
-| Developer Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、路由、Query、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，业务 UC 尚未分配 |
-| Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，审核业务 UC 尚未建立 |
+| Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002`（管理概览） | `IN_PROGRESS` | 独立构建、认证入口已实现；UC002 的只读列表与详情实施中，真实服务验收待完成 |
+| Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，审核业务 UC 尚未接受 |
+| Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IN_PROGRESS` | 固定 API、列表/详情 client、筛选/分页与只读页面开始实施；真实 Gateway/Auth/App 浏览器验收待完成 |
 
 ## 代码位置
 
-实现目录为 `worktrees/iwut-console`。UC001 接受后在该目录初始化独立 Git 仓库与 pnpm workspace；本页的 `IN_PROGRESS` 不表示真实 E2E 或 UC 完成。
+实现目录为独立的 `iwut-console` 仓库。UC001 接受后已初始化 pnpm workspace；本页的 `IN_PROGRESS` 不表示真实 E2E 或 UC 完成。
+
+## UC-CONSOLE-002 首个实现工作包
+
+状态：`IN_PROGRESS`
+
+接受输入与范围：
+
+- 固定统一 API commit `a5d504c058c62cd91be451074d21608d69789918`；
+- 生成 `app_center/v1/application_management` 类型并提供严格 ProtoJSON fetch client；
+- Developer Console 增加 `/applications` 列表与 `/applications/{applicationId}` 只读详情；
+- 列表覆盖服务端默认筛选、生命周期/平台/归档状态筛选、不透明 token 逐页加载与显式刷新；归档默认不限制且不能从管理面隐藏；
+- 详情覆盖深链接、统一不可访问、刷新、返回列表和 UC003–005 的禁用/未交付导航表达；
+- `SESSION_INVALID` 只清 Developer Session 并返回登录入口，网络/5xx 不清 Session；
+- 所有业务响应只在内存 Query cache 中短暂存在，不启用持久化，不写入 Web Storage、IndexedDB 或日志。
+
+非目标：
+
+- Application 创建、编辑、转让、关闭、归档或任何其它写命令；
+- UC003–005 的 Version、ProfileRevision、Tester 具体页面；
+- 用 mock 或组件测试宣称真实管理授权链完成。
+
+验证命令：
+
+```bash
+pnpm generate:check
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm exec playwright test
+pnpm edge:e2e
+```
 
 ## UC-CONSOLE-001 首个实现工作包
 
