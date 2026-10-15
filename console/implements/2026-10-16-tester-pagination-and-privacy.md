@@ -43,3 +43,7 @@ API三RPC成功形状/fromJson回归先红，细分6个错误输入后全部绿�
 实际验收改用单次`RESPONSE/TRUNCATE`：代理先完整取得真实上游响应（仍受256KiB上限），然后原样转发真实status/headers及正文第一个原字节，write flush callback后断开，既不更改Content-Length/Transfer-Encoding也不补完正文。只允许非空且长度至少2的真实响应；其它形状失败关闭。记录upstreamStatus及bodyTruncated布尔，不记录正文/headers或凭证。它是传输中断而非伪造JSON/错误响应，浏览器fetch已得到真实200，但正文读取应TypeError；旧one-shot inspect/cleanup不变，必须由Node、原生浏览器和真实React分别验证。
 
 成功HTTP正文读取的真实TypeError继续归网络故障，不转换成`null`/畸形成功而丢旧数据。完整传输但JSON语法错误仍归协议错误；已收到非成功HTTP的401/403/404即使错误正文读取失败，也保留明确status的既有ApiError边界，不降为可保留旧数据的网络错误。此澄清在共享fetch transport实施，并补成功断流/完整坏JSON/非成功断流回归。Tester真实旧asOf和显式恢复目标不变，不改变产品自动重试或引入正文代理。
+
+最终实现：runtime新增25项先6红/19绿后全绿（原7项保留，共32项）；API全包68项、Developer124项通过。共享transport修复本地提交`d954441`。TRUNCATE新4项先红后绿、原16项保留，HTTP(S)共20项；原生TLS独立诊断严格证明单次真实POST、fetch200、正文TypeError及bodyTruncated。此前重复DROP的5项测试已撤回，不混入最终计数。
+
+最终focused真实4项全部通过（15.3秒）：前述分页/空态/token/最小披露矩阵继续通过；成员与链接两次分别用独立原生协议探针证明真实200正文断流TypeError，再用实际React刷新取得原asOf旧快照提示、兄弟区域保留、显式正常读取恢复。精确真实撤销仍成功且25 ACTIVE保留、Session完全不变。没有fetch wrapper/产品Query hook、伪响应或提高重复次数。fixture/runner/spec及正常固定API生成描述符提交`4749a32`；普通全仓435项Vitest/32项Node、严格类型已通过。生成漂移收尾又遇同一GitHub低速超时，正用原命令重试；无参数29项完整真实门禁已启动，完成前不得把focused当全量通过。
