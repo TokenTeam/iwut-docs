@@ -32,3 +32,9 @@ Version结束token为字符串空值；UC034 token绑定caller/App/filter/排序
 当前普通门禁：452项Vitest、32项Node通过，完整严格类型及固定输入生成漂移检查通过；其中Version页面/projection22项、API全包74项、Developer全包135项。上述是单元/组件与类型证据，不是实际后端/浏览器证据。
 
 专用真实fixture由Developer/DEVICE及两次正式Create建立App/ownership/quota，再受Mongo validator约束准备25Version、25OAuth、20Review。恢复后编辑链source1→提交2→拒绝3→恢复4→编辑5，seq25 revision精确9007199254740993；正式policy/check ID只作历史读fixture元数据，不声称运行preflight/审核/恢复命令。新独立真实spec正验收20+5、筛选、空态、最小披露、当前详情/最近摘要、跨App隐藏及单次正文TRUNCATE；结果未收齐前不得登记通过。
+
+第二轮focused已收齐4通过/0失败（浏览器16.9秒），exit0；20+5、四种筛选各自重置首批、空App、当前DRAFT revision5+最近REJECTED/restoredAt、无Review大bigint、PENDING/APPROVED/REJECTED、惰性runtime/scopes/redirect、原始JSON最小披露、真实跨App child404及private/no-store均通过。真实token跨App/filter/查询类型/篡改400与改变pageSize合法续读分别通过，不把探针当作React非法请求证据。独立原生探针确认真实200成功正文TypeError，另一单次gate验证React保留原20项/原asOf并明确加载同第二批恢复25；不以代理DROPPED代替JS失败。
+
+第一轮focused在20+5断言通过后，由`getByLabel`精确名称定位筛选失败，结果1失败/3未运行，未转记通过；改为语义combobox定位并保留全部业务断言后重跑。两轮均重新pull已发布latest，未编译后端、伪造响应或改错误头；本轮资源已清理。普通fixture浏览器8通过/4 Admin非目标跳过、同镜像Edge检查亦通过。
+
+两轮三个业务镜像digest均未变化：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`；App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`；Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`。Mongo/Traefik沿用上包记录。产品提交`0955d1d`，真实fixture/spec独立提交；均仅本地，legacy未变。无参数`pnpm test:real`已启动，完整结果仍待收齐，本包及上层UC不得因focused成功关闭。

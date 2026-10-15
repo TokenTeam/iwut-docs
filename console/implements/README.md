@@ -15,7 +15,7 @@
 
 ## 代码位置
 
-[Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)正在实施：正式reason先红后绿，400/成功协议错误精确退场与每批asOf已实现；普通452项Vitest/32项Node、strict及生成漂移检查通过，真实四状态/恢复DRAFT、20+5与断流恢复尚在验收。不得套用Profile预算或Tester token绑定。
+[Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)正在实施：正式reason先红后绿，400/成功协议错误精确退场与每批asOf已实现；普通452项Vitest/32项Node、strict、生成漂移及focused真实4项通过，含四状态/恢复DRAFT、20+5与断流恢复。无参数完整门禁已启动、仍待收齐，不得以focused替代；不套用Profile预算或Tester token绑定。
 
 [真实Tester分页、容量与最小披露](2026-10-16-tester-pagination-and-privacy.md)已接受：补25条ACTIVE成员、历史episode、独立链接分页/筛选、容量与无当前链接的真实读取矩阵，以及畸形成功的区域级退场；不增加产品写入口或REMOVED成员入口。
 
