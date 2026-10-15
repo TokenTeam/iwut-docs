@@ -22,4 +22,6 @@
 
 原生同源探针使用真实opaque token验证坏编码、换调用者、真正不同的生命周期/平台/归档筛选400，以及改变pageSize合法续读。UC029 token绑定caller、规范化filter、createdAt/id和版本；空默认与显式ACTIVE+CLOSING等价，token不是授权结论。当前实现未HMAC且不绑定ownershipRevision/父App，不能套Tester的revision失效或“改任意合法位置必400”，也不造Version/Tester式父App token混用断言。没有本能力正式Profile预算413，不制造超预算验收。
 
+2026-10-16 实施补充：换调用者探针使用独立仅注册的`ownedPeer`账号，不复用完整套件已经登录的转让接收者，避免依赖spec执行顺序绕过邮箱60秒冷却。新账号同样计入准备阶段的实际mail-ready时间；不提高Auth限流或重试未知写入。Create返回的Timestamp可含亚毫秒，而Mongo BSON Date排序仅精确到毫秒；准备器以bigint秒精算、仅截亚毫秒后检查safe integer，返回真实持久排序精度的`createdAtUnixMs`，不因合法nanos拒绝准备，也不假设创建顺序等于查询顺序。
+
 每轮重新pull已发布latest、轮内固定digest，不编译相邻后端。保持成功/空态/错误private/no-store、报告隐私、惰性标识和仅内存token；focused与无参数完整门禁分层，记录失败、资源清理和本地提交，legacy不变。本包不关闭资格下降/角色矩阵、UC001/fencing或UC006–007。
