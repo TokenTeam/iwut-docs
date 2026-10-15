@@ -55,6 +55,7 @@
 | `ADR-CONSOLE-002` | 前端功能文档与视觉设计边界 | `ACCEPTED` | [ADR-CONSOLE-002](adr/ADR-CONSOLE-002-functional-documentation-boundary.md) |
 | `ADR-CONSOLE-003` | Console 首版技术基线 | `ACCEPTED` | [ADR-CONSOLE-003](adr/ADR-CONSOLE-003-frontend-technology-baseline.md) |
 | `ADR-CONSOLE-004` | Console 混合 BFF 与 Session ForwardAuth 流量边界 | `ACCEPTED` | [ADR-CONSOLE-004](adr/ADR-CONSOLE-004-hybrid-bff-session-forward-auth.md) |
+| `ADR-CONSOLE-005` | 持久 Session 与登录流程 fencing | `ACCEPTED` | [ADR-CONSOLE-005](adr/ADR-CONSOLE-005-durable-session-and-login-fencing.md) |
 
 ## Next IDs
 
@@ -64,4 +65,4 @@
 | Console BR-CSE | `BR-CSE-009` |
 | Console BR-CMG | `BR-CMG-011` |
 | Console BR-CRV | `BR-CRV-009` |
-| Console ADR | `ADR-CONSOLE-005` |
+| Console ADR | `ADR-CONSOLE-006` |

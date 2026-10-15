@@ -2,6 +2,8 @@
 
 状态：`OPEN`。记录日期：2026-10-16。
 
+2026-10-16 后续决定：[ADR-CONSOLE-005](../adr/ADR-CONSOLE-005-durable-session-and-login-fencing.md) 已接受持久 context/Session 与不同代 opaque carrier，修订了 BR-CSE-005 的确认点；下述 A/B 保留为调查历史，不是并列的当前选项。实现仍分阶段，完整接线及联合门禁通过前本缺口保持 OPEN。
+
 本文是 [UC-CONSOLE-001](../use-cases/UC-CONSOLE-001-establish-console-session.md) 的实现缺口与候选方案记录，不接受新架构，不修改 UC 的权威要求，也不把下列候选方案解释为当前部署约束。
 
 ## 原始要求与当前覆盖
