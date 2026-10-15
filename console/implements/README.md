@@ -10,6 +10,7 @@
 | Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，审核业务 UC 尚未接受 |
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
+| Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |
 
 ## 代码位置
 
@@ -86,6 +87,23 @@ pnpm edge:e2e
 - Console `edge:e2e` 已显式确认 Gateway `latest` digest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9` 包含两条 Version DEVELOPER route，并验证 BFF 不可用时失败关闭；同 digest 的 Gateway 协议 E2E 已通过真实 Auth/App/Mongo 和 BFF Cookie 身份交换，Version 两条路由包含在已验收的 16 条管理查询/本人退出路由中。
 
 剩余验收是让浏览器页面直接连接同一套真实 Gateway/Auth/App 环境，使用真实管理员及四状态 Version 数据覆盖管理权变化、生命周期组合、no-store 与迟到响应；完成前不得把 fixture 浏览器测试表述为完整业务 E2E。
+
+## UC-CONSOLE-004 首个实现工作包
+
+状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
+
+首包实现固定 API 的 ProfileRevision List/Get 同源 client、资料列表/详情路由、单状态筛选、独立修订/审核历史 token、页级指针、latestReview 与原文纯文本表达。`null`、空字符串和有值必须分开，不执行 icon/正文/reason 内容。复用 UC002 的身份、错误、Session 和仅内存缓存规则。
+
+非目标包括所有资料写操作、Reviewer queue/snapshot/decision、Admin Console、受控 icon 资产、外链代理、跨页冻结和持久缓存。验证命令沿用 UC002，并要求 Gateway `latest` 显式包含两个 ProfileRevision DEVELOPER surface route。
+
+2026-10-16 实现结果：
+
+- 生成并固定 ProfileRevision ProtoJSON 类型；两个同源 GET client 只发白名单 query、无正文，拒绝未知字段、畸形必需对象与非 `null | string` Value；
+- Developer Console 提供资料列表/详情、单状态筛选、显式前后页、页级指针、当前内容、latestReview 和独立审核历史页；当前 token 进入仅内存 query key，身份、Application、筛选或修订变化即重置；
+- 审核翻页返回的新完整详情整体替换旧页，不拼接跨时点 snapshot；原文保留空白并区分 null/空串，所有 URL 形字符串都是不可执行文本；
+- Session 失效回收覆盖新增私有 query root；404、坏 token、413、5xx/网络均有独立恢复边界；UC002 详情中的资料入口已启用，所有写操作和 Reviewer/Admin 入口仍不存在；
+- `generate:check`、strict typecheck、全量 Vitest、production build、Playwright 与 `git diff --check` 通过；Playwright 共 7 项通过、3 项按 Admin surface 跳过；
+- `edge:e2e` 从 CNB 拉取 Gateway `latest` digest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，确认两个 ProfileRevision route 存在且 BFF 不可用时 fail closed。浏览器业务响应仍是 fixture，真实后端浏览器联合验收待补。
 
 ## UC-CONSOLE-001 首个实现工作包
 
