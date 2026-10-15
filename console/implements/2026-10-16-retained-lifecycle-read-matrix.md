@@ -44,3 +44,15 @@ Application组件新增默认标签与CLOSING/CLOSED摘要3项，先得到3失�
 普通门禁现为455项Vitest/48项Node通过，完整strict及固定API生成漂移通过；fixture浏览器8通过/4 Admin非目标跳过、同镜像Edge通过。fixture合成测试覆盖4App事务/CAS/整体rollback、Int32配额4→0与Long revision4→8只一次、实际初始coordinationRevision0（仅Archive后1）、同phase不写、worker漂移和脏关系失败关闭；这些不能替代真实validator/index/协议联合验收。
 
 第二轮focused实际经历密码429等待后成功继续同一注册，四个Create和两个Archive正式准备完成；随后真实全局tokenHash唯一索引拒绝与既有Tester matrix同值的Lifecycle链接fixture，exit1，浏览器仍未启动。没有删除索引、跳过其它fixture或放宽后端；须给Lifecycle读取hash独立32-byte命名空间并补全局共存回归。两轮失败均已完成清理，不能登记任何真实页面通过。
+
+全局hash共存回归先得到1失败/8通过；改为独立的32-byte非uniform读取fixture命名空间后9项通过，既有26条Tester记录逐字段未动、共30个hash全局唯一，不生成join secret或URL。最新普通门禁455项Vitest/49项Node、strict和生成漂移均通过；第三轮重新pull latest后已进入真实浏览器，结果待收齐。
+
+## Focused真实读取结果
+
+第三轮focused终态为3通过/0失败（浏览器58.6秒），exit0：ACTIVE/CLOSING/CLOSED各自覆盖四平台/归档组合、每组合八RPC，共12组合96次原生读取；每阶段四个React管理概览，以及SUSPENDED＋ARCHIVED代表App经实际链接进入Version列表/详情、Profile列表/详情和Tester三区域。默认列表ACTIVE/CLOSING含四App，CLOSED默认空但明确筛选可读，四格组合筛选各有实际首批请求；不宣称四条小页证明了非空游标重置。
+
+每个成功响应均校验private/no-store与独立asOf，React的时间断言限定各实际区域，Tester恰有三个字段、Profile正文/指针分别有自己的字段，不用同一分钟body泛匹配替代区域归属。无closure的ACTIVE、CLOSING/PENDING无完成时间、CLOSED/APPLIED有完成时间均验证；未展示receipt/JTI/task或新增写按钮。保留DRAFT和资料原文/working指针、ACTIVE成员，关闭链接为REVOKED/APPLICATION_CLOSURE且仍可读历史；Session摘要、单把不可导出钥匙保持，无DELETE、Auth个人资料补查、浏览器业务写入或外部请求，受限Web Storage/路由检查通过。阶段末重复固定control实际验证DB无worker改写、无第二次quota debit；仍只是读取fixture一致性证据。
+
+focused轮资源已核对清理。产品`df92aed`与真实fixture/spec/限流准备`9bcd054`已本地提交；随后在无参数浏览器worker启动前额外收紧Application原始counts及对应React四个metric断言（`5151c36`），strict通过，完整结果仍待验证，不能倒记为先前focused覆盖。无参数`pnpm test:real`正在执行，保留所有旧门禁及App详情404 no-store断言。
+
+本轮重复pull的业务digest仍为Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，基础镜像沿用前包记录。未编译后端、调高Auth限额或伪造服务响应；提交仅本地、legacy不变。下一独立包[UC002累计分页与正式错误恢复](2026-10-16-owned-application-pagination-and-recovery.md)已接受、尚未实施；不以本包focused通过关闭上层UC。
