@@ -15,6 +15,8 @@
 
 ## 代码位置
 
+[真实Tester分页、容量与最小披露](2026-10-16-tester-pagination-and-privacy.md)已接受：补25条ACTIVE成员、历史episode、独立链接分页/筛选、容量与无当前链接的真实读取矩阵，以及畸形成功的区域级退场；不增加产品写入口或REMOVED成员入口。
+
 [真实资料分页、历史与预算错误](2026-10-16-profile-pagination-and-budget.md)已接受：在两个正式Create的测试App中按唯一索引准备四状态及25条遗留读取历史，补真实keyset、页外指针与413错误；不绕过validator，不增加资料写UI，不关闭既有镜像响应头缺口。
 
 [真实管理权转让与私有读取回收](2026-10-16-management-access-loss.md)已接受：修复同Session明确404后旧数据保留，验证归档Application真实转让和UC002–005旧/新管理员页面，不增加写UI或Reviewer授权。
