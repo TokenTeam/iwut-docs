@@ -41,3 +41,5 @@
 最终focused诊断终态：新spec完整执行23.0秒，1失败、exit1，错误清单仅3条Application详情404缺no-store；没有其它断言失败。真实转让与六页回收、Tester在途200退场、B接任后的六页历史、ARCHIVED默认可见、原ACTIVE链接真实撤销/ADMIN_TRANSFER和保留MANUAL历史、ACTIVE Membership保留，以及最后双方Session完全不变/无DELETE均已执行通过。当前代码strict real types与diff检查通过；仍需App发布修复后重新pull latest并运行无参数完整套件，本包不得标IMPLEMENTED，也不关闭上层UC/fencing。
 
 已向用户请求授权通知App agent修复并发布镜像，未自行修改/编译App源码或跨chat派单，未推送本轮未过完整门禁的Console提交。legacy保留`e68851e343bd0e077e5ccd0b680fe6813216ced0`，已检查本地与远程一致；测试临时容器/网络清理后再交接。当前是明确的外部镜像契约缺口，不以反复运行相同镜像或删除响应头断言解决。
+
+后续[资料分页与预算错误](2026-10-16-profile-pagination-and-budget.md)增量后的无参数完整门禁已执行完25项：24通过/1失败（8.4分钟），转让用例完整执行至最终双方Session不变/无DELETE，唯一错误清单为上述3条Application详情404缺no-store；测试定位问题已不再出现。用户通知Gateway CI完成后重新pull Gateway/App latest，digest仍与本页记录相同，缺口未解除。本包继续IN_PROGRESS，不将独立资料矩阵通过视为本包已完成。
