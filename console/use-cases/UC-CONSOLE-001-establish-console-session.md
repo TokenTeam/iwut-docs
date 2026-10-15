@@ -197,6 +197,8 @@ Complete 超时、连接中断或 BFF 写 Cookie 失败时，页面必须进入�
 | 凭据冲突 | `EMAIL_LOGIN_CREDENTIAL_UNAVAILABLE` | 不披露原归属；保留现有本地材料并引导选择另一安全恢复路径。 |
 | requestId 冲突 | `EMAIL_LOGIN_REQUEST_CONFLICT` | 停止该请求，生成新 requestId 前先确认仍使用原密钥与表单意图。 |
 | 限流或容量 | `AUTHENTICATION_LIMIT_EXCEEDED`、`EMAIL_LOGIN_RATE_LIMITED` | 尊重有效 `Retry-After`，倒计时期间禁止自动轮询/重试。 |
+| Console context签发用尽 | `CONSOLE_CONTEXT_EXHAUSTED` | 停止旧流程、清一次性表单但保留钥匙；按[Session v2显式重建契约](../query-contracts/console-session-v2.md#context用尽后的显式重建)由用户终止旧context，再明确返回入口重新确认；不当作等待可恢复的限流。 |
+| Console Cookie硬上限 | `CONSOLE_COOKIE_LIMIT_EXCEEDED` | 失败关闭；说明仅清理本Console Cookie而非删除设备站点存储，不自动降低验证或wildcard删除。 |
 | 邮件或认证依赖不可用 | `EMAIL_DELIVERY_UNAVAILABLE`、`AUTHENTICATION_UNAVAILABLE`、`EMAIL_LOGIN_UNAVAILABLE` | 显示暂时不可用；使用有界退避，保留可恢复上下文，不改成“凭据错误”。 |
 | Session 无效 | `SESSION_INVALID` | BFF 清除本 Console Cookie，浏览器回到未登录状态；不删除设备私钥。 |
 

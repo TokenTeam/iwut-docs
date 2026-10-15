@@ -25,6 +25,7 @@ SessionSummary   { state: ESTABLISHED, authId, credentialId,
 | --- | --- | --- |
 | POST `/api/auth/context` | `{}` | 有有效 context 则返回 snapshot；否则创建新匿名 context 并设置其 Cookie。先消耗 surface 共享 bootstrap 配额。 |
 | POST `/api/auth/context/confirm` | `{contextBinding}` | Cookie 与 binding 一致时返回 snapshot；不设置 Cookie。 |
+| POST `/api/auth/context/reset` | `{contextBinding,revision,resetId: Opaque32}` | 仅原子终止匹配且32次签发已用尽的旧context，返回绑定原请求的RESET receipt；不设置或删除任何Cookie。 |
 | POST `/api/auth/flows` | `{contextBinding, revision, flowId}` | flowId 由浏览器提前随机生成并由 BFF 原子登记；比较旧 revision 后返回新 FlowTicket。同一 flowId 的原创建重试可读回已经登记的那一代，不覆盖别的意图。 |
 | POST `/api/auth/flows/cancel` | `{flow: FlowTicket}` | 原子取消 OPEN flow；若同 flow 刚 FINISHED 且仅 revision+1，原子取消并失效其刚提交的 Session。新 flow/新 Session 不受旧取消影响。 |
 | POST `/api/auth/flows/recover` | `{flow: FlowTicket, flowId: Opaque32}` | 原 root 仍 OPEN 则返回原票据，设备探测作为 DEVICE 子操作；若该 root 已 FINISHED，则登记恢复 root（不返回旧 token/carrier）。新 flowId 提前保留以恢复该登记的未知结果。其它意图已取代时拒绝。 |
@@ -48,6 +49,16 @@ DEVICE 探测保留 EMAIL 操作。设备失败后能重试有效原邮箱 Compl
 显式重发使用原 localId、新 requestId 与新 flowId，比较旧 ticket 的 revision；在新 root 得到确认前不发送新 Auth Begin。取消/卸载会中止本地请求并尽力发送带原票据的 cancel；未得到 BFF 确认时不能声称服务端撤销。取消确认后，已在途的旧 carrier 即使到达也不再有效。
 
 Mongo 提交响应丢失时仅用本次已知 generation/commit ID 读回当前状态；读回不确定不发成功 Cookie、不擅自撤销 token。后续独立请求不复发旧 carrier secret。任何新成功都生成新的 generation/secret，不复用匿名凭据。
+
+## context用尽后的显式重建
+
+start/recover在创建新root前统一拒绝`CONSOLE_CONTEXT_EXHAUSTED`（429，不冒充临时限流），store的startFlow原子要求issuedSessions<32。已有第32代不因返回上限错误而被静默清除。
+
+reset body绑定当前Cookie、public binding、confirm后冻结的revision及首次发送前生成的resetId。有效旧context仅在issuedSessions=32且CAS匹配时原子写有界`reset:{id,fromRevision,at:Mongo $$NOW}`、revision+1并清flow/session，保留原expiresAt。所有普通context/Session/flow读写排除reset墓碑；专用receipt读取可在原有效期限内确认精确原命令，不能延长期限或复活旧context。
+
+receipt严格为`{state:"RESET",contextBinding,revision:fromRevision+1,resetId}`。相同Cookie/命令重试返回同一receipt；不同resetId、旧revision、未用尽、缺失/变更Cookie或过期返回409，不修改其它context。写ACK未知只读回精确墓碑，仍未知为503。所有reset响应均无Set-Cookie，尤其不删除固定context Cookie，也不顺手清理其它carrier。
+
+Browser只在用户明确选择后confirm同一binding并冻结plan；网络未知重试复用plan，不自动换ID/revision。确认后停止，用户再次选择返回入口重新读取当前Session，下一次显式登录才按既有bootstrap重新确认环境。不自动重放登录或邮箱请求，不删除设备钥匙、不声称撤销Auth Session。停止等待/离开立即隔离回调，服务端结果仍可能已提交。共享UI、错误边界及分层证据见[重建工作包](../implements/2026-10-16-context-exhaustion-recovery.md)。
 
 ## 私有业务响应与旧错误回收
 

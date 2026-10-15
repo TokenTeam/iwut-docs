@@ -15,6 +15,8 @@
 
 ## 代码位置
 
+[context签发上限显式重建](2026-10-16-context-exhaustion-recovery.md)已接受，正在实施精确旧context终止、稳定receipt重试和共享认证入口的显式恢复，不放宽Cookie硬上限，不自动重放登录。
+
 实现目录为独立的 `iwut-console` 仓库。UC001 接受后已初始化 pnpm workspace；本页的 `IN_PROGRESS` 不表示真实 E2E 或 UC 完成。
 
 [真实镜像浏览器联合验收工作包](2026-10-16-real-service-browser-verification.md) 已自行接受并交付，`pnpm test:real` 的 2 项真实 Browser/BFF/Gateway/Auth/App 测试通过，覆盖双 Console 邮件/设备登录、UC002–005 成功读取及 Session 失效回收。各 UC 的完整状态/恢复/并发验收矩阵仍继续实施；测试只使用已发布 backend latest 镜像，不依赖相邻源码路径。
