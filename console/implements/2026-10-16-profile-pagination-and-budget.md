@@ -8,6 +8,8 @@
 
 同一Application的DRAFT/SUBMITTED共用正式working唯一索引，不能为测试绕过。专用账号经真实注册、Developer申请和DEVICE证明，通过正式Create建立两个Application。主App准备25条资料读取fixture：seq25 DRAFT为working，seq1..12 APPROVED（published=seq1），seq13..24 REJECTED；另一App准备SUBMITTED/PENDING并作为同一管理员的跨App ID隔离对照。全部附属fixture须经过现有Mongo validator/index，不修改ownership/quota或安全状态。
 
+同步澄清UC004验收措辞：工作/公开指针只能使用权威UC039允许的组合，不把原“同或不同”误读为可将同一ID同时当成功的working/published。无后端规则变更。
+
 seq24准备25条attempt升序REJECTED历史；这只验证兼容遗留读取投影，不宣称当前资料命令可以重试同一修订25次（正式UC039限制继续有效）。decision reason仍服从非空/非首尾空白等正式约束，不能用非法reason测试空字符串；null/空串/空白与惰性URL用允许这些表达的原文字段验证。页级working/published指针独立于当前页或filter；latestReview不从当前历史页推导。
 
 列表token和review token只来自真实响应，保持不透明；在内存中比较/重放用于协议负例时不输出token，不进入URL路由、日志、诊断或持久化。真实同源客户端查询携带API契约要求的query参数，不与前端页面URL混淆。跨App、跨查询种类/筛选的token错用通过真实读请求验证正式400及no-store，不能合成错误正文。前端自身不会主动错用token；组件测试覆盖对应坏token的显式从头恢复。
@@ -17,6 +19,8 @@ seq24准备25条attempt升序REJECTED历史；这只验证兼容遗留读取投�
 网络/5xx仅在相同读取上下文保留旧快照并标原asOf，沿用[私有读取边界](../query-contracts/private-read-boundary.md)。400坏token、413预算错误或畸形成功不是授权下降，不清Session/设备，也不触发整App权限黑名单；但本次查询失败时不能继续把旧正文、指针、latestReview或reviews呈现为本次成功结果。旧已读数据若仍被TanStack保留在挂载Query内，也不得出现在失败页面；可按当前Query精确回收，不影响其它资源或新attempt。413不得截断/跳过条目、自动翻页或重试同一超预算响应。
 
 同key后台刷新失败与显式从头刷新分别验收：前者以组件Query refetch直接证明显示边界，不能冒称其为真实点击；后者在真实页面用正式413响应验证旧内容退出。不会为触发同key错误暴露产品QueryClient或伪造document visibility。
+
+补充执行决定见[私有读取边界](../query-contracts/private-read-boundary.md)：失败先遮蔽，再按捕获的当前Query实例清除retained data，防止后续5xx把先前退场的内容复活；明确错误不因focus/reconnect自动重试。Profile成功解码错误与fetch网络TypeError分型，协议错误不附带原正文/cause。保留网络/5xx真实旧快照对照，不用关闭所有自动刷新来缩小语义。
 
 ## 真实镜像矩阵
 
