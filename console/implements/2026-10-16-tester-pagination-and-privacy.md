@@ -10,7 +10,7 @@
 
 局部网络失败复用已有透明TLS代理：两个POST列表分别在真实App已完成200后断开回执，校验代理upstreamStatus及实际React旧asOf提示、兄弟区域保留和显式刷新恢复。不生成500/伪响应，也不把网络故障视为Session失效；三RPC的5xx分支仍由组件测试独立证明，不混称本轮真实500。
 
-传输决定修订（同日接受）：一次DROP不保证浏览器fetch失败。首次新增真实场景在旧asOf提示处失败；随后独立原生Chromium+真实HTTP代理最小诊断得到POST实际发出2次、第一次gate DROPPED而fetch最终200，证实浏览器连接重试，不应修改产品刷新逻辑或放宽页面oracle。测试代理允许仅RESPONSE/DROP使用可选`dropCount` 1..3（默认1），每次都完整取得真实上游响应才断开，耗尽计数后不再干预；受控场景用2次，分别记录bounded upstream statuses/count并最终核对JS错误与页面。它不是任意持续阻断、不伪造响应/身份、不关闭浏览器网络或产品自动刷新；旧one-shot协议保持原样。若浏览器仍恢复成功，测试须如实失败，不能把gate计数当UI失败证据。
+传输决定修订（同日接受）：一次DROP不保证浏览器fetch失败。首次新增真实场景在旧asOf提示处失败；随后独立原生Chromium+真实HTTP代理最小诊断得到POST实际发出2次、第一次gate DROPPED而fetch最终200，证实浏览器连接重试，不应修改产品刷新逻辑或放宽页面oracle。测试代理允许仅RESPONSE/DROP使用可选`dropCount` 1..3（默认1），每次都完整取得真实上游响应才断开，耗尽计数后不再干预；受控场景最多3次，分别记录bounded upstream statuses/count并最终核对JS错误与页面。它不是任意持续阻断、不伪造响应/身份、不关闭浏览器网络或产品自动刷新；旧one-shot协议保持原样。若浏览器仍恢复成功，测试须如实失败，不能把gate计数当UI失败证据。
 
 Node闭包可通过正式精确DELETE撤销本包预登记ACTIVE链接，响应按固定API生成DTO验证，不发回浏览器或日志。固定loopback control只接受空JSON、固定动作，无ID/URL/正文参数；撤销后概览无当前链接但ACTIVE成员与容量保留。没有一次性join secret创建或恢复请求，不实现产品写入口。
 
@@ -33,3 +33,5 @@ API三RPC成功形状/fromJson回归先红，细分6个错误输入后全部绿�
 普通全仓410项Vitest/28项Node、strict类型通过；首次生成漂移因GitHub固定API取数60秒低速超时失败，原命令重试通过，不换输入或使用相邻源码。仍固定API `a5d504c058c62cd91be451074d21608d69789918`，新增tester_join_link descriptor仅供测试Node精确DELETE解析，不暴露产品写client。fixture浏览器8通过/4个Admin非目标skip。
 
 首轮focused真实3项全部通过（11.2秒）：正式Create与validator/index seed成功；成员20+5、REVOKED20+5、ALL20+6的同时间ID排序、区域分页独立、键盘筛选/翻页/全部刷新、旧REMOVED排除及真实空态全部通过。六类真实token负例400/private/no-store通过；正式精确DELETE成功，刷新后当前链接为空、容量25和ACTIVE成员保留、原链接MANUAL历史可读、Session摘要保持且无DELETE /api/session。随后增加局部回执丢失的真实网络场景，仍须focused及无参数全量完成，不能沿用这三项通过代替新增场景证据。
+
+有界代理新增5项Node先红后绿，原16项保留，共21项HTTP(S)回归通过；普通Node合计33项通过。两次DROP真实诊断仍在提示处失败，随后无正文/无Query访问的被动fetch元数据明确观测：仅一次JS fetch、两次真实200被丢弃、最终fetch仍成功，三次上游POST不是React自动刷新。最小HTTP/TLS/复用TLS实验只重试一次，不能据此声称TLS必然重试两次；仅按当前真实拓扑证据使用既定上限3，不扩成持续阻断。被动wrapper原参数/Promise/Response原样返回，输出仅静态布尔，不读取认证或业务正文；后续必须同时验证JS TypeError与DOM，不能只验证代理。
