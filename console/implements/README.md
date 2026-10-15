@@ -31,6 +31,8 @@
 
 [真实浏览器失败报告隐私护栏](2026-10-16-real-report-privacy.md) 已交付：合成定位器/hook/API回归保持4失败/1通过，当前标准报告无随机输入材料；共用fixture后重新拉取latest，13项真实测试再次全通过。不以隐藏诊断替代失败状态，不改变上述真实验收的完成边界。
 
+[真实UI迟到与私有视图隔离验收](2026-10-16-real-ui-concurrency.md) 已交付：实际Begin等待取消/新意图替换及旧业务成功/SESSION_INVALID与新身份交错；完整真实套件16项通过。直接Query内存检查与真实DOM/网络证据分层记录；Complete/Recover等待取消、旧清理回执与新同页缓存交错、context上限恢复仍开放，UC001/fencing不关闭。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）

@@ -10,6 +10,8 @@
 
 [未知结果/UI恢复增量](../implements/2026-10-16-unknown-result-and-ui-recovery.md)又补齐实际Begin原请求恢复、真实DEVICE认证失败后的原EMAIL成功及Mongo回执丢失两分支，当前联合13项通过。迟到Begin、实际私有DOM/cache与旧错误回收矩阵仍未齐备，本缺口继续OPEN。
 
+[真实UI并发增量](../implements/2026-10-16-real-ui-concurrency.md)进一步验证Begin等待期间键盘取消/新root登录，以及Application列表旧成功/SESSION_INVALID与另一标签页B身份交错，完整套件16项通过。Query直接内存移除由组件测试证明，浏览器只主张实际DOM/网络证据；Complete/Recover等待取消、旧DELETE回执与新同页cache及context上限重建仍待补，本缺口不关闭。
+
 本文是 [UC-CONSOLE-001](../use-cases/UC-CONSOLE-001-establish-console-session.md) 的实现缺口与候选方案记录，不接受新架构，不修改 UC 的权威要求，也不把下列候选方案解释为当前部署约束。
 
 ## 原始要求与当前覆盖
