@@ -1,6 +1,6 @@
 # UC001 邮箱重发与浏览器恢复控制增量
 
-状态：`ACCEPTED / IN_PROGRESS`。
+状态：`ACCEPTED / IMPLEMENTED`（客户端增量；UC001 整体仍为 IN_PROGRESS）。
 
 本工作包依据用户持续授权由 Console agent 自行接受，实施 BR-CSE-005–008 中当前客户端可以独立保证的交互，并保留 BFF Cookie 并发的真实缺口，不改变认证协议或后端规则。
 
@@ -22,3 +22,16 @@
 Testing Library 覆盖同参数 Begin 重试、新 requestId/同 localId 重发、倒计时、到期擦除、取消/卸载迟到回调、登录方式互斥、结果未知与限流。浏览器适配器覆盖取消前不签名/不接管、已完成和畸形成功响应进入未知。真实镜像 SMTP 浏览器测试继续验证主链并增加明确重发后登录，不通过改写服务端时钟或配额缩短冷却。
 
 全量生成漂移、类型、单测、build 和 fixture/真实浏览器门禁沿用现有命令。UC001 在服务端并发缺口和完整恢复矩阵收口前保持 `IN_PROGRESS`。
+
+## 2026-10-16 实现与证据
+
+Console 实现 commit：`b0b2614`。
+
+- 两个 Console 共用独立的邮箱流程组件，使用每次请求的 AbortController 身份和组件生命周期约束异步消费；设备与邮箱方式用同步互斥保护，不依赖 React 下一次渲染才能阻止重复提交。取消/卸载不删除设备私钥。
+- 浏览器适配器在读取设备、公钥校验、签名、响应和凭据接管的异步边界检查取消；Complete 的 5xx、已完成、不合法/已到期成功摘要和本机 credentialId 保存失败均作为结果未知。上游 Retry-After 与 Kratos metadata 只投影规范化等待秒数，不转发私有诊断字段；未知结果保留等待秒数。
+- Testing Library 覆盖原邮箱/requestId/localId 重试、显式重发、到期清理、未知恢复、键盘错误焦点、取消/卸载与重复提交。有效协议 frame 的适配器测试证明取消前不签名/不接管以及未知分类；它们不证明服务端事务回滚或 Cookie 响应顺序。
+- `pnpm test:real` 2 项通过；Developer 用真实 SMTP 第一封邮件建立等待状态，等待服务端 resendAfter 后用键盘明确重发，确认新 requestId/相同邮箱与公钥、旧验证码为空，再用第二封邮件成功登录。最终 IndexedDB 仍只有一把 non-extractable 私钥；Admin 独立邮箱/设备登录和 UC002–005 管理读取及真实 Session 失效基线继续通过。
+- 本次仍拉取 CNB latest，实际 Auth/App/Gateway digest 与上一真实镜像工作包一致；无后端源码编译，无时钟/配额改写，无 sudo；临时容器和网络已清理。
+- 全量 strict typecheck、生成输入漂移、Vitest、production build 和 fixture Playwright（8 项通过、4 项按 Admin surface 跳过）通过。真实 E2E 运行 production build，不依赖 Vite fixture response。
+
+保留缺口仍以 UC001 原文为准：跨标签页/跨副本/在途 Set-Cookie fencing、服务端取消确认与完整恢复矩阵尚未实现。这些缺口不是本增量的完成声明；不得把结果未知时的 mock 设备探测与原 Complete 重试组合解释为真实后端全部恢复路径已通过。

@@ -19,6 +19,8 @@
 
 上述事实说明 UC001 仍需增量实施；现有成功登录测试不能作为并发要求已经完成的证据。
 
+同一个 flow Cookie 还限制结果未知恢复的组合：邮箱 Complete 未知后，新的设备 Begin 会把 flow kind/operationId 替换为 DEVICE；若设备探测未能建立 Session，此时直接重试仍有效的原邮箱 Complete 会被 BFF 的 EMAIL flow 校验拒绝。页面保留原操作不等于 BFF 仍允许消费它。后续架构必须明确区分当前用户意图和该意图下允许的恢复操作，验证“设备探测失败 → 原邮箱 Complete”的真实组合；不能仅分别 mock 两条恢复按钮就宣称 BR-CSE-006 闭环。
+
 ## 两类不同的竞争
 
 第一类发生在 BFF 尚未决定写 Cookie 时：
