@@ -30,3 +30,9 @@
 ## 非目标与后续边界
 
 不开放Admin治理/审核页面、Reviewer queue/decision、Tester客户端加入页或任何生产写UI。正式写命令仅用于隔离测试准备，不等于交付相应前端UC。PENDING/REJECTED/null owner不是正常Create后下降路径，不用seed制造；WITHDRAWN涉及正式归属退出屏障及资产处置，另包，不把SUSPENDED当WITHDRAWN替代。账号DISABLED也不等于资格下降，本包不验证或改变其Session失效规则。上层UC001/fencing、UC002–005完整并发矩阵及UC006–007不因接受本包而关闭。
+
+## 实施与验证进展
+
+固定API同pin扩充三份Proto生成输入和对应产物，未升级`a5d504c`、未手写业务DTO或开放生产治理client。准备器初始接口存在性1红后实现（仅证明接口缺失）；正式G/R/T非Developer查询缺失再取1业务红，权限revision默认0/Tester limit非100也先红后绿，不把接口红扩大为全部协议红。最终12项资格准备合成测试覆盖四真实DEVICE请求形状、仅A Apply、两独立grant共享revision、null Profile/空OAuth声明、正式Join与secret保护、权威重读和未知状态提交不重放；8项bootstrap合成测试覆盖原容器归属/镜像/网络、停服与CLI次序、未知结果/清理/重启就绪失败及中断，不当作真实后台角色证据。
+
+普通`pnpm test`终态512项Vitest＋76项Node全绿；strict types、同pin生成漂移、fixture浏览器8通过/4个Admin非目标跳过及Edge检查均通过。四项真实spec已写好，先进行独立focused再无参数全量；准备器/runner/spec在真实轮次中冻结，不提前登记真实通过。
