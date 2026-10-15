@@ -9,7 +9,7 @@
 | ID | 标题 | 状态 | 权威位置 | 备注 |
 | --- | --- | --- | --- | --- |
 | `UC-CONSOLE-001` | 建立浏览器 Console Session | `ACCEPTED` | [UC-CONSOLE-001](use-cases/UC-CONSOLE-001-establish-console-session.md) | 共享认证入口；Gateway 路由已交付，实现进行中 |
-| `UC-CONSOLE-002` | 查询我的 Application 管理概览 | `ACCEPTED` | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md) | 2026-10-15 接受；首个只读管理工作包实施中 |
+| `UC-CONSOLE-002` | 查询我的 Application 管理概览 | `ACCEPTED` | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md) | 2026-10-15 接受；首个只读管理工作包已实现，真实浏览器联合验收待补 |
 | `UC-CONSOLE-003` | 只读管理 Application Version | `PROPOSED` | [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
 | `UC-CONSOLE-004` | 只读管理 Application 资料修订 | `PROPOSED` | [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
 | `UC-CONSOLE-005` | 只读查询 Application Tester 管理 | `PROPOSED` | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md) | 用户授权同时起草只读管理与审核；待审，未实施 |

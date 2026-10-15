@@ -60,3 +60,9 @@
 - 首包实现列表、生命周期/平台可用/归档状态筛选、不透明 token 的逐页加载、详情读取、显式刷新、统一不可访问表达和 Session 失效回收；不提前实现 UC003–005 页面或任何写命令。
 - 普通管理查询直接使用 ADR-CONSOLE-004 的同源 Gateway route，不增加 BFF body proxy；浏览器 transport 必须携带本 surface Cookie，但不得持久化响应正文或 page token。
 - 组件和浏览器测试可以用类型化 fixture 验证页面分支；只有连接真实 Gateway/Auth/App 的联合测试才能登记真实业务链路完成。
+
+## 实现登记
+
+2026-10-15 首个实现工作包已交付：固定类型与同源 client、列表/详情路由、URL 筛选、显式游标翻页、刷新、统一不可访问、`SESSION_INVALID` 回收和仅内存 Query 隔离均已落地。浏览器 fixture 用例、Gateway `latest` 路由组成测试及真实 Auth/App/Mongo 协议 E2E 已通过。
+
+本登记不宣称 UC 的真实浏览器联合验收已完成：仍需由浏览器页面连接同一套真实 Gateway/Auth/App 环境，使用真实管理员与 Application 数据覆盖默认归档可见、深链接、权限隐藏、身份切换和迟到响应。证据与固定镜像 digest 记录在 [Console 实现状态](../implements/README.md)。
