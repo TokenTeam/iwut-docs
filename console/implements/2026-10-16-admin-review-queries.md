@@ -37,3 +37,9 @@ Admin Version和Profile为两个独立capability，不复用Developer按App清�
 ## 实施记录
 
 本次先接受设计并开放上述读取实现。实际代码、红绿证据、镜像digest、真实结果与清理将在完成后追加；当前不登记任何新增功能为已实现。
+
+准备决定落定：使用独立reviewOwner、两个新普通单项Reviewer V/P，复用已有G平台治理者与R双Reviewer；不改变资格包A/G/R/T的既有资源。reviewOwner正式Apply、26次Create、正式grant双权限用于三重利益冲突，V/P各只grant一项。25个独立App各准备一份SUBMITTED Version/Profile及PENDING Review，26th保存APPROVED/REJECTED、Version恢复后DRAFT历史和null/空串/空白/惰性资料。所有这些终态仅为明确readseed，不能作为真实提交/决定/恢复命令证据。事务内校验真实validator、BSON精度、引用/snapshot/OAuth和工作槽，只CAS新App序列计数，不seed ownership/quota/Auth权限。
+
+已有fixture还会贡献待审记录，不能为了凑20+5改写旧数据或声称默认队列只有25条。真实测试要求每页最多20、存在续页、自有25条全部覆盖且无重复、整页替换和按某App精确筛选一条；不添加未定义队列状态筛选。固定R的撤Version/重授/撤Profile/重授是四个有界CAS相位，未知回执只读确认，控制端点不接受任意subject或permission。
+
+Edge新增四查询与隔离检查已用已发布Gateway latest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`通过。首轮新增检查错误预期Developer为404而实际502：核对真实生成配置确认未匹配surface会进入Gateway `developer-console-api-deny`，但隔离smoke刻意不监听Gateway，所以502是基础设施拒绝而非SPA兜底。修正为检查502及四条access-log的实际api-deny/gateway-http选择；ADMIN认证上游不可用仍500、伪造身份头不旁路、两个私有ForwardAuth均404。真实完整栈仍须独立验证Developer拒绝404和Admin缺Cookie401，不用隔离502替代。
