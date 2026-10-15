@@ -19,6 +19,8 @@
 
 [真实镜像浏览器联合验收工作包](2026-10-16-real-service-browser-verification.md) 已自行接受并交付，`pnpm test:real` 的 2 项真实 Browser/BFF/Gateway/Auth/App 测试通过，覆盖双 Console 邮件/设备登录、UC002–005 成功读取及 Session 失效回收。各 UC 的完整状态/恢复/并发验收矩阵仍继续实施；测试只使用已发布 backend latest 镜像，不依赖相邻源码路径。
 
+[UC001 邮箱重发与浏览器恢复控制增量](2026-10-16-login-recovery-controls.md) 已自行接受并实施中。页面回调隔离与 Cookie 的跨请求顺序不是同一保证；[登录 flow fencing 缺口](../query-contracts/login-flow-fencing.md) 独立保持 OPEN，UC001 整体仍为 IN_PROGRESS。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
