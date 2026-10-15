@@ -38,3 +38,7 @@
 Application组件新增默认标签与CLOSING/CLOSED摘要3项，先得到3失败/10通过，再实现后13项全部通过，Developer严格类型通过。扩展默认→显式CLOSED→重置时断言真实client输入为空/单值/空filter及首批token；不是非空真实游标的联合验收。ACTIVE不显示closure，关闭中无完成时间，两终态保留三个只读子入口且不出现关闭/恢复按钮、不DELETE Session。产品独立本地提交`df92aed`。
 
 类型检查曾暴露测试误用Playwright的ByRole exact参数，扩展筛选断言又遇到option与badge同文定位歧义；均修正为Testing Library支持的参数及限定实际列表，未改产品状态或删断言。上述是组件证据，真实12组合协议和三阶段React仍待执行；当前不能把本包登记完成。
+
+首轮focused在浏览器启动前由真实注册返回429/PASSWORD_RATE_LIMITED而失败，未登记任何浏览器场景通过。新增账号将同源连续密码工作量推进到21次，不能靠调高后端限额、伪源IP、删账号隔离或改Mongo密码事实绕过。已核对Auth该拒绝在创建提交前发生，正式transport返回Retry-After。测试准备仅在Complete明确这个reason且header为1..60秒时等待后最多重试一次同一序列化正文，保留operation/code/password/proof；Begin、其它429、网络/5xx/正文错误不重放未知写入，重复429或缺失/超限header直接失败。1秒等待切片保持中断可用，失败只记静态状态/reason、不保留正文/cause。该准备器新增8项Node合成回归通过；第二轮已重新pull latest开始验证，不把有界重试当作生产前端恢复策略。
+
+普通门禁现为455项Vitest/48项Node通过，完整strict及固定API生成漂移通过；fixture浏览器8通过/4 Admin非目标跳过、同镜像Edge通过。fixture合成测试覆盖4App事务/CAS/整体rollback、Int32配额4→0与Long revision4→8只一次、实际初始coordinationRevision0（仅Archive后1）、同phase不写、worker漂移和脏关系失败关闭；这些不能替代真实validator/index/协议联合验收。
