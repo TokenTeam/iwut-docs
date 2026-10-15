@@ -15,7 +15,7 @@
 
 ## 代码位置
 
-[context签发上限显式重建](2026-10-16-context-exhaustion-recovery.md)已接受，正在实施精确旧context终止、稳定receipt重试和共享认证入口的显式恢复，不放宽Cookie硬上限，不自动重放登录。
+[context签发上限显式重建](2026-10-16-context-exhaustion-recovery.md)已交付：精确旧context终止、稳定receipt重试和两个独立origin实际32次签发后的React显式恢复通过；完整真实套件21项通过。没有放宽Cookie硬上限或自动重放登录，全部私有页/管理权变化矩阵仍待补。
 
 实现目录为独立的 `iwut-console` 仓库。UC001 接受后已初始化 pnpm workspace；本页的 `IN_PROGRESS` 不表示真实 E2E 或 UC 完成。
 

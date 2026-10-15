@@ -14,6 +14,8 @@
 
 [提交/恢复等待取消与旧清理回执增量](../implements/2026-10-16-pending-cancel-and-clear-ack.md)随后补齐实际React的EMAIL/普通DEVICE等待取消、恢复新root取消，以及同一SPA文档建立B私有视图后旧DELETE回执迟到；完整真实套件19项通过。没有将DevTools未消费正文的完成通知当作产品回调证据，也没有暴露产品QueryClient；直接Query内存证据仍来自组件测试。context上限后的显式重建及其它私有页/权限变化完整矩阵未完成，本缺口继续OPEN。
 
+[context签发上限恢复](../implements/2026-10-16-context-exhaustion-recovery.md)又补齐持久终止墓碑/精确receipt重试，以及Developer/Admin两个独立origin实际32次签发后的React恢复、迟到reset回执与新context交错；完整真实套件21项通过。任意33+迟到carrier的Cookie硬上限无损自助修复及全部私有页/管理权变化矩阵仍未完成，本缺口仍OPEN。
+
 本文是 [UC-CONSOLE-001](../use-cases/UC-CONSOLE-001-establish-console-session.md) 的实现缺口与候选方案记录，不接受新架构，不修改 UC 的权威要求，也不把下列候选方案解释为当前部署约束。
 
 ## 原始要求与当前覆盖
