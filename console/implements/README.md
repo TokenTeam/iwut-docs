@@ -15,6 +15,8 @@
 
 ## 代码位置
 
+[Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)已接受、尚未实施：已核对短reason与正式wire不匹配，下一包补四状态/恢复DRAFT、20+5与独立asOf；不得套用Profile预算或Tester token绑定。
+
 [真实Tester分页、容量与最小披露](2026-10-16-tester-pagination-and-privacy.md)已接受：补25条ACTIVE成员、历史episode、独立链接分页/筛选、容量与无当前链接的真实读取矩阵，以及畸形成功的区域级退场；不增加产品写入口或REMOVED成员入口。
 
 [真实资料分页、历史与预算错误](2026-10-16-profile-pagination-and-budget.md)已接受：在两个正式Create的测试App中按唯一索引准备四状态及25条遗留读取历史，补真实keyset、页外指针与413错误；不绕过validator，不增加资料写UI，不关闭既有镜像响应头缺口。
