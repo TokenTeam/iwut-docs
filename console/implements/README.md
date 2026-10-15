@@ -15,7 +15,9 @@
 
 ## 代码位置
 
-[Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)正在实施：正式reason先红后绿，400/成功协议错误精确退场与每批asOf已实现；普通452项Vitest/32项Node、strict、生成漂移及focused真实4项通过，含四状态/恢复DRAFT、20+5与断流恢复。无参数完整门禁已启动、仍待收齐，不得以focused替代；不套用Profile预算或Tester token绑定。
+[Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)增量已实现、整体门禁仍IN_PROGRESS：正式reason先红后绿，400/成功协议错误精确退场与每批asOf已实现；普通452项Vitest/32项Node、strict、生成漂移、fixture浏览器、Edge及focused真实4项通过，含四状态/恢复DRAFT、20+5与断流恢复。无参数完整门禁终态33项中32通过/1失败（8.9分钟），仍仅3条App管理详情404 no-store断言失败，其余全部通过；资源已清理、提交仅本地、legacy不变。不套用Profile预算或Tester token绑定，不因本包独立通过关闭上层UC。
+
+下一独立包[保留生命周期历史读取矩阵](2026-10-16-retained-lifecycle-read-matrix.md)已接受、尚未实施：四个正式Create的App覆盖三个生命周期阶段与平台/归档四格，协议12组合与React代表路径分层。平台/关闭历史只读seed不当作治理/关闭命令或Auth撤销收敛证据，不绕过当前密码＋新设备签名近期认证，也不扩展生产写UI；资格下降另包。
 
 [真实Tester分页、容量与最小披露](2026-10-16-tester-pagination-and-privacy.md)已接受：补25条ACTIVE成员、历史episode、独立链接分页/筛选、容量与无当前链接的真实读取矩阵，以及畸形成功的区域级退场；不增加产品写入口或REMOVED成员入口。
 

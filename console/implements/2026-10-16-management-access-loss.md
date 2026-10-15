@@ -45,3 +45,5 @@
 后续[资料分页与预算错误](2026-10-16-profile-pagination-and-budget.md)增量后的无参数完整门禁已执行完25项：24通过/1失败（8.4分钟），转让用例完整执行至最终双方Session不变/无DELETE，唯一错误清单为上述3条Application详情404缺no-store；测试定位问题已不再出现。用户通知Gateway CI完成后重新pull Gateway/App latest，digest仍与本页记录相同，缺口未解除。本包继续IN_PROGRESS，不将独立资料矩阵通过视为本包已完成。
 
 随后[Tester分页与正文断流](2026-10-16-tester-pagination-and-privacy.md)增量后的无参数完整门禁终态为29项中28通过/1失败（8.6分钟），转让用例仍仅上述3条no-store断言失败；全部其余场景通过，未删断言或借其它包关闭本包。实际Auth/App/Gateway latest digest未变，本包仍等待App发布对应错误响应头修复。完整轮次容器和网络已核对清理，无后端源码修改或编译。
+
+[Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)增量后再次无参数执行完整门禁33项：32通过/1失败，8.9分钟、exit1；新增Version4项及全部其它场景通过，转让用例完整执行至双方最终Session不变/无DELETE，错误清单仍只有上述3条Application管理详情404 no-store断言。三个业务latest digest未变化，仍不删断言、不推送或关闭本包；本轮容器/网络已核对清理，等待App对应修复发布。
