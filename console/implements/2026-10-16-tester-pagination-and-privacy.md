@@ -35,3 +35,11 @@ API三RPC成功形状/fromJson回归先红，细分6个错误输入后全部绿�
 首轮focused真实3项全部通过（11.2秒）：正式Create与validator/index seed成功；成员20+5、REVOKED20+5、ALL20+6的同时间ID排序、区域分页独立、键盘筛选/翻页/全部刷新、旧REMOVED排除及真实空态全部通过。六类真实token负例400/private/no-store通过；正式精确DELETE成功，刷新后当前链接为空、容量25和ACTIVE成员保留、原链接MANUAL历史可读、Session摘要保持且无DELETE /api/session。随后增加局部回执丢失的真实网络场景，仍须focused及无参数全量完成，不能沿用这三项通过代替新增场景证据。
 
 有界代理新增5项Node先红后绿，原16项保留，共21项HTTP(S)回归通过；普通Node合计33项通过。两次DROP真实诊断仍在提示处失败，随后无正文/无Query访问的被动fetch元数据明确观测：仅一次JS fetch、两次真实200被丢弃、最终fetch仍成功，三次上游POST不是React自动刷新。最小HTTP/TLS/复用TLS实验只重试一次，不能据此声称TLS必然重试两次；仅按当前真实拓扑证据使用既定上限3，不扩成持续阻断。被动wrapper原参数/Promise/Response原样返回，输出仅静态布尔，不读取认证或业务正文；后续必须同时验证JS TypeError与DOM，不能只验证代理。
+
+### 传输方案最终修订（ACCEPTED，同日）
+
+三次DROP的真实诊断仍是一次JS fetch最终成功、4次上游；不能把有界DROP当必然网络故障，也不能继续增加次数凑失败。上述重复DROP实现未提交，撤回该扩展及其专属测试，保留原one-shot HOLD/DROP和已有证据。公开TCP RST的独立TLS最小诊断同样可能重试，不据此改成RST方案。
+
+实际验收改用单次`RESPONSE/TRUNCATE`：代理先完整取得真实上游响应（仍受256KiB上限），然后原样转发真实status/headers及正文第一个原字节，write flush callback后断开，既不更改Content-Length/Transfer-Encoding也不补完正文。只允许非空且长度至少2的真实响应；其它形状失败关闭。记录upstreamStatus及bodyTruncated布尔，不记录正文/headers或凭证。它是传输中断而非伪造JSON/错误响应，浏览器fetch已得到真实200，但正文读取应TypeError；旧one-shot inspect/cleanup不变，必须由Node、原生浏览器和真实React分别验证。
+
+成功HTTP正文读取的真实TypeError继续归网络故障，不转换成`null`/畸形成功而丢旧数据。完整传输但JSON语法错误仍归协议错误；已收到非成功HTTP的401/403/404即使错误正文读取失败，也保留明确status的既有ApiError边界，不降为可保留旧数据的网络错误。此澄清在共享fetch transport实施，并补成功断流/完整坏JSON/非成功断流回归。Tester真实旧asOf和显式恢复目标不变，不改变产品自动重试或引入正文代理。
