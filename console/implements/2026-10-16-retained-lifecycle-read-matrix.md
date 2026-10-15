@@ -32,3 +32,9 @@
 当前生命周期默认选项显示“全部”，实际发送空lifecycleStatuses数组，后端按UC029只返回ACTIVE/CLOSING。改为明确“默认（正常、关闭中）”，保留原请求语义及显式CLOSED选择，不为了文案把默认查询改为三状态。平台/归档缺省仍是真正不限制。
 
 当前详情忽略固定API已返回的closure。按UC002已有范围补最小关闭历史摘要：closureId、状态、Auth撤销回执状态与开始/完成时间，ACTIVE无closure不显示；不补查receipt/proof/内部task，不把读取摘要解释为发起/恢复关闭权限。先取组件RED再实现，随后真实fixture只验证App返回历史事实的呈现，不把合成APPLIED字段记为Auth撤销验收。
+
+## 实施中证据
+
+Application组件新增默认标签与CLOSING/CLOSED摘要3项，先得到3失败/10通过，再实现后13项全部通过，Developer严格类型通过。扩展默认→显式CLOSED→重置时断言真实client输入为空/单值/空filter及首批token；不是非空真实游标的联合验收。ACTIVE不显示closure，关闭中无完成时间，两终态保留三个只读子入口且不出现关闭/恢复按钮、不DELETE Session。产品独立本地提交`df92aed`。
+
+类型检查曾暴露测试误用Playwright的ByRole exact参数，扩展筛选断言又遇到option与badge同文定位歧义；均修正为Testing Library支持的参数及限定实际列表，未改产品状态或删断言。上述是组件证据，真实12组合协议和三阶段React仍待执行；当前不能把本包登记完成。
