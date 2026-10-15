@@ -39,3 +39,5 @@
 第三项全部功能探针均执行：坏base64、不同生命周期/平台/归档filter、不同caller得到正式reason的400；改变pageSize=2和空默认等价显式ACTIVE+CLOSING合法继续读第21–22项，独立非Developer peer默认列表真实为空。失败恰为5个400响应各缺private与no-store的10条soft断言（第200/201/220/221行）；soft仅用于收齐其余证据，最终exit1，不能记为三项全通过。扩展确认App管理读取错误响应头缺口不限于此前Get404；不在Console临时补头或删断言掩盖，后续须新App镜像修复后重跑。
 
 本轮重新pull的Auth/App/Gateway image ID分别为`sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、`sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、`sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，均与上一轮相同；Mongo/Traefik仍沿用该轮已打印固定标识。不编译后端；下一步无参数完整门禁，不能用focused替代。
+
+只读源码定位（App工作区commit `c6332708ed9a89accb229f569ee44f98fd7487b2`，未修改/编译）：`internal/adapter/transport/server.go`的`createdResponseEncoder`第532行只为两个成功管理DTO设置private/no-store；`credentialSafeErrorEncoder`及`middleware.go`的私有操作预设头覆盖Version/Profile/Tester等，但没有Application Management分类。这解释成功200有头而领域400/404缺头的同类症状，建议App拥有者补齐错误/鉴权/绑定失败链并保持两RPC契约。镜像没有OCI revision标签，不能把本地源码commit冒称本轮镜像的构建revision；实际镜像缺头结论仍以前述浏览器响应断言为准，不归因于Gateway工具缺失。
