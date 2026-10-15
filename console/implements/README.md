@@ -19,7 +19,7 @@
 
 [保留生命周期历史读取矩阵](2026-10-16-retained-lifecycle-read-matrix.md)增量已实现、整体门禁仍IN_PROGRESS：四正式Create/二正式Archive、三阶段readseed与12组合×8RPC和React代表路径focused3项通过；默认生命周期文案、关闭摘要展示先红后绿，普通455项Vitest/49项Node、strict、生成漂移、fixture浏览器和Edge通过。无参数全量终态36项中35通过/1失败（9.9分钟），新增三阶段含加强计数全部通过，仍仅原3条App详情404 no-store断言失败；首两轮准备暴露的密码429/全局hash冲突已修复并保留门禁。资源已清理、提交仅本地、legacy不变；平台/关闭历史seed不当治理/关闭命令或Auth撤销收敛证据，不绕过当前密码＋新设备签名近期认证、不扩展生产写UI，资格下降另包。
 
-下一独立包[UC002累计分页与正式错误恢复](2026-10-16-owned-application-pagination-and-recovery.md)已接受、尚未实施：正式wire reason、拒绝投影退场/后续503不复活及每批asOf，拟仅测试实例以正式初始quota配置30准备25个真实Create的App，不seed owner/quota、不改变生产默认10；UC029 token不套用Tester ownershipRevision、父App或HMAC假设。
+[UC002累计分页与正式错误恢复](2026-10-16-owned-application-pagination-and-recovery.md)增量已实现、完整门禁仍IN_PROGRESS：正式reason、拒绝投影精确退场/后续503不复活及每批asOf先红后绿，普通512项Vitest/56项Node、strict、生成漂移、fixture浏览器和Edge通过。仅测试实例以正式初始quota配置30准备25个真实Create的App，不seed owner/quota、不改变生产默认10；独立peer只注册并遵守邮件冷却。focused三项2通过/1失败（13.5秒）：20+5、非空cursor刷新/筛选重置、空详情合法默认、原生与React独立200正文断流及明确续读均通过；第三项功能全部通过，但5个真实400各缺private与no-store，共10条soft断言仍使门禁exit1。App错误头缺口不限于旧Get404，未删断言或补代理头；无参数完整门禁进行中。UC029 token不套用Tester ownershipRevision、父App或HMAC假设，当前包不关闭资格下降、UC001/fencing或UC006–007。
 
 [真实Tester分页、容量与最小披露](2026-10-16-tester-pagination-and-privacy.md)已接受：补25条ACTIVE成员、历史episode、独立链接分页/筛选、容量与无当前链接的真实读取矩阵，以及畸形成功的区域级退场；不增加产品写入口或REMOVED成员入口。
 
