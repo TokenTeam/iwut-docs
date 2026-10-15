@@ -17,6 +17,8 @@
 
 实现目录为独立的 `iwut-console` 仓库。UC001 接受后已初始化 pnpm workspace；本页的 `IN_PROGRESS` 不表示真实 E2E 或 UC 完成。
 
+[真实镜像浏览器联合验收工作包](2026-10-16-real-service-browser-verification.md) 已自行接受并交付，`pnpm test:real` 的 2 项真实 Browser/BFF/Gateway/Auth/App 测试通过，覆盖双 Console 邮件/设备登录、UC002–005 成功读取及 Session 失效回收。各 UC 的完整状态/恢复/并发验收矩阵仍继续实施；测试只使用已发布 backend latest 镜像，不依赖相邻源码路径。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
@@ -117,7 +119,7 @@ pnpm edge:e2e
 2026-10-16 实现结果：
 
 - 按固定 API 输入生成 Tester Management 类型与完整 enum/error reason，并实现一个 GET 和两个直接 Query body 的 POST 同源 client；Application ID 独立编码，所有方法支持取消，成功响应在 Proto 默认值生效前验证必需 envelope；
-- 修正了此前被 fixture 隐藏的内容协商问题：App Center 同源 transport 现在显式发送 `Accept: application/protojson`，有正文时同时发送 `Content-Type: application/protojson`，从而与生成客户端的 camelCase、完整字符串 enum 和 RFC3339 Timestamp 一致；Auth 登录 transport 仍保留既有 `application/json` 契约；
+- 真实镜像联合验收纠正了首包的内容协商判断：App 实际依赖 Kratos v2.9.2，其 `application/json` codec 对 protobuf 消息已经使用 ProtoJSON；首包误根据缓存 v3 实现改用 `application/protojson`，真实镜像返回 400。现已修回 `Accept: application/json` 与正文 `Content-Type: application/json`，继续使用生成客户端的 camelCase、完整字符串 enum 和 RFC3339 Timestamp；
 - Developer Console 交付 `/applications/{applicationId}/testers`，overview、ACTIVE Membership 和 JoinLink 三块使用独立 query key、loading/error/asOf/refresh 和分页状态；JoinLink 首次与重置均显式发送 ACTIVE，切换 ACTIVE/REVOKED/ALL 时只重置该列表 token；
 - 容量以 overview 为权威，不从行数计算；Tester Auth ID、Membership ID 和 JoinLink ID 仅作不可点击的不透明文本，不进行 Auth enrichment，也不展示或拼接 URL、secret、hash、actor、复制、导出或写操作；
 - 任一查询返回 401/统一 404 时取消并清除三块私有缓存；`SESSION_INVALID` 继续走共享 Session 回收；网络/5xx 的刷新失败保留并明确标记带 asOf 的旧快照；坏 token 只重置对应列表；

@@ -12,7 +12,7 @@
 | `UC-CONSOLE-002` | 查询我的 Application 管理概览 | `ACCEPTED` | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md) | 2026-10-15 接受；首个只读管理工作包已实现，真实浏览器联合验收待补 |
 | `UC-CONSOLE-003` | 只读管理 Application Version | `ACCEPTED` | [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | 2026-10-15 接受；首个只读 Version 工作包已实现，真实浏览器联合验收待补 |
 | `UC-CONSOLE-004` | 只读管理 Application 资料修订 | `ACCEPTED` | [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | 2026-10-15 接受；首个只读资料工作包已实现，真实浏览器联合验收待补 |
-| `UC-CONSOLE-005` | 只读查询 Application Tester 管理 | `ACCEPTED` | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md) | 2026-10-16 接受；首个只读 Tester 管理工作包实施中 |
+| `UC-CONSOLE-005` | 只读查询 Application Tester 管理 | `ACCEPTED` | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md) | 2026-10-16 接受并实现；真实镜像成功读取及失效回收基线通过，完整验收矩阵继续实施 |
 | `UC-CONSOLE-006` | 审核 Application Version | `PROPOSED` | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
 | `UC-CONSOLE-007` | 审核 Application 公开资料 | `PROPOSED` | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
 
