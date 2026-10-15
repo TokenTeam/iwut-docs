@@ -20,6 +20,8 @@
 
 需要的developer_management、reviewer_permission、tester_membership Proto已经在固定`a5d504c058c62cd91be451074d21608d69789918`中。仅同pin增加生成输入并通过漂移检查，不手写第二DTO、不升级API。注册账号全部计入既有真实邮件冷却及有界PASSWORD_RATE_LIMITED重试；私钥/Session留Node闭包，公开fixture仅含合成邮箱、opaque ID和核验所需的非敏感状态/版本。
 
+实施安全补充：控制权限只覆盖本轮固定A的revision1→2→3，不允许恢复后再次SUSPEND写出revision4才由公开投影拒绝。写前核对允许的源状态/版本；相同已达目标只观察，未知写入继续只读确认。真实spec另验证缺/错bearer、非POST、query、非空/数组正文和未知phase在进入治理前被拒绝，随后正式观察仍为APPROVED/revision1。不增加生产路由或任意治理代理。
+
 ## 分层验收
 
 - 准备器合成测试先红后绿：精确生成请求、普通账号不Apply、治理CAS、不重试未知写入、secret不返回/落盘、错误静态化；不当作真实业务证据。
@@ -36,3 +38,13 @@
 固定API同pin扩充三份Proto生成输入和对应产物，未升级`a5d504c`、未手写业务DTO或开放生产治理client。准备器初始接口存在性1红后实现（仅证明接口缺失）；正式G/R/T非Developer查询缺失再取1业务红，权限revision默认0/Tester limit非100也先红后绿，不把接口红扩大为全部协议红。最终12项资格准备合成测试覆盖四真实DEVICE请求形状、仅A Apply、两独立grant共享revision、null Profile/空OAuth声明、正式Join与secret保护、权威重读和未知状态提交不重放；8项bootstrap合成测试覆盖原容器归属/镜像/网络、停服与CLI次序、未知结果/清理/重启就绪失败及中断，不当作真实后台角色证据。
 
 普通`pnpm test`终态512项Vitest＋76项Node全绿；strict types、同pin生成漂移、fixture浏览器8通过/4个Admin非目标跳过及Edge检查均通过。四项真实spec已写好，先进行独立focused再无参数全量；准备器/runner/spec在真实轮次中冻结，不提前登记真实通过。
+
+### Focused 真实结果
+
+轮次`iwut-console-real-857321`，专项4项终态**3通过/1失败**，52.2秒，exit1。正式停服CLI bootstrap、同一Auth容器重启就绪、G经Gateway两项grant/权威查询、A正式Create App/Version/Profile及T真实Join全部成功，不依赖Auth资格/权限或App依附seed。A三阶段APPROVED1→SUSPENDED2→APPROVED3各自完成owned-list＋八RPC和六类生产React页面，Session/设备不变。
+
+第4项G/R/T三个角色的正常空owned-list、对A的八RPC统一404及六类React深链隐藏、最小错误内容、无写按钮/个人资料补查/外部请求/DELETE、四方Session/非可导出钥匙保持均执行通过。唯一失败为每角色各一次原生/一次React Application GET404均缺private和no-store，即6个响应×2共12条soft断言；Version/Profile/Tester隐藏响应头通过。soft只用于收齐其它证据，未删除断言或把整项记为通过。
+
+本轮Auth/App/Gateway image ID依次为`sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、`sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、`sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`；Mongo`sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik`sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。全部按本轮重新pull打印，未编译后端；终态后额外查询匹配containers（含停止）和network均为空。
+
+专项终态后才继续有限phase写前护栏与控制HTTP负例，不在运行中改源码。最终源码仍须普通回归和无参数43项全量；本专项不是最终源码完整门禁，不能提前关闭本包或既有App错误头缺口。
