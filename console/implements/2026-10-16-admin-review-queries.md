@@ -43,3 +43,23 @@ Admin Version和Profile为两个独立capability，不复用Developer按App清�
 已有fixture还会贡献待审记录，不能为了凑20+5改写旧数据或声称默认队列只有25条。真实测试要求每页最多20、存在续页、自有25条全部覆盖且无重复、整页替换和按某App精确筛选一条；不添加未定义队列状态筛选。固定R的撤Version/重授/撤Profile/重授是四个有界CAS相位，未知回执只读确认，控制端点不接受任意subject或permission。
 
 Edge新增四查询与隔离检查已用已发布Gateway latest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`通过。首轮新增检查错误预期Developer为404而实际502：核对真实生成配置确认未匹配surface会进入Gateway `developer-console-api-deny`，但隔离smoke刻意不监听Gateway，所以502是基础设施拒绝而非SPA兜底。修正为检查502及四条access-log的实际api-deny/gateway-http选择；ADMIN认证上游不可用仍500、伪造身份头不旁路、两个私有ForwardAuth均404。真实完整栈仍须独立验证Developer拒绝404和Admin缺Cookie401，不用隔离502替代。
+
+### 代码及本地验证
+
+Console提交`0b8e36c`实现同pin八份审核Proto及四个严格只读client；`c3dd826`实现Admin双队列/三元详情与capability/Session边界；`c1395bd`保存Edge、真实准备器和四项浏览器场景。没有决定client、BFF通用业务代理或生产治理/决定UI。所有实现目前仅本地提交。
+
+API新增68项测试：接口未接时2红；接通生成解码后缺envelope仍被Proto默认值吞掉2项业务红；细化必需对象/snapshot/Value/精度/conflict等51红后严格guards转绿。API包182项通过，未知完整JSON统一静态ApiResponseError，真实网络/成功正文TypeError/AbortError和明确HTTP错误不被吞并。
+
+Admin最终57项（页面44、核心9、原Session4）通过：入口缺导航1红、同能力多attempt迟到成功/AbortError2红、捕获Query对象残留data4红、同filter从头刷新晚403误清新页1红均修复。活动attempt用QueryClient弱引用集合，403广播遮蔽同能力页面并精确清捕获Query.data，404仅同三元目标；显式重启建立新attempt，旧回调不能伤新页。实际双mounted Version＋Profile组件证明同能力双DOM退场而另一能力保留；新generation建立后旧clear回执不能改其Profile视图/路由/Query/Session。这些是组件/Query层直接证据，不扩大为全heap或真实网络故障验收。
+
+新准备器和BSON/事务readseed合成测试12项通过，不冒充真实Mongo业务证据。新fixture浏览器两项为补测后绿（页面已经实现，不伪造缺页面RED）；整个fixture套件终态10通过/6个跨surface非目标跳过，4.6秒。
+
+冻结源码的统一`pnpm test`终态633项Vitest＋89项Node通过；strict、固定生成漂移、生产build与diff通过。构建保留大于500KB的chunk警告，未放宽阈值或声称性能验收。真实四项专项现已启动；未得到真实终态前，不登记新页面为联合验收已交付，更不关闭完整UC或既有App错误头缺口。
+
+### 首轮真实专项及定位修订
+
+轮次`iwut-console-real-899807`终态1通过/1失败/2未运行（12.5秒、exit1）。真实注册/停服bootstrap/grant/26次Create、Mongo validator/BSON/snapshot/OAuth事务自检及控制HTTP负例全部成功；两个真实默认队列分页、自有25条全覆盖、整页替换、过滤/从头刷新和Session保持通过。详情已读到两类PENDING及若干终态，但某Profile的sequence与revision同为3，测试在“当前对象上下文”按纯数字找元素发生严格多匹配，因此不能登记详情矩阵或后两项角色/撤权通过。
+
+终态后额外查询本轮containers（含停止）/network均为空，随后只修订spec定位：按section中的字段dt/dd配对断言source/current/restoration revision、终态结果及当前DRAFT，不删数值检查或改产品显示。另给最终权限矩阵增加测试善后：先正式观察R，仅明确单权限的既定相位才调用对应固定重授；未决写仍只读确认，不重放revoke/unknown CAS，不让一个UI断言失败污染后续资格包，也不吞掉原失败。修订`9f0bb0a`严格real types与diff通过，产品代码未变；接下来直接无参数47项完整门禁验收，不以focused替代全量。
+
+本轮重新pull实际image ID：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`，App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`，Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。相邻后端只作设计/源码核对，不成为测试编译输入。
