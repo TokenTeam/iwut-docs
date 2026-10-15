@@ -33,6 +33,8 @@
 
 [真实UI迟到与私有视图隔离验收](2026-10-16-real-ui-concurrency.md) 已交付：实际Begin等待取消/新意图替换及旧业务成功/SESSION_INVALID与新身份交错；完整真实套件16项通过。直接Query内存检查与真实DOM/网络证据分层记录；Complete/Recover等待取消、旧清理回执与新同页缓存交错、context上限恢复仍开放，UC001/fencing不关闭。
 
+[提交/恢复等待取消与旧清理回执](2026-10-16-pending-cancel-and-clear-ack.md) 已交付，补EMAIL/DEVICE等待与恢复新root取消，以及同一实际SPA文档内新B私有视图建立后旧A清理回执迟到的交错；无参数完整真实套件19项通过。context上限重建及全部私有页/权限变化矩阵仍待补，仍不关闭UC001/fencing。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
