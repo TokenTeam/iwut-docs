@@ -74,3 +74,20 @@ Console 侧已增加共享 Traefik 的 BFF/SPA 动态配置生成器，并以固
 - 每个工作包登记目标 UC/ADR、代码范围、非目标、验证命令和真实外部依赖；
 - 两个应用分别记录构建、组件测试、BFF 测试和 Playwright 验收；
 - 涉及浏览器认证协议时必须复用平台公开测试向量，并包含真实 Auth/Gateway 验证。
+
+## 2026-10-15 App 管理与审核页面设计草案
+
+用户已明确授权“同时起草只读管理和审核页面设计”。本授权仅启动功能设计，不接受这些 UC 或启动页面实现；UC-CONSOLE-001 的首个实现工作包和非目标保持不变。新增六份提案均为 `PROPOSED / NOT_STARTED`：
+
+| 草案 | 页面范围 | 实现前置与当前缺口 |
+| --- | --- | --- |
+| [UC-CONSOLE-002：查询我的 Application 管理概览](../use-cases/UC-CONSOLE-002-query-owned-applications.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；App UC029 已交付 |
+| [UC-CONSOLE-003：只读管理 Application Version](../use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；不实现编辑、提交或发布 |
+| [UC-CONSOLE-004：只读管理 Application 资料修订](../use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；独立审核历史分页，不实现恢复/复制 |
+| [UC-CONSOLE-005：只读查询 Application Tester 管理](../use-cases/UC-CONSOLE-005-query-application-tester-management.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；ACTIVE 管理为主，纯只读，不生成/恢复 secret |
+| [UC-CONSOLE-006：审核 Application Version](../use-cases/UC-CONSOLE-006-review-application-versions.md) | `PROPOSED / NOT_STARTED` | 用户接受设计、ADMIN surface、真实 Reviewer 权限链路及正式检查项定义来源；currentPolicy 版本和 ID 已有 |
+| [UC-CONSOLE-007：审核 Application 公开资料](../use-cases/UC-CONSOLE-007-review-application-profiles.md) | `PROPOSED / NOT_STARTED` | 用户接受设计、ADMIN surface 与精确权限；Reviewer 当前公开指针读取缺失，APPROVE 阻塞；REJECT 不需指针 |
+
+接入调查与分包见 [App API 接入计划](2026-10-15-app-api-integration-plan.md)。Console 页面的业务授权由相应 App/Auth UC 拥有；新提案仅规定前端编排、安全与恢复。Tester 本人 UC038/040 入口继续暂缓，未创建其 Console UC，未伪造宿主 runtime。
+
+本次没有修改 Console 源码、App/Auth/Gateway/API 或生成 brief。正式检查定义、Reviewer 公开指针等后端缺口只记录交接方案；不得以 BFF 数据库读取、管理员查询或临时 DTO 绕过。设计接受前仅可做已授权工程核对，不将草案标记为已实现。最终页面验收仍需真实 Browser/BFF/Gateway/Auth/App，mock 不计真实 E2E。

@@ -1,6 +1,6 @@
 # App 管理 API 与 Console 接入计划
 
-状态：`PROPOSED`。这是接入调查与待审工作包，不是新的 UC、BR 或已接受的页面设计；未启动业务页面实现。
+状态：`PROPOSED`。这是非权威接入调查与待审工作包；页面实现尚未启动。2026-10-15 用户后续已明确授权“同时起草只读管理和审核页面设计”，对应 UC002–007 已起草但全部保持 PROPOSED。
 
 日期：2026-10-15。
 
@@ -8,7 +8,7 @@
 
 App 已交付 Application 管理查询、Version 查询、ProfileRevision 查询、Tester 管理查询、本人测试参与查询和指定 episode 退出。Console 具备认证与混合 BFF 的工程基础，但目前只有 [UC-CONSOLE-001](../use-cases/UC-CONSOLE-001-establish-console-session.md) 被接受；[产品范围](../product-scope.md) 仍为 PROPOSED，不能当作管理页面的实现授权。
 
-`iwut-console/AGENTS.md` 的当前工作包明确要求：“不得提前实现 Developer/Application 管理或 Admin 审核业务页面”。[ADR-CONSOLE-002](../adr/ADR-CONSOLE-002-functional-documentation-boundary.md) 又要求页面状态、导航、并发冲突、结果未知、安全和可访问性在前端功能设计中定义。因此需要先审核下文建议的页面范围，再由 Console 所有者建立对应 UC 草案；草案接受后才能实现。这里没有分配 UC 编号或修改 registry。
+`iwut-console/AGENTS.md` 的当前工作包明确要求：“不得提前实现 Developer/Application 管理或 Admin 审核业务页面”。[ADR-CONSOLE-002](../adr/ADR-CONSOLE-002-functional-documentation-boundary.md) 又要求页面状态、导航、并发冲突、结果未知、安全和可访问性在前端功能设计中定义。用户后续已授权同时起草只读管理与审核 UC；具体草案接受后才能实现。初次调查未分配编号；在用户后续授权下新增 UC002–007 和对应 registry 索引，均未接受。
 
 可独立推进的工作是 Gateway 路由/API 基线核对、生成客户端准备和只读契约检查。Console 页面缺少已接受设计，不阻塞 App UC003–005 的后端联合验收。
 
@@ -37,22 +37,25 @@ App 已交付 Application 管理查询、Version 查询、ProfileRevision 查询
 | C4，surface 待审 | 我参与的测试、指定 episode 退出 | UC038：ListMyTestApplications / GetMyTestApplication；UC040：LeaveApplicationAsTester | `POST /v1/test-applications:search`；`POST /v1/test-applications/{application_id}:resolve`；`POST /v1/applications/{application_id}/tester-memberships/{membership_id}:leave` | 本人 USER；不要求 Developer、Reviewer 或 Application admin |
 | C5，ADMIN | Version 待审队列、审核详情 | UC030：ListPendingApplicationVersionReviews / GetApplicationVersionReview | `POST /v1/reviews/application-versions:search`；`GET /v1/applications/{application_id}/versions/{version_id}/reviews/{review_id}` | 精确 `app.version.review`，不被其他角色替代 |
 | C5，ADMIN | Profile 待审队列、审核详情 | UC031：ListPendingApplicationProfileReviews / GetApplicationProfileReview | `POST /v1/reviews/application-profiles:search`；`GET /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}` | 精确 `app.profile.review`，不被其他角色替代 |
+| C5，ADMIN | Version APPROVE/REJECT | UC005：DecideApplicationVersionReview | `POST /v1/applications/{application_id}/versions/{version_id}/reviews/{review_id}/decision` | `app.version.review` 与最终利益冲突/策略检查 |
+| C5，ADMIN | Profile APPROVE/REJECT | UC016：DecideApplicationProfileRevisionReview | `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision` | `app.profile.review`；批准另有公开指针正式读取依赖 |
 
 依据：[UC029](../../app-center/use-cases/UC-APP-029-query-owned-application-management.md)、[UC034](../../app-center/use-cases/UC-APP-034-query-owned-application-versions.md)、[UC037](../../app-center/use-cases/UC-APP-037-query-application-tester-management.md)、[UC038](../../app-center/use-cases/UC-APP-038-query-my-test-applications.md)、[UC039](../../app-center/use-cases/UC-APP-039-query-owned-application-profile-revisions.md)、[UC040](../../app-center/use-cases/UC-APP-040-leave-application-as-tester.md)、[UC030](../../app-center/use-cases/UC-APP-030-query-application-version-reviews.md)、[UC031](../../app-center/use-cases/UC-APP-031-query-application-profile-reviews.md)。可执行字段、ProtoJSON 和正文映射以固定 API Proto 为准，页面不手写第二套业务 DTO。
 
-C1–C3 首批建议只读。Tester 移除/轮换/撤销、Version 编辑/提交、资料创建/提交、Admin 审核决定和权限治理需要各自的 Console 编排设计，不能因后端命令已存在而隐含启用。C5 只读队列也不能被解释为已经交付审批流程。App UC003–005 联合验收使用真实链路和 Reviewer，不依赖这些页面。
+C1–C3 仍为只读。Tester 移除/轮换/撤销、Version 编辑/提交、资料创建/提交和权限治理没有纳入新提案，不能因后端命令已存在而隐含启用。Admin 审核决定已纳入 UC006/007 待审设计，但不表示已交付审批流程。App UC003–005 联合验收使用真实链路和 Reviewer，不依赖这些页面。
 
-## 最少设计决策与建议
+## 当前待审设计与范围授权
 
-下列事项供用户审核；没有替用户接受任何选项。API 固定版本、客户端生成、no-store、精确权限和 Cookie 隔离都是既定契约，无需重复业务决策。
+用户已授权同时起草只读管理及 Admin 审核页面；以下已形成具体 UC 草案，仍需逐项或整组接受后实施，不再要求用户重复确认“是否起草”。
 
-| 事项 | 权威/冲突 | 选项 | 建议 |
-| --- | --- | --- | --- |
-| 首批 Console 业务范围 | 唯一 ACCEPTED Console UC 仅认证；product-scope 未接受；AGENTS 禁止提前实现管理页 | A：先补 C1–C3 的只读管理 UC；B：同时补编辑/提交/审核决定整套流程 | A。先形成可验证的管理读路径，写流程随后按独立 UC 串行审核；不把 App 联合验收扩大成前端生命周期实现 |
-| 本人 Tester 入口归属 | UC038 是普通 USER 的本人查询，依赖真实 hostRpcApiMajor/capabilities；UC040 允许非 Developer 退出。Console 当前无宿主运行协议，用户已暂缓客户端目录 | A：C4 留给负责宿主/客户端的 agent；B：在 Developer Console 增设所有登录用户可访问的“我参与的测试”，并先设计宿主上下文和无资料卡片 | A，保持客户端目录暂缓；Gateway 可交付 UC038/040 路由但不启用无设计的 Console surface。若用户明确选择 B，再建立单独 Console UC，不能用浏览器猜测或固定假值满足 runtime |
-| Admin 审核交互启动时点 | 后端 UC030/031 与 UC005/016 已接受；Console 尚无审核业务 UC | A：完成后端联合验收后补独立审核 UC；B：现在一并起草审核 UC | A。C5 暂列后续，完整定义 snapshot/当前策略、检查项、利益冲突、权限撤销、结果未知后再编码；不需要重做后端审核业务规则 |
+| 草案 | 审核内容 | 当前设计取向 |
+| --- | --- | --- |
+| UC-CONSOLE-002–005 | Application 概览、Version、资料历史、Tester 管理 | 纯只读；不因后端写命令已存在而加入创建/编辑/移除等按钮。Tester 管理首版 ACTIVE 为主，不展示 REMOVED Membership 历史入口 |
+| UC-CONSOLE-006 | Admin 版本队列、详情与 APPROVE/REJECT | snapshot 与当前策略分离、逐项主动确认、精确权限、冲突和结果未知恢复；正式检查项定义来源未核验时禁止决定 |
+| UC-CONSOLE-007 | Admin 资料队列、详情与 APPROVE/REJECT | 批准自动公开须明确确认替换；Reviewer 当前公开指针的正式读取依赖尚缺，允许分阶段先交队列/详情与拒绝，APPROVE 保持禁用直到正式补齐 |
+| 本人 Tester 入口 | 未纳入这次 Console 草案 | 客户端目录继续暂缓；无真实宿主 runtime 不造值，Gateway 后端路由接入可独立进行 |
 
-若接受上述三项建议，当前只需一句“按建议范围补 Console 设计”。这表示允许起草 C1–C3；草案仍需按既有流程审核接受后实施。C4/C5 暂缓不影响 Gateway 后端接入。
+用户实施前主要审核三个前端取舍：只读管理不夹带写操作；审核确认和结果未知后的显式重读/再确认；资料批准缺前置读取时可否分阶段交付。既有后端权限、Scope/OCC、no-store 和 Cookie 边界无需再次重新设计。
 
 ## 分派与交付顺序
 
@@ -60,10 +63,10 @@ C1–C3 首批建议只读。Tester 移除/轮换/撤销、Version 编辑/提交
 | --- | --- | --- | --- |
 | G0 | Gateway agent；统一 API 更新、上述 RPC 的精确路由与 surface 清单 | 已有 App/平台契约；不用等 Console 页面 | 固定 API SHA、路由差异、未知路径默认关闭、HTTP/gRPC/gRPC-Web 一致性；未接受页面只登记后端入口，Console surface 按实际待审设计保守关闭 |
 | C0 | Console agent；API 生成输入与 transport/client 准备 | 与 G0 协调可获取的 API commit；不覆盖当前仓库独立性 dirty | 固定 source lock；增加所需 Proto 输入/生成类型与 HTTP client；漂移、strict ProtoJSON、方法/正文/无未知参数契约检查；不增加业务导航或按钮 |
-| D1 | Console 设计所有者；C1–C3 前端 UC 草案 | 用户接受首批范围建议 | actor、入口/退出、loading/empty/权限/错误状态、分页、敏感资料与可访问性；引用 App BR；审核后才分配实现包 |
+| D1 | Console 设计所有者；只读管理 UC002–005 | 用户已授权起草，当前 PROPOSED | actor、状态、分页、错误/私有安全与验收已形成；等待用户接受才实现 |
 | C1 → C2 → C3 | Console agent；按接受 UC 串行实现管理读页面 | D1 接受、G0/C0 可用、UC001 有真实有效 Session 基线 | 每包组件/BFF 边界/真实浏览器联合验收；双 surface、身份隔离、分页和 no-store；不要用 mock 报真实服务通过 |
 | D2/C4 | 宿主/客户端所有者，或经用户明确授权的 Console 所有者 | 入口归属和 runtime 来源已接受；客户端暂缓解除 | 只复用 UC038/040，不增离线列表、参与历史、隐式退出所有 episode 或即时 token 撤销承诺 |
-| D3/C5 | Console 设计与 Admin agent | 独立审核 UC 已接受；真实 Reviewer grant/revoke 基线可用 | 精确权限、两类审核分离、不可变 snapshot、当前策略、冲突/并发和结果未知；后端审核联合验收报告作为依赖证据 |
+| D3/C5 | Console 设计与 Admin agent；审核 UC006/007 已起草 | 用户接受设计；正式检查定义/Reviewer 公开指针缺口解除；真实 Reviewer grant/revoke 基线可用 | 精确权限、两类审核分离、不可变 snapshot、当前策略、冲突/并发和结果未知；后端联合验收作为依赖证据 |
 
 此分派是建议工作顺序，不创建其他 chat、不修改其他 agent 文件，也不替 G0/C0 所有者接受 API 升级。只读页面是否依赖 UC001 所有邮箱流程完成由工作包记录明确；使用预建测试 Session 验证页面时，必须写清没有验证完整登录邮件链路。
 
@@ -99,6 +102,6 @@ C1–C3 首批建议只读。Tester 移除/轮换/撤销、Version 编辑/提交
 
 ## 本次实际改动与未完成项
 
-只新增本文件；未修改 Console 源码、生成物、UC/BR、registry、Auth/App/Gateway/API 或生产配置；未 push、部署。调查为只读核对，未运行或宣称 Console 真实 E2E 通过。
+初次只新增本计划；用户后续授权后新增六份 PROPOSED Console UC，并更新 Console registry 与实现导航。未修改 Console 源码、生成物、Auth/App/Gateway/API 或生产配置；未 push、部署，未宣称 Console 真实 E2E 通过。
 
-阻塞业务页面实现的唯一设计前置是缺少对应 ACCEPTED Console UC；生成基线和 Gateway 路由属于工程接入缺口。C4 另受客户端暂缓与宿主上下文缺失约束，C5 需要独立审核交互设计。按建议先补 C1–C3 可把用户需审核的事项控制在一组只读管理流程。
+业务页面实现等待 UC002–007 审核接受；生成基线和 Gateway surface 属于工程接入缺口。审核另有正式检查定义来源、Reviewer 当前公开指针读取缺口，分别登记在 UC006/007。本人 Tester 入口仍受客户端暂缓与宿主上下文缺失约束。

@@ -9,6 +9,12 @@
 | ID | 标题 | 状态 | 权威位置 | 备注 |
 | --- | --- | --- | --- | --- |
 | `UC-CONSOLE-001` | 建立浏览器 Console Session | `ACCEPTED` | [UC-CONSOLE-001](use-cases/UC-CONSOLE-001-establish-console-session.md) | 共享认证入口；Gateway 路由已交付，实现进行中 |
+| `UC-CONSOLE-002` | 查询我的 Application 管理概览 | `PROPOSED` | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
+| `UC-CONSOLE-003` | 只读管理 Application Version | `PROPOSED` | [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
+| `UC-CONSOLE-004` | 只读管理 Application 资料修订 | `PROPOSED` | [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
+| `UC-CONSOLE-005` | 只读查询 Application Tester 管理 | `PROPOSED` | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
+| `UC-CONSOLE-006` | 审核 Application Version | `PROPOSED` | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
+| `UC-CONSOLE-007` | 审核 Application 公开资料 | `PROPOSED` | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md) | 用户授权同时起草只读管理与审核；待审，未实施 |
 
 ## Business Rules
 
@@ -22,6 +28,24 @@
 | `BR-CSE-006` | 结果不确定与幂等恢复 | Console Session Establishment | [UC001](use-cases/UC-CONSOLE-001-establish-console-session.md#br-cse-006) | 不复原旧 token |
 | `BR-CSE-007` | 错误、失效与隐私表达 | Console Session Establishment | [UC001](use-cases/UC-CONSOLE-001-establish-console-session.md#br-cse-007) | 按稳定 reason 映射 |
 | `BR-CSE-008` | 功能可访问性与秘密生命周期 | Console Session Establishment | [UC001](use-cases/UC-CONSOLE-001-establish-console-session.md#br-cse-008) | 不规定视觉样式 |
+| `BR-CMG-001` | 管理读取与动作权限分离 | Console Management Query | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md#br-cmg-001) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-002` | 私有页面数据与身份隔离 | Console Management Query | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md#br-cmg-002) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-003` | 私有分页与刷新 | Console Management Query | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md#br-cmg-003) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-004` | 错误、会话与可访问性 | Console Management Query | [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md#br-cmg-004) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-005` | 当前 Version 与审核事实区分 | Console Management Query | [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md#br-cmg-005) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-006` | 版本筛选、敏感运行声明与可访问性 | Console Management Query | [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md#br-cmg-006) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-007` | 原文、指针与审核摘要忠实表达 | Console Management Query | [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md#br-cmg-007) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-008` | 资料与审核历史独立分页 | Console Management Query | [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md#br-cmg-008) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-009` | Tester 管理事实不扩张到用户资料或凭证 | Console Management Query | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md#br-cmg-009) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CMG-010` | 概览与两类列表独立恢复 | Console Management Query | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md#br-cmg-010) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-001` | 精确权限、利益冲突与在线重查 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-001) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-002` | snapshot、当前策略与确认绑定 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-002) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-003` | 并发变化与结果未知恢复 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-003) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-004` | 审核敏感状态与可访问性 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-004) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-005` | 资料审核独立权限 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-005) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-006` | 资料批准的公开指针前置值 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-006) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-007` | 资料拒绝与实际终态 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-007) | `PROPOSED`，随所属 UC 待审 |
+| `BR-CRV-008` | 资料决定确认与恢复 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-008) | `PROPOSED`，随所属 UC 待审 |
 
 ## Architecture Decisions
 
@@ -36,6 +60,8 @@
 
 | 空间 | 下一个编号 |
 | --- | --- |
-| Console UC | `UC-CONSOLE-002` |
+| Console UC | `UC-CONSOLE-008` |
 | Console BR-CSE | `BR-CSE-009` |
+| Console BR-CMG | `BR-CMG-011` |
+| Console BR-CRV | `BR-CRV-009` |
 | Console ADR | `ADR-CONSOLE-005` |
