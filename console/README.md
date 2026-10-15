@@ -47,7 +47,8 @@ Console 文档不重新定义 Auth Center、App Center 或 Gateway 的业务规�
 ## 当前用例
 
 - [UC-CONSOLE-001](use-cases/UC-CONSOLE-001-establish-console-session.md)：建立浏览器 Console Session，当前为 `ACCEPTED / IN_PROGRESS`；工程、生成类型、BFF Session 边界与浏览器设备协议基线已实现，正在接入设备/邮箱 Begin、Complete、恢复与真实 E2E。
-- [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md)：查询本人管理的 Application 列表与只读概览，当前为 `ACCEPTED / IN_PROGRESS`；首包只实现读取、筛选、分页和详情导航。
+- [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md)：查询本人管理的 Application 列表与只读概览，当前为 `ACCEPTED / IMPLEMENTED`；真实浏览器联合验收待补。
+- [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md)：只读管理 Application Version，当前为 `ACCEPTED / IMPLEMENTED`；当前内容与最新审核摘要分区，真实浏览器联合验收待补。
 
 ## 开工规则
 

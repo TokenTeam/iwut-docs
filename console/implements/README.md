@@ -6,9 +6,10 @@
 | --- | --- | --- | --- |
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
 | 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 加密 Cookie、安全 Session 投影、私有 ForwardAuth、设备/邮箱 Begin/Complete BFF 编排、双登录页面状态机、Gateway surface chain 与共享 Traefik 配置合并验证已实现；重发协调与真实 Auth/邮件链路验收待完成 |
-| Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002`（管理概览） | `IN_PROGRESS` | 独立构建、认证入口和 UC002 只读管理页面已实现；UC001 后续增量及 UC002 真实浏览器联合验收待完成 |
+| Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002/003`（只读管理） | `IN_PROGRESS` | 独立构建、认证入口和 Application/Version 只读页面已实现；UC001 后续增量及真实浏览器联合验收待完成 |
 | Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，审核业务 UC 尚未接受 |
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
+| Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 
 ## 代码位置
 
@@ -54,6 +55,37 @@ pnpm edge:e2e
 - Console `edge:e2e` 拉取 Gateway `latest`（验证 digest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`），确认 UC002 两条 Developer route 与失败关闭；Gateway 协议 E2E 使用 Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、真实 Mongo/BFF/Gateway 验证身份交换和 16 条管理查询/本人退出路由。
 
 剩余验收只限于把已实现页面连接到同一套真实服务环境，准备真实管理员与 Application 数据并由 Playwright 操作页面；完成前不得把 fixture 浏览器测试表述为完整业务 E2E。
+
+## UC-CONSOLE-003 首个实现工作包
+
+状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
+
+接受输入与范围：
+
+- 继续使用统一 API commit `a5d504c058c62cd91be451074d21608d69789918`；
+- 生成 `app_center/v1/application_version` 类型并提供严格 ProtoJSON 同源 fetch client；
+- Developer Console 增加 Version 列表与详情路由，UC002 详情启用 Version 导航；
+- 列表覆盖服务端默认查询、DRAFT/SUBMITTED/APPROVED/REJECTED 单状态筛选、不透明 token 加载更多和显式刷新；
+- 详情把当前 Version、latestReview decision/restoration、capability/scope 与 OAuth redirect 明确分区；运行声明只显示文本；
+- 复用 UC002 的身份隔离、`SESSION_INVALID`、统一404、无效 token 从头刷新和仅内存 Query cache 规则。
+
+非目标：
+
+- Version 创建、编辑、提交、恢复、放弃草稿或发布槽位写操作；
+- Reviewer snapshot、完整审核历史、当前 policy、confirmed checks 或 Reviewer 身份；
+- 把 launch URL / OAuth redirect 变成可执行导航，或用 fixture 宣称真实管理链完成。
+
+验证命令沿用 UC002，并要求 Gateway `latest` 显式包含 `ListApplicationVersions` 与 `GetApplicationVersion` 的 DEVELOPER surface route。
+
+2026-10-15 实现结果：
+
+- `@iwut/api-client` 已生成 Application Version 类型；list 正文严格为直接 query ProtoJSON，detail 无正文，两个 ID 均按独立 path segment 编码，`int64` 保持 `bigint`；
+- Developer Console 已交付 Version 列表/详情、单状态 URL 筛选、显式游标翻页、无效 token 从头刷新、同 token 分页重试与共享 Session 失效回收；
+- 当前 Version 与 latestReview 独立展示，覆盖恢复后 DRAFT + 最近 REJECTED 摘要；launch URL、capability、scope 与 OAuth redirect 都是不可点击的惰性纯文本，不执行预取或外部探测；
+- Vitest 覆盖 direct query body、strict ProtoJSON、大 int64、四状态基础表达、筛选、坏 token 与详情隐私边界；Playwright 在真实浏览器 origin 上覆盖同源 list/detail、筛选、导航与不可执行 URL，但业务响应仍为类型化 fixture；
+- Console `edge:e2e` 已显式确认 Gateway `latest` digest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9` 包含两条 Version DEVELOPER route，并验证 BFF 不可用时失败关闭；同 digest 的 Gateway 协议 E2E 已通过真实 Auth/App/Mongo 和 BFF Cookie 身份交换，Version 两条路由包含在已验收的 16 条管理查询/本人退出路由中。
+
+剩余验收是让浏览器页面直接连接同一套真实 Gateway/Auth/App 环境，使用真实管理员及四状态 Version 数据覆盖管理权变化、生命周期组合、no-store 与迟到响应；完成前不得把 fixture 浏览器测试表述为完整业务 E2E。
 
 ## UC-CONSOLE-001 首个实现工作包
 
@@ -119,12 +151,12 @@ Console 侧已增加共享 Traefik 的 BFF/SPA 动态配置生成器，并以固
 
 ## 2026-10-15 App 管理与审核页面设计草案
 
-用户已明确授权“同时起草只读管理和审核页面设计”。本授权仅启动功能设计，不接受这些 UC 或启动页面实现；UC-CONSOLE-001 的首个实现工作包和非目标保持不变。新增六份提案均为 `PROPOSED / NOT_STARTED`：
+用户已明确授权“同时起草只读管理和审核页面设计”。以下表格保留起草时的整体分包，并按后续接受与实现结果更新状态：
 
 | 草案 | 页面范围 | 实现前置与当前缺口 |
 | --- | --- | --- |
 | [UC-CONSOLE-002：查询我的 Application 管理概览](../use-cases/UC-CONSOLE-002-query-owned-applications.md) | `ACCEPTED / IMPLEMENTED` | 页面代码与协议/边缘链验证已交付；真实浏览器联合验收待补 |
-| [UC-CONSOLE-003：只读管理 Application Version](../use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；不实现编辑、提交或发布 |
+| [UC-CONSOLE-003：只读管理 Application Version](../use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | `ACCEPTED / IMPLEMENTED` | 页面代码与协议/边缘链验证已交付；真实浏览器联合验收待补 |
 | [UC-CONSOLE-004：只读管理 Application 资料修订](../use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；独立审核历史分页，不实现恢复/复制 |
 | [UC-CONSOLE-005：只读查询 Application Tester 管理](../use-cases/UC-CONSOLE-005-query-application-tester-management.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；ACTIVE 管理为主，纯只读，不生成/恢复 secret |
 | [UC-CONSOLE-006：审核 Application Version](../use-cases/UC-CONSOLE-006-review-application-versions.md) | `PROPOSED / NOT_STARTED` | 用户接受设计、ADMIN surface、真实 Reviewer 权限链路及正式检查项定义来源；currentPolicy 版本和 ID 已有 |
