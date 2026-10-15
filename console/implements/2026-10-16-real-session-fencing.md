@@ -22,3 +22,32 @@
 6. 真实 Auth Complete 已提交但返回丢失时，以原本机密钥显式设备恢复，不重放旧 token、不自动创建新密钥。仍需分别登记 UI 与协议层证据。
 
 本轮若发现实现不符合既有契约，可以修复 Console 并记录原因；不得通过缩小断言、伪造 Auth 成功、修改上游业务库的安全状态或把 handler fixture 说成真实浏览器验收来关闭缺口。独立的资源上限恢复交互继续另包设计。
+
+## 2026-10-16 验收增量
+
+本轮无需修改产品实现；新增有界测试转发器、双生产副本 runner、临时 browser driver 与七个真实故障场景。第一轮原主链2项+故障6项全通过；第二轮补强旧载体单独拒绝/真实业务故障断言，并新增 Auth 成功后 BFF 未提交即崩溃的场景，最终 `pnpm test:real` **9项全通过**（约3.5分钟，不跳过、不自动重试）。
+
+| 真实场景 | 证据 |
+| --- | --- |
+| Complete A 已提交但响应头被扣留，另一tab取消并登录B，再释放A | 浏览器实际保留不同名A/B载体；A的成功JSON被产品客户端拒绝接管，权威Session/真实App读取保持B。fixture仅删除B精确Cookie后，旧A载体单独存在不能认证，业务HTTP401 |
+| 旧条件DELETE已执行但删除头迟到，B已登录后释放 | 只删除旧名；B载体、当前generation及真实B业务结果保留 |
+| 旧Complete在到BFF前被扣留，另一tab已建立新flow/Session | 释放后409，无额外载体，权威身份与业务结果不变 |
+| 两生产副本逐个重启及Mongo暂停/恢复 | 重启后持久身份/业务读取保留；暂停时Session503、真实业务HTTP5xx、无Set-Cookie、客户端拒绝消费；恢复后原代可用 |
+| 真实Auth邮箱Complete成功，BFF未得到响应 | 不复发邮箱Complete或换密钥；显式同公钥DEVICE恢复成功，credentialId写回原non-extractable密钥记录，真实A业务读取正确 |
+| 真实Auth设备Complete成功，BFF收到响应前两个进程被终止 | 上游扣留头随断连丢弃，旧浏览器结果不确定；重启后原Mongo claim仍阻止立即恢复，返回合法等待秒数；到期后第二次显式恢复得到新operationId并成功 |
+| 无Cookie的双tab bootstrap交错，旧匿名头最后到达 | 迟到context不能承载已建立身份；Session SIGNED_OUT、原binding确认409、私有transport拒绝旧身份消费，符合已接受的失败关闭边界 |
+
+其中 A 有独立的真实 Application fixture，B 列表为空；断言同时先验证 A 可读、再验证 B 不会读到 A 数据。每个 surface 的两进程共用其独立库与 key ring，转发轮转由13项真实Node HTTP测试验证；该测试已纳入 `pnpm test`。
+
+其它门禁：全量Vitest、包含新增driver/spec的strict typecheck、固定API生成漂移、production build及diff检查通过。新driver仅存在于本轮临时目录，两个生产Web dist均未包含测试入口。所有临时容器、网络、进程、转发器和Mongo volume均已清理。此次每轮仍先拉backend latest，解析出的Auth/App/Gateway/Mongo image ID与[Session v2接线记录](2026-10-16-session-v2-wiring.md)一致。先前Profile读取瞬时失败未在本轮两次主链中复现；仍不据此声称已定位其根因。
+
+## 保留的联合验收项
+
+本包与UC001/fencing继续 `IN_PROGRESS/OPEN`，不能用以上成功重定义整个完成条件。后续优先补：
+
+1. EMAIL Complete未到真实Auth而结果未知，DEVICE探测失败后，仍可显式完成原EMAIL操作。现有两次DEVICE失败后EMAIL成功证据在真实Mongo+fixture Auth的handler层，尚非真实Auth浏览器组合。
+2. Begin真实SMTP投递后的响应丢失，按原requestId/邮箱/公钥恢复且不重复投递，以及取消/替换后的迟到Begin。已有handler/浏览器mock覆盖；显式重发成功不等于Begin未知恢复。
+3. Mongo已持久提交而回执丢失的两个分支：读回确认签发，以及读回仍不可达无Cookie、后续重新证明设备。真实Mongo wire丢ACK已有存储层证据，尚未与真实Auth/production BFF/browser联合。
+4. 实际React UI恢复按钮、卸载/onEstablished、旧业务数据与Query cache回收的迟到响应矩阵。当前driver复用产品browser协议和私有transport，但不操作这些UI路径；现有UI/私有cache证据主要是mock/单测。
+
+context 32次签发上限的显式重建交互仍需独立设计，不随故障测试自动解决。

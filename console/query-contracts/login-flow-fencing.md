@@ -6,6 +6,8 @@
 
 后续[Session v2 接线增量](../implements/2026-10-16-session-v2-wiring.md)已同步迁移 Browser/BFF/Edge，并通过真实 Mongo 双连接/双 Hono 交错与真实镜像成功主链。下文旧无状态实现描述是调查基线，不是当前实现；完整浏览器迟到响应头/双标签页/生产副本故障矩阵尚未完成，因此本缺口仍 OPEN。
 
+[真实Session fencing验收增量](../implements/2026-10-16-real-session-fencing.md)随后通过7项真实浏览器/production BFF/真实Auth故障场景，含迟到载体、双tab、双副本、Mongo中断与Auth已提交后的BFF崩溃。Begin未知、EMAIL失败兄弟恢复、Mongo提交回执丢失及实际UI/cache故障仍需联合证据，不因这7项关闭本缺口。
+
 本文是 [UC-CONSOLE-001](../use-cases/UC-CONSOLE-001-establish-console-session.md) 的实现缺口与候选方案记录，不接受新架构，不修改 UC 的权威要求，也不把下列候选方案解释为当前部署约束。
 
 ## 原始要求与当前覆盖
