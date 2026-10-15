@@ -23,6 +23,8 @@
 
 [ADR-CONSOLE-005](../adr/ADR-CONSOLE-005-durable-session-and-login-fencing.md) 已接受共享持久 Session 与不同代认证 carrier；[持久状态原子核心工作包](2026-10-16-durable-session-core.md) 已实现并通过 16 项真实 Mongo 测试，尚未替换现有 BFF。缺口只有在新协议接线和真实跨副本/浏览器故障门禁完成后才能关闭。
 
+[Session v2 接线工作包](2026-10-16-session-v2-wiring.md) 已自行接受并实施中，精确 wire 与恢复/会话版本边界见 [接线契约](../query-contracts/console-session-v2.md)。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）

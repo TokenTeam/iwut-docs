@@ -6,3 +6,4 @@
 
 - [Version 审核决定接入准备](version-review-decision-readiness.md)：UC-CONSOLE-006 的现有 wire、正式检查定义来源与 Gateway ADMIN 决定路由缺口及解除证据。
 - [登录 flow fencing 缺口](login-flow-fencing.md)：UC001 页面取消与 BFF Cookie 并发的能力边界、ADR-CONSOLE-005 已接受的持久方案及尚未完成的接线/联合验收。
+- [Console Session v2 接线契约](console-session-v2.md)：ADR005 的公共票据、精确 BFF 命令、参数/执行 claim、恢复子操作和按 generation 的私有响应协调。
