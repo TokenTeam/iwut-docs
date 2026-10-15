@@ -25,3 +25,9 @@
 2026-10-16 实施补充：换调用者探针使用独立仅注册的`ownedPeer`账号，不复用完整套件已经登录的转让接收者，避免依赖spec执行顺序绕过邮箱60秒冷却。新账号同样计入准备阶段的实际mail-ready时间；不提高Auth限流或重试未知写入。Create返回的Timestamp可含亚毫秒，而Mongo BSON Date排序仅精确到毫秒；准备器以bigint秒精算、仅截亚毫秒后检查safe integer，返回真实持久排序精度的`createdAtUnixMs`，不因合法nanos拒绝准备，也不假设创建顺序等于查询顺序。
 
 每轮重新pull已发布latest、轮内固定digest，不编译相邻后端。保持成功/空态/错误private/no-store、报告隐私、惰性标识和仅内存token；focused与无参数完整门禁分层，记录失败、资源清理和本地提交，legacy不变。本包不关闭资格下降/角色矩阵、UC001/fencing或UC006–007。
+
+## 实施与验证进展
+
+正式wire reason/旧投影/每批时间组件先7红，必要成功DTO/静态协议错误client先21红，实施后Application组件25＋核心5、client45定向全绿。普通`pnpm test`为512项Vitest＋56项Node全绿（含7项新准备器合成测试），strict types、生成漂移、fixture浏览器8通过/4个Admin非目标跳过与Edge检查均通过。产品提交`2c55fe1`；准备和真实专项仍待独立结果，不以这些组件/fixture证据宣称真实完成。
+
+首次专项命令错误地额外传了`--`，runner参数校验在创建环境之前拒绝，exit1；类型及报告隐私测试通过。修正为`pnpm test:real tests/real/owned-application-pagination.real.spec.ts`重新开始，不能把未启动一轮算作镜像联调失败。
