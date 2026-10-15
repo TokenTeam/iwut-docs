@@ -1,6 +1,6 @@
 # UC002–005：保留生命周期历史读取矩阵
 
-状态：`ACCEPTED / IN_PROGRESS`，2026-10-16，按用户持续授权自行决定。本包开始实施；仍须独立真实读取证据，不关闭此前App详情404响应头门禁。
+状态：`ACCEPTED / IN_PROGRESS`（本包增量已实现，整体门禁仍有App响应头缺口），2026-10-16，按用户持续授权自行决定。无参数36项中35通过/1失败；不以本包独立通过关闭此前App详情404响应头门禁或上层UC。
 
 ## 范围与依据
 
@@ -41,11 +41,11 @@ Application组件新增默认标签与CLOSING/CLOSED摘要3项，先得到3失�
 
 首轮focused在浏览器启动前由真实注册返回429/PASSWORD_RATE_LIMITED而失败，未登记任何浏览器场景通过。新增账号将同源连续密码工作量推进到21次，不能靠调高后端限额、伪源IP、删账号隔离或改Mongo密码事实绕过。已核对Auth该拒绝在创建提交前发生，正式transport返回Retry-After。测试准备仅在Complete明确这个reason且header为1..60秒时等待后最多重试一次同一序列化正文，保留operation/code/password/proof；Begin、其它429、网络/5xx/正文错误不重放未知写入，重复429或缺失/超限header直接失败。1秒等待切片保持中断可用，失败只记静态状态/reason、不保留正文/cause。该准备器新增8项Node合成回归通过；第二轮已重新pull latest开始验证，不把有界重试当作生产前端恢复策略。
 
-普通门禁现为455项Vitest/48项Node通过，完整strict及固定API生成漂移通过；fixture浏览器8通过/4 Admin非目标跳过、同镜像Edge通过。fixture合成测试覆盖4App事务/CAS/整体rollback、Int32配额4→0与Long revision4→8只一次、实际初始coordinationRevision0（仅Archive后1）、同phase不写、worker漂移和脏关系失败关闭；这些不能替代真实validator/index/协议联合验收。
+修复限流准备后的普通门禁为455项Vitest/48项Node通过，完整strict及固定API生成漂移通过；fixture浏览器8通过/4 Admin非目标跳过、同镜像Edge通过。fixture合成测试覆盖4App事务/CAS/整体rollback、Int32配额4→0与Long revision4→8只一次、实际初始coordinationRevision0（仅Archive后1）、同phase不写、worker漂移和脏关系失败关闭；这些不能替代真实validator/index/协议联合验收。
 
 第二轮focused实际经历密码429等待后成功继续同一注册，四个Create和两个Archive正式准备完成；随后真实全局tokenHash唯一索引拒绝与既有Tester matrix同值的Lifecycle链接fixture，exit1，浏览器仍未启动。没有删除索引、跳过其它fixture或放宽后端；须给Lifecycle读取hash独立32-byte命名空间并补全局共存回归。两轮失败均已完成清理，不能登记任何真实页面通过。
 
-全局hash共存回归先得到1失败/8通过；改为独立的32-byte非uniform读取fixture命名空间后9项通过，既有26条Tester记录逐字段未动、共30个hash全局唯一，不生成join secret或URL。最新普通门禁455项Vitest/49项Node、strict和生成漂移均通过；第三轮重新pull latest后已进入真实浏览器，结果待收齐。
+全局hash共存回归先得到1失败/8通过；改为独立的32-byte非uniform读取fixture命名空间后9项通过，既有26条Tester记录逐字段未动、共30个hash全局唯一，不生成join secret或URL。最新普通门禁455项Vitest/49项Node、strict和生成漂移均通过；第三轮重新pull latest后进入真实浏览器，终态见下。
 
 ## Focused真实读取结果
 
@@ -56,3 +56,11 @@ Application组件新增默认标签与CLOSING/CLOSED摘要3项，先得到3失�
 focused轮资源已核对清理。产品`df92aed`与真实fixture/spec/限流准备`9bcd054`已本地提交；随后在无参数浏览器worker启动前额外收紧Application原始counts及对应React四个metric断言（`5151c36`），strict通过，完整结果仍待验证，不能倒记为先前focused覆盖。无参数`pnpm test:real`正在执行，保留所有旧门禁及App详情404 no-store断言。
 
 本轮重复pull的业务digest仍为Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，基础镜像沿用前包记录。未编译后端、调高Auth限额或伪造服务响应；提交仅本地、legacy不变。下一独立包[UC002累计分页与正式错误恢复](2026-10-16-owned-application-pagination-and-recovery.md)已接受、尚未实施；不以本包focused通过关闭上层UC。
+
+## 无参数完整门禁终态
+
+`pnpm test:real`完整执行36项，35通过/1失败，浏览器9.9分钟、exit1；严格类型/报告脱敏前置通过，真实密码429等待及同一完成请求的一次重试后正常进入全部浏览器测试。新增三阶段均通过，包含完整12组合×8RPC、React路径、各区域asOf以及全量前补强的Application八项计数/四个DOM metric。先前Auth双surface、两个真实32签发恢复、双副本/Mongo故障、旧业务/Session错误/清理回执隔离、真实UI恢复/等待取消、Profile3项、Tester4项及Version4项全部通过。
+
+转让用例完整执行至双方最终Session保持且无DELETE，错误清单仍仅3条Application管理详情404缺no-store（B接任前、A失权后、A显式新attempt）。未删断言、改skip、代理伪补头或修改/编译后端；本轮业务latest digest未变化，需App发布对应错误响应头修复后重新pull再通过完整门禁。新读取矩阵不能代替这个外部门禁，也不证明正式Close/Auth撤销或全部资格/角色矩阵。
+
+完整轮`iwut-console-real-812715`及三次focused轮资源已核对清理，包括停止容器无残留；所有Console real容器/网络亦无残留。Console/doc工作区提交后保持干净，仅本地保存，未push；本地/远程legacy仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。下一包状态保持ACCEPTED/NOT_STARTED，不因等待同镜像响应头修复停止独立前端工作。

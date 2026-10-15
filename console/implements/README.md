@@ -17,7 +17,7 @@
 
 [Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)增量已实现、整体门禁仍IN_PROGRESS：正式reason先红后绿，400/成功协议错误精确退场与每批asOf已实现；普通452项Vitest/32项Node、strict、生成漂移、fixture浏览器、Edge及focused真实4项通过，含四状态/恢复DRAFT、20+5与断流恢复。无参数完整门禁终态33项中32通过/1失败（8.9分钟），仍仅3条App管理详情404 no-store断言失败，其余全部通过；资源已清理、提交仅本地、legacy不变。不套用Profile预算或Tester token绑定，不因本包独立通过关闭上层UC。
 
-[保留生命周期历史读取矩阵](2026-10-16-retained-lifecycle-read-matrix.md)正在实施：四正式Create/二正式Archive、三阶段readseed与12组合×8RPC和React代表路径focused3项已通过；默认生命周期文案、关闭摘要展示先红后绿，普通455项Vitest/49项Node、strict、生成漂移、fixture浏览器和Edge通过。首两轮真实准备暴露的密码429/全局hash冲突已修复并保留门禁；无参数全量仍待收齐。平台/关闭历史seed不当作治理/关闭命令或Auth撤销收敛证据，不绕过当前密码＋新设备签名近期认证，也不扩展生产写UI；资格下降另包。
+[保留生命周期历史读取矩阵](2026-10-16-retained-lifecycle-read-matrix.md)增量已实现、整体门禁仍IN_PROGRESS：四正式Create/二正式Archive、三阶段readseed与12组合×8RPC和React代表路径focused3项通过；默认生命周期文案、关闭摘要展示先红后绿，普通455项Vitest/49项Node、strict、生成漂移、fixture浏览器和Edge通过。无参数全量终态36项中35通过/1失败（9.9分钟），新增三阶段含加强计数全部通过，仍仅原3条App详情404 no-store断言失败；首两轮准备暴露的密码429/全局hash冲突已修复并保留门禁。资源已清理、提交仅本地、legacy不变；平台/关闭历史seed不当治理/关闭命令或Auth撤销收敛证据，不绕过当前密码＋新设备签名近期认证、不扩展生产写UI，资格下降另包。
 
 下一独立包[UC002累计分页与正式错误恢复](2026-10-16-owned-application-pagination-and-recovery.md)已接受、尚未实施：正式wire reason、拒绝投影退场/后续503不复活及每批asOf，拟仅测试实例以正式初始quota配置30准备25个真实Create的App，不seed owner/quota、不改变生产默认10；UC029 token不套用Tester ownershipRevision、父App或HMAC假设。
 
