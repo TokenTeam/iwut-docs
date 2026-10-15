@@ -48,3 +48,23 @@
 本轮Auth/App/Gateway image ID依次为`sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、`sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、`sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`；Mongo`sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik`sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。全部按本轮重新pull打印，未编译后端；终态后额外查询匹配containers（含停止）和network均为空。
 
 专项终态后才继续有限phase写前护栏与控制HTTP负例，不在运行中改源码。最终源码仍须普通回归和无参数43项全量；本专项不是最终源码完整门禁，不能提前关闭本包或既有App错误头缺口。
+
+### 最终源码回归与镜像接入复核
+
+有限phase写前护栏新增第13项合成测试先红后绿，验证正式恢复到revision3后拒绝再次SUSPEND、外部revision9漂移不触发写入。最终源码普通回归512项Vitest＋77项Node、strict types通过。首次生成漂移检查因远程Git传输低于速率下限而超时（curl28、early EOF、index-pack失败）；原命令终态失败后仅重跑`pnpm generate:check`，同pin检查通过，未放宽网络期限或改成本地API输入。
+
+用户通知Gateway CI完成后，独立`pnpm edge:e2e`再次pull已发布`latest`，实际image ID仍为上述`a048de73…`。镜像内`/gateway-config --render`成功；九条Developer管理路由存在、两个Session入口与静态入口分流、私有ForwardAuth不可公开访问，认证上游不可用时管理API fail closed。该检查不是成功业务读取的替代证据，也不声称新增镜像版本已经发布。
+
+冻结源码`f003d0e`的无参数43项全量轮次`iwut-console-real-865240`终态为**40通过/3失败**，10.6分钟、exit1。正式准备、控制HTTP负例、A三阶段和其余37项通过；转让场景3条Get404 no-store、owned分页5个List400各缺private/no-store的10条soft断言继续失败。
+
+角色场景本轮不能记作全部功能通过：G的原生八RPC及前五类React隐藏已执行，但Tester页并行请求中某一明确拒绝会触发正常共享退场、取消兄弟请求；测试固定等待overview响应头后读取其正文，在G阶段发生正文读取失败。此外G的Application原生/React GET404共4条缺private/no-store的soft断言已收集。后续R/T及该项末尾四方Session断言未执行，不能沿用focused证据声称本轮收齐，也不能把第三项归为仅缺响应头。终态后额外查询本轮containers（含停止）与network均为空。
+
+仅在上述终态及清理后修正spec等待方式：Tester React深链等待三类真实请求中首个`requestfinished`，立即读取该完整响应并核验实际查询种类的404/reason/private/no-store；仍要求统一不可访问DOM、无私有内容/写操作/副作用及Session保持。未放过正文读取失败或用mock替代；八个原生真实RPC继续逐个完整检查。其它五类单请求页面不变，不修改生产取消逻辑或App响应头。strict real types与diff检查通过；修订后的四项专项单独重跑，不把原43项门禁改写为通过。
+
+### 取消竞态修订后的真实复验
+
+冻结修订`20efa21`，轮次`iwut-console-real-876561`，四项专项终态**3通过/1失败**、exit1。三阶段分别8.0/8.3/7.8秒，角色项25.0秒。控制HTTP负例及正式四角色准备再次通过；G/R/T均完成原生空owned-list＋八RPC、六类React深链隐藏、最小披露、无写操作/个人资料补查/外部请求/DELETE，以及末尾四方Session/非可导出设备和正式角色权威重读。没有正文读取硬失败，也未用catch吞掉失败；唯一12条错误全部来自每角色Application GET404原生/React各一次、各缺private/no-store。
+
+本轮重新pull的五个image ID与前两轮相同；未编译后端、代理补头或改动生产代码。终态后containers（含停止）和network额外查询为空，仓库独立性与diff检查通过。源码和记录仅本地提交，未push；本地legacy仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。本次远程legacy只读核验遇到GitHub30秒低速超时，不能写成本次已重新核验远端。
+
+当前完整门禁仍以此前43项40通过/3失败记录为准；修订后只有四项专项证据，未假称再次跑过完整43项。后续须App发布补齐Application管理错误响应头的新镜像，再重新pull latest、运行无参数完整门禁。该外部缺口不等于Gateway配置工具或混合认证链路不可用，也不关闭UC001/全部读取矩阵及其它前端工作包。

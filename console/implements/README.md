@@ -21,7 +21,7 @@
 
 [UC002累计分页与正式错误恢复](2026-10-16-owned-application-pagination-and-recovery.md)增量已实现、完整门禁仍IN_PROGRESS：正式reason、拒绝投影精确退场/后续503不复活及每批asOf先红后绿，普通512项Vitest/56项Node、strict、生成漂移、fixture浏览器和Edge通过。仅测试实例以正式初始quota配置30准备25个真实Create的App，不seed owner/quota、不改变生产默认10；独立peer只注册并遵守邮件冷却。focused三项2通过/1失败（13.5秒）；最终无参数39项全量为37通过/2失败（10.1分钟、exit1），新20+5/非空cursor刷新与筛选重置/空详情及正文断流恢复、原其余35项全部通过。两失败项仅为原Get404的3条no-store及5个List400各缺private/no-store的10条soft断言，功能/Session断言仍收齐；未删断言或补代理头。每轮重拉latest、digest相同，资源已清理、提交仅本地、legacy不变。UC029 token不套用Tester ownershipRevision、父App或HMAC假设，当前包不关闭资格下降、UC001/fencing或UC006–007。
 
-下一独立包[资格下降与非管理员角色读取边界](2026-10-16-qualification-and-role-read-boundaries.md)已接受、尚未实施：四个专用真实账号区分owner/平台治理者/双Reviewer/ACTIVE Tester；拟正式停服bootstrap、grant、Create依附资源、Join及SUSPEND/RESTORE，不seed Auth权限或资格。测试准备不扩展生产写UI，WITHDRAWN/账号禁用及上层UC继续开放；先记录当前分页包完整门禁终态再实施。
+[资格下降与非管理员角色读取边界](2026-10-16-qualification-and-role-read-boundaries.md)增量已实现、完整门禁仍IN_PROGRESS：四个真实专用账号正式停服bootstrap、grant、Create依附资源、Join及SUSPEND/RESTORE，不seed本包Auth权限/资格或App依附数据、不扩生产写UI。普通512项Vitest/77项Node及strict通过，生成漂移首轮Git网络超时后独立重试通过，最新Edge通过。无参数43项全量40通过/3失败（10.6分钟、exit1）：两项仅App错误头；角色项还因测试读取被正常共享退场取消的overview正文而提前退出，R/T未执行。终态清理后仅修正Tester深链等待首个完整真实响应，保留原生八RPC/全部隐藏与Header断言；修订focused四项终态3通过/1失败，A三阶段及G/R/T全部功能与末尾Session断言执行通过，仅Application GET404缺private/no-store的12条soft错误。每轮重新pull latest、五镜像ID相同、轮次资源已清理、提交仅本地；修订后未重跑43项，不以focused替代完整门禁。WITHDRAWN/账号禁用及上层UC继续开放。
 
 [真实Tester分页、容量与最小披露](2026-10-16-tester-pagination-and-privacy.md)已接受：补25条ACTIVE成员、历史episode、独立链接分页/筛选、容量与无当前链接的真实读取矩阵，以及畸形成功的区域级退场；不增加产品写入口或REMOVED成员入口。
 
