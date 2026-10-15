@@ -43,3 +43,5 @@
 已向用户请求授权通知App agent修复并发布镜像，未自行修改/编译App源码或跨chat派单，未推送本轮未过完整门禁的Console提交。legacy保留`e68851e343bd0e077e5ccd0b680fe6813216ced0`，已检查本地与远程一致；测试临时容器/网络清理后再交接。当前是明确的外部镜像契约缺口，不以反复运行相同镜像或删除响应头断言解决。
 
 后续[资料分页与预算错误](2026-10-16-profile-pagination-and-budget.md)增量后的无参数完整门禁已执行完25项：24通过/1失败（8.4分钟），转让用例完整执行至最终双方Session不变/无DELETE，唯一错误清单为上述3条Application详情404缺no-store；测试定位问题已不再出现。用户通知Gateway CI完成后重新pull Gateway/App latest，digest仍与本页记录相同，缺口未解除。本包继续IN_PROGRESS，不将独立资料矩阵通过视为本包已完成。
+
+随后[Tester分页与正文断流](2026-10-16-tester-pagination-and-privacy.md)增量后的无参数完整门禁终态为29项中28通过/1失败（8.6分钟），转让用例仍仅上述3条no-store断言失败；全部其余场景通过，未删断言或借其它包关闭本包。实际Auth/App/Gateway latest digest未变，本包仍等待App发布对应错误响应头修复。完整轮次容器和网络已核对清理，无后端源码修改或编译。

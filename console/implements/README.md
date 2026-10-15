@@ -11,7 +11,7 @@
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 | Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |
-| Developer Application Tester 管理 | `UC-CONSOLE-005`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的容量/ACTIVE Membership/JoinLink 历史三个独立只读区域、隐私边界和错误恢复已实现；真实浏览器联合验收待完成 |
+| Developer Application Tester 管理 | `UC-CONSOLE-005`（`ACCEPTED`） | `IMPLEMENTED` | 三个独立只读区域、隐私和错误恢复已实现；真实分页/空态/正文断流/精确撤销通过，资格与生命周期完整矩阵及全量响应头门禁仍开放 |
 
 ## 代码位置
 

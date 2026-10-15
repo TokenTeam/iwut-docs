@@ -47,3 +47,11 @@ API三RPC成功形状/fromJson回归先红，细分6个错误输入后全部绿�
 最终实现：runtime新增25项先6红/19绿后全绿（原7项保留，共32项）；API全包68项、Developer124项通过。共享transport修复本地提交`d954441`。TRUNCATE新4项先红后绿、原16项保留，HTTP(S)共20项；原生TLS独立诊断严格证明单次真实POST、fetch200、正文TypeError及bodyTruncated。此前重复DROP的5项测试已撤回，不混入最终计数。
 
 最终focused真实4项全部通过（15.3秒）：前述分页/空态/token/最小披露矩阵继续通过；成员与链接两次分别用独立原生协议探针证明真实200正文断流TypeError，再用实际React刷新取得原asOf旧快照提示、兄弟区域保留、显式正常读取恢复。精确真实撤销仍成功且25 ACTIVE保留、Session完全不变。没有fetch wrapper/产品Query hook、伪响应或提高重复次数。fixture/runner/spec及正常固定API生成描述符提交`4749a32`；普通全仓435项Vitest/32项Node、严格类型已通过。生成漂移收尾又遇同一GitHub低速超时，正用原命令重试；无参数29项完整真实门禁已启动，完成前不得把focused当全量通过。
+
+## 完整门禁终态
+
+无参数`pnpm test:real`已执行完29项：28通过、1失败（8.6分钟），exit1。新增Tester四项在全量中全部通过；Profile三项、双surface真实登录/context32、双生产副本/提交点重启、Mongo故障/提交回执丢失、旧私有视图/Session错误/清理回执，以及真实UI等待取消/未知结果恢复均通过。管理权转让用例完整执行至双方最终Session，唯一错误清单仍为3条Application详情404缺no-store（B接任前、A失权后、A明确重读），没有其它失败。本包保持IN_PROGRESS，不将独立矩阵通过视作完整联合门禁或整个UC005完成。
+
+本轮每次pull已发布latest，实际输入：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。API版本不变，无后端编译/工作区修改或跨chat派单。
+
+生成漂移原命令重试后通过；随后fixture浏览器8通过/4个Admin非目标skip，Edge同镜像接线通过。已按精确轮次`iwut-console-real-750808`核对所有容器（含已停止）和网络均无残留；临时诊断的CA/私钥/浏览器/socket亦已清理。未push未过完整门禁的Console提交，legacy仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。下一包[Version正式错误码与分页恢复](2026-10-16-version-pagination-and-recovery.md)仅已接受、尚未实施，不用本包证据替代其验证。
