@@ -20,7 +20,7 @@
 
 ## 最小验证矩阵
 
-1. 生产React分别在12组合读取Application详情、Version列表/详情、Profile列表/详情与Tester三区域；逐响应验证真实200、各自asOf、private/no-store及固定fixture身份。状态仅由App投影呈现，历史读取不产生写按钮或恢复/上线暗示。
+1. 原生同源协议分别在12组合读取Application详情、Version列表/详情、Profile列表/详情与Tester三个RPC；逐响应验证真实200、各自asOf、private/no-store及固定fixture身份。生产React每阶段读取四App管理概览，再以SUSPENDED＋ARCHIVED App走完Version列表/详情、Profile列表/详情及Tester页面。协议全矩阵与UI三阶段代表路径分别登记，不把原生探针夸大为12组合全部React交互；状态仅由App投影呈现，历史读取不产生写按钮或恢复/上线暗示。
 2. 默认owned-list在ACTIVE/CLOSING各含四App且不因ARCHIVED/SUSPENDED被隐藏；CLOSED阶段默认空，明确CLOSED与已有平台/归档筛选能找到对应历史，筛选重置token。App默认排除CLOSED不能被前端误解为永久丧失历史管理权。
 3. 每阶段Session public binding/generation保持、无DELETE及Auth个人资料补查；runtime/OAuth/opaque ID仍惰性，正文与token不进入Web Storage/前端URL。附属空态、成员保留及关闭链接历史分别验证，不把容量从首屏行数推算。
 4. 测试control仅本轮loopback随机bearer、固定phase和空JSON，内部持有固定四App；禁止任意ID、URL、认证材料或Mongo语句。真实spec沿用报告隐私fixture，不接入产品QueryClient，不拦截或伪造业务响应。
