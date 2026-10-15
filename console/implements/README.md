@@ -15,6 +15,8 @@
 
 ## 代码位置
 
+[真实资料分页、历史与预算错误](2026-10-16-profile-pagination-and-budget.md)已接受：在两个正式Create的测试App中按唯一索引准备四状态及25条遗留读取历史，补真实keyset、页外指针与413错误；不绕过validator，不增加资料写UI，不关闭既有镜像响应头缺口。
+
 [真实管理权转让与私有读取回收](2026-10-16-management-access-loss.md)已接受：修复同Session明确404后旧数据保留，验证归档Application真实转让和UC002–005旧/新管理员页面，不增加写UI或Reviewer授权。
 
 [context签发上限显式重建](2026-10-16-context-exhaustion-recovery.md)已交付：精确旧context终止、稳定receipt重试和两个独立origin实际32次签发后的React显式恢复通过；完整真实套件21项通过。没有放宽Cookie硬上限或自动重放登录，全部私有页/管理权变化矩阵仍待补。
