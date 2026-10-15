@@ -6,12 +6,12 @@
 | --- | --- | --- | --- |
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
 | 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 加密 Cookie、安全 Session 投影、私有 ForwardAuth、设备/邮箱 Begin/Complete BFF 编排、双登录页面状态机、Gateway surface chain 与共享 Traefik 配置合并验证已实现；重发协调与真实 Auth/邮件链路验收待完成 |
-| Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002/003`（只读管理） | `IN_PROGRESS` | 独立构建、认证入口和 Application/Version 只读页面已实现；UC001 后续增量及真实浏览器联合验收待完成 |
+| Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002–005`（只读管理） | `IN_PROGRESS` | 独立构建、认证入口和 Application/Version/Profile/Tester 只读页面已实现；UC001 后续增量及真实浏览器联合验收待完成 |
 | Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，审核业务 UC 尚未接受 |
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 | Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |
-| Developer Application Tester 管理 | `UC-CONSOLE-005`（`ACCEPTED`） | `IN_PROGRESS` | 固定 API 的容量/ACTIVE Membership/JoinLink 历史三个只读区域开始实施；真实浏览器联合验收待完成 |
+| Developer Application Tester 管理 | `UC-CONSOLE-005`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的容量/ACTIVE Membership/JoinLink 历史三个独立只读区域、隐私边界和错误恢复已实现；真实浏览器联合验收待完成 |
 
 ## 代码位置
 
@@ -108,11 +108,21 @@ pnpm edge:e2e
 
 ## UC-CONSOLE-005 首个实现工作包
 
-状态：`IN_PROGRESS`
+状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
 
 首包实现固定 API 的 Tester Management Get 与两类 Search 同源 client、Developer Tester 路由、容量/当前链接 overview、固定 ACTIVE Membership 列表及 ACTIVE/REVOKED/ALL JoinLink 列表。三个区域各自维护 asOf/loading/error/refresh，两类 token 仅在当前身份、Application、查询种类和 filter 的内存上下文内使用。
 
 非目标包括 REMOVED/ALL Membership UI、创建/轮换/撤销链接、移除 Tester、任何 join URL/secret/hash 恢复或复制、Auth 用户补查、本人 Tester 客户端入口、Admin Console、跨 RPC 原子 snapshot 和持久缓存。验证命令沿用 UC002，并要求 Gateway `latest` 显式包含三个 Tester Management DEVELOPER surface route。
+
+2026-10-16 实现结果：
+
+- 按固定 API 输入生成 Tester Management 类型与完整 enum/error reason，并实现一个 GET 和两个直接 Query body 的 POST 同源 client；Application ID 独立编码，所有方法支持取消，成功响应在 Proto 默认值生效前验证必需 envelope；
+- 修正了此前被 fixture 隐藏的内容协商问题：App Center 同源 transport 现在显式发送 `Accept: application/protojson`，有正文时同时发送 `Content-Type: application/protojson`，从而与生成客户端的 camelCase、完整字符串 enum 和 RFC3339 Timestamp 一致；Auth 登录 transport 仍保留既有 `application/json` 契约；
+- Developer Console 交付 `/applications/{applicationId}/testers`，overview、ACTIVE Membership 和 JoinLink 三块使用独立 query key、loading/error/asOf/refresh 和分页状态；JoinLink 首次与重置均显式发送 ACTIVE，切换 ACTIVE/REVOKED/ALL 时只重置该列表 token；
+- 容量以 overview 为权威，不从行数计算；Tester Auth ID、Membership ID 和 JoinLink ID 仅作不可点击的不透明文本，不进行 Auth enrichment，也不展示或拼接 URL、secret、hash、actor、复制、导出或写操作；
+- 任一查询返回 401/统一 404 时取消并清除三块私有缓存；`SESSION_INVALID` 继续走共享 Session 回收；网络/5xx 的刷新失败保留并明确标记带 asOf 的旧快照；坏 token 只重置对应列表；
+- `generate:check`、strict typecheck、全量 Vitest、production build与 Playwright 协议测试通过；浏览器测试核对两个 POST 无 URL query、body 不包 `query`、完整 enum 和 ProtoJSON headers，但业务响应仍为 fixture；
+- `edge:e2e` 拉取 Gateway `latest` digest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，确认三条 Tester Management DEVELOPER route 存在且 BFF 不可用时均 fail closed。真实 Browser/BFF/Gateway/Auth/App 成功数据链仍待联合验收。
 
 ## UC-CONSOLE-001 首个实现工作包
 
@@ -184,8 +194,8 @@ Console 侧已增加共享 Traefik 的 BFF/SPA 动态配置生成器，并以固
 | --- | --- | --- |
 | [UC-CONSOLE-002：查询我的 Application 管理概览](../use-cases/UC-CONSOLE-002-query-owned-applications.md) | `ACCEPTED / IMPLEMENTED` | 页面代码与协议/边缘链验证已交付；真实浏览器联合验收待补 |
 | [UC-CONSOLE-003：只读管理 Application Version](../use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | `ACCEPTED / IMPLEMENTED` | 页面代码与协议/边缘链验证已交付；真实浏览器联合验收待补 |
-| [UC-CONSOLE-004：只读管理 Application 资料修订](../use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；独立审核历史分页，不实现恢复/复制 |
-| [UC-CONSOLE-005：只读查询 Application Tester 管理](../use-cases/UC-CONSOLE-005-query-application-tester-management.md) | `PROPOSED / NOT_STARTED` | 固定 API、Gateway DEVELOPER surface 与用户接受设计；ACTIVE 管理为主，纯只读，不生成/恢复 secret |
+| [UC-CONSOLE-004：只读管理 Application 资料修订](../use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | `ACCEPTED / IMPLEMENTED` | 页面代码与协议/边缘链验证已交付；真实浏览器联合验收待补 |
+| [UC-CONSOLE-005：只读查询 Application Tester 管理](../use-cases/UC-CONSOLE-005-query-application-tester-management.md) | `ACCEPTED / IMPLEMENTED` | 三块独立只读区域、隐私/恢复边界与协议/边缘链验证已交付；真实浏览器联合验收待补 |
 | [UC-CONSOLE-006：审核 Application Version](../use-cases/UC-CONSOLE-006-review-application-versions.md) | `PROPOSED / NOT_STARTED` | 用户接受设计、ADMIN surface、真实 Reviewer 权限链路及正式检查项定义来源；currentPolicy 版本和 ID 已有 |
 | [UC-CONSOLE-007：审核 Application 公开资料](../use-cases/UC-CONSOLE-007-review-application-profiles.md) | `PROPOSED / NOT_STARTED` | 用户接受设计、ADMIN surface 与精确权限；Reviewer 当前公开指针读取缺失，APPROVE 阻塞；REJECT 不需指针 |
 
