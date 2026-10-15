@@ -24,12 +24,12 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 设计状态与实现状态彼此独立，定义见[文档约定](../document-conventions.md#状态)。当前覆盖如下：
 
-2026-10-14 已核对 UC002–005 的提供方与跨服务证据，具体缺口和相邻服务交接见 [串行工作与验收核对](2026-10-14-backlog-audit.md)。提供方已交付不自动代表真实用户版本审核旅程闭合；四项仍保留 IN_PROGRESS。
+2026-10-14 已核对 UC002–005 的提供方与跨服务证据，具体缺口和相邻服务交接见 [串行工作与验收核对](2026-10-14-backlog-audit.md)。2026-10-15 [UC002 真实 Gateway/Auth 联合验收](2026-10-15-uc002-gateway-auth.md) 已闭合，当前后端接入范围为 COMPLETE；UC003–005 仍保留 IN_PROGRESS。该结论从有效 Session 开始，不包含密码登录、邮件或 Console 页面。
 
 | Use Case | 设计状态 | 实现状态 | 已闭合 | 尚未闭合 |
 | --- | --- | --- | --- | --- |
 | [UC-APP-001](../use-cases/UC-APP-001-create-application.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、MongoDB Repository、配置注入、事务与并发集成测试、Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、本地 Wire Composition Root、真实 MongoDB 端到端测试 | — |
-| [UC-APP-002](../use-cases/UC-APP-002-create-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、Version 依附 OAuth 双数组配置及同事务创建、0015 migration/backfill、Scope Catalog cache、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 MongoDB consumer E2E | 生产 Mongo Scope manifest 与真实 USER 签发的版本创建/目录故障联合验收；Auth 提供方已交付 |
+| [UC-APP-002](../use-cases/UC-APP-002-create-application-version.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、Mongo 事务、Version 依附 OAuth 双数组配置、0015 migration、Scope cache、Proto/HTTP/gRPC/Wire、真实 Traefik/Gateway 三协议、Auth Session→USER 签发及持久 Catalog revision/TTL/停用/故障/回退/恢复；服务 `15250b9`，cross-service 28/28 | —（当前创建版本后端与接入范围；登录、Console 和生产部署独立验收） |
 | [UC-APP-003](../use-cases/UC-APP-003-update-draft-application-version.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、OAuth 双数组完整替换/no-op/OCC 与同 revision 事务、显式 migration、生成 Auth gRPC client、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 JWS 与 MongoDB consumer E2E | 生产 Mongo Scope manifest 与真实 USER 签发的草稿编辑/OCC/OAuth 同步联合验收；Auth 提供方已交付 |
 | [UC-APP-004](../use-cases/UC-APP-004-submit-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、MongoDB Repository、OAuth 回调策略复检及不可变深拷贝 snapshot、ApplicationReview migration、事务与管理员转让并发集成测试、生成 Auth gRPC client、DNS-only 公网 HTTPS 预检、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、caller-signed service JWS、真实 JWS 与 MongoDB consumer E2E | 生产 Mongo Scope manifest 与真实 USER 签发的编辑后提交/目录变化联合验收；Auth 提供方已交付 |
 | [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `IN_PROGRESS` | Domain、UseCase、决定与本地不可变策略 MongoDB Repository、app-version-review-v2 激活/v1 退役、批准时 OAuth 回调复检、0005/0007/0015 migrations、System 自动拒绝、事务与并发集成测试、trusted-identity-v1 reviewer permissions、Auth Developer Status consumer、caller-signed service JWS、Auth SYSTEM principal 延迟解析/成功缓存、资源化 Proto、Kratos HTTP/gRPC Transport、Wire Composition Root、测试 Auth Server E2E、真实 App+Auth 双服务 E2E | 真实 Auth Reviewer grant/revoke/USER 签发对真实 PENDING Review 的成功审核及撤销联合验收；Auth 身份/权限提供方已交付 |
