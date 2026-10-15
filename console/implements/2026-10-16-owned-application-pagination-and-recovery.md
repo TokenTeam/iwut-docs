@@ -31,3 +31,11 @@
 正式wire reason/旧投影/每批时间组件先7红，必要成功DTO/静态协议错误client先21红，实施后Application组件25＋核心5、client45定向全绿。普通`pnpm test`为512项Vitest＋56项Node全绿（含7项新准备器合成测试），strict types、生成漂移、fixture浏览器8通过/4个Admin非目标跳过与Edge检查均通过。产品提交`2c55fe1`；准备和真实专项仍待独立结果，不以这些组件/fixture证据宣称真实完成。
 
 首次专项命令错误地额外传了`--`，runner参数校验在创建环境之前拒绝，exit1；类型及报告隐私测试通过。修正为`pnpm test:real tests/real/owned-application-pagination.real.spec.ts`重新开始，不能把未启动一轮算作镜像联调失败。
+
+### Focused 真实结果
+
+轮次`iwut-console-real-833217`：三项中2通过/1失败，浏览器13.5秒。25个正式Create的真实排序、20+5累计、键盘分页、独立asOf、非空token的从头/筛选重置、真实空筛选和无附属资源详情合法默认值通过；两次独立单次TRUNCATE分别证明原生200正文TypeError及实际React原20项/时间保留、明确同cursor恢复25。两方Session/设备不变且无DELETE/外部资源/补查个人资料/业务写入。
+
+第三项全部功能探针均执行：坏base64、不同生命周期/平台/归档filter、不同caller得到正式reason的400；改变pageSize=2和空默认等价显式ACTIVE+CLOSING合法继续读第21–22项，独立非Developer peer默认列表真实为空。失败恰为5个400响应各缺private与no-store的10条soft断言（第200/201/220/221行）；soft仅用于收齐其余证据，最终exit1，不能记为三项全通过。扩展确认App管理读取错误响应头缺口不限于此前Get404；不在Console临时补头或删断言掩盖，后续须新App镜像修复后重跑。
+
+本轮重新pull的Auth/App/Gateway image ID分别为`sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、`sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、`sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，均与上一轮相同；Mongo/Traefik仍沿用该轮已打印固定标识。不编译后端；下一步无参数完整门禁，不能用focused替代。
