@@ -25,6 +25,8 @@
 
 [Session v2 接线工作包](2026-10-16-session-v2-wiring.md) 已同步接入 Browser/BFF/Edge，通过17项真实 Mongo双连接/双Hono交错、fixture浏览器及2项真实镜像成功主链；完整浏览器/生产副本故障矩阵继续实施。精确 wire 与恢复/会话版本边界见 [接线契约](../query-contracts/console-session-v2.md)。
 
+[真实浏览器 Session fencing 验收](2026-10-16-real-session-fencing.md) 已接受并实施中，补齐迟到响应头、双标签页、两生产副本及重启/依赖故障的分层证据。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
