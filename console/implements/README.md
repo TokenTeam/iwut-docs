@@ -11,6 +11,7 @@
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 | Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |
+| Developer Application Tester 管理 | `UC-CONSOLE-005`（`ACCEPTED`） | `IN_PROGRESS` | 固定 API 的容量/ACTIVE Membership/JoinLink 历史三个只读区域开始实施；真实浏览器联合验收待完成 |
 
 ## 代码位置
 
@@ -104,6 +105,14 @@ pnpm edge:e2e
 - Session 失效回收覆盖新增私有 query root；404、坏 token、413、5xx/网络均有独立恢复边界；UC002 详情中的资料入口已启用，所有写操作和 Reviewer/Admin 入口仍不存在；
 - `generate:check`、strict typecheck、全量 Vitest、production build、Playwright 与 `git diff --check` 通过；Playwright 共 7 项通过、3 项按 Admin surface 跳过；
 - `edge:e2e` 从 CNB 拉取 Gateway `latest` digest `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，确认两个 ProfileRevision route 存在且 BFF 不可用时 fail closed。浏览器业务响应仍是 fixture，真实后端浏览器联合验收待补。
+
+## UC-CONSOLE-005 首个实现工作包
+
+状态：`IN_PROGRESS`
+
+首包实现固定 API 的 Tester Management Get 与两类 Search 同源 client、Developer Tester 路由、容量/当前链接 overview、固定 ACTIVE Membership 列表及 ACTIVE/REVOKED/ALL JoinLink 列表。三个区域各自维护 asOf/loading/error/refresh，两类 token 仅在当前身份、Application、查询种类和 filter 的内存上下文内使用。
+
+非目标包括 REMOVED/ALL Membership UI、创建/轮换/撤销链接、移除 Tester、任何 join URL/secret/hash 恢复或复制、Auth 用户补查、本人 Tester 客户端入口、Admin Console、跨 RPC 原子 snapshot 和持久缓存。验证命令沿用 UC002，并要求 Gateway `latest` 显式包含三个 Tester Management DEVELOPER surface route。
 
 ## UC-CONSOLE-001 首个实现工作包
 
