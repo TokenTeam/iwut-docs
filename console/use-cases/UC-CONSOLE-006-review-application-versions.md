@@ -1,6 +1,8 @@
 # UC-CONSOLE-006：审核 Application Version
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
+
+2026-10-16按用户持续授权自行接受完整用例，按[首阶段实现记录](../implements/2026-10-16-admin-review-queries.md)先实施真实队列/详情与权限恢复。决定及其全部验收仍属于本UC，依赖未齐不得标记完整交付。
 
 ## 用户目标、权限与边界
 
@@ -62,4 +64,4 @@ UC030 详情与当前 Proto 已包含 `currentPolicy.version/requiredCheckIds`�
 2. 真实 PENDING 队列/详情、终态深链接、snapshot 与当前 Version 分离；过滤、keyset、空队列与损坏失败关闭有覆盖。
 3. 正式策略逐项确认、未知定义、版本变化、缺/重复 checks、REJECT 理由与空 checks、非预期系统拒绝、批准不自动发布均通过。
 4. 两个 Reviewer 并发、策略退休、Scope 失效、依赖故障、响应丢失/断网、PENDING 重读与终态重读通过真实后端；不自动重放，迟到响应不覆盖新目标。
-5. 私有缓存、Header/Cookie 清理、权限撤销、SESSION_INVALID、5xx 保会话及键盘/焦点通过浏览器联合验收。定义来源、固定版本、真实服务证据齐全才可标记完整实现；当前仅 PROPOSED。
+5. 私有缓存、Header/Cookie 清理、权限撤销、SESSION_INVALID、5xx 保会话及键盘/焦点通过浏览器联合验收。定义来源、固定版本、真实服务证据齐全才可标记完整实现；接受首阶段不代表完整决定流程已实现。

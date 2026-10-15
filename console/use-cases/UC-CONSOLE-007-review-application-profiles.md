@@ -1,6 +1,8 @@
 # UC-CONSOLE-007：审核 Application 公开资料
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
+
+2026-10-16按用户持续授权自行接受完整用例，按[首阶段实现记录](../implements/2026-10-16-admin-review-queries.md)先实施真实队列/详情与权限恢复。批准/拒绝及其全部验收保留；公开指针与决定surface缺口不以只读实现代替。
 
 ## 用户目标、权限与范围
 

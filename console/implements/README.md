@@ -7,7 +7,7 @@
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
 | 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 边界、登录/重发/页面回调隔离及双 Console 真实邮件/设备主链通过；跨请求 Cookie fencing 和完整恢复/并发矩阵仍待完成 |
 | Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002–005`（只读管理） | `IN_PROGRESS` | 独立构建、认证入口和 Application/Version/Profile/Tester 只读页面已实现；UC001 后续增量及真实浏览器联合验收待完成 |
-| Admin Console 功能 | `UC-CONSOLE-001`（认证入口） | `IN_PROGRESS` | 独立构建、BFF/Cookie 边界、Session 入口及设备/邮箱登录交互已实现；完整恢复和真实服务验收待完成，审核业务 UC 尚未接受 |
+| Admin Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-006–007`（审核） | `IN_PROGRESS` | 独立认证入口已实现；完整审核UC已接受，先实施[查询阶段](2026-10-16-admin-review-queries.md)，决定依赖及完整验收继续开放 |
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 | Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |
@@ -230,8 +230,8 @@ Console 侧已增加共享 Traefik 的 BFF/SPA 动态配置生成器，并以固
 | [UC-CONSOLE-003：只读管理 Application Version](../use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | `ACCEPTED / IMPLEMENTED` | 页面代码与协议/边缘链验证已交付；真实浏览器联合验收待补 |
 | [UC-CONSOLE-004：只读管理 Application 资料修订](../use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | `ACCEPTED / IMPLEMENTED` | 页面代码与协议/边缘链验证已交付；真实浏览器联合验收待补 |
 | [UC-CONSOLE-005：只读查询 Application Tester 管理](../use-cases/UC-CONSOLE-005-query-application-tester-management.md) | `ACCEPTED / IMPLEMENTED` | 三块独立只读区域、隐私/恢复边界与协议/边缘链验证已交付；真实浏览器联合验收待补 |
-| [UC-CONSOLE-006：审核 Application Version](../use-cases/UC-CONSOLE-006-review-application-versions.md) | `PROPOSED / NOT_STARTED` | 用户接受设计、ADMIN surface、真实 Reviewer 权限链路及正式检查项定义来源；currentPolicy 版本和 ID 已有 |
-| [UC-CONSOLE-007：审核 Application 公开资料](../use-cases/UC-CONSOLE-007-review-application-profiles.md) | `PROPOSED / NOT_STARTED` | 用户接受设计、ADMIN surface 与精确权限；Reviewer 当前公开指针读取缺失，APPROVE 阻塞；REJECT 不需指针 |
+| [UC-CONSOLE-006：审核 Application Version](../use-cases/UC-CONSOLE-006-review-application-versions.md) | `ACCEPTED / IN_PROGRESS` | [查询阶段](2026-10-16-admin-review-queries.md)开始；完整决定ADMIN surface、正式检查定义及真实验收仍开放；currentPolicy 版本和 ID 已有 |
+| [UC-CONSOLE-007：审核 Application 公开资料](../use-cases/UC-CONSOLE-007-review-application-profiles.md) | `ACCEPTED / IN_PROGRESS` | 查询阶段开始；精确权限链和决定surface待验收；Reviewer 当前公开指针缺失仍阻塞APPROVE，不以读取交付替代完整用例 |
 
 接入调查与分包见 [App API 接入计划](2026-10-15-app-api-integration-plan.md)。Console 页面的业务授权由相应 App/Auth UC 拥有；新提案仅规定前端编排、安全与恢复。Tester 本人 UC038/040 入口继续暂缓，未创建其 Console UC，未伪造宿主 runtime。
 
