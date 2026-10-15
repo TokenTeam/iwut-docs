@@ -4,7 +4,11 @@
 
 ## 范围与兼容性
 
+2026-10-12：本协议继续用于邮箱/验证码登录，客户端后台登记设备并回到原 authId，签名字节与载体不变。无邮箱注册和学生关联退役；邮箱登录不依赖关联密钥或迁移，失败不得转注册。
+
 本契约固定 [UC012](../../auth-center/use-cases/UC-AUTH-012-login-with-email.md) 的客户端、Auth 和 Gateway 协议。它授权邮箱持有人登录原账号并登记/复用本机设备，不是注册协议，也不增加邮箱字符串到 JWS 的投影。
+
+2026-10-12 此入口确认保留备用，默认密码登录另见 UC034 DRAFT/密码协议；自动登录继续 UC007。只认当前登录角色，添加学校地址不获登录权；最终检查 UC033 账号版本/凭据下界，不复活密码退休钥。v1 字节不变，新增角色/代际适配未实现；登录码不能重置密码。
 
 Frame、UTF8、U64BE、规范 UUID、公钥及 DER 签名编码引用 [设备协议](auth-device-session-v1.md)。credentialProposal.protocol_version 仍为 `iwut-device-v1`，供后续 UC007 使用；本次 challenge.protocol_version 独立为 `iwut-email-login-v1`。旧 REGISTER/LOGIN 和 [邮箱注册协议](auth-email-binding-v1.md) 的格式与向量均不变。
 

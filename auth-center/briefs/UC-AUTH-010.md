@@ -219,7 +219,7 @@ Developer 状态。两者都不能作为本查询的成功结果，且不得被�
 
 首版采用固定绝对有效期：T_session 通过 AUTH_SESSION_TTL 配置，为部署必填的正时长，创建时固定 expiresAt；缺失/非法配置拒绝接流量。配置采用 Go duration 格式，示例部署值为 `720h`（30 天）；该示例不是隐式默认值。本轮不自动滑动续期、不签发 refresh token，也不因请求活跃无限延长会话。到期后必须重新完成本用例的设备认证并建立新 Session，不延长旧会话的 expiresAt。后续若增加续期，另行设计轮换与并发语义。
 
-一次成功会话检查必须得到一致、当前的事实：token 摘要匹配，Session 未撤销且 `now < expiresAt`，所属主体为 ACTIVE USER，作为会话认证依据的设备凭据仍有效且归属一致。缺失、损坏、超时或无法读取均失败关闭，不能回退到客户端缓存或只凭旧 JWT 放行。
+一次会话检查须确认 token、未撤销/未到期、ACTIVE/当前 accountRevision、credential owner/未撤销/UC033 下界及认证来源完整。UC033 正常改密/重置后的旧代 Session 不可检查成功，换发是新记录，不把旧版本覆盖成当前。缺失/损坏/依赖故障失败关闭；新增字段/方法需真实回归后交付，不从客户端缓存放行。
 
 首版不缓存正向会话授权结果，权威读取不得使用可能落后的副本。建议使用一致快照读取主体、凭据和 Session；检查与撤销/禁用存在并发时，以明确的检查快照为边界。变更提交后才开始的新检查必须看到变更；先已通过的请求可能继续执行，不承诺取消在途业务。
 
@@ -242,7 +242,7 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
-UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contracts/auth-email-account-v3.md) 的精确载体；旧可选 Session REGISTER/BIND 已退役，其它接口的必需载体不变。
 
 ### `platform/contracts/auth-session-identity-issuance-v1.md`：Session 到可信用户身份签发 v1
 
@@ -562,11 +562,11 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |
-| `use-cases/UC-AUTH-022-disable-and-restore-user-account.md` | 183 | `f13eb70a5211` |
+| `use-cases/UC-AUTH-022-disable-and-restore-user-account.md` | 183 | `7519f5d0d5b0` |
 | `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
-| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
-| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
+| `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
+| `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `eb7024a3ea06` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
 | `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

@@ -1,0 +1,30 @@
+{
+  "uc": "UC-AUTH-030",
+  "note": "Deliver ApplicationUserStorage as an Auth-owned, bounded string KV namespace isolated by authId, applicationId, and channel. Authorize every HTTP read or CAS mutation with the current opaque OAuth bearer token and independent storage.read/storage.write scopes for the iwut-auth-center audience. Provide user-session clearing across all channels, retain data across revocation, and integrate account and Application closure cleanup without exposing values in audit or logs.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与依赖检查",
+    "隔离模型",
+    "授权与 API",
+    "错误语义与运行约束",
+    "验收场景",
+    "已确认的首版取舍"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/oauth-oidc-v1.md": [
+      "范围与职责",
+      "公网端点与响应",
+      "Scope 启用与兼容投影",
+      "凭据与身份格式",
+      "错误、CORS 与限额",
+      "交付依赖与验收"
+    ],
+    "platform/contracts/auth-center-api-routing.md": [
+      "路由边界",
+      "JSON 与载体",
+      "部署开关与验收"
+    ]
+  }
+}

@@ -30,7 +30,7 @@ UserInfo 使用与 UC019 相同的有效 token 判断，但不递归调用委托
 <a id="br-oau-013"></a>
 ### BR-OAU-013：最小资料披露
 
-基础投影为 openid→sub，email→当前激活邮箱的 email/email_verified=true；没有激活邮箱时同时省略两项。平台确认邮箱控制权不代表确认学生身份。资料 KV 中叫 email 的字段不能替代激活邮箱事实。
+基础投影为 openid→sub，email→当前唯一已验证登录邮箱的 email/email_verified=true；不返回邮箱列表或其他学校/非登录地址。无登录邮箱的既有合法基线记录同时省略两项，新账号按修订 UC011 保持唯一角色。资料 KV 不能替代认证邮箱。新列表/角色查询还未实现，须随 UC011 回归。
 
 不遍历全部动态资料，不披露 authId、学校密码、association 标识、developer/reviewer 状态。UC028 只允许显式 `USERINFO_PROFILE` scope 按 [BR-UPF-012 至 016](UC-AUTH-028-disclose-user-profile-to-applications.md#br-upf-012) 投影对应资料字段；没有该映射和有效 scope 时保持上述基础响应。有效集合 E 有 email 才能返回邮箱，应用声明 email、平台已绑定邮箱或用户已填写资料本身都不构成用户授权。
 
@@ -49,6 +49,8 @@ UserInfo 在 Auth 本地一致检查点确认授权和读取投影；撤销提�
 - 同一 Application 的 subject 跨 channel/type/major/Version/redirect hostname 一致，其他 Application 不同；ID Token/UserInfo sub 完全相同。
 - token 原有 email 但当前 D 不含 email 或 Catalog enabled=false 时只返回 sub，不修改 G；版本许可和目录启用恢复且凭据仍有效、G 未撤回时可再次返回邮箱。
 - openid 停用后无法满足 UserInfo 的必需权限，拒绝读取；目录不可读返回依赖故障，不能当作没有邮箱或成功返回部分数据。
+
+校园认证只按 UC031/BR-CMP-004 的有效 campus.whut scope 输出最小 iwut_campus，不包含邮箱、认证时间或内部标识；无该 scope 不读取认证依赖，坏记录/必要故障整次拒绝。新修订须确认当前有效学校绑定，删除最后依据后的新读取省略 iwut_campus，不沿用旧永久事实。既有披露基线已实现，新绑定/撤回待交付；不改变 ID Token，也不能收回第三方已取得的数据。
 
 ## 依赖与实现边界
 

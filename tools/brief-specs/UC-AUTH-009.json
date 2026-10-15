@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-009",
-  "note": "Accepted backend delivery: production verifier, Mongo persistence, generated Proto and native gRPC. Client secure storage and Gateway identity issuance are separate deliveries. External BRs and the shared protocol are included as implementation dependencies.",
+  "note": "Accepted password/anti-bypass revision, explicitly approved 2026-10-13. Generate this brief before implementing. Restrict UC009 original entry to the current credential; UC025 requires current password plus existing dedicated proof (including DISABLED purpose); UC026 requires current password plus same-Session device proof. UC032 remains DRAFT. Preserve prior dirty work, public signature bytes, transaction fences, closure/cleanup evidence; no production migration, push or deployment.",
   "uc_sections": [
     "目标与范围",
     "参与者与前置条件",
@@ -18,7 +18,6 @@
       "基础编码",
       "公钥与签名",
       "挑战与待签消息",
-      "学号关联声明",
       "Session 载体",
       "RPC 鉴权表",
       "实现配置与验收边界",

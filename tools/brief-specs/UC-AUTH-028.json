@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-028",
-  "note": "Implement one-field-one-scope UserInfo disclosure on the existing OAuth runtime. Add immutable USERINFO_PROFILE metadata to the Auth-owned persistent scope catalog, cross-check it against the UC005 field catalog at startup, and project only current authorized values into the fixed iwut_profile claim. Preserve existing openid/email behavior, OAuth grants and Scope Catalog v1 wire shape. No new Proto, endpoint, ApplicationUserStorage, production field list, UI or Gateway parsing.",
+  "note": "Extend the implemented one-field-one-scope UserInfo disclosure with the accepted nine-field production catalog. Preserve existing openid/email behavior, grants, fixed iwut_profile claim, public UserInfo endpoint and Scope Catalog v1 wire shape. Add canonical string-array projection for campus areas and compute current grade from the UC005 user-confirmed anchor plus the UC029 authoritative academic-year schedule, capped at the stage final year with no automatic stage transition. The UC005 Profile API must gain STRING_SET/ACADEMIC_GRADE; no new third-party endpoint, ApplicationUserStorage or Gateway parsing is introduced.",
   "uc_sections": [
     "目标与范围",
     "参与者与依赖",

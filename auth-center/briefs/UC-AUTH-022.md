@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-022` 禁用与恢复用户账号 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-ACC-001`–`BR-ACC-008`（8 条） |
-| 外部引用 BR | `BR-ADM-003`（来自 `UC-AUTH-021`） |
+| 外部引用 BR | `BR-ADM-003`，`BR-PWD-006`（来自 `UC-AUTH-021`、`UC-AUTH-033`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/auth-device-session-v1.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -137,7 +137,7 @@ UserAccountStatus {
 <!-- 权威位置: use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002 -->
 ### BR-ACC-002：账号版本与不可复活
 
-`auth_principals.accountRevision` 是账号状态的正 int64 版本。UC006/011 新建 USER 时初始化为 1；DISABLE 和 RESTORE 每次成功都严格加 1。它同时作为本账号认证材料的有效代际，不新增另一份 authenticationEpoch，不复用权限 permissionRevision 或 grant revocationEpoch，也不使用墙上时钟比较替代。
+`auth_principals.accountRevision` 是正 int64 账号安全版本，UC006/011 初始化为 1；DISABLE/RESTORE 每次成功加 1。新增 [UC033 / BR-PWD-006](../use-cases/UC-AUTH-033-manage-password-and-recovery.md#br-pwd-006) DRAFT 提案中，真正改密/重置也原子推进它但不改 accountStatus；不新建 authenticationEpoch，不复用 permissionRevision/grant epoch，不用墙上时钟代替。密码写入与凭据下界尚未实现，既有状态治理仍为已交付基线。
 
 受账号版本约束的记录在创建或首次绑定用户时保存服务端读出的 accountRevision；消费时必须验证所属 authId 相同、当前 ACTIVE、记录版本等于当前账号版本，并满足原有凭据/Session/grant 条件。已绑定的版本不可更新成当前版本，刷新、重试、查询和恢复不得覆盖旧版本以使记录有效。
 
@@ -160,7 +160,7 @@ UserAccountStatus {
 
 未绑定用户的匿名 OAuth interaction 不属于被禁用账号，可在用户恢复并重新登录后首次绑定当前版本；曾由旧 Session 绑定的 interaction 不能退回匿名状态绕过校验。UC006 和 UC011 REGISTER 只创建新账号：新 USER 与首次 Session 原子初始化为版本 1；已登记设备不能通过重新注册恢复原账号。
 
-原有随机挑战、设备签名字节及邮箱验证码协议无需把账号版本交给客户端；版本作为不可变操作内部绑定，在原子确认点验证。设备凭据和激活邮箱自身不绑定会随禁用失效的版本，否则会失去恢复后的重新认证能力。
+原有签名字节不用向客户端披露账号版本；操作内部绑定、最终复核。邮箱绑定不随禁用失效；设备新增 credentialRevision/minimumCredentialRevision 由 UC033 定义，不直接要求 credentialRevision 等于当前 accountRevision。禁用/恢复不抬下界，密码变更抬下界，因此恢复仍可用未退休设备新登录，却不能复活密码收回的旧钥；新增字段缺失不能默认补 1。
 
 UC008 的幂等 token 撤销、UC009 的已有撤销事实及物理清理可以继续处理旧代记录，但不得将其解释为有效认证或返回秘密。账号版本失效不要求逐条写 revokedAt；审计可由账号状态事件解释失效原因。
 
@@ -224,6 +224,21 @@ DISABLE 使有效管理员数量减少时，强制引用 [BR-ADM-003](../use-cas
 
 统计和修改须参与同一可写事务协调点；单纯 Mongo snapshot 下 count 后更新不同主体不能防止并发写偏差。复用现有全局认证事务栅栏并确认它覆盖所有相关写入口；若实现调整为专用治理栅栏，仍须与身份签发、UC004 和后续账号状态变更建立一致锁顺序。无需 Redis 或跨服务事务。
 
+### 来自 `UC-AUTH-033`
+
+<!-- 权威位置: use-cases/UC-AUTH-033-manage-password-and-recovery.md#br-pwd-006 -->
+### BR-PWD-006：统一代际与不可复活的设备下界
+
+继续使用 [UC022 的 accountRevision](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002)作为认证材料统一代际，不新增另一份 authenticationEpoch。密码修改/重置也原子推进它，accountStatus 不变；禁用/恢复仍只按 UC022 改状态/版本。
+
+新增 principal.minimumCredentialRevision 正 int64，初始 1；密码变更将它提升到新的 accountRevision，永不下降。credential.credentialRevision 为登记时的 accountRevision；有效条件包含 `minimumCredentialRevision <= credentialRevision <= currentAccountRevision` 和原有未撤销/owner/协议条件。禁用/恢复不提升该下界，因此未被撤销且未退休的设备仍能恢复后新登录；密码重置则永久退休旧代设备。正常改密仅在该事务中推进原本有效的当前凭据，不允许一般登录/重试给低于下界的旧公钥补版本复活。
+
+Session、登录/绑定/重置挑战、OAuth interaction/code/access/family/refresh、USER 身份签发和敏感动作都在最终边界检查 accountRevision；旧记录不可回填到新代。密码验证还比较 passwordRevision；工作因子升级不改变这些代际。版本缺失/非法/溢出失败关闭，不在请求中默认为 1。
+
+改密事务的失效成本不随历史凭据/Session/token 数量增长，不无界 UpdateMany；退休由下界/代际立即决定，物理清理另做有界任务。保留公钥指纹永久归属。UC009 对本人已退休目标可按已失效事实幂等处理；列表/LRU/UC012 复用均须识别退休，不能只检查 revokedAt。
+
+全部旧 OAuth code/access/refresh family 在 Auth 后续在线检查中失败，grant 历史同意/撤权 epoch 与 pairwise 映射保留，新授权按当前规则复用同意。Auth audience USER JWS 原有 account_revision 在线检查也拒绝旧版本；App audience、委托、app.close 及 OIDC 的已签短期离线证据与第三方自身 Cookie 仍可能存续到原期限，不能声称密码更新取消所有在途/离线业务。
+
 ## 平台共享契约（按 spec 显式抽取）
 
 > 这些是 `docs/` 根下的跨系统共享设计输入，**不进入工程基线**；只有本 spec 显式选择的章节才被抽取。
@@ -239,7 +254,7 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
-UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contracts/auth-email-account-v3.md) 的精确载体；旧可选 Session REGISTER/BIND 已退役，其它接口的必需载体不变。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -300,6 +315,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 - `UC-AUTH-022`（use-cases/UC-AUTH-022-disable-and-restore-user-account.md）：变更记录
 - `UC-AUTH-021`（use-cases/UC-AUTH-021-manage-platform-administrators.md）：目标与范围、参与者与身份、输入与输出、API、主流程、错误语义与运行约束、测试与验收、实现依赖与联动、变更记录
+- `UC-AUTH-033`（use-cases/UC-AUTH-033-manage-password-and-recovery.md）：目标与范围、参与者与依赖、输入与输出、主流程、验收与错误边界、交付依赖与变更记录
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：目的与范围、传输载体、JOSE Header、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
 
@@ -307,7 +323,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-022-disable-and-restore-user-account.md` | 183 | `f13eb70a5211` |
+| `use-cases/UC-AUTH-022-disable-and-restore-user-account.md` | 183 | `7519f5d0d5b0` |
 | `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
-| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

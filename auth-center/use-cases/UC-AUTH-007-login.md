@@ -12,6 +12,8 @@
 
 本轮闭合设备凭据登录、Session 建立与在线检查。Session 撤销由 [UC-AUTH-008](UC-AUTH-008-revoke-own-session.md) 定义，设备凭据撤销由 [UC-AUTH-009](UC-AUTH-009-revoke-own-credential.md) 定义；退出、账号切换、自动登录和本地秘密删除属于客户端编排，见非权威的[客户端认证生命周期建议](../client-guides/authentication-lifecycle.md)。邮箱认证、邮箱绑定、旧设备迁移授权、账号禁用和全设备管理分别另立用例。
 
+2026-10-12：前台默认 UC034 密码登录、UC012 邮箱码备用，注册 UC011、恢复 UC033；这些新密码流程仍 DRAFT。本 UC 保留后台记住登录，不要求用户管理 Passkey。LOGIN 字节不变；有效凭据须增加 UC033 下界检查，退休后不能仅靠旧钥新登录；拒绝后明确登录，不自动建号。
+
 客户端使用随机 opaque sessionToken。服务间可信身份继续遵守 [ADR-PLAT-001](../../platform/adr/ADR-PLAT-001-trusted-identity-jws.md) 和 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)，本 UC 不修改 JWS 格式、不把 Session 令牌作为可信身份头转发给业务服务。
 
 ## 参与者与前置条件
@@ -63,7 +65,7 @@ SessionEstablished {
 5. 在原子确认点复核操作未消费/未过期、凭据有效、主体为 ACTIVE USER，按 BR-LGN-010 处理会话容量，消费挑战并创建新 Session。
 6. 提交成功后返回 SessionEstablished。客户端安全保存令牌，加载该账号的数据。
 
-已有账号登录失败不会创建新 USER、添加新凭据或自动改绑学号关联。UC-AUTH-006 的成功注册可以复用会话建立规则，但不再次要求用户完成一轮登录交互。
+已有账号登录失败不会创建新 USER 或添加新凭据，不用本地学校账号定位或恢复账号。UC011 邮箱注册复用首次 Session 规则，不要求额外登录交互；本机凭据不可用时由 UC012 邮箱登录原 authId。
 
 ## 业务规则
 
@@ -74,7 +76,7 @@ SessionEstablished {
 
 登录只允许 ACTIVE USER 和有效凭据。未知、已撤销、禁用或非 USER 主体不建立 Session；对外统一返回认证失败，不泄露对应邮箱、资料或关联成员。
 
-未来邮箱认证和旧设备授权可为同一 authId 建立会话或新增凭据，但必须由各自用例验证控制权；不能通过增加 loginMethod 字符串、复用客户端布尔值就进入此成功路径。登录方式、凭据、Session 和恢复能力是独立事实。
+已接受的 UC012 邮箱认证可为原 authId 登记凭据并建立 Session；旧设备授权新增设备仍待独立设计，各自必须验证控制权；不能通过增加 loginMethod 字符串、复用客户端布尔值就进入此成功路径。登录方式、凭据、Session 和恢复能力是独立事实。
 
 <a id="br-lgn-002"></a>
 ### BR-LGN-002：挑战绑定与一次性证明
@@ -94,14 +96,14 @@ Auth 保存 Session 权威状态，每个 Session 只对应一个 authId。sessi
 
 token 线格式、摘要输入和认证载体引用[Session 载体契约](../../platform/contracts/auth-device-session-v1.md#session-载体)。服务端持久化 token 的 SHA-256 摘要并建立唯一索引，不保存明文令牌；高熵随机令牌不同于低熵密码，不从密码/学号派生。客户端通过 TLS 传输并安全存储令牌，不在 URL、普通日志、分析事件或崩溃报告中包含它。拥有有效 bearer token 即可使用会话，本规则不宣称自动具有设备持有证明或防重放能力。
 
-每条 Session 记录本次认证方法、凭据引用（设备认证时必填）、authenticatedAt、createdAt、lastUsedAt、expiresAt、撤销状态与时间。lastUsedAt 的使用与更新规则见 [BR-LGN-010](#br-lgn-010)。Session 不包含私钥，不被 profile、学生关联或客户端设备名称决定归属。以后添加邮箱方法时必须扩展明确的认证记录语义。
+每条 Session 记录认证方法、credentialId、认证/创建/使用/到期时间及撤销状态。EMAIL_CODE_AND_DEVICE 来源见 UC012；新增 PASSWORD_AND_DEVICE 见 UC034、PASSWORD_AND_SESSION 见 UC033/密码契约，分别必须 passwordRevision 以及后者的 sourceSessionId。sourceSessionId 是历史证明来源，不要求旧来源仍有效。统一验证 owner/当前代际/凭据下界和必需来源字段，不能当未知方法忽略。新方法未实施，不改变 lastUsedAt/LRU 或宣称已有密码会话。
 
 <a id="br-lgn-004"></a>
 ### BR-LGN-004：有效期与在线检查
 
 首版采用固定绝对有效期：T_session 通过 AUTH_SESSION_TTL 配置，为部署必填的正时长，创建时固定 expiresAt；缺失/非法配置拒绝接流量。配置采用 Go duration 格式，示例部署值为 `720h`（30 天）；该示例不是隐式默认值。本轮不自动滑动续期、不签发 refresh token，也不因请求活跃无限延长会话。到期后必须重新完成本用例的设备认证并建立新 Session，不延长旧会话的 expiresAt。后续若增加续期，另行设计轮换与并发语义。
 
-一次成功会话检查必须得到一致、当前的事实：token 摘要匹配，Session 未撤销且 `now < expiresAt`，所属主体为 ACTIVE USER，作为会话认证依据的设备凭据仍有效且归属一致。缺失、损坏、超时或无法读取均失败关闭，不能回退到客户端缓存或只凭旧 JWT 放行。
+一次会话检查须确认 token、未撤销/未到期、ACTIVE/当前 accountRevision、credential owner/未撤销/UC033 下界及认证来源完整。UC033 正常改密/重置后的旧代 Session 不可检查成功，换发是新记录，不把旧版本覆盖成当前。缺失/损坏/依赖故障失败关闭；新增字段/方法需真实回归后交付，不从客户端缓存放行。
 
 首版不缓存正向会话授权结果，权威读取不得使用可能落后的副本。建议使用一致快照读取主体、凭据和 Session；检查与撤销/禁用存在并发时，以明确的检查快照为边界。变更提交后才开始的新检查必须看到变更；先已通过的请求可能继续执行，不承诺取消在途业务。
 
@@ -238,9 +240,11 @@ LRU 查询需支持按 authId 过滤，并按 lastUsedAt、createdAt、sessionId
 - 独立 API 包 `auth_center/v1/authentication/`；BeginDeviceLogin/CompleteDeviceLogin、匿名入口及 Session 入口按[RPC 鉴权表](../../platform/contracts/auth-device-session-v1.md#rpc-鉴权表)实现 middleware。
 - 持久化表结构、端口接口与 Mongo 事务栅栏由实现集成负责人统一；单机多请求仍须满足原子登录、撤销及 LRU 顺序，不新增在线密钥迁移。物理删除未单独验收前可保守保留撤销记录，不能释放公钥唯一归属。
 - Auth 身份签发用例及 Gateway 鉴权契约，随后贯通 UC-AUTH-005 的用户调用链。
-- Session/凭据撤销分别由 UC-AUTH-008/009 定义；邮箱绑定及认证（验证码还是密码尚未决定）、旧设备授权新增凭据、其它设备/会话管理、注销、关联修改与对外披露另立用例。
+- 默认密码登录 UC034、备用邮箱码 UC012，密码生命周期/设备清退 UC033、凭据管理 UC032，完整新工程设计仍 DRAFT；Session/当前凭据退出见 UC008/009，会话管理 UC020。密码产品建议已接受，不继续标普通密码登录/重置收敛为未定；旧设备扫码后移，学校关联不恢复。
 
 ## 变更记录
+
+- 2026-10-12：明确设备登录退居后台，拒绝后回到邮箱登录而非创建；不依赖学生关联/密钥迁移，LOGIN 字节不变。
 
 - 2026-09-22：接受本用例，设备证明、关联声明、Session 载体与 RPC 鉴权引用 auth-device-session-v1；后端、客户端和 Gateway 分别验收。
 

@@ -116,7 +116,7 @@ DeveloperApplicationBlocker =
 3. 注册、邮箱激活、登录、本人查询不隐式授予 Developer；无需额外学生信息或角色输入。
 4. 并发和重复申请只有一次迁移/审计，activatedAt 稳定；暂停或拒绝后重试不能复活历史成功状态；PENDING 不被自动批准。
 5. Session/主体禁用、邮箱变化与申请并发有明确提交顺序；审计失败回滚，提交未知可重试/查询。
-6. 权限、资料、关联和已有 Session 不被覆盖；UC002 读取 APPROVED，新的 UC010 App audience JWS 携带 APPROVED，Auth audience 投影不变。
+6. 权限、资料和已有 Session 不被覆盖；UC002 读取 APPROVED，新的 UC010 App audience JWS 携带 APPROVED，Auth audience 投影不变。
 7. 本人查询正确处理 null、全部已有枚举、blockers 和不可用；不能查询他人或以旧查询结果绕过提交校验。
 8. App Center 仍执行自身配额和审核，Developer 不自动获得 Reviewer/管理员权限；已有 APPROVED 的历史数据不通过查询伪造激活记录。
 9. 默认不注册入口；显式启用入口但恢复就绪声明或 UC012 功能关闭时，普通账号收到明确 blocker，已有 APPROVED 可幂等读取。配置非法拒绝启动，未知 RPC 不获得匿名访问。
@@ -153,11 +153,11 @@ DeveloperApplicationBlocker =
 <!-- 权威位置: use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-006 -->
 ### BR-DEV-006：本人显式申请与邮箱前置条件
 
-只有当前有效 ACTIVE USER 可申请本人资格。首次开通要求 Auth 当前已激活邮箱，并且 UC012 的邮箱登录和本机设备登记能力已经实际交付及启用；不能拿客户端布尔值、邮箱资料字段、历史验证操作或“曾经绑定过”代替当前事实。
+只有当前有效 ACTIVE USER 可申请本人资格。首次开通要求当前唯一已验证登录邮箱，并且 UC012 邮箱登录/本机设备登记实际交付启用；额外非登录学校邮箱、客户端布尔值、资料/历史验证不能代替。新邮箱列表须按角色查询，不因列表非空就满足恢复门禁；消费方适配待 UC011 新模型交付。
 
 这里“可用”指部署的功能配置、必要密钥/邮件适配器配置校验通过，且产品入口已交付启用，不通过申请时给邮箱再发测试信判断。邮件服务临时故障不证明该账号失去邮箱控制权，也不自动撤销已有 Developer。停用整个邮箱登录能力时，禁止新增开通；既有资格保持原状态，由部署恢复该能力，不批量改成 SUSPENDED。
 
-不要求用户先退出设备登录再做一次邮箱登录，不要求再次上传 associationToken、原始学号或学校凭据，也不宣称完成权威学生认证。日常设备登录的便利性保留。
+不要求用户先退出设备登录再做一次邮箱登录，不接收已退役关联声明、原始学号或学校凭据，也不宣称完成权威学生认证。日常设备登录的便利性保留。
 
 <!-- 权威位置: use-cases/UC-AUTH-013-apply-for-developer.md#br-dev-007 -->
 ### BR-DEV-007：自助开通与受限状态迁移
@@ -182,7 +182,7 @@ DeveloperApplicationBlocker =
 
 当前 Session、主体状态、邮箱绑定与 Developer 状态必须在一次确认边界内检查。邮箱更换沿用 UC011 的原子替换，不产生中间无邮箱状态；未来若引入解绑，必须与本命令在同一认证事务栅栏内确认，避免申请与解绑并发破坏邮箱前置条件。
 
-首次开通的 handle 占用、开发者状态、首次开通记录与审计原子提交。开通记录按 authId 唯一，记录首次 activatedAt；审计包含 actorAuthId/subjectAuthId（两者相同）、操作类型、null 到 APPROVED 的前后状态、用于决策的邮箱绑定 revision、规范 developerHandle、时间和结果，不记录邮箱明文或任何凭据秘密。只更新所需主体字段，不覆盖 profile、学生关联、permissions 或 permissionRevision。
+首次开通的 handle 占用、开发者状态、首次开通记录与审计原子提交。开通记录按 authId 唯一，记录首次 activatedAt；审计包含 actorAuthId/subjectAuthId（两者相同）、操作类型、null 到 APPROVED 的前后状态、用于决策的邮箱绑定 revision、规范 developerHandle、时间和结果，不记录邮箱明文或任何凭据秘密。只更新所需主体字段，不覆盖 profile、permissions 或 permissionRevision。
 
 与 [BR-IDN-004](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004) 使用相同认证事务栅栏：开通提交后开始的新身份签发读取 APPROVED；之前已签发的短期 JWS 保持原 claims，不原地修改或追发。UC002 从同一权威 principal 读取新的 Developer 状态，不另建一个最终一致的状态副本。
 
@@ -195,7 +195,7 @@ DeveloperApplicationBlocker =
 
 developerHandle 是公开命名空间，不是认证秘密、另一个用户身份或官方认证标志。`developerHandle/nameKey` 可作为未来可读应用标识，但本用例不实现该标识的查询/路由、改名、转让或重定向；应用 UUID、adminId=authId 和 `(adminId, nameKey)` 约束保持不变，不新增 JWS claim 或 UC002 字段。
 
-App Center 继续检查可信身份中的 APPROVED，并执行自身配额、管理员归属及审核规则；本 UC 不替代这些门禁。学校关联只是客户端声明，不保证“一个自然人只开通一个 Developer”，也不把关联组内其它账号一并升级。
+App Center 继续检查可信身份中的 APPROVED，并执行自身配额、管理员归属及审核规则；本 UC 不替代这些门禁。学号关联已退役；校园邮箱或校园认证不保证“一个自然人只开通一个 Developer”，不升级其他 authId。
 
 Developer 日常可继续使用设备凭据。首版不提供邮箱解绑；未来解绑命令应禁止 Developer 移除最后可用邮箱登录方式，更换邮箱则继续使用 UC011 先验证后替换。UC009 撤销最后设备凭据保持允许，已激活邮箱可通过 UC012 在新设备恢复。邮箱服务偶发故障或用户日后失去邮箱访问权不自动等同于违规暂停。
 
@@ -213,7 +213,7 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 
 产品称“开发者 ID”，契约字段为 developerHandle，由用户填写。输入为 3–32 个 ASCII 字符，首字符必须是英文字母，后续只允许英文字母、数字、`_`、`-`，即 `^[A-Za-z][A-Za-z0-9_-]{2,31}$`。不 trim，不接受空白、中文、斜杠、点或 Unicode 相似字符；只把合法 ASCII 大写转成小写作为规范值，存储与响应均为该值，不另存显示大小写。
 
-规范 handle 在全平台唯一，一个 authId 最多占用一个；例如 Alice 与 alice 冲突。首版不引入保留词表，不把任何名称（包括 official/admin）作为权限或官方背书依据。首版不支持改名、转让、解除占用或回收；账号禁用、Developer 暂停/拒绝及同校关联不释放或共享 handle。任何后续删除功能必须另行明确名称保留策略，不通过 TTL 释放。
+规范 handle 在全平台唯一，一个 authId 最多占用一个；例如 Alice 与 alice 冲突。首版不引入保留词表，不把任何名称（包括 official/admin）作为权限或官方背书依据。首版不支持改名、转让、解除占用或回收；账号禁用、Developer 暂停/拒绝或校园认证不释放或共享 handle。任何后续删除功能必须另行明确名称保留策略，不通过 TTL 释放。
 
 只有通过当前账号状态及邮箱门禁后才尝试占用名称；名称已归属其他账号返回 DEVELOPER_HANDLE_TAKEN，不透露其 authId 或邮箱。没有匿名可用性探测接口、预占操作或客户端提供的 handleKey。相同账号与规范 handle 的重复 Apply 幂等；修改大小写不产生新名称，不新增审计。提交另一个合法 handle 返回 DEVELOPER_HANDLE_CHANGE_NOT_ALLOWED，即使目标未占用也不能借 Apply 改名。
 
@@ -246,7 +246,8 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 | 设备凭据 | 删除公钥及使用元数据；永久保留规范公钥指纹和 CLOSED authId 的最小占用墓碑，防止旧设备密钥跨账号重用，延续 UC009 不释放密钥归属的约束。新注册必须使用新密钥 |
 | Session、挑战及结果、授权交互、code/access/refresh/family | 删除秘密摘要、操作内容及业务记录；由永久主体墓碑防重建，不为检测重放继续保存已终止账号全部 token 历史 |
 | grant、pairwise 用户映射 | 删除该 authId 的 consent 内容及 `(authId,sectorId)→sub` 映射；不删除 Application 的 sector。旧 sub 不转交新账号，日志/第三方引用不宣称被删除 |
-| 学生关联 | 删除本账号的成员关系及其专属材料；组仍有其他成员时保留组，不暴露或改变其他成员；无成员且无合法未决引用时，在关联事务栅栏下删除 lookup/关联密文和空组。并发注册加成员不得误删共享组 |
+| 校园认证与操作 | 按修订 UC031 清除认证依据/投影、验证地址/MAC/操作及受控审计；新邮箱列表/密码材料须纳入终止清单，不按邮箱跨账号清理，不保留已消费库，备份恢复执行终止门禁 |
+| 已退役学生关联 | 新设计没有组/成员或关联密文。移除关联装配时同步退役清理步骤；当前代码历史清理仍存在，不能以文档修订冒称已移除。旧开发数据独立显式处置，不增加生产迁移 |
 | developerHandle | 永久保留规范 handle、原 authId、claimedAt 和终止占用标记；不转让、不释放、不连同邮箱/资料保留。该最小公开命名空间墓碑明确向本人披露 |
 | Auth 审计 | 只读期内保留最小事件归因，不保留 token/邮箱/资料副本；账号相关普通事件上限为事件发生后 180 天，已超期的随本次任务清理。注销事件保留 180 天；期满按专用保留任务删除，不由业务更新覆盖 |
 | 协调决定、清理进度及查询令牌 | App 确认终局前保留必要决定；查询摘要最多 30 天，详细清理任务在全部步骤完成且终局回执后清理，永久终止事实由最小墓碑承担 |
@@ -275,13 +276,13 @@ Developer 状态。两者都不能作为本查询的成功结果，且不得被�
 <!-- 权威位置: use-cases/UC-AUTH-011-set-and-activate-email.md#br-eml-004 -->
 ### BR-EML-004：更换与原子激活
 
-本规则适用于 BIND。每个账号只保留一个当前可验证提案；新 Begin 成功创建操作时使旧提案失效，且必须先通过 revision 和限额检查。重发不延长旧验证码寿命，生成新验证码和新 operationId；晚到的旧邮件不能激活。Begin 的数据库失败不替换原提案。
+本规则区分添加绑定与切换登录角色。添加先验证目标，成功只增加非登录地址，不删除原邮箱或改变角色；切换始终须当前密码、合法目标及一致版本。邮件重发不能延长旧操作、晚到码不能完成被替代操作；多个添加提案的容量/替代规则和幂等键需随邮箱列表协议闭合，不沿用“每账号单个 BIND 就替换登录邮箱”的隐式行为。
 
-邮箱绑定 revision 独立于用户资料 revision；未绑定为 0，每次成功激活递增一次。请求当前已激活的同一规范化地址返回 `EMAIL_ALREADY_ACTIVE`，不发邮件、不增加 revision。提交必须与 Begin 固定的 expectedRevision 相符，且操作仍是当前提案；冲突不自动覆盖新绑定。
+邮箱集合/登录角色的版本独立于资料、账号代际和密码版本。最终提交复核目标仍绑定且已验证、当前密码验证未被改密/重置废止、期望角色版本未变化；冲突不自动覆盖。最终存储版本划分与 Proto presence 待审核，不能用旧 activeEmail 单字段掩盖多个地址和角色竞争。
 
-激活将唯一邮箱归属、账号绑定、revision、操作成功结果和最小审计记录原子提交。旧邮箱在此之前始终有效；新验证码错误、过期、投递失败、冲突或事务回滚均不删除旧绑定。提交后旧地址释放，可被以后验证成功的账号使用；它不再具有原账号的认证资格。
+角色切换与密码验证消费、版本推进、操作结果、审计同事务提交；提交前旧登录邮箱始终有效，任何失败都不留下零个或多个登录角色。旧登录邮箱可以保留为非登录绑定，不隐式释放其地址或删除校园依据；只有明确解绑才移除。当前登录邮箱不得直接解绑，解绑事务必须重新确认其非登录状态，并与角色切换串行协调，不能靠客户端提示保护最后入口。
 
-更换不撤销已有设备 Session，不修改设备密钥或 Developer 状态。邮箱登录操作及设备/Session 扩展由 [UC012 草案](../use-cases/UC-AUTH-012-login-with-email.md) 独立交付，不是本用例的前置依赖；其入口未实现时保持关闭。
+邮箱增删/角色切换不改变 authId/Developer/sub，校园认证按 UC031。2026-10-13 用户确认切换登录邮箱不清退已有设备和 Session、不推进 accountRevision；推进 loginRoleRevision 使旧邮箱登录/恢复提案失效，切回也不复活旧提案。密码修改/恢复的收回策略唯一见 UC033/BR-PWD-004–006。
 
 ### 来自 `UC-AUTH-010`
 
@@ -301,7 +302,7 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 
 首版采用固定绝对有效期：T_session 通过 AUTH_SESSION_TTL 配置，为部署必填的正时长，创建时固定 expiresAt；缺失/非法配置拒绝接流量。配置采用 Go duration 格式，示例部署值为 `720h`（30 天）；该示例不是隐式默认值。本轮不自动滑动续期、不签发 refresh token，也不因请求活跃无限延长会话。到期后必须重新完成本用例的设备认证并建立新 Session，不延长旧会话的 expiresAt。后续若增加续期，另行设计轮换与并发语义。
 
-一次成功会话检查必须得到一致、当前的事实：token 摘要匹配，Session 未撤销且 `now < expiresAt`，所属主体为 ACTIVE USER，作为会话认证依据的设备凭据仍有效且归属一致。缺失、损坏、超时或无法读取均失败关闭，不能回退到客户端缓存或只凭旧 JWT 放行。
+一次会话检查须确认 token、未撤销/未到期、ACTIVE/当前 accountRevision、credential owner/未撤销/UC033 下界及认证来源完整。UC033 正常改密/重置后的旧代 Session 不可检查成功，换发是新记录，不把旧版本覆盖成当前。缺失/损坏/依赖故障失败关闭；新增字段/方法需真实回归后交付，不从客户端缓存放行。
 
 首版不缓存正向会话授权结果，权威读取不得使用可能落后的副本。建议使用一致快照读取主体、凭据和 Session；检查与撤销/禁用存在并发时，以明确的检查快照为边界。变更提交后才开始的新检查必须看到变更；先已通过的请求可能继续执行，不承诺取消在途业务。
 
@@ -331,17 +332,17 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
-- 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。
-- 普通设备注册/登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
+- 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。学年时间表 PUT 只接受 nextRolloverAt、expectedRevision 和 reason，不接受客户端提交 currentAcademicYear。
+- 设备登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
   邮箱 Complete 消息体为 code 和条件必需的 registrationProof，路径 operation_id 同样覆盖体中值。
-  凭据撤销的 `credential_id` 仅来自路径。GET/DELETE 不带请求体。
+  凭据撤销的 `credential_id` 和应用存储清除的 `application_id` 仅来自路径。GET/DELETE 不带请求体。
 - 资料编辑保留消息体中的 `expectedRevision` 和显式 ProfileValue oneof，不引入另一套
   原始 KV 或 `If-Match` 协议。具体字段值类型仍按 UC005 校验。
 - 不接受 query 参数作为消息、Session 或身份来源。Session、可信用户身份载体完全遵守
   [设备认证契约](../../platform/contracts/auth-device-session-v1.md#session-载体) 与 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)。
 - JSON 解码拒绝未知字段、重复字段和冲突的 oneof 分支；资料编辑还拒绝 null 操作列表、条目及值分支，
   保留 UC005 的显式编辑规则。不把解析器的原始输入内容返回给客户端。
-- HTTP 请求体在分配前有界读取：认证入口默认 16 KiB（由部署配置），资料编辑 128 KiB。
+- HTTP 请求体在分配前有界读取：认证入口默认 16 KiB（由部署配置），资料编辑 128 KiB，应用用户存储固定 16 KiB。
   业务容量限制另行生效；暂不支持压缩请求体，返回 415。非 JSON POST/PUT/PATCH 同样返回 415。
 - 所有响应设置 `Cache-Control: no-store`；撤销成功响应为 `{}`。错误 reason 复用 gRPC，
   HTTP 状态遵守各 UC：大小超限 413、限流 429、版本冲突/耗尽 409。
@@ -355,7 +356,7 @@ Mongo 首版复用认证事务栅栏，并对参与确认的 Session、主体与
 `AUTH_USER_ENDPOINTS_ENABLED=false` 时不注册上述 HTTP 用户路由，与 gRPC 开关一致。
 TLS 与公网可达性由部署和 Gateway 决定，监听 HTTP 不代表公网入口已经交付。
 
-验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法、两个旧 Reviewer 管理方法与两个新增应用审核权限方法、
+验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖修订后的资料/认证方法及退役无邮箱路径拒绝、Reviewer/应用运维权限方法、两个学年时间表管理方法及应用用户存储 HTTP/本人清除方法、
 生成客户端、当前用户隔离、重复/替代身份头拒绝、严格 JSON、资料 CAS、撤销幂等性及内部 RPC
 不暴露为 HTTP。保留原生 gRPC 回归测试。
 
@@ -426,7 +427,7 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
-UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contracts/auth-email-account-v3.md) 的精确载体；旧可选 Session REGISTER/BIND 已退役，其它接口的必需载体不变。
 
 ## 未纳入本 brief 的源小节
 
@@ -439,20 +440,20 @@ UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 
 - `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-012`（use-cases/UC-AUTH-012-login-with-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、治理工作包路由、UC020 同账号 Session 管理
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC020 同账号 Session 管理
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-013-apply-for-developer.md` | 203 | `1eb6329b5b9a` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `4a8ab75ce6d1` |
+| `use-cases/UC-AUTH-013-apply-for-developer.md` | 203 | `ec453447f9eb` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
-| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 279 | `a96eacf40f23` |
+| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |
-| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
-| `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
-| `platform/contracts/auth-center-api-routing.md` | 125 | `3c4fa072811e` |
+| `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
+| `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
+| `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
 | `platform/contracts/auth-developer-application-v1.md` | 58 | `83ce98a96c34` |
-| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
+| `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

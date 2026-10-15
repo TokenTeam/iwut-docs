@@ -1,0 +1,31 @@
+{
+  "uc": "UC-AUTH-029",
+  "note": "Replace the static academic-calendar file with an Auth-owned Mongo schedule. Provision the deterministic September 1 baseline, let current complete platform administrators read the current academic year and next rollover and replace that next rollover with a full future Instant under CAS and immutable audit, then recur by Asia/Shanghai calendar year with February 29 normalizing to March 1. Integrate UC005 and UC028 through an on-demand schedule provider. Remove all reads of AUTH_ACADEMIC_CALENDAR_FILE but do not reject an externally lingering variable.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与依赖",
+    "输入与输出",
+    "API 契约",
+    "主流程",
+    "错误语义与运行约束",
+    "验收场景",
+    "实现依赖与交付边界"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "目的与范围",
+      "传输载体",
+      "Claims",
+      "时间与有效期",
+      "校验顺序",
+      "错误边界"
+    ],
+    "platform/contracts/auth-center-api-routing.md": [
+      "路由边界",
+      "JSON 与载体",
+      "部署开关与验收"
+    ]
+  }
+}

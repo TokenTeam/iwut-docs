@@ -718,7 +718,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | --- | --- | --- |
 | `use-cases/UC-APP-036-clear-test-publication-slot.md` | 180 | `e0aa209d3e5f` |
 | `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `7e93553d9cdd` |
-| `use-cases/UC-APP-027-close-application.md` | 273 | `d2761c77847f` |
+| `use-cases/UC-APP-027-close-application.md` | 275 | `c56d7c62e94e` |
 | `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
 | `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |

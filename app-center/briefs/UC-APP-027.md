@@ -37,6 +37,8 @@
 
 ### 目标与范围
 
+2026-10-12 Auth 近期认证正在 DRAFT 修订为“当前密码＋同设备新签名”；App 只消费 app.close proof，不收平台密码，不新增/放宽业务授权。现有关闭协调/验证基线已经交付，但新 Auth 签发门禁与门户交互需独立验收后启用，旧设备-only 测试不代表最新双证明完成。
+
 > 当前管理员经过近期重新认证和明确确认后，把一个 Application 不可逆地从 `ACTIVE` 推进到 `CLOSING`；App Center 立即停止它的全部本地运行与管理能力，并通过持久协议让 Auth Center 建立永久授权撤销栅栏，最后收敛为 `CLOSED`。
 
 本用例负责：
@@ -532,7 +534,7 @@ App 收到终局后回执；Auth 在回执前保留决定。只有协调已终�
 
 #### 目的与边界
 
-本契约定义用户在关闭一个 Application 前，如何用当前 Session 所属的同一登记设备完成一次新的 challenge/signature，并由 Auth Center 签发只能交给 App Center、只能用于该 Application 关闭的短期 JWS。
+本次修订定义当前平台密码＋同 Session 设备新签名共同授权 Auth 签发 app.close proof；旧设备-only 基线曾 ACCEPTED/交付，2026-10-13 用户接受新门禁，已实施并通过最终真实回归。既有签名 Frame/JWS 格式保留，Complete 增加密码字段并在 Auth 最终检查版本/下界，不允许遗漏密码回退。App 只消费用途受限 proof，不收平台密码。
 
 普通 USER JWS 的 `iat` 表示可信身份何时签发，不表示用户刚刚重新证明设备私钥控制权。前端确认框、Session 最近使用时间、密码输入字符串和已有 OAuth token 也不能代替本文证明。
 
@@ -908,13 +910,13 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-027-close-application.md` | 273 | `d2761c77847f` |
+| `use-cases/UC-APP-027-close-application.md` | 275 | `c56d7c62e94e` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
-| `platform/contracts/application-close-reauth-proof-v1.md` | 152 | `1e16aa4fe484` |
+| `platform/contracts/application-close-reauth-proof-v1.md` | 153 | `4fa7c9ec5eb5` |
 | `platform/contracts/application-closure-v1.md` | 135 | `05e04ba6d669` |
 | `platform/contracts/auth-developer-status-v1.md` | 97 | `65d986d93af1` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

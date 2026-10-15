@@ -4,6 +4,10 @@
 
 ## 目标与范围
 
+2026-10-13 用户明确接受本次密码/防旁路修订并授权实施；下文旧基线仅为历史证据。先生成 brief，再实施与验证。UC032 仍 DRAFT，不开放旧 Session-only 跨设备撤销。
+
+2026-10-12 app.close 近期认证新增 UC033 当前密码＋设备新签名门禁，本修订已 ACCEPTED；旧 tombstone/协调与设备 proof 基线仍已交付。新密码字段/版本复核已实施并通过最终真实回归，不能据旧验证宣称双证明已完成；关闭协调本身不新增密码或 App 业务权限。
+
 App Center 把 Application 不可逆地推进到 CLOSING 后，Auth Center 接受经过服务身份授权的关闭事实，持久建立 applicationId 级永久 tombstone，并让全部 OAuth/OIDC 授权消费路径在最终边界执行该栅栏；在关闭发起前，Auth 还为当前用户提供绑定 Application 的同设备新挑战，签发只能用于 `app.close` 的短期近期认证证明。
 
 本用例负责：
@@ -54,7 +58,7 @@ Auth 不调用 App 复查关闭状态，也不能因为 App provider 暂时失�
 
 用户入口 `BeginApplicationCloseReauth` / `CompleteApplicationCloseReauth` 同时提供 HTTP/JSON 与原生 gRPC，使用规范 `x-iwut-session`。Begin 在当前 Auth 边界确认 ACTIVE USER、有效 Session 和该 Session 引用的未撤销登记设备，创建最长 5 分钟的随机 challenge operation。
 
-Complete 必须继续使用 Begin 的同一 Session，并由同一 credential 对共享契约固定 Frame 完成一条新 P-256/SHA-256 签名。Auth 在最终事务中复查账号、Session、credential、operation、applicationId、版本和期限，再把 operation 置为 COMPLETED并固定 proof claims。
+Complete 使用同一 Session、同一 credential 新 P-256 签名，并向 Auth 提交当前密码。UC033 验密快照/额度与最终事务 passwordRevision/accountRevision/凭据下界、operation/app/期限复查闭合后才签发 proof；密码不进入签名 Frame、JWS 或 App Center。新字段与门禁见修订共享契约，旧无密码 Complete 必须拒绝，不仅修改 UI。
 
 签名成功时间是 `auth_time`；Session 的 issuedAt、createdAt、lastUsedAt 和普通 USER JWS `iat` 均不能代替。Auth 不在该入口调用 App 或验证管理员归属，以免把跨服务资格查询引入认证原子性；App 在消费 proof 时独立验证当前管理员和 Developer 状态。
 
@@ -107,12 +111,12 @@ authorize、grant 扩大、code 签发/消费、token/refresh、UserInfo 和 int
 <a id="br-oau-025"></a>
 ### BR-OAU-025：同设备新挑战证明近期认证
 
-app.close proof 必须来自有效 Session 所属同一登记设备对全新 challenge 的用途隔离签名。普通 USER JWS、Session 时间、另一个设备、旧登录/注销签名或 UI confirmation 均不满足近期认证。Complete 在最终事务复查 ACTIVE account、Session、credential、revision 和 operation 绑定。
+app.close proof 必须同时通过 UC033 当前密码验证和有效 Session 同一登记设备的新 challenge 签名；普通 JWS/Session 时间/另一设备/旧签名/UI 不满足。Complete 最终复核 passwordRevision/accountRevision、凭据下界和 operation/target/期限，不能旧无密码接口签发同用途 proof。
 
 <a id="br-oau-026"></a>
 ### BR-OAU-026：Proof 最小权力与固定时限
 
-proof 仅面向 iwut-app-center、仅用于 app.close，绑定一个 sub、applicationId 和 jti；auth_time 是新签名成功时间。proof 固定 5 分钟寿命、30 秒偏差，不刷新、不改变 Application、不授予管理员身份，App 必须另行完成业务授权。
+proof 只给 iwut-app-center/app.close，绑定 sub/applicationId/jti；auth_time 为本次密码和新签名验证成功的提交时间，不取 Session/JWS 时间。5 分钟/30 秒偏差、不刷新、不授予业务权；App 另校验管理员/Developer。此前签发的离线 proof 残余窗口按 UC033/BR-PWD-006，不承诺改密追溯撤销已签 JWS。
 
 <a id="br-oau-027"></a>
 ### BR-OAU-027：Proof 幂等与单次业务消费

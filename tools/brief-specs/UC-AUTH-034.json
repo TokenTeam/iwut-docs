@@ -1,0 +1,10 @@
+{
+  "uc": "UC-AUTH-034",
+  "note": "Accepted for implementation on 2026-10-13. Password login remains default-off until password/email initialization, revision consumers and real integrations are delivered. Keep email-code fallback and device bytes unchanged. No auto-registration, migration, deploy or push.",
+  "uc_sections": ["目标与范围", "参与者与依赖", "输入与输出及 API 提案", "主流程", "依赖与变更记录"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-password-v1.md": ["秘密输入与载体", "方法与逻辑消息", "密码登录签名字节", "Session 与安全代际", "接受与交付门禁"]
+  }
+}

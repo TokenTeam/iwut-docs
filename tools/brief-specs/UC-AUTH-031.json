@@ -1,0 +1,38 @@
+{
+  "uc": "UC-AUTH-031",
+  "note": "Accepted by user on 2026-10-13. Implement the reviewed email-account-v3 contract, password initialization, ten globally unique bindings with one primary role, current campus basis, strict retirement of old passwordless REGISTER/implicit-primary BIND, shared quotas and bounded cleanup. Historical v2 descriptions are baseline evidence only. Preserve dirty work; no migration, deploy, commit or push.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与依赖检查",
+    "输入与输出",
+    "主流程",
+    "验收场景",
+    "实现约定与依赖闭合"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-device-session-v1.md": [
+      "基础编码",
+      "公钥与签名",
+      "Session 载体"
+    ],
+    "platform/contracts/auth-center-api-routing.md": [
+      "JSON 与载体",
+      "部署开关与验收"
+    ],
+    "platform/contracts/oauth-oidc-v1.md": [
+      "Scope 启用与兼容投影"
+    ],
+    "platform/contracts/auth-email-account-v3.md": [
+      "范围与审核边界",
+      "精确入口与载体",
+      "消息字段提案",
+      "注册签名字节",
+      "邮箱目录与独立版本",
+      "用途、HMAC 与重试",
+      "校园依据与旧入口退役",
+      "错误、依赖与启用"
+    ]
+  }
+}

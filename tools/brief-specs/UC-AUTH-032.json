@@ -1,0 +1,11 @@
+{
+ "uc":"UC-AUTH-032",
+ "note":"User explicitly authorized completion on 2026-10-13. Direct dependencies verified from HEAD+dirty tree: no-touch Session, password verifier/quota/cutoff, email v3 and UC009/025/026. Generate before implementation. Preserve legacy current-only revocation and all dirty work. No production migration/push/deployment; no scan-to-add, batch revocation or WebAuthn.",
+ "uc_sections":["目标与范围","参与者与前置条件","输入与输出","API 契约","主流程","错误语义","测试与验收","依赖检查与接受门禁","邮箱安全新要求与待确认依赖"],
+ "include_own_brs":true,
+ "include_external_brs":true,
+ "shared_sections":{
+  "platform/contracts/auth-credential-management-v1.md":["范围与来源","消息与载体","设备签名字节","最终复核与部署","公开向量"],
+  "platform/contracts/auth-device-session-v1.md":["基础编码","公钥与签名","Session 载体"]
+ }
+}

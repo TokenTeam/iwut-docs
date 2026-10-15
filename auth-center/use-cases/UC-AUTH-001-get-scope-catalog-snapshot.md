@@ -85,6 +85,7 @@ Auth 内部的 ScopeDefinition 只使用 `enabled: bool` 表达启用状态，�
 - enabled=false 的 scope 不进入 Auth 新授权/签发的许可集合，也不进入已有凭据的实际有效权限集合；enabled=true 仍需通过用户同意、应用许可、token 范围等检查。OAuth 各阶段的处理分别由 UC014–019 定义。
 - requestable 不表达用户 consent、token grant 或最终数据访问授权；消费方缓存不能替代 Auth 当前 enabled 的运行检查。
 - 停用不删除 scope 定义或用户历史同意，也不等同于用户撤回；恢复必须保持同名 scope 原语义，不能复用旧名称扩大数据范围。Grant 与凭据恢复边界见 [BR-OAU-002](UC-AUTH-014-authorize-application.md#br-oau-002)。
+- 内部 USERINFO_CAMPUS 的唯一名称 campus.whut、空 audience/无 profile 映射与授权披露由 UC031 定义；跨服务仍仅投影 name/requestable，不增加邮箱、用户认证或内部 kind 字段。
 - 其它展示、安全分类或数据投影元数据不在本 UC 中提前定义。
 
 本规则固定状态及其读投影，不增加目录写接口；生产持久化/部署装载另行交付，在线目录管理仍不在本用例范围内。

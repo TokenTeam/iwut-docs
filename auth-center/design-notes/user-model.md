@@ -2,7 +2,7 @@
 
 状态：`PROPOSED`
 
-本文在[用户资料字段定义](user-profile-field-definition.md)基础上保留用户逻辑模型说明。资料编辑、初始化及内嵌存储的规则正文已归入 [UC-AUTH-005](../use-cases/UC-AUTH-005-edit-own-user-profile.md)，下文通过 BR 引用提供摘要；登录、账号管理完整生命周期仍属于后续用例。UC-AUTH-005 至 009 均已 ACCEPTED；设备协议见[共享契约](../../platform/contracts/auth-device-session-v1.md)，实现与客户端交付分别验收。
+本文仅摘要权威规则；密码 UC033/034 新草案及 UC006/009/011/025/026/031 实质修订均 DRAFT，UC007/008 等既有基础继续保留。旧交付与新缺口以 implements 为准；新密码/凭据下界不是 profile，设备契约及客户端独立验收。
 
 ## 模型边界
 
@@ -69,7 +69,7 @@ UserProfile {
 
 ### 逻辑示例
 
-以下展示两个相关对象，不是公共 API 响应，也不表示主体字段和全部资料可以一起披露给应用。字段目录中的示例仍不等于已接受的实际收集清单。
+以下展示两个相关对象，不是公共 API 响应，也不表示主体字段和全部资料可以一起披露给应用。示例早于 BR-UPF-017，仅说明 KV 结构，不是当前生产收集清单。
 
 ```json
 {
@@ -92,7 +92,7 @@ UserProfile {
 }
 ```
 
-主体创建后资料发生了一次真实修改，因此示例中 profile revision 为 2，两个 updatedAt 不同。学校名称和入学年份仍是字段目录约束的动态值，不成为 User 的固定字段。
+主体创建后资料发生了一次真实修改，因此示例中 profile revision 为 2，两个 updatedAt 不同。历史示例中的学校名称和入学年份不成为 User 的固定字段，也不属于当前 BR-UPF-017 生产目录。
 
 ## 已有资格与权限如何接入
 
@@ -109,12 +109,14 @@ UserProfile {
 
 | 候选内容 | 建议归属 |
 | --- | --- |
-| 学校、学号、院系、专业、入学年份 | 按真实用途逐项进入 ProfileFieldDefinition；用户值进入 UserProfile.values。当前仅学校名称与入学年份有说明性示例，其余尚无完整定义。 |
+| 姓名、性别、活动片区、专业、生日、一卡通号、手机号、QQ、当前年级 | 首批目录已由 [BR-UPF-017/018](../use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-017) 定义；用户确认值进入 UserProfile.values，当前年级另含服务端学年锚点。 |
 | 昵称、头像 | 根据实际产品用途定义；本轮不默认增加公开个人主页能力或必填资料。 |
-| 平台登录邮箱、邮箱验证事实、密码摘要 | 登录标识与凭据模型；设备凭据创建/登录见 UC-AUTH-006/007，邮箱认证方式仍待决定，不成为 User 的必填字段。若资料中以后有联系邮箱，也不能据此修改登录邮箱或取得验证状态。 |
+| 邮箱列表/登录角色、平台密码 | UC006/011 邮箱角色；UC033 密码策略/改密/邮箱恢复及凭据下界，UC034 默认密码登录、UC012 码备用；与 profile 分离。产品建议已接受，新工程 UC/协议 DRAFT 未交付。 |
 | 学校账号密码、登录 cookie | 客户端本地凭据；遵循字段定义草案的上传边界。 |
 | 设备凭据、Session、登录设备 | [UC-AUTH-007](../use-cases/UC-AUTH-007-login.md) 定义认证与会话，[UC-AUTH-008](../use-cases/UC-AUTH-008-revoke-own-session.md) 与 [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) 定义两类撤销；均不属于学生资料，refresh token 尚未引入。 |
-| 学生关联分组 | [BR-REG-004/005](../use-cases/UC-AUTH-006-create-user.md#br-reg-004) 的客户端声明关系，与资料和账号控制权独立。 |
+| 学生关联分组 | 已按 UC006/BR-REG-004/008 退役，不上传派生声明、不建组/成员、不执行关联密钥迁移。 |
+| 校园成员认证 | UC031 DRAFT 修订：当前学校绑定非空则认证，最后依据解绑撤回；无需定期复验，不等于学生/学籍或权限。旧永久事实后端是已交付基线。 |
+| 应用次数权益 | 归属稳定 iWUT 账号，存储与扣次属于具体应用；Auth 不建设钱包，第三方使用 Application 级 pairwise sub。 |
 | 应用对资料的读取同意记录 | 独立应用授权事实，通过 authId 关联，不在 User 上添加一个表示全部同意的布尔值。 |
 
 ## MongoDB 存储方向
@@ -127,4 +129,4 @@ Session、consent、追加审计和应用存储的具体集合与生命周期仍
 
 [UC-AUTH-005](../use-cases/UC-AUTH-005-edit-own-user-profile.md) 已提出本人资料编辑的命令、异常与验收；开始编辑和冲突恢复的读取见[配套查询](../query-contracts/user-profile-editing.md)。
 
-普通 USER 创建、登录和本人撤销已有 [UC-AUTH-006](../use-cases/UC-AUTH-006-create-user.md) 至 [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) 的已接受设计；账号禁用管理、邮箱恢复和注销仍是后续独立用例。学生关联是独立于资料的客户端声明关系，边界见 [BR-REG-004](../use-cases/UC-AUTH-006-create-user.md#br-reg-004)，不代表已验证的学生身份。第一批资料字段及生产交付依赖见 [open-questions.md](../open-questions.md#用户资料生产交付)。
+此前邮箱 v2/关联退役与后台设备登录基线已验证；新增密码注册、邮箱列表唯一角色、当前校园依据修订为 UC006/011/031 DRAFT，不代表已经实现。设备登录/撤销及账号治理的既有能力继续由对应 UC 拥有；密码生命周期工作包、客户端与 Gateway 独立推进。第一批资料交付见 open-questions。

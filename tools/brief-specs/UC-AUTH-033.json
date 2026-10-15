@@ -1,0 +1,10 @@
+{
+  "uc": "UC-AUTH-033",
+  "note": "Accepted for implementation on 2026-10-13. Deliver password policy/Argon2id, bounded execution, revision cutoff, normal change and primary-email reset with atomic audit/outbox and exact APIs. Never enable partially upgraded consumers or passwordless registration. Preserve dirty baseline; no production migration, deploy or push.",
+  "uc_sections": ["目标与范围", "参与者与依赖", "输入与输出", "主流程", "验收与错误边界", "交付依赖与变更记录"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-password-v1.md": ["权威与兼容边界", "秘密输入与载体", "方法与逻辑消息", "密码验证与幂等记录", "Session 与安全代际", "接受与交付门禁"]
+  }
+}

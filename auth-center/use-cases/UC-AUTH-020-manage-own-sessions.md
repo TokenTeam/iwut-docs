@@ -34,7 +34,7 @@ OwnSessionPage {
 OwnSessionSummary {
   sessionId: SessionId
   credentialId: CredentialId
-  authenticationMethod: DEVICE_CREDENTIAL | EMAIL_CODE_AND_DEVICE
+  authenticationMethod: DEVICE_CREDENTIAL | EMAIL_CODE_AND_DEVICE | PASSWORD_AND_DEVICE | PASSWORD_AND_SESSION
   authenticatedAt: Instant
   createdAt: Instant
   lastUsedAt: Instant
@@ -52,6 +52,8 @@ SessionsRevoked {}
 sessionId/credentialId 是引用标识，不是认证材料。列表不返回 sessionToken/tokenDigest、公钥/指纹、邮箱、IP、地理位置、学校信息或其他账号资料；首版不新增这些数据的收集。credentialId 仅帮助辨识哪些会话使用同一凭据，不表示已经验证物理设备名称或“一个凭据等于一台设备”。
 
 ## API 契约
+
+2026-10-12 新密码方法与凭据下界见 UC033/034 DRAFT；列表/回收/LRU 的来源校验及 enum 必须同步，不只更新响应文案。旧两方法基线已实现，密码退休凭据下的旧会话不显示；新增支持待完整回归，不增加密码验证到普通 Session 回收。
 
 独立 package `auth_center.v1.session_management`，service `SessionManagementService`：
 

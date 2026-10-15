@@ -67,7 +67,7 @@ OwnSessionPage {
 OwnSessionSummary {
   sessionId: SessionId
   credentialId: CredentialId
-  authenticationMethod: DEVICE_CREDENTIAL | EMAIL_CODE_AND_DEVICE
+  authenticationMethod: DEVICE_CREDENTIAL | EMAIL_CODE_AND_DEVICE | PASSWORD_AND_DEVICE | PASSWORD_AND_SESSION
   authenticatedAt: Instant
   createdAt: Instant
   lastUsedAt: Instant
@@ -85,6 +85,8 @@ SessionsRevoked {}
 sessionId/credentialId 是引用标识，不是认证材料。列表不返回 sessionToken/tokenDigest、公钥/指纹、邮箱、IP、地理位置、学校信息或其他账号资料；首版不新增这些数据的收集。credentialId 仅帮助辨识哪些会话使用同一凭据，不表示已经验证物理设备名称或“一个凭据等于一台设备”。
 
 ### API 契约
+
+2026-10-12 新密码方法与凭据下界见 UC033/034 DRAFT；列表/回收/LRU 的来源校验及 enum 必须同步，不只更新响应文案。旧两方法基线已实现，密码退休凭据下的旧会话不显示；新增支持待完整回归，不增加密码验证到普通 Session 回收。
 
 独立 package `auth_center.v1.session_management`，service `SessionManagementService`：
 
@@ -216,7 +218,7 @@ cursor 为上页最后扫描的候选 sessionId，由服务端 nextCursor 指定
 
 首版采用固定绝对有效期：T_session 通过 AUTH_SESSION_TTL 配置，为部署必填的正时长，创建时固定 expiresAt；缺失/非法配置拒绝接流量。配置采用 Go duration 格式，示例部署值为 `720h`（30 天）；该示例不是隐式默认值。本轮不自动滑动续期、不签发 refresh token，也不因请求活跃无限延长会话。到期后必须重新完成本用例的设备认证并建立新 Session，不延长旧会话的 expiresAt。后续若增加续期，另行设计轮换与并发语义。
 
-一次成功会话检查必须得到一致、当前的事实：token 摘要匹配，Session 未撤销且 `now < expiresAt`，所属主体为 ACTIVE USER，作为会话认证依据的设备凭据仍有效且归属一致。缺失、损坏、超时或无法读取均失败关闭，不能回退到客户端缓存或只凭旧 JWT 放行。
+一次会话检查须确认 token、未撤销/未到期、ACTIVE/当前 accountRevision、credential owner/未撤销/UC033 下界及认证来源完整。UC033 正常改密/重置后的旧代 Session 不可检查成功，换发是新记录，不把旧版本覆盖成当前。缺失/损坏/依赖故障失败关闭；新增字段/方法需真实回归后交付，不从客户端缓存放行。
 
 首版不缓存正向会话授权结果，权威读取不得使用可能落后的副本。建议使用一致快照读取主体、凭据和 Session；检查与撤销/禁用存在并发时，以明确的检查快照为边界。变更提交后才开始的新检查必须看到变更；先已通过的请求可能继续执行，不承诺取消在途业务。
 
@@ -278,7 +280,7 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
-UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contracts/auth-email-account-v3.md) 的精确载体；旧可选 Session REGISTER/BIND 已退役，其它接口的必需载体不变。
 
 #### RPC 鉴权表
 
@@ -286,12 +288,12 @@ Auth 原生 gRPC 新接口固定为以下 full method；可执行 Proto 在独�
 
 | full method | 认证与授权 |
 | --- | --- |
-| `/auth_center.v1.authentication.AuthenticationService/BeginUserRegistration` | 有界匿名；校验输入与容量，创建 REGISTER 挑战。 |
-| `/auth_center.v1.authentication.AuthenticationService/CompleteUserRegistration` | 有界匿名；仅挑战与私钥证明可完成注册。 |
+| `/auth_center.v1.authentication.AuthenticationService/BeginUserRegistration` | 退役；UNIMPLEMENTED，不创建挑战或账号。 |
+| `/auth_center.v1.authentication.AuthenticationService/CompleteUserRegistration` | 退役；UNIMPLEMENTED，不消费旧证明创建账号。 |
 | `/auth_center.v1.authentication.AuthenticationService/BeginDeviceLogin` | 有界匿名；创建 LOGIN 挑战。 |
 | `/auth_center.v1.authentication.AuthenticationService/CompleteDeviceLogin` | 有界匿名；仅挑战与私钥证明可建立 Session。 |
 | `/auth_center.v1.authentication.AuthenticationService/RevokeCurrentSession` | 仅 token 定向撤销；必须绕过普通“当前 Session 有效”前置检查，按 UC008 幂等处理。 |
-| `/auth_center.v1.authentication.AuthenticationService/RevokeOwnCredential` | 有效 Session，ACTIVE USER；以可信 authId 检查目标凭据归属，执行 UC009。 |
+| `/auth_center.v1.authentication.AuthenticationService/RevokeOwnCredential` | UC009 已交付：有效 Session/ACTIVE，仅当前凭据；其他目标 403 CREDENTIAL_REAUTH_REQUIRED，由 UC032 当前密码＋当前钥证明处理。 |
 | `/auth_center.v1.user_profile.UserProfileService/EditOwnProfile` | trusted-identity-v1 用户 JWS，audience 为 `iwut-auth-center`；按 UC005 再查当前主体。 |
 | `/auth_center.v1.user_profile.UserProfileService/GetOwnProfile` | 同上。 |
 | `/auth_center.v1.user_profile.UserProfileService/GetProfileEditingSchema` | 同上。 |
@@ -301,7 +303,7 @@ Auth 原生 gRPC 新接口固定为以下 full method；可执行 Proto 在独�
 
 同一调用只依据该方法规定的认证类型授权，不接受其它类型替代。会话撤销请求不因携带一个失效用户 JWS 而失去幂等性；匿名证明接口也不因附带身份获得额外权限。所有认证材料均需脱敏。客户端请求中声明的 authId、角色、设备名称或 applicationId 不生成可信 context。
 
-UC009 撤销当前认证凭据后，再用原 Session 重试会得到 SESSION_INVALID；“幂等撤销已撤销凭据成功”以前置有效 Session 为限。其它仍有效 Session 可重复撤销同一目标。认证检查成功后的在途撤销请求按 UC007 的检查时间边界处理。
+UC009 当前凭据撤销后旧 Session 重试 SESSION_INVALID；其他有效 Session 只能经 UC032 密码＋签名流程确认该其他目标，不能直接用旧入口。目标状态幂等与在途边界仍引用 UC009；新收紧逻辑未实施，不以本文修订冒称已修复。
 
 ## 未纳入本 brief 的源小节
 
@@ -310,15 +312,15 @@ UC009 撤销当前认证凭据后，再用原 Session 重试会得到 SESSION_IN
 - `UC-AUTH-020`（use-cases/UC-AUTH-020-manage-own-sessions.md）：主流程/查看会话、主流程/回收一个或多个其他会话、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-012`（use-cases/UC-AUTH-012-login-with-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、JSON 与载体、部署开关与验收、治理工作包路由
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、JSON 与载体、部署开关与验收、治理工作包路由
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-020-manage-own-sessions.md` | 179 | `4854c03b98ef` |
-| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
-| `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
-| `platform/contracts/auth-center-api-routing.md` | 125 | `3c4fa072811e` |
-| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
+| `use-cases/UC-AUTH-020-manage-own-sessions.md` | 181 | `55131ae2468d` |
+| `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
+| `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
+| `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
+| `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

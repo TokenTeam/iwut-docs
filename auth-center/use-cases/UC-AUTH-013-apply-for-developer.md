@@ -64,11 +64,11 @@ DeveloperApplicationBlocker =
 <a id="br-dev-006"></a>
 ### BR-DEV-006：本人显式申请与邮箱前置条件
 
-只有当前有效 ACTIVE USER 可申请本人资格。首次开通要求 Auth 当前已激活邮箱，并且 UC012 的邮箱登录和本机设备登记能力已经实际交付及启用；不能拿客户端布尔值、邮箱资料字段、历史验证操作或“曾经绑定过”代替当前事实。
+只有当前有效 ACTIVE USER 可申请本人资格。首次开通要求当前唯一已验证登录邮箱，并且 UC012 邮箱登录/本机设备登记实际交付启用；额外非登录学校邮箱、客户端布尔值、资料/历史验证不能代替。新邮箱列表须按角色查询，不因列表非空就满足恢复门禁；消费方适配待 UC011 新模型交付。
 
 这里“可用”指部署的功能配置、必要密钥/邮件适配器配置校验通过，且产品入口已交付启用，不通过申请时给邮箱再发测试信判断。邮件服务临时故障不证明该账号失去邮箱控制权，也不自动撤销已有 Developer。停用整个邮箱登录能力时，禁止新增开通；既有资格保持原状态，由部署恢复该能力，不批量改成 SUSPENDED。
 
-不要求用户先退出设备登录再做一次邮箱登录，不要求再次上传 associationToken、原始学号或学校凭据，也不宣称完成权威学生认证。日常设备登录的便利性保留。
+不要求用户先退出设备登录再做一次邮箱登录，不接收已退役关联声明、原始学号或学校凭据，也不宣称完成权威学生认证。日常设备登录的便利性保留。
 
 <a id="br-dev-007"></a>
 ### BR-DEV-007：自助开通与受限状态迁移
@@ -93,7 +93,7 @@ DeveloperApplicationBlocker =
 
 当前 Session、主体状态、邮箱绑定与 Developer 状态必须在一次确认边界内检查。邮箱更换沿用 UC011 的原子替换，不产生中间无邮箱状态；未来若引入解绑，必须与本命令在同一认证事务栅栏内确认，避免申请与解绑并发破坏邮箱前置条件。
 
-首次开通的 handle 占用、开发者状态、首次开通记录与审计原子提交。开通记录按 authId 唯一，记录首次 activatedAt；审计包含 actorAuthId/subjectAuthId（两者相同）、操作类型、null 到 APPROVED 的前后状态、用于决策的邮箱绑定 revision、规范 developerHandle、时间和结果，不记录邮箱明文或任何凭据秘密。只更新所需主体字段，不覆盖 profile、学生关联、permissions 或 permissionRevision。
+首次开通的 handle 占用、开发者状态、首次开通记录与审计原子提交。开通记录按 authId 唯一，记录首次 activatedAt；审计包含 actorAuthId/subjectAuthId（两者相同）、操作类型、null 到 APPROVED 的前后状态、用于决策的邮箱绑定 revision、规范 developerHandle、时间和结果，不记录邮箱明文或任何凭据秘密。只更新所需主体字段，不覆盖 profile、permissions 或 permissionRevision。
 
 与 [BR-IDN-004](UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004) 使用相同认证事务栅栏：开通提交后开始的新身份签发读取 APPROVED；之前已签发的短期 JWS 保持原 claims，不原地修改或追发。UC002 从同一权威 principal 读取新的 Developer 状态，不另建一个最终一致的状态副本。
 
@@ -106,7 +106,7 @@ DeveloperApplicationBlocker =
 
 developerHandle 是公开命名空间，不是认证秘密、另一个用户身份或官方认证标志。`developerHandle/nameKey` 可作为未来可读应用标识，但本用例不实现该标识的查询/路由、改名、转让或重定向；应用 UUID、adminId=authId 和 `(adminId, nameKey)` 约束保持不变，不新增 JWS claim 或 UC002 字段。
 
-App Center 继续检查可信身份中的 APPROVED，并执行自身配额、管理员归属及审核规则；本 UC 不替代这些门禁。学校关联只是客户端声明，不保证“一个自然人只开通一个 Developer”，也不把关联组内其它账号一并升级。
+App Center 继续检查可信身份中的 APPROVED，并执行自身配额、管理员归属及审核规则；本 UC 不替代这些门禁。学号关联已退役；校园邮箱或校园认证不保证“一个自然人只开通一个 Developer”，不升级其他 authId。
 
 Developer 日常可继续使用设备凭据。首版不提供邮箱解绑；未来解绑命令应禁止 Developer 移除最后可用邮箱登录方式，更换邮箱则继续使用 UC011 先验证后替换。UC009 撤销最后设备凭据保持允许，已激活邮箱可通过 UC012 在新设备恢复。邮箱服务偶发故障或用户日后失去邮箱访问权不自动等同于违规暂停。
 
@@ -124,7 +124,7 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 
 产品称“开发者 ID”，契约字段为 developerHandle，由用户填写。输入为 3–32 个 ASCII 字符，首字符必须是英文字母，后续只允许英文字母、数字、`_`、`-`，即 `^[A-Za-z][A-Za-z0-9_-]{2,31}$`。不 trim，不接受空白、中文、斜杠、点或 Unicode 相似字符；只把合法 ASCII 大写转成小写作为规范值，存储与响应均为该值，不另存显示大小写。
 
-规范 handle 在全平台唯一，一个 authId 最多占用一个；例如 Alice 与 alice 冲突。首版不引入保留词表，不把任何名称（包括 official/admin）作为权限或官方背书依据。首版不支持改名、转让、解除占用或回收；账号禁用、Developer 暂停/拒绝及同校关联不释放或共享 handle。任何后续删除功能必须另行明确名称保留策略，不通过 TTL 释放。
+规范 handle 在全平台唯一，一个 authId 最多占用一个；例如 Alice 与 alice 冲突。首版不引入保留词表，不把任何名称（包括 official/admin）作为权限或官方背书依据。首版不支持改名、转让、解除占用或回收；账号禁用、Developer 暂停/拒绝或校园认证不释放或共享 handle。任何后续删除功能必须另行明确名称保留策略，不通过 TTL 释放。
 
 只有通过当前账号状态及邮箱门禁后才尝试占用名称；名称已归属其他账号返回 DEVELOPER_HANDLE_TAKEN，不透露其 authId 或邮箱。没有匿名可用性探测接口、预占操作或客户端提供的 handleKey。相同账号与规范 handle 的重复 Apply 幂等；修改大小写不产生新名称，不新增审计。提交另一个合法 handle 返回 DEVELOPER_HANDLE_CHANGE_NOT_ALLOWED，即使目标未占用也不能借 Apply 改名。
 
@@ -163,7 +163,7 @@ GetOwnDeveloperEligibility 只允许有效 Session 查询本人，返回当前�
 3. 注册、邮箱激活、登录、本人查询不隐式授予 Developer；无需额外学生信息或角色输入。
 4. 并发和重复申请只有一次迁移/审计，activatedAt 稳定；暂停或拒绝后重试不能复活历史成功状态；PENDING 不被自动批准。
 5. Session/主体禁用、邮箱变化与申请并发有明确提交顺序；审计失败回滚，提交未知可重试/查询。
-6. 权限、资料、关联和已有 Session 不被覆盖；UC002 读取 APPROVED，新的 UC010 App audience JWS 携带 APPROVED，Auth audience 投影不变。
+6. 权限、资料和已有 Session 不被覆盖；UC002 读取 APPROVED，新的 UC010 App audience JWS 携带 APPROVED，Auth audience 投影不变。
 7. 本人查询正确处理 null、全部已有枚举、blockers 和不可用；不能查询他人或以旧查询结果绕过提交校验。
 8. App Center 仍执行自身配额和审核，Developer 不自动获得 Reviewer/管理员权限；已有 APPROVED 的历史数据不通过查询伪造激活记录。
 9. 默认不注册入口；显式启用入口但恢复就绪声明或 UC012 功能关闭时，普通账号收到明确 blocker，已有 APPROVED 可幂等读取。配置非法拒绝启动，未知 RPC 不获得匿名访问。

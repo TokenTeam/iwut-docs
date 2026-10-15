@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-026` 应用关闭授权收敛与近期认证 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAU-022`–`BR-OAU-028`（7 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-PWD-006`（来自 `UC-AUTH-033`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/application-close-reauth-proof-v1.md`、`platform/contracts/application-closure-v1.md`、`platform/contracts/auth-device-session-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -36,6 +36,10 @@
 ## 用例正文
 
 ### 目标与范围
+
+2026-10-13 用户明确接受本次密码/防旁路修订并授权实施；下文旧基线仅为历史证据。先生成 brief，再实施与验证。UC032 仍 DRAFT，不开放旧 Session-only 跨设备撤销。
+
+2026-10-12 app.close 近期认证新增 UC033 当前密码＋设备新签名门禁，本修订已 ACCEPTED；旧 tombstone/协调与设备 proof 基线仍已交付。新密码字段/版本复核已实施并通过最终真实回归，不能据旧验证宣称双证明已完成；关闭协调本身不新增密码或 App 业务权限。
 
 App Center 把 Application 不可逆地推进到 CLOSING 后，Auth Center 接受经过服务身份授权的关闭事实，持久建立 applicationId 级永久 tombstone，并让全部 OAuth/OIDC 授权消费路径在最终边界执行该栅栏；在关闭发起前，Auth 还为当前用户提供绑定 Application 的同设备新挑战，签发只能用于 `app.close` 的短期近期认证证明。
 
@@ -87,7 +91,7 @@ Auth 不调用 App 复查关闭状态，也不能因为 App provider 暂时失�
 
 用户入口 `BeginApplicationCloseReauth` / `CompleteApplicationCloseReauth` 同时提供 HTTP/JSON 与原生 gRPC，使用规范 `x-iwut-session`。Begin 在当前 Auth 边界确认 ACTIVE USER、有效 Session 和该 Session 引用的未撤销登记设备，创建最长 5 分钟的随机 challenge operation。
 
-Complete 必须继续使用 Begin 的同一 Session，并由同一 credential 对共享契约固定 Frame 完成一条新 P-256/SHA-256 签名。Auth 在最终事务中复查账号、Session、credential、operation、applicationId、版本和期限，再把 operation 置为 COMPLETED并固定 proof claims。
+Complete 使用同一 Session、同一 credential 新 P-256 签名，并向 Auth 提交当前密码。UC033 验密快照/额度与最终事务 passwordRevision/accountRevision/凭据下界、operation/app/期限复查闭合后才签发 proof；密码不进入签名 Frame、JWS 或 App Center。新字段与门禁见修订共享契约，旧无密码 Complete 必须拒绝，不仅修改 UI。
 
 签名成功时间是 `auth_time`；Session 的 issuedAt、createdAt、lastUsedAt 和普通 USER JWS `iat` 均不能代替。Auth 不在该入口调用 App 或验证管理员归属，以免把跨服务资格查询引入认证原子性；App 在消费 proof 时独立验证当前管理员和 Developer 状态。
 
@@ -178,12 +182,12 @@ authorize、grant 扩大、code 签发/消费、token/refresh、UserInfo 和 int
 <!-- 权威位置: use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-025 -->
 ### BR-OAU-025：同设备新挑战证明近期认证
 
-app.close proof 必须来自有效 Session 所属同一登记设备对全新 challenge 的用途隔离签名。普通 USER JWS、Session 时间、另一个设备、旧登录/注销签名或 UI confirmation 均不满足近期认证。Complete 在最终事务复查 ACTIVE account、Session、credential、revision 和 operation 绑定。
+app.close proof 必须同时通过 UC033 当前密码验证和有效 Session 同一登记设备的新 challenge 签名；普通 JWS/Session 时间/另一设备/旧签名/UI 不满足。Complete 最终复核 passwordRevision/accountRevision、凭据下界和 operation/target/期限，不能旧无密码接口签发同用途 proof。
 
 <!-- 权威位置: use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-026 -->
 ### BR-OAU-026：Proof 最小权力与固定时限
 
-proof 仅面向 iwut-app-center、仅用于 app.close，绑定一个 sub、applicationId 和 jti；auth_time 是新签名成功时间。proof 固定 5 分钟寿命、30 秒偏差，不刷新、不改变 Application、不授予管理员身份，App 必须另行完成业务授权。
+proof 只给 iwut-app-center/app.close，绑定 sub/applicationId/jti；auth_time 为本次密码和新签名验证成功的提交时间，不取 Session/JWS 时间。5 分钟/30 秒偏差、不刷新、不授予业务权；App 另校验管理员/Developer。此前签发的离线 proof 残余窗口按 UC033/BR-PWD-006，不承诺改密追溯撤销已签 JWS。
 
 <!-- 权威位置: use-cases/UC-AUTH-026-apply-application-closure.md#br-oau-027 -->
 ### BR-OAU-027：Proof 幂等与单次业务消费
@@ -195,6 +199,25 @@ proof 仅面向 iwut-app-center、仅用于 app.close，绑定一个 sub、appli
 
 Apply 与全部 OAuth 最终消费共享事务可见的协调边界；proof Complete 与账号/Session/credential 变更共享认证协调边界。依赖、签名或存储结果未知时失败关闭，不返回未持久化 receipt/proof。审计保存稳定 ID 与时间，不保存 challenge、signature、proof、token、secret 或用户资料。
 
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-AUTH-033`
+
+<!-- 权威位置: use-cases/UC-AUTH-033-manage-password-and-recovery.md#br-pwd-006 -->
+### BR-PWD-006：统一代际与不可复活的设备下界
+
+继续使用 [UC022 的 accountRevision](../use-cases/UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002)作为认证材料统一代际，不新增另一份 authenticationEpoch。密码修改/重置也原子推进它，accountStatus 不变；禁用/恢复仍只按 UC022 改状态/版本。
+
+新增 principal.minimumCredentialRevision 正 int64，初始 1；密码变更将它提升到新的 accountRevision，永不下降。credential.credentialRevision 为登记时的 accountRevision；有效条件包含 `minimumCredentialRevision <= credentialRevision <= currentAccountRevision` 和原有未撤销/owner/协议条件。禁用/恢复不提升该下界，因此未被撤销且未退休的设备仍能恢复后新登录；密码重置则永久退休旧代设备。正常改密仅在该事务中推进原本有效的当前凭据，不允许一般登录/重试给低于下界的旧公钥补版本复活。
+
+Session、登录/绑定/重置挑战、OAuth interaction/code/access/family/refresh、USER 身份签发和敏感动作都在最终边界检查 accountRevision；旧记录不可回填到新代。密码验证还比较 passwordRevision；工作因子升级不改变这些代际。版本缺失/非法/溢出失败关闭，不在请求中默认为 1。
+
+改密事务的失效成本不随历史凭据/Session/token 数量增长，不无界 UpdateMany；退休由下界/代际立即决定，物理清理另做有界任务。保留公钥指纹永久归属。UC009 对本人已退休目标可按已失效事实幂等处理；列表/LRU/UC012 复用均须识别退休，不能只检查 revokedAt。
+
+全部旧 OAuth code/access/refresh family 在 Auth 后续在线检查中失败，grant 历史同意/撤权 epoch 与 pairwise 映射保留，新授权按当前规则复用同意。Auth audience USER JWS 原有 account_revision 在线检查也拒绝旧版本；App audience、委托、app.close 及 OIDC 的已签短期离线证据与第三方自身 Cookie 仍可能存续到原期限，不能声称密码更新取消所有在途/离线业务。
+
 ## 平台共享契约（按 spec 显式抽取）
 
 > 这些是 `docs/` 根下的跨系统共享设计输入，**不进入工程基线**；只有本 spec 显式选择的章节才被抽取。
@@ -204,7 +227,7 @@ Apply 与全部 OAuth 最终消费共享事务可见的协调边界；proof Comp
 
 #### 目的与边界
 
-本契约定义用户在关闭一个 Application 前，如何用当前 Session 所属的同一登记设备完成一次新的 challenge/signature，并由 Auth Center 签发只能交给 App Center、只能用于该 Application 关闭的短期 JWS。
+本次修订定义当前平台密码＋同 Session 设备新签名共同授权 Auth 签发 app.close proof；旧设备-only 基线曾 ACCEPTED/交付，2026-10-13 用户接受新门禁，已实施并通过最终真实回归。既有签名 Frame/JWS 格式保留，Complete 增加密码字段并在 Auth 最终检查版本/下界，不允许遗漏密码回退。App 只消费用途受限 proof，不收平台密码。
 
 普通 USER JWS 的 `iat` 表示可信身份何时签发，不表示用户刚刚重新证明设备私钥控制权。前端确认框、Session 最近使用时间、密码输入字符串和已有 OAuth token 也不能代替本文证明。
 
@@ -229,6 +252,7 @@ message CompleteApplicationCloseReauthRequest {
   string operation_id = 1;
   string application_id = 2;
   bytes signature_der = 3;
+  string current_password = 4; // 已接受修订：必需；仅 TLS 请求秘密，非签名/JWS字段
 }
 
 message CompleteApplicationCloseReauthResponse {
@@ -270,7 +294,7 @@ Frame(
 
 `Frame(part...) = concat(U32BE(len(part)), part)`。UUIDBytes 是 RFC 4122 网络字节序的 16 字节值。签名算法、低 S 规范化、公钥编码和 DER 严格校验沿用 [App 设备认证与 Session v1](../../platform/contracts/auth-device-session-v1.md)，但 domain/action 与其他设备证明完全隔离。
 
-Complete 必须携带 Begin 时的同一 Session。Auth 在最终事务中重新确认 Session、账号、凭据、版本、operation 绑定和未过期，再验证 signature。Session、credential、authId 或 applicationId 任一漂移都失败；不能把另一个有效设备或同账号另一条 Session 替换进已有 operation。
+Complete 同一 Session＋当前密码＋设备新签名；按 UC033 先有界校验密码，最终事务比较原 passwordRevision/accountRevision 和凭据下界/operation/期限。任一漂移拒绝，不能另一设备/Session替代，不持久化密码。请求字段号与生成代码须同步交付；完整新门禁验收独立记录，不改变既有 Frame/JWS 编码或用旧设备-only 证据冒充双证明验收。
 
 #### Proof JWS
 
@@ -492,7 +516,7 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
-UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contracts/auth-email-account-v3.md) 的精确载体；旧可选 Session REGISTER/BIND 已退役，其它接口的必需载体不变。
 
 ### `platform/contracts/trusted-service-identity-v1.md`：内部服务身份 JWS v1 契约（trusted-service-identity-v1）
 
@@ -551,6 +575,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-026`（use-cases/UC-AUTH-026-apply-application-closure.md）：变更记录
+- `UC-AUTH-033`（use-cases/UC-AUTH-033-manage-password-and-recovery.md）：目标与范围、参与者与依赖、输入与输出、主流程、验收与错误边界、交付依赖与变更记录
 - `platform/contracts/application-close-reauth-proof-v1.md`（docs 根级共享文档）：权威用例
 - `platform/contracts/application-closure-v1.md`（docs 根级共享文档）：先决条件与生效点、投递、查询与收敛、权威用例
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
@@ -560,8 +585,9 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-026-apply-application-closure.md` | 167 | `0e5af4dcd172` |
-| `platform/contracts/application-close-reauth-proof-v1.md` | 152 | `1e16aa4fe484` |
+| `use-cases/UC-AUTH-026-apply-application-closure.md` | 171 | `6b728c3da094` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `platform/contracts/application-close-reauth-proof-v1.md` | 153 | `4fa7c9ec5eb5` |
 | `platform/contracts/application-closure-v1.md` | 135 | `05e04ba6d669` |
-| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
+| `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

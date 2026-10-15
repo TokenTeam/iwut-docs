@@ -2,7 +2,7 @@
 
 状态：`ACCEPTED`
 
-本文保留字段模型说明与示例。规则正文已归入 [UC-AUTH-005](../use-cases/UC-AUTH-005-edit-own-user-profile.md) 的 `BR-UPF-*`，本文不构成第二权威。UC-AUTH-005 的编辑和容量规则已接受，生产字段目录及实现依赖继续跟踪。
+本文保留字段模型说明与历史示例。规则正文已归入 [UC-AUTH-005](../use-cases/UC-AUTH-005-edit-own-user-profile.md) 的 `BR-UPF-*`，本文不构成第二权威。UC-AUTH-005 的编辑、容量和首批生产字段规则已接受，实际实现依赖继续跟踪。
 
 ## 已确认的资料定位
 
@@ -36,11 +36,11 @@ key 的语法、长度、唯一性及点分名称语义见 [BR-UPF-002](../use-c
 
 ## valueType 与 constraints
 
-首版类型与精确校验规则统一见 [BR-UPF-003](../use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-003)。它们支持配置新增字段；新的基础类型或校验能力仍需要实现支持。
+类型与精确校验规则统一见 [BR-UPF-003](../use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-003)，首批实际目录见 [BR-UPF-017](../use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-017)，锚定年级见 [BR-UPF-018](../use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-018)。新的基础类型或校验能力仍需要实现支持。
 
 ## 示例
 
-以下用于说明结构，不意味着已经接受这些字段为实际收集目录。说明中的单一就读记录是示例选择，多学籍需求另行设计。
+以下是 2026-09-22 的历史结构示例，不是 BR-UPF-017 已接受的实际收集目录，也不得进入生产配置。
 
 ```json
 {
@@ -87,8 +87,8 @@ key 的语法、长度、唯一性及点分名称语义见 [BR-UPF-002](../use-c
 | 用户读取表单定义和自己的资料 | [资料编辑配套查询](../query-contracts/user-profile-editing.md)。 |
 | 与应用读取授权的边界 | [BR-UPF-001](../use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-001)、[BR-SCP-004](../use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)。 |
 
-字段定义不承担某位用户的 value、来源、会话、权限或教务接口映射。多语言文案、表单控件和布局仍可在实际展示需求出现后设计。
+字段定义不承担某位用户的 value、会话、权限或教务接口映射。普通生产字段均为用户确认；ACADEMIC_GRADE 的服务端学年锚点属于 BR-UPF-018 的封闭值元数据，不建立通用 verified/source 权限系统。多语言文案、表单控件和布局仍可在实际展示需求出现后设计。
 
 ## 后续方向
 
-确定第一批具有实际用途的字段，交付已接受的 UC-AUTH-005；再以独立用例扩展字段目录在线管理和第三方应用读取。
+交付 BR-UPF-017/018 的真实目录、Profile API 类型、[UC029](../use-cases/UC-AUTH-029-manage-academic-year-rollover.md) 权威学年时间表与客户端；字段目录在线管理继续后移。第三方读取由已接受的 [UC-AUTH-028](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md) 负责；[UC-AUTH-030](../use-cases/UC-AUTH-030-manage-application-user-storage.md) 的 ApplicationUserStorage 是独立 DRAFT，不属于资料字段目录。

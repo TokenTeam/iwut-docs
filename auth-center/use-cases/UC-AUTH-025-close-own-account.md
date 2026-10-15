@@ -4,13 +4,15 @@
 
 ## 目标与范围
 
+2026-10-13 用户明确接受本次密码/防旁路修订并授权实施；下文旧基线仅为历史证据。先生成 brief，再实施与验证。UC032 仍 DRAFT，不开放旧 Session-only 跨设备撤销。
+
 用户明确确认后不可恢复地终止自己的平台账号，并通过可重试任务清理 Auth 的个人资料和认证数据。终止作用于已证明控制权的一个 authId，不包括同一 associationId 下的其他账号，也不宣称能够删除第三方已取得的数据。
 
 首版不设注销冷静期或恢复窗口。分开表达“账号已终止”和“活动存储清理完成”；备份、必要墓碑及历史审计的保留范围单独披露。本文的保留时间是已接受的产品/运维方案，不作法律合规结论。
 
 ## 认证与资格
 
-使用当前仍有效的已登记设备凭据，完成专用于注销的全新挑战签名；不能只凭已有 Session、学校账号声明、邮箱字符串或普通 LOGIN 证明注销。支持 ACTIVE 和 DISABLED USER，后者只能经此专用证明走注销流程，不签发普通 Session、不解除禁用。CLOSED、SYSTEM、未知/撤销凭据不能取得注销授权。
+2026-10-12 当前密码门禁是实质修订，本 UC 已 ACCEPTED；旧设备证明/退出协调/清理基线保留，新门禁已实施并通过最终真实回归。按 UC033/BR-PWD-003 使用当前密码＋仍有效且未低于凭据下界的登记密钥新签名；单有 Session/邮箱/学校声明/普通 LOGIN 不能注销。ACTIVE/DISABLED 本人均可用此专用途径，禁用者只在设备已证明 owner 范围验密码，不签普通 Session/解除禁用；CLOSED/SYSTEM/撤销或退休钥拒绝。
 
 普通用户无需先绑定邮箱，无生物识别要求。ACTIVE 用户丢失全部设备私钥但有可用邮箱时，可先经 UC012 恢复本机凭据；DISABLED 用户若同时没有有效私钥，需另行受理控制权核验，不能把普通邮箱登录开放为解禁入口。该人工受理流程仍为产品上线依赖。
 
@@ -25,7 +27,7 @@ ACTIVE 且 APPROVED 的 Developer 须先完成 UC024 退出。DISABLED 账号不
 | 方法 | HTTP POST 路径 | 输入及输出 |
 | --- | --- | --- |
 | BeginAccountClosure | /v1/account-closures:begin | credentialLocator、requestId → operationId、challenge、signingPayload、expiresAt |
-| PrepareAccountClosure | /v1/account-closures:prepare | operationId、signature → preview、confirmationToken、receiptToken |
+| PrepareAccountClosure | /v1/account-closures:prepare | operationId、signature、currentPassword → preview、confirmationToken、receiptToken；current_password 为字段 3、非空必需、仅 TLS 请求秘密；旧省略字段请求拒绝 |
 | ConfirmAccountClosure | /v1/account-closures:confirm | operationId、confirmation=CLOSE_ACCOUNT、policyVersion；专用 confirmationToken → 状态 |
 | CancelAccountClosure | /v1/account-closures:cancel | operationId；专用 confirmationToken → 状态 |
 | GetAccountClosure | /v1/account-closures:get | operationId；专用 receiptToken → 最小状态 |
@@ -56,7 +58,7 @@ preview 向已证明身份的本人返回 authId、developerHandle（如有）�
 
 终止递增 accountRevision，使旧 Session、Auth audience JWS、code/token/family 和待完成操作失效，规则引用 UC022；每条实际消费仍检查 CLOSED，不因删除相应记录而放宽。Session、凭据和邮箱不再能授予普通操作，即使物理清理尚未执行。
 
-删除不影响关联组其他账号。重新注册只能产生新 authId、新资料和新授权，不继承旧数据、pairwise sub 或 handle。学校关联不是自然人封禁证明；本用例不承诺阻止同一人创建另一账号。
+删除不影响其他 authId。重新邮箱注册只能产生新 authId、新资料和新授权，不继承旧数据、pairwise sub、handle 或应用权益。学号关联已按 UC006 退役；本用例不承诺阻止同一人创建另一账号或在应用再次符合赠送条件，次数处理由应用负责。
 
 <a id="br-acc-010"></a>
 ### BR-ACC-010：用途绑定的近期设备证明
@@ -72,7 +74,7 @@ Frame(UTF8("iwut-account-closure-proof-v1"), UTF8("PREPARE_ACCOUNT_CLOSURE"),
 
 locatorKind/value 沿用设备登录的精确类型和编码；serviceId/applicationId 来自固定部署上下文。客户端签名前验证用途、自己选择的凭据、期限及政策版本；不接收任意服务端字节直接盲签。authId/账号版本由不可变服务端操作绑定，不泄露给未认证 Begin。禁止复用 LOGIN/REGISTER 签名或授权任意新公钥。
 
-签名有效才可创建注销准备和展示本人信息；单有 Session 不能调用本方法替代证明。每操作最多 5 次失败验证。requestId 在 24 小时内只对同规范定位和提案去重，不延长期限；未知凭据 Begin 与 Complete 沿用认证入口的反枚举响应及有界容量。新的证明请求不能仅因 locator 相同就取消别人的准备，必须先验证真实签名。Prepare 的秘密结果只返回一次；新证明在原操作仍未提交时可原子取消原注销准备，等待 App 确认解除后重新准备。原操作已提交则禁止替换或取消；UC024 的未决退出仍须先单独完成或取消。
+新签名＋UC033 当前密码验证有效才创建准备/展示本人信息；最终事务复核 passwordRevision/accountRevision/凭据下界，密码不进签名 Frame 或存储正文。5 次失败包括密码/签名并共用昂贵验证额度，不能旧无密码 Prepare 绕过。原 requestId 幂等/新证明取消旧未提交准备/确认令牌一次返回规则保留；原提交后不得替换取消，UC024 未决退出先完成/取消。Prepare.current_password 字段 3 必需；签名/密码/凭据失效统一 ACCOUNT_CLOSURE_PROOF_INVALID，语法 400、额度 429、依赖 503；缺密码不能降级；当前交付与验证证据见 implements。
 
 confirmationToken 一次消费，绑定 operation、本人 authId、上述版本、policyVersion 及 App receipt；只授权 CLOSE_ACCOUNT/提交前取消。重复 Confirm 若摘要匹配且已提交，只返回原最小状态，不再写数据。提交后再 Cancel 必须拒绝，不能重跑 bootstrap 或复用 receipt 恢复。
 
@@ -97,7 +99,8 @@ confirmationToken 一次消费，绑定 operation、本人 authId、上述版本
 | 设备凭据 | 删除公钥及使用元数据；永久保留规范公钥指纹和 CLOSED authId 的最小占用墓碑，防止旧设备密钥跨账号重用，延续 UC009 不释放密钥归属的约束。新注册必须使用新密钥 |
 | Session、挑战及结果、授权交互、code/access/refresh/family | 删除秘密摘要、操作内容及业务记录；由永久主体墓碑防重建，不为检测重放继续保存已终止账号全部 token 历史 |
 | grant、pairwise 用户映射 | 删除该 authId 的 consent 内容及 `(authId,sectorId)→sub` 映射；不删除 Application 的 sector。旧 sub 不转交新账号，日志/第三方引用不宣称被删除 |
-| 学生关联 | 删除本账号的成员关系及其专属材料；组仍有其他成员时保留组，不暴露或改变其他成员；无成员且无合法未决引用时，在关联事务栅栏下删除 lookup/关联密文和空组。并发注册加成员不得误删共享组 |
+| 校园认证与操作 | 按修订 UC031 清除认证依据/投影、验证地址/MAC/操作及受控审计；新邮箱列表/密码材料须纳入终止清单，不按邮箱跨账号清理，不保留已消费库，备份恢复执行终止门禁 |
+| 已退役学生关联 | 新设计没有组/成员或关联密文。移除关联装配时同步退役清理步骤；当前代码历史清理仍存在，不能以文档修订冒称已移除。旧开发数据独立显式处置，不增加生产迁移 |
 | developerHandle | 永久保留规范 handle、原 authId、claimedAt 和终止占用标记；不转让、不释放、不连同邮箱/资料保留。该最小公开命名空间墓碑明确向本人披露 |
 | Auth 审计 | 只读期内保留最小事件归因，不保留 token/邮箱/资料副本；账号相关普通事件上限为事件发生后 180 天，已超期的随本次任务清理。注销事件保留 180 天；期满按专用保留任务删除，不由业务更新覆盖 |
 | 协调决定、清理进度及查询令牌 | App 确认终局前保留必要决定；查询摘要最多 30 天，详细清理任务在全部步骤完成且终局回执后清理，永久终止事实由最小墓碑承担 |
@@ -113,7 +116,7 @@ confirmationToken 一次消费，绑定 operation、本人 authId、上述版本
 
 终止事务创建持久任务，按 collection/步骤以有界批次（初始 500 条）执行幂等清理；步骤完成事实和重试可跨进程重启恢复。大批历史数据不放入一个长 Mongo 事务。逻辑终止与 cleanup 状态分离，任务失败不恢复账号、不释放未确认安全的跨服务屏障。
 
-对邮箱归属、设备占用墓碑和学生共享组使用专门事务与唯一约束，不做无归属条件的批量删除。清理始终使用原 authId，不能按已释放且可能被新账号使用的邮箱或学号散列删除数据。
+对邮箱归属和设备占用墓碑使用专门事务与唯一约束，不做无归属条件的批量删除。清理始终使用原 authId，不能按已释放且可能被新账号使用的邮箱或学号散列删除数据。
 
 保留独立于旧业务备份的最小终止清单（authId、最终 accountRevision、terminatedAt、operationId），与墓碑同等保护并持续备份。Auth 终止事务写持久待投递记录，以 operationId 幂等写入不会随业务备份回滚的清单；收到持久化确认前只展示 TERMINATION_PENDING，本地 CLOSED 不可取消或回滚，投递故障必须告警并重试。恢复历史备份后先隔离服务，重放此清单、重新执行清理并核验，再接流量，防止旧备份复活账号。清单不可用、可能不完整或未能核验最新终止事实时保持停服，不直接以旧备份接流量。清单同步和恢复演练是上线门禁；未完成前不能承诺已终止账号不会因灾备回滚复活。
 
@@ -146,7 +149,7 @@ Begin 不披露账号状态；Prepare 对未知目标、签名无效、凭据撤
 
 入口默认关闭 `AUTH_ACCOUNT_CLOSURE_ENABLED`，依赖用户认证基础、App provider 和清理工作器配置；特殊 DISABLED 注销不绕过功能门禁。 此开关控制 Begin/Prepare/Confirm；已有操作的 Cancel/Get 在配置完整的注销 runtime 中继续按专用令牌提供。配置独立终止目录即构建恢复与清理 runtime，关闭公网开关不能跳过启动重放或停止已提交任务。存在注销数据却缺失必要运行依赖时失败关闭，不静默忽略任务。Begin 复用设备认证的有界 IP/locator 容量，证明后采用有界账号桶，初始写每分钟 10、收据读取每分钟 30；读写令牌摘要、签名和任何秘密不进入日志。
 
-验收至少覆盖：ACTIVE/DISABLED 设备证明；无 Session、无邮箱普通用户；未知/撤销密钥与旧 LOGIN 签名；预览后权限/Developer/账号/凭据变化；SUSPENDED 无应用可终止而有应用阻止；最后管理员与并发交接；旧 JWS、token、邮箱 challenge/result 不复活；清理中断/重启/重复执行；邮箱释放后新注册不被旧任务删除；共享关联组并发注册；永久 handle/密钥占用；App 回执丢失；收据只读隔离；备份恢复重放终止清单。使用真实 Mongo 与双服务集成，不能只验证账号字段变成 CLOSED。
+验收至少覆盖：ACTIVE/DISABLED 设备证明；无当前 Session 的普通用户；未知/撤销密钥与旧 LOGIN 签名；预览后权限/Developer/账号/凭据变化；SUSPENDED 无应用可终止而有应用阻止；最后管理员与并发交接；旧 JWS、token、邮箱 challenge/result 不复活；清理中断/重启/重复执行；邮箱释放后新注册不被旧任务删除；退役关联清理步骤与邮箱注册回归；永久 handle/密钥占用；App 回执丢失；收据只读隔离；备份恢复重放终止清单。使用真实 Mongo 与双服务集成，不能只验证账号字段变成 CLOSED。
 
 ## 实现依赖与联动
 
@@ -155,6 +158,8 @@ Begin 不披露账号状态；Prepare 对未知目标、签名无效、凭据撤
 实施时同步 UC002 的 CLOSED 主体查询及 App 历史审核处理、UC006–019/020–024 的 CLOSED 拒绝、UC013 handle 终止占用、UC015 pairwise 映射删除例外、所有审计保留规则、客户端引导、共享注销签名字节/公开向量及可执行 API。共享归属契约另与 App agent 对齐；不添加旧数据库迁移。本轮生成实施 brief 并交付后端；公网启用仍受恢复受理、数据清单和部署验收门禁约束。
 
 ## 变更记录
+
+- 2026-10-13 UC032 清理补充：名称随凭据删除，永久保留仅最小指纹占用；已撤销/退休合法结构同样可清理。新增管理操作按 authId 分批删除，相关 actorAuthId 审计按既有 180 天/CLOSED 条件受控到期；规则唯一见 UC032 BR-LGN-030。
 
 - 2026-10-05：提出本人不可恢复注销；独立设备证明、禁用账号专用途径、应用归属门禁、CLOSED 与异步清理、最小永久保留及备份恢复防复活。
 

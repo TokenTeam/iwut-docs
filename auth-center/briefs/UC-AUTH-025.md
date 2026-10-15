@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-025` 本人注销账号 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-ACC-009`–`BR-ACC-014`（6 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-LGN-030`，`BR-PWD-003`（来自 `UC-AUTH-032`、`UC-AUTH-033`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/account-owner-exit-v1.md`、`platform/contracts/auth-device-session-v1.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -37,13 +37,15 @@
 
 ### 目标与范围
 
+2026-10-13 用户明确接受本次密码/防旁路修订并授权实施；下文旧基线仅为历史证据。先生成 brief，再实施与验证。UC032 仍 DRAFT，不开放旧 Session-only 跨设备撤销。
+
 用户明确确认后不可恢复地终止自己的平台账号，并通过可重试任务清理 Auth 的个人资料和认证数据。终止作用于已证明控制权的一个 authId，不包括同一 associationId 下的其他账号，也不宣称能够删除第三方已取得的数据。
 
 首版不设注销冷静期或恢复窗口。分开表达“账号已终止”和“活动存储清理完成”；备份、必要墓碑及历史审计的保留范围单独披露。本文的保留时间是已接受的产品/运维方案，不作法律合规结论。
 
 ### 认证与资格
 
-使用当前仍有效的已登记设备凭据，完成专用于注销的全新挑战签名；不能只凭已有 Session、学校账号声明、邮箱字符串或普通 LOGIN 证明注销。支持 ACTIVE 和 DISABLED USER，后者只能经此专用证明走注销流程，不签发普通 Session、不解除禁用。CLOSED、SYSTEM、未知/撤销凭据不能取得注销授权。
+2026-10-12 当前密码门禁是实质修订，本 UC 已 ACCEPTED；旧设备证明/退出协调/清理基线保留，新门禁已实施并通过最终真实回归。按 UC033/BR-PWD-003 使用当前密码＋仍有效且未低于凭据下界的登记密钥新签名；单有 Session/邮箱/学校声明/普通 LOGIN 不能注销。ACTIVE/DISABLED 本人均可用此专用途径，禁用者只在设备已证明 owner 范围验密码，不签普通 Session/解除禁用；CLOSED/SYSTEM/撤销或退休钥拒绝。
 
 普通用户无需先绑定邮箱，无生物识别要求。ACTIVE 用户丢失全部设备私钥但有可用邮箱时，可先经 UC012 恢复本机凭据；DISABLED 用户若同时没有有效私钥，需另行受理控制权核验，不能把普通邮箱登录开放为解禁入口。该人工受理流程仍为产品上线依赖。
 
@@ -58,7 +60,7 @@ ACTIVE 且 APPROVED 的 Developer 须先完成 UC024 退出。DISABLED 账号不
 | 方法 | HTTP POST 路径 | 输入及输出 |
 | --- | --- | --- |
 | BeginAccountClosure | /v1/account-closures:begin | credentialLocator、requestId → operationId、challenge、signingPayload、expiresAt |
-| PrepareAccountClosure | /v1/account-closures:prepare | operationId、signature → preview、confirmationToken、receiptToken |
+| PrepareAccountClosure | /v1/account-closures:prepare | operationId、signature、currentPassword → preview、confirmationToken、receiptToken；current_password 为字段 3、非空必需、仅 TLS 请求秘密；旧省略字段请求拒绝 |
 | ConfirmAccountClosure | /v1/account-closures:confirm | operationId、confirmation=CLOSE_ACCOUNT、policyVersion；专用 confirmationToken → 状态 |
 | CancelAccountClosure | /v1/account-closures:cancel | operationId；专用 confirmationToken → 状态 |
 | GetAccountClosure | /v1/account-closures:get | operationId；专用 receiptToken → 最小状态 |
@@ -94,7 +96,7 @@ Begin 不披露账号状态；Prepare 对未知目标、签名无效、凭据撤
 
 入口默认关闭 `AUTH_ACCOUNT_CLOSURE_ENABLED`，依赖用户认证基础、App provider 和清理工作器配置；特殊 DISABLED 注销不绕过功能门禁。 此开关控制 Begin/Prepare/Confirm；已有操作的 Cancel/Get 在配置完整的注销 runtime 中继续按专用令牌提供。配置独立终止目录即构建恢复与清理 runtime，关闭公网开关不能跳过启动重放或停止已提交任务。存在注销数据却缺失必要运行依赖时失败关闭，不静默忽略任务。Begin 复用设备认证的有界 IP/locator 容量，证明后采用有界账号桶，初始写每分钟 10、收据读取每分钟 30；读写令牌摘要、签名和任何秘密不进入日志。
 
-验收至少覆盖：ACTIVE/DISABLED 设备证明；无 Session、无邮箱普通用户；未知/撤销密钥与旧 LOGIN 签名；预览后权限/Developer/账号/凭据变化；SUSPENDED 无应用可终止而有应用阻止；最后管理员与并发交接；旧 JWS、token、邮箱 challenge/result 不复活；清理中断/重启/重复执行；邮箱释放后新注册不被旧任务删除；共享关联组并发注册；永久 handle/密钥占用；App 回执丢失；收据只读隔离；备份恢复重放终止清单。使用真实 Mongo 与双服务集成，不能只验证账号字段变成 CLOSED。
+验收至少覆盖：ACTIVE/DISABLED 设备证明；无当前 Session 的普通用户；未知/撤销密钥与旧 LOGIN 签名；预览后权限/Developer/账号/凭据变化；SUSPENDED 无应用可终止而有应用阻止；最后管理员与并发交接；旧 JWS、token、邮箱 challenge/result 不复活；清理中断/重启/重复执行；邮箱释放后新注册不被旧任务删除；退役关联清理步骤与邮箱注册回归；永久 handle/密钥占用；App 回执丢失；收据只读隔离；备份恢复重放终止清单。使用真实 Mongo 与双服务集成，不能只验证账号字段变成 CLOSED。
 
 ### 实现依赖与联动
 
@@ -111,7 +113,7 @@ Begin 不披露账号状态；Prepare 对未知目标、签名无效、凭据撤
 
 终止递增 accountRevision，使旧 Session、Auth audience JWS、code/token/family 和待完成操作失效，规则引用 UC022；每条实际消费仍检查 CLOSED，不因删除相应记录而放宽。Session、凭据和邮箱不再能授予普通操作，即使物理清理尚未执行。
 
-删除不影响关联组其他账号。重新注册只能产生新 authId、新资料和新授权，不继承旧数据、pairwise sub 或 handle。学校关联不是自然人封禁证明；本用例不承诺阻止同一人创建另一账号。
+删除不影响其他 authId。重新邮箱注册只能产生新 authId、新资料和新授权，不继承旧数据、pairwise sub、handle 或应用权益。学号关联已按 UC006 退役；本用例不承诺阻止同一人创建另一账号或在应用再次符合赠送条件，次数处理由应用负责。
 
 <!-- 权威位置: use-cases/UC-AUTH-025-close-own-account.md#br-acc-010 -->
 ### BR-ACC-010：用途绑定的近期设备证明
@@ -127,7 +129,7 @@ Frame(UTF8("iwut-account-closure-proof-v1"), UTF8("PREPARE_ACCOUNT_CLOSURE"),
 
 locatorKind/value 沿用设备登录的精确类型和编码；serviceId/applicationId 来自固定部署上下文。客户端签名前验证用途、自己选择的凭据、期限及政策版本；不接收任意服务端字节直接盲签。authId/账号版本由不可变服务端操作绑定，不泄露给未认证 Begin。禁止复用 LOGIN/REGISTER 签名或授权任意新公钥。
 
-签名有效才可创建注销准备和展示本人信息；单有 Session 不能调用本方法替代证明。每操作最多 5 次失败验证。requestId 在 24 小时内只对同规范定位和提案去重，不延长期限；未知凭据 Begin 与 Complete 沿用认证入口的反枚举响应及有界容量。新的证明请求不能仅因 locator 相同就取消别人的准备，必须先验证真实签名。Prepare 的秘密结果只返回一次；新证明在原操作仍未提交时可原子取消原注销准备，等待 App 确认解除后重新准备。原操作已提交则禁止替换或取消；UC024 的未决退出仍须先单独完成或取消。
+新签名＋UC033 当前密码验证有效才创建准备/展示本人信息；最终事务复核 passwordRevision/accountRevision/凭据下界，密码不进签名 Frame 或存储正文。5 次失败包括密码/签名并共用昂贵验证额度，不能旧无密码 Prepare 绕过。原 requestId 幂等/新证明取消旧未提交准备/确认令牌一次返回规则保留；原提交后不得替换取消，UC024 未决退出先完成/取消。Prepare.current_password 字段 3 必需；签名/密码/凭据失效统一 ACCOUNT_CLOSURE_PROOF_INVALID，语法 400、额度 429、依赖 503；缺密码不能降级；当前交付与验证证据见 implements。
 
 confirmationToken 一次消费，绑定 operation、本人 authId、上述版本、policyVersion 及 App receipt；只授权 CLOSE_ACCOUNT/提交前取消。重复 Confirm 若摘要匹配且已提交，只返回原最小状态，不再写数据。提交后再 Cancel 必须拒绝，不能重跑 bootstrap 或复用 receipt 恢复。
 
@@ -152,7 +154,8 @@ confirmationToken 一次消费，绑定 operation、本人 authId、上述版本
 | 设备凭据 | 删除公钥及使用元数据；永久保留规范公钥指纹和 CLOSED authId 的最小占用墓碑，防止旧设备密钥跨账号重用，延续 UC009 不释放密钥归属的约束。新注册必须使用新密钥 |
 | Session、挑战及结果、授权交互、code/access/refresh/family | 删除秘密摘要、操作内容及业务记录；由永久主体墓碑防重建，不为检测重放继续保存已终止账号全部 token 历史 |
 | grant、pairwise 用户映射 | 删除该 authId 的 consent 内容及 `(authId,sectorId)→sub` 映射；不删除 Application 的 sector。旧 sub 不转交新账号，日志/第三方引用不宣称被删除 |
-| 学生关联 | 删除本账号的成员关系及其专属材料；组仍有其他成员时保留组，不暴露或改变其他成员；无成员且无合法未决引用时，在关联事务栅栏下删除 lookup/关联密文和空组。并发注册加成员不得误删共享组 |
+| 校园认证与操作 | 按修订 UC031 清除认证依据/投影、验证地址/MAC/操作及受控审计；新邮箱列表/密码材料须纳入终止清单，不按邮箱跨账号清理，不保留已消费库，备份恢复执行终止门禁 |
+| 已退役学生关联 | 新设计没有组/成员或关联密文。移除关联装配时同步退役清理步骤；当前代码历史清理仍存在，不能以文档修订冒称已移除。旧开发数据独立显式处置，不增加生产迁移 |
 | developerHandle | 永久保留规范 handle、原 authId、claimedAt 和终止占用标记；不转让、不释放、不连同邮箱/资料保留。该最小公开命名空间墓碑明确向本人披露 |
 | Auth 审计 | 只读期内保留最小事件归因，不保留 token/邮箱/资料副本；账号相关普通事件上限为事件发生后 180 天，已超期的随本次任务清理。注销事件保留 180 天；期满按专用保留任务删除，不由业务更新覆盖 |
 | 协调决定、清理进度及查询令牌 | App 确认终局前保留必要决定；查询摘要最多 30 天，详细清理任务在全部步骤完成且终局回执后清理，永久终止事实由最小墓碑承担 |
@@ -168,7 +171,7 @@ confirmationToken 一次消费，绑定 operation、本人 authId、上述版本
 
 终止事务创建持久任务，按 collection/步骤以有界批次（初始 500 条）执行幂等清理；步骤完成事实和重试可跨进程重启恢复。大批历史数据不放入一个长 Mongo 事务。逻辑终止与 cleanup 状态分离，任务失败不恢复账号、不释放未确认安全的跨服务屏障。
 
-对邮箱归属、设备占用墓碑和学生共享组使用专门事务与唯一约束，不做无归属条件的批量删除。清理始终使用原 authId，不能按已释放且可能被新账号使用的邮箱或学号散列删除数据。
+对邮箱归属和设备占用墓碑使用专门事务与唯一约束，不做无归属条件的批量删除。清理始终使用原 authId，不能按已释放且可能被新账号使用的邮箱或学号散列删除数据。
 
 保留独立于旧业务备份的最小终止清单（authId、最终 accountRevision、terminatedAt、operationId），与墓碑同等保护并持续备份。Auth 终止事务写持久待投递记录，以 operationId 幂等写入不会随业务备份回滚的清单；收到持久化确认前只展示 TERMINATION_PENDING，本地 CLOSED 不可取消或回滚，投递故障必须告警并重试。恢复历史备份后先隔离服务，重放此清单、重新执行清理并核验，再接流量，防止旧备份复活账号。清单不可用、可能不完整或未能核验最新终止事实时保持停服，不直接以旧备份接流量。清单同步和恢复演练是上线门禁；未完成前不能承诺已终止账号不会因灾备回滚复活。
 
@@ -186,6 +189,48 @@ confirmationToken 一次消费，绑定 operation、本人 authId、上述版本
 TERMINATION_PENDING 已终止本地账号、正在确认独立终止清单，仍不可恢复；TERMINATED 表示终止清单亦已确认，账号不可再登录；CLEANUP_COMPLETE 只在 Auth 活动数据清理、App 个人状态清理和必须的其他平台服务回执都完成后返回，同时列明永久保留项及备份到期边界。收据丢失后不能通过原邮箱、旧 Session 或匿名 authId 查询终止详情；必要的用户支持由独立核验流程处理。
 
 已有 App audience/委托短期 JWS 仍存在 UC022 定义的离线有效期窗口，第三方自建登录态或已导出的数据不能被本用例删除。客户端应在确认终止后删除本地 Session 和设备私钥；失败或结果不确定时先保留收据查询，不能通过本地删除声称服务端已经注销。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-AUTH-032`
+
+<!-- 权威位置: use-cases/UC-AUTH-032-manage-own-device-credentials.md#br-lgn-030 -->
+### BR-LGN-030：有界请求、审计与生命周期清理
+
+四个入口共用有界限流，默认全局 600 次/分钟、每 socket 来源 120 次/分钟、每确认 authId 30 次/分钟，最多 4096 个细分桶；有限正值可配置，桶满失败关闭，不信任 forwarded header。账户额度在身份确认后计入，事务重试不重复扣减，429 携带 Retry-After=60；单进程限流不宣称跨实例/重启持久。
+
+未过期 PENDING 挑战每 authId 最多 5 个、全局最多 10000 个；新集合加入既有 Auth 共享操作容量（总物理保留 1000000，过期每集合每次最多清理 64），不开第二套无界存储，同一次 Begin/Complete 的创建/计数/状态更改原子维护。已完成/到期/耗尽记录不占未完成容量；存储和限流故障不能释放仍有效占用。保留窗口到点后按有界任务清理操作与 challenge；拒绝过期依赖服务端时间，不依赖 TTL 删除是否及时。
+
+真实改名和首次撤销产生不可变审计，包含事件 ID、action、可信 actorAuthId/actorSessionId、调用/目标 credentialId、时间；改名仅记录新 revision，不保存旧/新名称。无变化重试不重复审计，审计失败事务回滚。列表不写业务审计；验签失败仅作脱敏有界安全统计，不写签名、payload 或 challenge。
+
+label 是用户数据，注销清理从保留的凭据占用记录移除；撤销挑战/op 按 authId 纳入 UC025 清理清单，相关审计引用 UC025 的 180 天受控清理和恢复规则。保留最小公钥归属不等于永久保留名称。UC025 已同步集合清单；真实清理/备份恢复必须回归，不新增凭据私钥或硬件数据收集。
+
+请求正文、名称、Session、challenge、signingPayload 和签名不进入普通日志、trace/metrics、URL 或审计正文。返回存储/损坏数据错误而不是伪造空列表或未持久化的成功。
+
+### 来自 `UC-AUTH-033`
+
+<!-- 权威位置: use-cases/UC-AUTH-033-manage-password-and-recovery.md#br-pwd-003 -->
+### BR-PWD-003：危险动作的目标绑定验证
+
+首版密码要求矩阵如下，业务权限/原有设备证明仍由各 UC 校验，不因密码正确被替代：
+
+| 动作 | 密码要求 | 原有额外条件 |
+| --- | --- | --- |
+| UC011 切换唯一登录邮箱 | 当前密码 | 有效 Session、目标已验证、角色版本 |
+| UC032 移除其他凭据 | 当前密码 | 原 Session 所引用设备的新签名、明确单目标 |
+| UC025 注销本人账号 | 当前密码 | 原专用设备证明、确认及应用/管理员退出门禁 |
+| UC026 签发 app.close 近期证明 | 当前密码 | 同 Session/设备新签名；App 独立归属门禁 |
+| 正常改密码 | 旧密码 | 有效 Session、新密码策略 |
+| 忘记密码重置 | 不要求旧密码 | 仅当前登录邮箱独立重置码 |
+| 非登录邮箱添加/解绑、Session 回收、本机凭据退出 | 不新增密码要求 | 原有效 Session/邮件控制权/owner 条件 |
+
+密码由 Auth 在业务提交时核验，验证结果内部绑定 authId、passwordRevision、accountRevision、操作 ID、purpose、精确目标/版本及期限；事务重试重新复核，不能接受客户端 passwordVerified 或通用 5 分钟解锁标志。优先直接携带密码在原业务 Complete 中验证，不额外签发通用高权限 token。
+
+UC025 的 DISABLED 本人专用途径仍可用：在该专用设备操作解析出的本人范围内检查密码，不要求普通有效 Session，也不恢复账号；其它密码操作仍只允许 ACTIVE。遗忘密码且账号禁用时不能绕过账号 gate 自动恢复，受理/治理另按既有边界。
+
+已签发 app.close/USER/委托短期 JWS 的离线残余窗口见 BR-PWD-006；密码规则需同步其签发入口，不能仅改 UI，而旧 Complete 仍无密码成功。其他未列平台管理动作不自动新增/取消原权限规则，后续扩展矩阵需独立审核。
 
 ## 平台共享契约（按 spec 显式抽取）
 
@@ -271,7 +316,7 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
-UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contracts/auth-email-account-v3.md) 的精确载体；旧可选 Session REGISTER/BIND 已退役，其它接口的必需载体不变。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -331,6 +376,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-025`（use-cases/UC-AUTH-025-close-own-account.md）：变更记录
+- `UC-AUTH-032`（use-cases/UC-AUTH-032-manage-own-device-credentials.md）：目标与范围、参与者与前置条件、输入与输出、API 契约、主流程、错误语义、测试与验收、依赖检查与接受门禁、邮箱安全新要求与待确认依赖、变更记录
+- `UC-AUTH-033`（use-cases/UC-AUTH-033-manage-password-and-recovery.md）：目标与范围、参与者与依赖、输入与输出、主流程、验收与错误边界、交付依赖与变更记录
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：目的与范围、传输载体、JOSE Header、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
 
@@ -338,7 +385,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `4a8ab75ce6d1` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
+| `use-cases/UC-AUTH-032-manage-own-device-credentials.md` | 269 | `66997dc9aa54` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
-| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
+| `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

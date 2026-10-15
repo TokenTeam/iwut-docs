@@ -8,7 +8,7 @@
 
 > 已认证且账号可用的普通用户，明确提交要设置和删除的资料字段，在不覆盖其他客户端修改的前提下，一次性更新自己的资料。
 
-本用例承接用户已确认的资料定位、字段定义方向，以及“主体内嵌基础资料”的存储方向。命令细节、容量限制和错误语义已接受；实际字段目录及生产接入仍按交付依赖推进。本文件是本用例与 `BR-UPF-*` 的唯一规则正文；此前设计笔记转为导航和示例。
+本用例承接用户已确认的资料定位、字段定义方向，以及“主体内嵌基础资料”的存储方向。命令细节、容量限制、错误语义和首批生产字段目录均已接受；生产配置、客户端和 Gateway 接入仍按交付依赖推进。本文件是本用例与 `BR-UPF-*` 的唯一规则正文；此前设计笔记转为导航和示例。
 
 本用例不注册用户、不修改登录凭据、不建立学校身份认证，不授予 Developer/Reviewer 权限，也不授权第三方应用读取资料。资料编辑不要求 Developer 资格。
 
@@ -18,6 +18,7 @@
 - 从可信身份提取 authId，读取 Auth 自有的 USER 主体及当前 accountStatus；具体规则见 [BR-UPF-004](#br-upf-004)。
 - 普通 USER 创建流程已建立 accountStatus 和初始 profile。该创建流程仍是独立实现依赖，本用例不隐式 provision、不在资料缺失时猜测初始状态。
 - 使用 set 时，Auth 能提供符合 [BR-UPF-002](#br-upf-002) 的已发布字段定义。
+- 设置当前就读年级时，Auth 能从 [UC029](UC-AUTH-029-manage-academic-year-rollover.md) 的权威时间表按服务端时间唯一确定当前学年；规则见 [BR-UPF-018](#br-upf-018)。
 
 用户先通过[资料编辑配套查询](../query-contracts/user-profile-editing.md)读取自己的资料和字段目录，在客户端编辑、预览并明确提交。本地教务导入只辅助填写，规则见 [BR-UPF-001](#br-upf-001)。
 
@@ -40,12 +41,22 @@ ProfileValue = exactly one of {
   integerValue: int32
   booleanValue: bool
   dateValue: YYYY-MM-DD
+  stringSetValue: []string
+  academicGradeValue: AcademicGradeValue
+}
+
+AcademicGradeValue {
+  stage: UNDERGRADUATE | MASTER | DOCTORAL
+  year: positive int32
+  finalYear: positive int32
+  academicYear: int32
+  confirmedAt: Instant? // response/storage only
 }
 ```
 
 authId 来自可信上下文，不接受请求中的目标用户 ID。客户端不提交 profile revision 的新值、时间戳、账号状态或资格/权限；这些都不是可编辑字段。
 
-set 使用带显式类型的条目列表，便于 transport 保留并拒绝重复 key，也能区分 DATE 与普通 STRING。JSON/Proto 的最终线格式由独立 API 仓库落实，不能使用丢失字段存在性或类型信息的转换。缺少 value、null、同时指定多个值分支均为无效输入；`false`、`0` 有明确的值存在性。
+set 使用带显式类型的条目列表，便于 transport 保留并拒绝重复 key，也能区分 DATE、STRING_SET 与普通 STRING。JSON/Proto 的最终线格式由独立 API 仓库落实，不能使用丢失字段存在性或类型信息的转换。缺少 value、null、同时指定多个值分支均为无效输入；`false`、`0` 有明确的值存在性。STRING_SET 是一个完整集合值，不把重复或顺序当作资料内容；ACADEMIC_GRADE 的 `confirmedAt` 只能由服务端生成，请求携带即拒绝。
 
 示意命令（不是已发布 HTTP 请求契约）：
 
@@ -54,15 +65,15 @@ set 使用带显式类型的条目列表，便于 transport 保留并拒绝重�
   "expectedRevision": 3,
   "set": [
     {
-      "key": "education.school_name",
-      "value": { "stringValue": "示例大学" }
+      "key": "education.campus_areas",
+      "value": { "stringSetValue": ["NANHU", "JIANHU"] }
     }
   ],
-  "remove": ["education.enrollment_year"]
+  "remove": ["contact.qq"]
 }
 ```
 
-示例字段不是生产收集清单。expectedRevision、操作集合和容量边界分别见 [BR-UPF-005](#br-upf-005)、[BR-UPF-007](#br-upf-007)、[BR-UPF-008](#br-upf-008)。
+生产字段清单见 [BR-UPF-017](#br-upf-017)。expectedRevision、操作集合和容量边界分别见 [BR-UPF-005](#br-upf-005)、[BR-UPF-007](#br-upf-007)、[BR-UPF-008](#br-upf-008)。
 
 ## 输出
 
@@ -79,7 +90,7 @@ OwnUserProfileSnapshot {
 }
 ```
 
-profile 是本次操作在其原子确认点得到的完整资料快照，entries 按 key 的 ASCII 字典序排列，不因客户端只提交部分字段而省略其他已有字段。并发请求可以在本次操作完成后继续修改；该返回值不宣称是客户端收到响应瞬间的最新状态。
+profile 是本次操作在其原子确认点得到的完整持久资料快照，entries 按 key 的 ASCII 字典序排列，不因客户端只提交部分字段而省略其他已有字段。STRING_SET 元素按 ASCII 字典序返回。ACADEMIC_GRADE 返回用户最后确认的 stage/year/finalYear、服务端锚定的 academicYear 和 confirmedAt；当前有效年级由 BR-UPF-018 推算，不通过改写快照冒充新的用户确认。并发请求可以在本次操作完成后继续修改；该返回值不宣称是客户端收到响应瞬间的最新状态。
 
 只返回资料，不混入主体权限、凭据、会话或第三方 consent。写入后的返回值由同一次更新返回，或由成功提交的确定性候选快照构造，不再通过无版本约束的第二次读取拼接结果。
 
@@ -89,7 +100,7 @@ profile 是本次操作在其原子确认点得到的完整资料快照，entrie
 2. 校验命令形状、expectedRevision、操作数量、key 语法、类型分支与输入容量；结构不合法不访问资料仓储。
 3. 读取主体和嵌入的 profile，确认存在、类型为 USER、账号 ACTIVE、存储结构完整。
 4. 确认当前 profile.revision 等于 expectedRevision；过期版本立即冲突，不因为目标值碰巧相同而成功。
-5. 对 set 批量取得本次使用的一致字段定义视图，校验每个赋值；remove 按 [BR-UPF-006](#br-upf-006) 处理。
+5. 对 set 批量取得本次使用的一致字段定义视图，校验每个赋值；ACADEMIC_GRADE 还校验请求观察的学年仍是服务端当前学年并生成确认时间；remove 按 [BR-UPF-006](#br-upf-006) 处理。
 6. 在内存中从当前完整快照计算候选资料：保留未涉及的值，执行显式删除和设置，检查最终容量。
 7. 按 [BR-UPF-009](#br-upf-009) 判断是否真实变化；变更分支按 [BR-UPF-010](#br-upf-010) 原子确认当前账号状态与版本，并一次性提交 profile。no-op 分支执行最后一次带相同身份、状态和版本条件的权威读取确认。
 8. 返回 changed 和对应完整资料快照。
@@ -123,12 +134,16 @@ key 在目录中唯一，长度为 1–128 ASCII bytes，符合 `^[a-z][a-z0-9_]
 
 | valueType | 值 | constraints |
 | --- | --- | --- |
-| `STRING` | 有效 UTF-8 文本 | `maxLength` 必填；`minLength` 可选、默认 1；二者为正整数且 min <= max，按 Unicode code point 计数。 |
+| `STRING` | 有效 UTF-8 文本 | `maxLength` 必填；`minLength` 可选、默认 1；二者为正整数且 min <= max，按 Unicode code point 计数。可选 `characterSet=ASCII_DIGITS` 要求每个字符为 `0`–`9`；可选 `options` 要求值精确命中一个稳定 option value。 |
 | `INTEGER` | 有符号 32 位整数 | 可选 `minimum`、`maximum`，均为该类型范围内的整数且包含端点；同时存在时 minimum <= maximum。 |
 | `BOOLEAN` | true 或 false | 空对象。 |
-| `DATE` | 0001–9999 年范围内的真实公历日期，格式严格为 `YYYY-MM-DD`，无时区 | 空对象。 |
+| `DATE` | 0001–9999 年范围内的真实公历日期，格式严格为 `YYYY-MM-DD`，无时区 | 可选 `notAfterToday=true`；today 取服务端当前时间在 `Asia/Shanghai` 的公历日期。 |
+| `STRING_SET` | 无序且无重复的非空字符串集合 | `options`、`minItems`、`maxItems` 必填；每项必须精确命中一个 option value，且 `1 <= minItems <= maxItems <= options 数量`。 |
+| `ACADEMIC_GRADE` | 用户在某个服务端学年确认的培养阶段、年级和该阶段最后学年 | 空对象；固定结构和推算规则见 [BR-UPF-018](#br-upf-018)。 |
 
-未知类型、未知或错配 constraints 为无效定义。字段值分支必须与 valueType 一致；null、数组、对象、任意脚本、隐式字符串转数字、默认值填充均不支持。不 trim、不折叠大小写、不做 Unicode 规范化；空格属于原始内容并计入长度，STRING 不能用空字符串表示删除。日期校验包含闰年和真实月份天数。
+option 由稳定非空 ASCII value 和非空有效 UTF-8 label 组成，同一定义内 value 唯一；value 发布后不可改名或复用，label 可只改展示文字。未知类型、未知或错配 constraints 为无效定义。字段值分支必须与 valueType 一致；除 STRING_SET 与 ACADEMIC_GRADE 的显式结构外，null、数组、对象、任意脚本、隐式字符串转数字、默认值填充均不支持。不 trim、不折叠大小写、不做 Unicode 规范化；空格属于原始内容并计入长度，STRING 不能用空字符串表示删除。日期校验包含闰年和真实月份天数。
+
+STRING_SET 的请求顺序不构成语义，重复元素或空集合拒绝；服务端按 option value 的 ASCII 字典序规范存储和返回。两个集合成员相同即相等。ACADEMIC_GRADE 不是学校验证事实，也不因时间推算变成验证事实。
 
 这些类型只定义基础格式。学号等带前导零的标识应定义为 STRING；不得由 INTEGER 或字段值自动推导身份资格。
 
@@ -144,7 +159,7 @@ Auth 当前持久化主体必须为 USER 且 accountStatus 为 ACTIVE。SYSTEM �
 <a id="br-upf-005"></a>
 ### BR-UPF-005：显式设置与删除
 
-set 对每个 key 新增或替换一个完整标量值；remove 删除列出的 key。未在两者出现的资料保持原样。
+set 对每个 key 新增或替换一个完整值；remove 删除列出的 key。未在两者出现的资料保持原样。
 
 set 内重复 key、remove 内重复 key、set/remove 相交均拒绝整个命令，不采用“最后一个值获胜”或指定执行顺序来消除歧义。至少提供一个操作；缺省操作列表按空列表处理，但不得用 null 列表或含 null 条目替代有效结构。
 
@@ -171,7 +186,7 @@ remove 只检查 key 语法和命令边界，不要求 key 仍在目录中；它
 | 变更后资料逻辑容量 | 32 KiB（32768 bytes） |
 | 单次命令逻辑容量 | 64 KiB（65536 bytes） |
 
-逻辑容量统一计算：每项加上 key 的 UTF-8 byte 数；STRING 值计 UTF-8 bytes，INTEGER 计 4 bytes，BOOLEAN 计 1 byte，DATE 计 10 bytes。资料容量对最终全部条目求和；命令容量对所有 set 的 key/value 和所有 remove 的 key 求和。revision、JSON 标点、类型标签和 BSON 元数据不计入此业务度量，因此它不等于传输大小或 BSON 大小。
+逻辑容量统一计算：每项加上 key 的 UTF-8 byte 数；STRING 值计 UTF-8 bytes，INTEGER 计 4 bytes，BOOLEAN 计 1 byte，DATE 计 10 bytes；STRING_SET 计全部元素 UTF-8 bytes 之和；ACADEMIC_GRADE 计 stage ASCII bytes 加 year/finalYear/academicYear 各 4 bytes。资料容量对最终全部条目求和；命令容量对所有 set 的 key/value 和所有 remove 的 key 求和。revision、confirmedAt、JSON 标点、数组/类型标签和 BSON 元数据不计入此业务度量，因此它不等于传输大小或 BSON 大小。
 
 客户端收到具体字段约束时，也需要知道这些全局上限。字段定义允许的单值长度不能绕过总容量。64 个删除加 64 个新增可以在一次命令中完成，只检查最终资料数量，而不把中间临时状态当作最终状态。
 
@@ -189,7 +204,9 @@ revision 属于整份资料，与权限版本、目录版本和认证版本相�
 <a id="br-upf-009"></a>
 ### BR-UPF-009：无变化与结果不确定的重试
 
-所有校验通过且版本匹配后，候选 key 集合及对应的类型/值与当前资料相同，视为 no-op；条目顺序不影响相等性。no-op 返回 changed=false，revision 和 updatedAt 均不变。重新设置相同值、删除不存在的 key 可以构成 no-op，但空命令仍按 BR-UPF-005 拒绝。
+所有校验通过且版本匹配后，候选 key 集合及对应的类型/值与当前资料相同，视为 no-op；条目顺序和 STRING_SET 请求顺序不影响相等性。no-op 返回 changed=false，revision 和 updatedAt 均不变。重新设置相同值、删除不存在的 key 可以构成 no-op，但空命令仍按 BR-UPF-005 拒绝。
+
+ACADEMIC_GRADE 的锚定 academicYear 属于值的一部分：同一当前学年重复设置相同 stage/year/finalYear 是 no-op；进入后续学年后，用户重新提交当前年级会建立新锚点和 confirmedAt，即使推算后的展示代码相同，也是真实变化并增加 revision。这使休学、留级或延期用户能够主动纠正自动推进结果。
 
 返回 no-op 前以 authId、USER、ACTIVE 和 expectedRevision 执行最后一次权威条件读取；条件不匹配不能返回基于先前快照的成功。该读取是 no-op 的确认点，并发修改或禁用若发生在其后，不追溯否定此前的成功。
 
@@ -200,7 +217,7 @@ revision 属于整份资料，与权限版本、目录版本和认证版本相�
 
 基础资料内嵌在 Auth 自有 `auth_principals.profile` 中。USER 的账号状态和资料版本处于同一 document；字段目录独立共享，Session、consent、应用存储和追加式审计不作为此 profile 的组成部分。
 
-仓储把逻辑 KV 保存为有界 `entries` 数组，每项为 `{key, valueType, value}`，按 key 的 ASCII 字典序存放且 key 唯一。key 是数据值，不作为 Mongo 更新路径；带点的名称不会被解释成嵌套字段。STRING/DATE 保存为 BSON string、INTEGER 为 BSON int32、BOOLEAN 为 BSON bool；DATE 由 valueType 区分。仓储读取时拒绝重复 key、未知存储类型或损坏的 profile 元数据，不静默合并或丢弃。
+仓储把逻辑 KV 保存为有界 `entries` 数组，每项为 `{key, valueType, value}`，按 key 的 ASCII 字典序存放且 key 唯一。key 是数据值，不作为 Mongo 更新路径；带点的名称不会被解释成嵌套字段。STRING/DATE 保存为 BSON string、INTEGER 为 BSON int32、BOOLEAN 为 BSON bool，STRING_SET 保存为规范排序的 BSON string array，ACADEMIC_GRADE 保存为带 stage/year/finalYear/academicYear/confirmedAt 的封闭 object；DATE 由 valueType 区分。仓储读取时拒绝重复 key、未知存储类型、非规范集合或损坏的 profile 元数据，不静默合并或丢弃。
 
 profile.revision 使用 BSON int64，profile.updatedAt 使用 BSON datetime。存储类型、key 语法、标量基本格式和元数据有效性属于结构校验；对未修改的历史值不重复应用当前字段目录的业务约束。内嵌 profile 不重复保存 authId，其归属由外层主体确定。
 
@@ -218,6 +235,36 @@ profile.revision 使用 BSON int64，profile.updatedAt 使用 BSON datetime。�
 编辑结果和配套“读取本人资料”仅向通过本人身份与当前账号检查的调用者返回资料；不作为第三方应用资料 API，不广播完整资料事件，不自动建立或扩大 consent。
 
 错误详情可以包含请求 key、稳定错误码和约束名，不回显字段值、其他用户资料、凭据或数据库内部结构。常规请求日志不得记录完整请求/响应资料正文。操作日志可记录 authId、requestId、结果和前后 revision；它不是与写入原子提交的不可变业务审计。首版不保存每次编辑的资料历史副本。
+
+<a id="br-upf-017"></a>
+### BR-UPF-017：首批生产字段目录
+
+首批生产目录固定为下表；全部字段可选、可显式删除，来源均为用户主动确认。格式校验只证明值符合约束，不证明姓名、联系方式、学籍或一卡通归属真实。字段 key、类型、选项 value 和约束按 BR-UPF-002 的已发布稳定性处理。
+
+| key | label | valueType | constraints / 含义 |
+| --- | --- | --- | --- |
+| `basic.name` | 姓名 | `STRING` | `minLength=1`，`maxLength=80`。 |
+| `basic.gender` | 性别 | `STRING` | options 仅 `MALE=男`、`FEMALE=女`；不提供其它选项，未提供用 remove 表达。 |
+| `education.campus_areas` | 活动片区 | `STRING_SET` | `minItems=1`、`maxItems=6`；options 为 `NANHU=南湖`、`JIANHU=鉴湖`、`MAFANGSHAN_WEST=西院`、`MAFANGSHAN_EAST=东院`、`YUJIA_TOU=余家头`、`JUNSHAN=军山`。这是面向学生的活动片区分类，不宣称六项都是行政意义上的独立校区。 |
+| `education.major` | 专业 | `STRING` | `minLength=1`，`maxLength=128`。 |
+| `personal.birthday` | 生日 | `DATE` | `notAfterToday=true`。 |
+| `education.campus_card_number` | 一卡通号 | `STRING` | `minLength=maxLength=6`，`characterSet=ASCII_DIGITS`；保留前导零。 |
+| `contact.phone` | 手机号 | `STRING` | `minLength=maxLength=11`，`characterSet=ASCII_DIGITS`；不据此建立登录凭据或验证号码归属。 |
+| `contact.qq` | QQ | `STRING` | `minLength=5`，`maxLength=12`，`characterSet=ASCII_DIGITS`；保留为文本标识。 |
+| `education.current_grade` | 当前就读年级 | `ACADEMIC_GRADE` | 用户确认阶段、当时年级和阶段最后学年；服务端锚定学年并按 BR-UPF-018 推算。 |
+
+这些字段不产生用户权限，不自动从注册学生关联、邮箱、教务数据或其它字段填充。第三方读取必须另行满足 UC028 的逐字段 scope；本目录本身不使任何值公开。
+
+<a id="br-upf-018"></a>
+### BR-UPF-018：当前就读年级的锚定与阶段内推进
+
+用户设置 `education.current_grade` 时提交 stage、year、finalYear 和从当前编辑 schema 观察到的 academicYear；必须满足 `1 <= year <= finalYear`。stage 只允许 `UNDERGRADUATE`、`MASTER`、`DOCTORAL`。academicYear 不是用户可自由选择的资料：Auth 按服务端当前时间从 [UC029/BR-UPF-019](UC-AUTH-029-manage-academic-year-rollover.md#br-upf-019) 的权威时间表取得当前学年，请求值必须与之相等；不匹配按学年冲突拒绝并要求刷新。服务端在原子提交时写 confirmedAt。
+
+对当前学年 C 和已保存锚点 A，当前有效年级序号为 `min(year + (C - A), finalYear)`。C 小于 A、差值溢出、stage/数值非法、confirmedAt 缺失或权威时间表不能解释当前服务端时间均失败关闭。时间推进只改变派生读结果，不批量改写 profile，不增加 profile revision，也不伪造一次新的用户确认。
+
+推算只在原 stage 内递增并在 finalYear 封顶：本科最后一年不会自动变为硕士一年，硕士也不会自动进入博士或“已毕业”。跨阶段、休学、留级、延期或学制变化只能由用户明确重新设置；新设置以当时当前学年建立新锚点。客户端可在学年切换后提示确认，但不得代替用户静默提交。
+
+学年时间表由 Auth 按 [UC029](UC-AUTH-029-manage-academic-year-rollover.md) 持有：缺省逐年 9 月 1 日，平台管理员只能设置带年份且晚于当前时间的下一次更新时间；到点后学年增加一，并从该时间按上海本地公历逐年推进。时间表修改不改写 profile 或既有年级锚点，也不是学校对个人学籍的认证来源。GetOwnProfile 返回保存的锚点值；当前 schema 返回同一次服务端观察时刻的 currentAcademicYear，官方客户端与 UC028 使用本规则计算同一有效年级。
 
 ## 持久化与返回说明
 
@@ -238,10 +285,12 @@ SYSTEM 不初始化 profile。已有 USER 记录需要由明确的 provision/数
 | 空命令、重复/相交 key、key 格式或值分支非法 | `INVALID_USER_PROFILE_EDIT` | 400 / INVALID_ARGUMENT |
 | set key 未发布 | `USER_PROFILE_FIELD_NOT_DEFINED` | 400 / INVALID_ARGUMENT |
 | 值类型或约束不满足 | `INVALID_USER_PROFILE_FIELD_VALUE` | 400 / INVALID_ARGUMENT |
+| ACADEMIC_GRADE 观察学年不再是当前学年 | `USER_PROFILE_ACADEMIC_YEAR_CONFLICT` | 409 / ABORTED |
 | 操作数、业务容量或 transport 大小超限 | `USER_PROFILE_LIMIT_EXCEEDED` | 413 / RESOURCE_EXHAUSTED |
 | 版本已变化或无法归因的条件更新失败 | `USER_PROFILE_REVISION_CONFLICT` | 409 / ABORTED |
 | revision 耗尽且请求需要真实变更 | `USER_PROFILE_REVISION_EXHAUSTED` | 409 / FAILED_PRECONDITION |
 | 定义目录暂不可用或无效 | `PROFILE_FIELD_CATALOG_UNAVAILABLE` | 503 / UNAVAILABLE |
+| 学年时间表缺失、损坏、范围溢出或不能解释当前时间 | `ACADEMIC_YEAR_UNAVAILABLE` | 503 / UNAVAILABLE |
 | 账号/profile 数据缺失损坏、数据库暂不可用 | `USER_PROFILE_UNAVAILABLE` | 503 / UNAVAILABLE |
 | 未预期内部异常 | `INTERNAL_ERROR` | 500 / INTERNAL |
 
@@ -252,16 +301,16 @@ SYSTEM 不初始化 profile。已有 USER 记录需要由明确的 provision/数
 ## API 与交付依赖
 
 - 这是经 Gateway 的用户能力，使用用户可信身份，不使用内部服务 identity 或单凭 service allowlist 授予编辑权。
-- 候选 API 包为 `auth_center/v1/user_profile/`，方法为 `EditOwnProfile`；配套读取语义见查询契约。可执行 Proto、路由和 Gateway 到 Auth 的认证引导链路由实现工作包补齐，不能以未认证临时入口代替。
+- API 包为 `auth_center/v1/user_profile/`，方法为 `EditOwnProfile`；配套读取语义见查询契约。实现扩展需要在独立 API Proto 中为 ProfileValue 增加 STRING_SET 与 ACADEMIC_GRADE 分支，并在 schema 投影 options、字符集、集合约束、日期上界和当前 academicYear；路由和 Gateway 到 Auth 的认证引导链路不能以未认证临时入口代替。
 - `expectedRevision` 在逻辑命令中只有一个来源；首版各 transport 映射该显式字段，不再同时接受另一套 `If-Match` 前置条件。
-- 登录、普通 USER provision、账号初始化/迁移、字段目录的实际初始内容和用户端确认页面仍需交付；本设计完成不代表生产链路已可用。
+- 登录、普通 USER provision、账号初始化/迁移、生产字段/Scope 目录装载、UC029 学年时间表和用户端确认页面仍需交付；本设计完成不代表生产链路已可用。新 key 不要求把说明性测试字段改义；部署若已有同名字段或非规范值，必须在启用前扫描并由显式迁移处理。
 
 ## 测试与验收
 
 1. 普通 ACTIVE USER 可以新增、替换、删除本人字段；无 Developer 资格不影响操作。
 2. 无效身份、SYSTEM、未知主体、DISABLED 均拒绝；请求不能选择其他 authId 或修改权限/账号状态。
 3. 空资料初始化遵循 BR-UPF-008；读取或编辑不能静默修复缺失 profile/accountStatus。
-4. STRING 边界按 code point、总容量按 UTF-8 bytes；INTEGER 边界、false、0、合法闰日、非法日期、类型错配及 null 都有验收样例。
+4. STRING 边界按 code point、数字字符集只接受 ASCII `0`–`9`、总容量按 UTF-8 bytes；INTEGER 边界、false、0、合法闰日、未来生日、类型错配及 null 都有验收样例。
 5. 重复 set、重复 remove、set/remove 相交、空命令和未知 set key 整体失败，无部分删除或写入。
 6. 删除不存在的合法 key 可以 no-op；删除现存未知目录 key 可以成功；纯删除在字段目录不可用时仍可执行。
 7. 混合请求在目录或 set 校验失败时，remove 也不提交；未触及的历史值不被自动清除。
@@ -272,12 +321,14 @@ SYSTEM 不初始化 profile。已有 USER 记录需要由明确的 provision/数
 12. 单文档写入失败不出现部分字段修改；网络超时后通过重新读取恢复，不盲目更新 expectedRevision 重放。
 13. 返回与本次提交快照一致，条目稳定排序；请求日志和失败响应不泄露资料值。
 14. 实现验收使用真实 MongoDB、真实 transport 与生产组合根；客户端单独验收本地导入、预览、选择、取消与明确提交。
+15. campus 集合拒绝空值、重复和目录外选项，忽略请求顺序并规范输出；一至六个合法片区及 remove 清空均覆盖。
+16. 当前年级在学年内稳定、跨学年阶段内递增并在 finalYear 封顶；不自动本科转硕士。休学/留级纠正建立新锚点；旧 academicYear 请求冲突，时间表损坏/不可用失败关闭，学年更新时间到达不批量写 profile。
 
 ## 非目标
 
 - 用户创建、登录、账号禁用管理或注销恢复。
-- 在线字段目录管理、类型演进、即时停用字段或字段级多版本。
-- 学生真实性核验、资料审核、管理员代填或自动教务同步。
+- 在线字段目录管理、类型演进、即时停用字段或字段级多版本。学年时间表管理由 UC029 独立拥有。
+- 学生真实性核验、资料审核、管理员代填、自动教务同步或自动识别休学/毕业。
 - 第三方应用读取、consent、Session、课程表等结构化业务数据。
 - 修改历史、每字段版本、自动合并、全量清空通配符、请求幂等键。
 
@@ -285,3 +336,5 @@ SYSTEM 不初始化 profile。已有 USER 记录需要由明确的 provision/数
 
 - 2026-09-22：建立本人资料编辑用例，承接共享字段定义与主体内嵌资料方向，提出显式 patch、容量、并发、no-op 和配套读取语义。
 - 2026-09-22：完成接受前检查，接受资料编辑及配套查询的业务规则、容量上限和并发/错误语义；生产字段目录和认证接入作为实现依赖跟踪。
+- 2026-10-10：用户审核并接受首批生产字段；增加多选活动片区、格式化联系方式及一卡通号，并以用户确认锚点和受信学年日历定义当前年级的阶段内推进、封顶与人工纠正，不自动跨培养阶段。
+- 2026-10-10：UC029 接受后，当前学年权威来源改为管理员可设置下一更新时间的 Auth 时间表；缺省逐年 9 月 1 日，年级锚点与封顶公式不变。

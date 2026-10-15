@@ -44,7 +44,7 @@
 | `profile` 动态属性 | 保留资料需求，重构信任和字段契约 | 区分用户自填、客户端同步/弱验证、平台审核结果；逐项决定字段来源、写权限、类型、更新和披露规则。 |
 | `claim` 数据与用户资料分开 | 保留意图 | 平台授权事实使用明确模型；签发 claims 是事实的投影，避免把任意 claim 字典当作领域模型。 |
 | Consent 与必要/可选 scopes | 保留 | 同意内容、有效状态、变更与撤回成为独立事实；必要权限扩张需要重新同意，可选权限不能被自动增加。具体规则由后续 UC 接受。 |
-| 按应用隔离的用户 KV 存储 | 保留为独立能力候选 | 按 `(authId, applicationId)` 隔离，独立定义配额、并发与清理；不继续作为 user 文档的动态顶层字段。 |
+| 按应用隔离的用户 KV 存储 | 保留为独立能力候选 | 已建立 [UC-AUTH-030](../use-cases/UC-AUTH-030-manage-application-user-storage.md) DRAFT；独立定义隔离粒度、配额、并发与清理，不继续作为 user 文档的动态顶层字段。 |
 | 软删除和恢复窗口 | 保留需求候选，重写生命周期 | 明确注销申请、恢复、最终关闭及权限影响；30 天和登录自动恢复不能直接成为新规则。 |
 | UUID、唯一索引、TTL、随机验证码、请求关联信息 | 保留工程意图 | 补齐唯一约束失败时的处理、原子消费与不可变业务审计。 |
 | 未签名身份头、Gateway 直读 Auth 数据库、单次 SHA-256 密码摘要 | 淘汰 | 使用当前平台身份契约；认证事实由 Auth 拥有；密码使用专用密码哈希机制。 |
@@ -152,7 +152,7 @@
 | PermissionGrant | 平台人员原子权限与审计 | 延续 UC-AUTH-004，不与资格或 handle 合并。 |
 | UserProfile / VerificationEvidence | 用户资料与其来源、核验事实 | 先定职责边界，按真实资料用例扩展。 |
 | ConsentGrant | 用户同意应用访问什么、何时撤回 | 后续独立纵切片，不作为 USER 创建的必填内容。 |
-| ApplicationUserStorage | 应用在某用户下保存的隔离数据 | 后续独立能力。 |
+| ApplicationUserStorage | 应用在某用户下保存的隔离数据 | [UC-AUTH-030](../use-cases/UC-AUTH-030-manage-application-user-storage.md) DRAFT。 |
 
 ## 建议的下一轮设计顺序
 

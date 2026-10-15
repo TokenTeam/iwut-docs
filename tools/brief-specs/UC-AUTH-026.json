@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-026",
-  "note": "Implement Auth/API application closure consumption and app.close recent-auth proof. Add permanent applicationId tombstone with idempotent App service Apply/Get receipt; enforce it at UC014-019 final OAuth boundaries. Require the current Session's same registered device to sign a new challenge; issue a fixed 5-minute iwut-app-center proof bound to purpose, sub, applicationId, jti and auth_time. Include real Mongo races/unknown commits, HTTP/native gRPC proof endpoints, gRPC-only internal service and actual App integration. Do not implement App lifecycle, UI, Gateway or third-party session deletion.",
+  "note": "Accepted password/anti-bypass revision, explicitly approved 2026-10-13. Generate this brief before implementing. Restrict UC009 original entry to the current credential; UC025 requires current password plus existing dedicated proof (including DISABLED purpose); UC026 requires current password plus same-Session device proof. UC032 remains DRAFT. Preserve prior dirty work, public signature bytes, transaction fences, closure/cleanup evidence; no production migration, push or deployment.",
   "uc_sections": [
     "目标与范围",
     "参与者与依赖",

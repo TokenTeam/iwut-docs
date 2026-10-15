@@ -65,7 +65,7 @@ UserAccountStatus {
 <a id="br-acc-002"></a>
 ### BR-ACC-002：账号版本与不可复活
 
-`auth_principals.accountRevision` 是账号状态的正 int64 版本。UC006/011 新建 USER 时初始化为 1；DISABLE 和 RESTORE 每次成功都严格加 1。它同时作为本账号认证材料的有效代际，不新增另一份 authenticationEpoch，不复用权限 permissionRevision 或 grant revocationEpoch，也不使用墙上时钟比较替代。
+`auth_principals.accountRevision` 是正 int64 账号安全版本，UC006/011 初始化为 1；DISABLE/RESTORE 每次成功加 1。新增 [UC033 / BR-PWD-006](UC-AUTH-033-manage-password-and-recovery.md#br-pwd-006) DRAFT 提案中，真正改密/重置也原子推进它但不改 accountStatus；不新建 authenticationEpoch，不复用 permissionRevision/grant epoch，不用墙上时钟代替。密码写入与凭据下界尚未实现，既有状态治理仍为已交付基线。
 
 受账号版本约束的记录在创建或首次绑定用户时保存服务端读出的 accountRevision；消费时必须验证所属 authId 相同、当前 ACTIVE、记录版本等于当前账号版本，并满足原有凭据/Session/grant 条件。已绑定的版本不可更新成当前版本，刷新、重试、查询和恢复不得覆盖旧版本以使记录有效。
 
@@ -88,7 +88,7 @@ UserAccountStatus {
 
 未绑定用户的匿名 OAuth interaction 不属于被禁用账号，可在用户恢复并重新登录后首次绑定当前版本；曾由旧 Session 绑定的 interaction 不能退回匿名状态绕过校验。UC006 和 UC011 REGISTER 只创建新账号：新 USER 与首次 Session 原子初始化为版本 1；已登记设备不能通过重新注册恢复原账号。
 
-原有随机挑战、设备签名字节及邮箱验证码协议无需把账号版本交给客户端；版本作为不可变操作内部绑定，在原子确认点验证。设备凭据和激活邮箱自身不绑定会随禁用失效的版本，否则会失去恢复后的重新认证能力。
+原有签名字节不用向客户端披露账号版本；操作内部绑定、最终复核。邮箱绑定不随禁用失效；设备新增 credentialRevision/minimumCredentialRevision 由 UC033 定义，不直接要求 credentialRevision 等于当前 accountRevision。禁用/恢复不抬下界，密码变更抬下界，因此恢复仍可用未退休设备新登录，却不能复活密码收回的旧钥；新增字段缺失不能默认补 1。
 
 UC008 的幂等 token 撤销、UC009 的已有撤销事实及物理清理可以继续处理旧代记录，但不得将其解释为有效认证或返回秘密。账号版本失效不要求逐条写 revokedAt；审计可由账号状态事件解释失效原因。
 

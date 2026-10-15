@@ -4,6 +4,8 @@
 
 ## 目标与范围
 
+2026-10-12 Auth 新模型边界：本文转发的是已交付邮箱 v2/单邮箱 BIND 基线，不代表密码注册/邮箱列表/角色切换已实现。UC006/011 已回到 DRAFT，新密码/角色协议与 exact route 待审核；Gateway 不通过验证 Session 形状替 Auth 完成密码验证，也不得继续用旧 BIND 作为新角色切换的无密码旁路。既有 optional-Session 转发规则和不匿名降级保持不变。
+
 > Gateway 对明确登记的 Auth 自认证接口允许 Session 完全缺失；若终端提供 Session，则只把这一个原始 Session 保留给 Auth，不执行 USER 身份交换。Session 的缺失与存在可以选择 Auth 的业务分支，但坏 Session 绝不能被删除后降级为匿名请求。
 
 首批消费者是 [UC-AUTH-011](../../auth-center/use-cases/UC-AUTH-011-set-and-activate-email.md) 的两个双模式入口：

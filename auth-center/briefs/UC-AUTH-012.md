@@ -43,9 +43,11 @@
 
 本用例闭合官方 App 在旧设备不可用时的登录路径。新手机自己生成新设备密钥，不继承旧私钥；用户只需输入邮箱和验证码，设备签名由客户端完成，不额外要求生物识别。后续可以使用 UC007 自动登录。
 
-本用例不注册 USER，不要求重新提交 associationToken，不修改学校关联、邮箱绑定、资料或 Developer 状态。未知邮箱和登录失败均不能自动转成注册；明确创建新账号使用 UC011 的 REGISTER 分支。
+本用例不注册 USER，不接收学号或派生关联声明，不修改邮箱绑定、资料、校园认证或 Developer 状态。未知邮箱和登录失败均不能自动转成注册；明确创建新账号只使用 UC011 的邮箱 REGISTER 分支。普通邮箱与学校邮箱采用相同登录证明要求。
 
-首版选择邮件一次性验证码，不引入平台密码。只交付“邮箱验证并授权本机设备”的完整 App 登录流程；不提供缺少设备凭据的邮箱专用 Session，也不在普通 UC007 设备登录接口中开放新增公钥。
+2026-10-12：邮箱是用户可见的登录/新设备恢复方式，设备密钥在客户端后台准备和使用，不作为用户须管理的 Passkey。邮箱登录 v1 与设备 LOGIN 字节不变；退役关联迁移不是邮箱登录的新迁移任务。
+
+本 UC 的既有邮箱码＋设备证明保留为备用，默认密码登录已由用户确认并单列 UC034 DRAFT，自动登录继续 UC007；不强制两种前台证明叠加，也不提供无设备 Session。密码恢复独立 UC033，不能用登录码当重置码。密码代际/凭据下界为本入口新增消费依赖，旧 v1 编码不变，不以基线已交付宣称完成新增门禁。
 
 ### 参与者与前置条件
 
@@ -113,7 +115,7 @@ EmailLoginResult {
 
 ### 测试与验收
 
-1. 没有旧设备、没有 Session，仅凭已激活邮箱及本机新设备证明进入原 authId；原资料和关联不变，新设备可通过 UC007 再次登录。
+1. 没有旧设备、没有 Session，仅凭已激活邮箱及本机新设备证明进入原 authId；原资料、授权和应用 subject 不变，不提交学校关联，新设备可通过 UC007 再次登录。
 2. 未知/未激活/禁用目标得到同形状 Begin；后来激活不能让旧占位操作有效；失败不创建 USER。
 3. 邮箱更换、换回、被其它账号重新绑定均不能让旧挑战进入错误账号；更换与登录并发符合提交顺序。
 4. 验证码及设备证明跨操作/用途/邮箱/公钥重放失败；验证码次数和冷却可并发验证且跨重启有效。
@@ -127,7 +129,7 @@ EmailLoginResult {
 
 #### 前置基线与复用边界
 
-UC011 必须提供权威邮箱绑定的 authId/activeEmail/revision 查询、现有认证事务中的条件确认、统一邮件发送与持久化额度。本工作包不得复制一个邮箱目录、绕过 UC011 写入或用 fixture 冒充依赖。UC011 未提交稳定基线时，可在独立 worktree 推进协议验证器、API 与领域/端口；Mongo 集成、完整 Wire 验收和最终合入等待其可用提交。
+UC011 必须提供唯一登录邮箱的 authId/地址/角色版本查询、现有认证事务中的条件确认、统一邮件发送与持久化额度；新邮箱列表不能让所有绑定地址都进入登录索引。当前代码仍使用单 activeEmail/revision 基线，须随 UC011 新模型做兼容与角色竞争回归。不得复制第二个邮箱目录、绕过 UC011 写入或用 fixture 冒充依赖。密码普通登录和重置属于未闭合的独立设计，不擅自改变本契约签名字节。
 
 复用 UC011 的邮箱规范化、SMTP 适配器及配置校验，引用 BR-EML-002 和 UC011 的“实现约定”；SMTP 模板追加 LOGIN_WITH_EMAIL 用途，不改变注册/绑定模板。目标邮箱发送冷却、过去 60 分钟滑动额度以及可信来源额度与 UC011 使用同一存储键和事务扣额，不能按 RPC 或用途另开一套使额度翻倍。两边的 requestId 幂等记录分别按用途隔离，不能互相命中。
 
@@ -137,7 +139,7 @@ UC011 必须提供权威邮箱绑定的 authId/activeEmail/revision 查询、现
 
 #### 邮件密钥与操作指纹
 
-K_login 由 AUTH_EMAIL_LOGIN_CODE_KEY 注入，独立于 UC011 邮件 HMAC、关联加密/查找和其它用途；共享 SMTP 不共享校验密钥。定义：
+K_login 由 AUTH_EMAIL_LOGIN_CODE_KEY 注入，独立于 UC011 邮件 HMAC 和其它用途；共享 SMTP 不共享校验密钥，不加载退役关联配置。定义：
 
 ```text
 requestMac = HMAC-SHA256(K_login, Frame(
@@ -151,7 +153,7 @@ keyId = SHA256(Frame(UTF8("iwut-email-login-key-id-v1"), K_login))
 
 保存 requestMac/codeMac/keyId，不保存明文验证码。操作快照内的邮箱、authId/revision/可登录性仅供 Auth 使用，不投影到 Begin 响应或日志。同键 Begin 先比较请求指纹；参数不符冲突，完成操作返回 LOGIN_ALREADY_COMPLETED，仍有效操作返回原挑战，不重发信。失效/过期/被替代操作返回 EMAIL_LOGIN_FAILED，不重新复活或延长时限。
 
-冷更新 keyId 变化使旧 keyId 未完成操作关闭；完成标记保留至其去重窗口结束，不返回已建立 Session 秘密。已完成操作可返回 LOGIN_ALREADY_COMPLETED，其它旧 keyId 操作统一失败，不因无法比较旧请求 HMAC 就创建同键新操作。无需保存旧 K_login；同密钥日常重启保留未过期操作。邮箱登录不保存学号关联快照，也不受关联密钥轮换而额外作废，除非其邮箱或设备事实已失效。
+冷更新 keyId 变化使旧 keyId 未完成操作关闭；完成标记保留至其去重窗口结束，不返回已建立 Session 秘密。已完成操作可返回 LOGIN_ALREADY_COMPLETED，其它旧 keyId 操作统一失败，不因无法比较旧请求 HMAC 就创建同键新操作。无需保存旧 K_login；同密钥日常重启保留未过期操作。邮箱登录不保存关联快照、不执行关联轮换，仍复核当前邮箱、设备与账号事实。
 
 #### 启用与故障
 
@@ -174,7 +176,7 @@ AUTH_EMAIL_LOGIN_ENABLED 默认 false，独立于 AUTH_EMAIL_BINDING_ENABLED。�
 <!-- 权威位置: use-cases/UC-AUTH-012-login-with-email.md#br-lgn-013 -->
 ### BR-LGN-013：邮箱登录定位与用途隔离
 
-账号归属只能来自 Auth 当前激活邮箱记录。Begin 固定内部 authId、邮箱绑定 revision、是否可登录、公钥提案和服务/应用上下文；不把这些内部账号信息返回给未认证调用者。Begin 时未知、未激活、禁用或非 USER 的目标，在该操作内始终不可登录，即使稍后注册或恢复状态也必须重新 Begin。
+账号归属只能来自 Auth 当前唯一登录邮箱记录，不是任意已验证地址。额外学校/非登录邮箱不能登录或授权新增设备。Begin 固定内部 authId、登录邮箱角色版本、是否可登录、公钥提案和服务/应用上下文；不把这些内部账号信息返回给未认证调用者。Begin 时未知、非登录、未激活、禁用或非 USER 的目标，在该操作内始终不可登录，即使稍后注册/切换角色/恢复状态也必须重新 Begin。
 
 Complete 必须确认激活邮箱仍属于原 authId，且 revision 与 Begin 一致。更换邮箱后再换回同一地址也不能复活旧登录操作；地址后来被另一账号绑定时，旧操作不得进入新账号。学生关联、邮箱字符串、本机账号标签和客户端 verified 标志均不是控制权证明。
 
@@ -185,7 +187,7 @@ Complete 必须确认激活邮箱仍属于原 authId，且 revision 与 Begin �
 
 验证码采用均匀的 8 位十进制随机字符串，保留前导零；验证码和设备挑战均在 10 分钟后到期，最多累计 5 次错误验证码或设备证明尝试。并发错误计数、次数耗尽和成功消费原子确认。邮箱绑定、注册、登录验证码不可跨用途替代。
 
-校验值使用独立的 `AUTH_EMAIL_LOGIN_CODE_KEY`（标准 Base64 编码的 32 字节随机密钥，ENV 注入）计算 HMAC-SHA-256，输入以 Frame 编码绑定用途、操作、目标邮箱、提案公钥、期限、服务/应用及验证码；不与邮箱绑定验证、学生关联或 JWS 的秘密共用。验证码明文仅用于当次投递，不落库、不进入普通日志，校验采用恒定时间比较。冷更新换钥可以关闭未完成操作，不影响既有设备凭据或 Session；缺失/非法配置拒绝启用邮箱登录。
+校验值使用独立的 `AUTH_EMAIL_LOGIN_CODE_KEY`（标准 Base64 编码的 32 字节随机密钥，ENV 注入）计算 HMAC-SHA-256，输入以 Frame 编码绑定用途、操作、目标邮箱、提案公钥、期限、服务/应用及验证码；不与邮箱绑定验证或 JWS 的秘密共用。验证码明文仅用于当次投递，不落库、不进入普通日志，校验采用恒定时间比较。冷更新换钥可以关闭未完成操作，不影响既有设备凭据或 Session；缺失/非法配置拒绝启用邮箱登录。
 
 与 UC011 共用“每目标邮箱”的发送冷却和小时总额度，不能通过切换注册、绑定、登录入口绕过：默认至少间隔 60 秒、每小时最多 5 次。另按公钥指纹每小时最多 5 次、可信来源 IP 每小时最多 20 次；发送失败也计额度，相同幂等请求不重复计数。全局请求和未完成操作容量沿用 [BR-LGN-009](../use-cases/UC-AUTH-007-login.md#br-lgn-009)，细分桶有界；邮件额度用 Mongo 原子持久化，不引入 Redis。
 
@@ -196,9 +198,9 @@ Complete 必须确认激活邮箱仍属于原 authId，且 revision 与 Begin �
 
 正确邮箱验证码授权将本次已证明私钥持有的设备公钥加入该账号，设备签名证明公钥可用。两者缺一不可；不能先获得普通 Session，再仅靠提交公钥新增凭据。
 
-公钥尚未登记时，在登录事务内生成 credentialId 并绑定原 authId；同一账号下已经有效的规范公钥可复用同一 credentialId，不重复新增。属于其它账号或已经撤销的公钥均不可接受，不能改绑或复活；即使撤销后仍持有私钥，也应生成新密钥重新发起邮箱登录。唯一归属沿用 [BR-REG-003](../use-cases/UC-AUTH-006-create-user.md#br-reg-003)。只有邮箱和设备证明通过后才披露受控的凭据冲突错误，不返回原公钥所属账号。
+新公钥同事务登记 credentialRevision=当前 accountRevision；同账号未撤销且符合 UC033 下界的公钥可复用。撤销、密码退休或他人公钥均不可补版本/改绑/复活，须新密钥；这使密码重置收回的旧设备无法通过保有私钥回来。只有正确邮箱码＋设备证明后才披露受控冲突，指纹唯一占用见 UC006/BR-REG-003。
 
-Begin 时公钥已被撤销或属于其它账号，不能在该操作中转为可接受；Begin 时未登记的公钥若后来由同一账号成功登记，可以复用，但若被撤销或绑定其它账号则失败。并发邮箱登录、一键注册和邮箱注册依靠同一全局公钥唯一约束协调。
+Begin 时公钥已被撤销或属于其它账号，不能在该操作中转为可接受；Begin 时未登记的公钥若后来由同一账号成功登记，可以复用，但若被撤销或绑定其它账号则失败。并发邮箱登录和邮箱注册依靠同一全局公钥唯一约束协调；一键注册已退役，不保留旁路。
 
 新增设备必须经过本用例的邮件额度、一次性验证码和设备证明，不自动淘汰旧设备凭据。UC007 的 10 条上限只统计有效 Session，不解释成设备数量上限；完整设备列表、数量策略和批量清理另立管理用例。
 
@@ -247,7 +249,8 @@ Begin 对未知、已知、禁用邮箱返回相同形状挑战并使用相同�
 | 设备凭据 | 删除公钥及使用元数据；永久保留规范公钥指纹和 CLOSED authId 的最小占用墓碑，防止旧设备密钥跨账号重用，延续 UC009 不释放密钥归属的约束。新注册必须使用新密钥 |
 | Session、挑战及结果、授权交互、code/access/refresh/family | 删除秘密摘要、操作内容及业务记录；由永久主体墓碑防重建，不为检测重放继续保存已终止账号全部 token 历史 |
 | grant、pairwise 用户映射 | 删除该 authId 的 consent 内容及 `(authId,sectorId)→sub` 映射；不删除 Application 的 sector。旧 sub 不转交新账号，日志/第三方引用不宣称被删除 |
-| 学生关联 | 删除本账号的成员关系及其专属材料；组仍有其他成员时保留组，不暴露或改变其他成员；无成员且无合法未决引用时，在关联事务栅栏下删除 lookup/关联密文和空组。并发注册加成员不得误删共享组 |
+| 校园认证与操作 | 按修订 UC031 清除认证依据/投影、验证地址/MAC/操作及受控审计；新邮箱列表/密码材料须纳入终止清单，不按邮箱跨账号清理，不保留已消费库，备份恢复执行终止门禁 |
+| 已退役学生关联 | 新设计没有组/成员或关联密文。移除关联装配时同步退役清理步骤；当前代码历史清理仍存在，不能以文档修订冒称已移除。旧开发数据独立显式处置，不增加生产迁移 |
 | developerHandle | 永久保留规范 handle、原 authId、claimedAt 和终止占用标记；不转让、不释放、不连同邮箱/资料保留。该最小公开命名空间墓碑明确向本人披露 |
 | Auth 审计 | 只读期内保留最小事件归因，不保留 token/邮箱/资料副本；账号相关普通事件上限为事件发生后 180 天，已超期的随本次任务清理。注销事件保留 180 天；期满按专用保留任务删除，不由业务更新覆盖 |
 | 协调决定、清理进度及查询令牌 | App 确认终局前保留必要决定；查询摘要最多 30 天，详细清理任务在全部步骤完成且终局回执后清理，永久终止事实由最小墓碑承担 |
@@ -289,14 +292,14 @@ Auth 保存 Session 权威状态，每个 Session 只对应一个 authId。sessi
 
 token 线格式、摘要输入和认证载体引用[Session 载体契约](../../platform/contracts/auth-device-session-v1.md#session-载体)。服务端持久化 token 的 SHA-256 摘要并建立唯一索引，不保存明文令牌；高熵随机令牌不同于低熵密码，不从密码/学号派生。客户端通过 TLS 传输并安全存储令牌，不在 URL、普通日志、分析事件或崩溃报告中包含它。拥有有效 bearer token 即可使用会话，本规则不宣称自动具有设备持有证明或防重放能力。
 
-每条 Session 记录本次认证方法、凭据引用（设备认证时必填）、authenticatedAt、createdAt、lastUsedAt、expiresAt、撤销状态与时间。lastUsedAt 的使用与更新规则见 [BR-LGN-010](../use-cases/UC-AUTH-007-login.md#br-lgn-010)。Session 不包含私钥，不被 profile、学生关联或客户端设备名称决定归属。以后添加邮箱方法时必须扩展明确的认证记录语义。
+每条 Session 记录认证方法、credentialId、认证/创建/使用/到期时间及撤销状态。EMAIL_CODE_AND_DEVICE 来源见 UC012；新增 PASSWORD_AND_DEVICE 见 UC034、PASSWORD_AND_SESSION 见 UC033/密码契约，分别必须 passwordRevision 以及后者的 sourceSessionId。sourceSessionId 是历史证明来源，不要求旧来源仍有效。统一验证 owner/当前代际/凭据下界和必需来源字段，不能当未知方法忽略。新方法未实施，不改变 lastUsedAt/LRU 或宣称已有密码会话。
 
 <!-- 权威位置: use-cases/UC-AUTH-007-login.md#br-lgn-004 -->
 ### BR-LGN-004：有效期与在线检查
 
 首版采用固定绝对有效期：T_session 通过 AUTH_SESSION_TTL 配置，为部署必填的正时长，创建时固定 expiresAt；缺失/非法配置拒绝接流量。配置采用 Go duration 格式，示例部署值为 `720h`（30 天）；该示例不是隐式默认值。本轮不自动滑动续期、不签发 refresh token，也不因请求活跃无限延长会话。到期后必须重新完成本用例的设备认证并建立新 Session，不延长旧会话的 expiresAt。后续若增加续期，另行设计轮换与并发语义。
 
-一次成功会话检查必须得到一致、当前的事实：token 摘要匹配，Session 未撤销且 `now < expiresAt`，所属主体为 ACTIVE USER，作为会话认证依据的设备凭据仍有效且归属一致。缺失、损坏、超时或无法读取均失败关闭，不能回退到客户端缓存或只凭旧 JWT 放行。
+一次会话检查须确认 token、未撤销/未到期、ACTIVE/当前 accountRevision、credential owner/未撤销/UC033 下界及认证来源完整。UC033 正常改密/重置后的旧代 Session 不可检查成功，换发是新记录，不把旧版本覆盖成当前。缺失/损坏/依赖故障失败关闭；新增字段/方法需真实回归后交付，不从客户端缓存放行。
 
 首版不缓存正向会话授权结果，权威读取不得使用可能落后的副本。建议使用一致快照读取主体、凭据和 Session；检查与撤销/禁用存在并发时，以明确的检查快照为边界。变更提交后才开始的新检查必须看到变更；先已通过的请求可能继续执行，不承诺取消在途业务。
 
@@ -344,15 +347,11 @@ LRU 以服务端保存的 `lastUsedAt` 升序决定；相同时依次按 created
 <!-- 权威位置: use-cases/UC-AUTH-006-create-user.md#br-reg-003 -->
 ### BR-REG-003：设备凭据持有证明与唯一归属
 
-Auth 只接受已发布、受支持协议的注册证明，校验公钥/算法及证明的绑定关系，并确认调用者持有对应私钥。协议级挑战约束见 BR-LGN-002。客户端“设备验证成功”布尔值不是服务器认证证据；本轮不声称已证明设备未被修改或完成学生真实性验证。
+Auth 使用受支持协议校验公钥和真实私钥持有证明，不能相信客户端 verified 标志。注册同时要求 UC011 邮箱验证码；公钥或设备签名本身不足以创建账号。本产品不额外要求生物识别或用户主动管理密钥；设备签名不证明学校身份、官方客户端或硬件可信等级。
 
-首次注册保留显式创建平台账号和提交关联声明的确认，不要求额外的生物识别或每次签名确认；后续设备登录的服务端证明与触发边界引用 [BR-LGN-011](../use-cases/UC-AUTH-007-login.md#br-lgn-011)，客户端自动登录和本地清理建议见[客户端认证生命周期建议](../client-guides/authentication-lifecycle.md)。具体凭据协议须满足该产品目标，不能把 App 自管设备密钥称作或实现成标准 Passkey。
+首版一个规范公钥只属于一个 authId，禁止换编码、credentialId 或操作绕过唯一性。相同公钥已登记时，不创建第二账号，也不直接返回已有账号 Session；使用 UC007 的新设备登录证明确认原归属。撤销记录不立即释放公钥，注销占用与清理引用 UC025。
 
-凭据的稳定标识与归一化公钥指纹由服务端/受信协议适配器确定。首版一个凭据只属于一个 authId，禁止将已有凭据改绑另一个账号；客户端不能通过不同编码、换 credentialId 或新注册 operation 绕过公钥唯一性。具体规范化由凭据协议规定。
-
-同一公钥已注册时，不创建第二个主体，也不直接发放已有主体的 Session；引导使用 UC-AUTH-007 完成新的登录证明。不能复用已消费的注册证明作为登录证明。撤销记录不立即释放公钥唯一归属，注销后的保留/清理另行设计。
-
-一个 authId 可以拥有多条独立 credential 记录，每条保存 credentialId、公钥、协议及状态；服务端不保存私钥。首版每台新设备或每次失去原安全存储后的独立安装都生成新密钥，并在邮箱登录、旧设备授权或其他恢复方式确认同一 authId 后新增一条 credential；不复制、导出或下载旧私钥。服务端凭据撤销由 [UC-AUTH-009](../use-cases/UC-AUTH-009-revoke-own-credential.md) 定义，本机私钥删除与退出编排见[客户端认证生命周期建议](../client-guides/authentication-lifecycle.md)；只撤销当前 Session 是 [UC-AUTH-008](../use-cases/UC-AUTH-008-revoke-own-session.md) 的独立能力。新增凭据和凭据列表仍由后续管理用例授权，当前匿名注册入口不能向既有 authId 添加凭据。
+一个 authId 可有多条 credential。新设备生成新密钥，在 UC012 验证原邮箱并证明新私钥后登记；不复制或下载旧私钥。服务端不保存私钥。UC009 撤销凭据、UC008 撤销 Session；设备列表、命名及旧设备授权新增设备仍属后续用例。
 
 ## 平台共享契约（按 spec 显式抽取）
 
@@ -365,17 +364,17 @@ Auth 只接受已发布、受支持协议的注册证明，校验公钥/算法�
 
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
-- 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。
-- 普通设备注册/登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
+- 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。学年时间表 PUT 只接受 nextRolloverAt、expectedRevision 和 reason，不接受客户端提交 currentAcademicYear。
+- 设备登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
   邮箱 Complete 消息体为 code 和条件必需的 registrationProof，路径 operation_id 同样覆盖体中值。
-  凭据撤销的 `credential_id` 仅来自路径。GET/DELETE 不带请求体。
+  凭据撤销的 `credential_id` 和应用存储清除的 `application_id` 仅来自路径。GET/DELETE 不带请求体。
 - 资料编辑保留消息体中的 `expectedRevision` 和显式 ProfileValue oneof，不引入另一套
   原始 KV 或 `If-Match` 协议。具体字段值类型仍按 UC005 校验。
 - 不接受 query 参数作为消息、Session 或身份来源。Session、可信用户身份载体完全遵守
   [设备认证契约](../../platform/contracts/auth-device-session-v1.md#session-载体) 与 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)。
 - JSON 解码拒绝未知字段、重复字段和冲突的 oneof 分支；资料编辑还拒绝 null 操作列表、条目及值分支，
   保留 UC005 的显式编辑规则。不把解析器的原始输入内容返回给客户端。
-- HTTP 请求体在分配前有界读取：认证入口默认 16 KiB（由部署配置），资料编辑 128 KiB。
+- HTTP 请求体在分配前有界读取：认证入口默认 16 KiB（由部署配置），资料编辑 128 KiB，应用用户存储固定 16 KiB。
   业务容量限制另行生效；暂不支持压缩请求体，返回 415。非 JSON POST/PUT/PATCH 同样返回 415。
 - 所有响应设置 `Cache-Control: no-store`；撤销成功响应为 `{}`。错误 reason 复用 gRPC，
   HTTP 状态遵守各 UC：大小超限 413、限流 429、版本冲突/耗尽 409。
@@ -389,7 +388,7 @@ Auth 只接受已发布、受支持协议的注册证明，校验公钥/算法�
 `AUTH_USER_ENDPOINTS_ENABLED=false` 时不注册上述 HTTP 用户路由，与 gRPC 开关一致。
 TLS 与公网可达性由部署和 Gateway 决定，监听 HTTP 不代表公网入口已经交付。
 
-验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法、两个旧 Reviewer 管理方法与两个新增应用审核权限方法、
+验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖修订后的资料/认证方法及退役无邮箱路径拒绝、Reviewer/应用运维权限方法、两个学年时间表管理方法及应用用户存储 HTTP/本人清除方法、
 生成客户端、当前用户隔离、重复/替代身份头拒绝、严格 JSON、资料 CAS、撤销幂等性及内部 RPC
 不暴露为 HTTP。保留原生 gRPC 回归测试。
 
@@ -430,13 +429,17 @@ HTTP header 与 gRPC metadata 均使用 `x-iwut-session`，值仅为 token，不
 
 Gateway 仅对显式 Auth Session 路由转发该秘密，不转发到 App Center 或其它业务服务。入口必须通过 TLS；内部 gRPC 使用部署控制的私有网络或 TLS。后续 Gateway 签发链路继续独立设计，本契约不开放任意 audience 的公共 introspection。
 
-UC011 的可选 Session 例外仅用于其精确 Begin/Complete 方法，详见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md#rpc-与-session-鉴权)；其它接口的必需载体规则不变。
+UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contracts/auth-email-account-v3.md) 的精确载体；旧可选 Session REGISTER/BIND 已退役，其它接口的必需载体不变。
 
 ### `platform/contracts/auth-email-login-v1.md`：邮箱登录协议 v1
 
 #### 范围与兼容性
 
+2026-10-12：本协议继续用于邮箱/验证码登录，客户端后台登记设备并回到原 authId，签名字节与载体不变。无邮箱注册和学生关联退役；邮箱登录不依赖关联密钥或迁移，失败不得转注册。
+
 本契约固定 [UC012](../use-cases/UC-AUTH-012-login-with-email.md) 的客户端、Auth 和 Gateway 协议。它授权邮箱持有人登录原账号并登记/复用本机设备，不是注册协议，也不增加邮箱字符串到 JWS 的投影。
+
+2026-10-12 此入口确认保留备用，默认密码登录另见 UC034 DRAFT/密码协议；自动登录继续 UC007。只认当前登录角色，添加学校地址不获登录权；最终检查 UC033 账号版本/凭据下界，不复活密码退休钥。v1 字节不变，新增角色/代际适配未实现；登录码不能重置密码。
 
 Frame、UTF8、U64BE、规范 UUID、公钥及 DER 签名编码引用 [设备协议](../../platform/contracts/auth-device-session-v1.md)。credentialProposal.protocol_version 仍为 `iwut-device-v1`，供后续 UC007 使用；本次 challenge.protocol_version 独立为 `iwut-email-login-v1`。旧 REGISTER/LOGIN 和 [邮箱注册协议](../../platform/contracts/auth-email-binding-v1.md) 的格式与向量均不变。
 
@@ -529,19 +532,19 @@ reason/HTTP/gRPC 状态遵守 UC012。超大消息使用 EMAIL_LOGIN_REQUEST_TOO
 - `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-006`（use-cases/UC-AUTH-006-create-user.md）：目标与范围、参与者与前置条件、输入与输出、主流程、持久化候选、异常语义、测试与验收、交付依赖与验收边界、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、治理工作包路由、UC020 同账号 Session 管理
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC020 同账号 Session 管理
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-012-login-with-email.md` | 203 | `59f3bf32fa60` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 161 | `4a8ab75ce6d1` |
-| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 279 | `a96eacf40f23` |
+| `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
+| `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |
-| `use-cases/UC-AUTH-007-login.md` | 252 | `3afbbd9047ae` |
-| `use-cases/UC-AUTH-006-create-user.md` | 279 | `2b56bd4eb59d` |
-| `platform/contracts/auth-center-api-routing.md` | 125 | `3c4fa072811e` |
-| `platform/contracts/auth-device-session-v1.md` | 125 | `5ff17feb92f9` |
-| `platform/contracts/auth-email-login-v1.md` | 88 | `ef2417d3b9e4` |
+| `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
+| `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
+| `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
+| `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
+| `platform/contracts/auth-email-login-v1.md` | 92 | `3bd9f86718ff` |

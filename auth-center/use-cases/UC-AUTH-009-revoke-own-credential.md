@@ -4,6 +4,10 @@
 
 ## 目标与范围
 
+2026-10-13 用户明确接受本次密码/防旁路修订并授权实施；下文旧基线仅为历史证据。先生成 brief，再实施与验证。UC032 仍 DRAFT，不开放旧 Session-only 跨设备撤销。
+
+2026-10-12 防旁路修订：旧已交付入口只凭 Session 即可撤销其他凭据，不能满足新密码保障。本修订已 ACCEPTED；原 RevokeOwnCredential 仅保留当前凭据退出，其他凭据须 UC032 当前密码＋当前钥新签名。生命周期不变；已生成 brief，实施时同步 API/HTTP/gRPC 与全部消费边界。
+
 账号初始化、认证材料版本和 CLOSED 拒绝统一引用 [UC022](UC-AUTH-022-disable-and-restore-user-account.md#br-acc-002) 与 [UC025](UC-AUTH-025-close-own-account.md#br-acc-009)；不得在旧记录缺字段时补默认值或通过历史成功结果复活账号。
 
 > 已认证用户要求 Auth 撤销属于自己账号的一条设备凭据，使该公钥不能再建立新 Session，并使依赖该凭据的既有 Session 在后续在线检查中失效。
@@ -13,7 +17,7 @@
 ## 参与者与前置条件
 
 - 调用者持有通过 BR-LGN-004 检查的有效 Session，主体为 ACTIVE USER。
-- 目标 credentialId 由调用者明确提交；Auth 以当前 Session 的 authId 做所有权判断，不接受请求体指定目标 authId。
+- 原入口目标必须等于当前 Session 的 credentialId；Auth 在最终检查后判断，不接受自报 owner。其他目标统一 CREDENTIAL_REAUTH_REQUIRED，由 UC032 流程处理，不先查目标泄露归属。
 
 ## 输入与输出
 
@@ -30,7 +34,7 @@ CredentialRevoked {}
 ## 主流程
 
 1. Auth 验证当前 Session，并取得可信 authId。
-2. 校验 credentialId 形状，按 `(authId, credentialId)` 读取目标凭据。
+2. 校验 credentialId 形状与当前凭据一致；其他目标拒绝并引导 UC032，不按 Session-only 路径撤销。
 3. 若凭据有效，以服务端时间原子设置 revokedAt；若同一账号的目标已经撤销，幂等返回成功。
 4. 提交成功后返回 CredentialRevoked。若目标正是当前 Session 的认证凭据，该 Session 从下一次在线检查开始失效。
 
@@ -45,7 +49,7 @@ CredentialRevoked {}
 
 凭据撤销提交后，它不能再完成 UC-AUTH-007 登录。BR-LGN-004 每次检查凭据状态，因此所有引用该 credentialId 的 Session 在随后检查中失败，无需在本命令内逐条更新 Session；撤销前已通过检查的在途请求和此前签发的短期 JWS 遵循各自既有边界。
 
-允许撤销当前 Session 使用的凭据，也允许撤销同一账号的其它凭据。撤销当前凭据后，再用原 Session 重试返回 SESSION_INVALID；其它仍有效 Session 可重复撤销同一目标。本次成功响应可能是该 Session 最后一次授权成功的请求；响应丢失时结果可能未知，客户端不能假定回滚。撤销最后一条凭据也不被服务器阻止：Auth 不以邮箱、其它设备或学生关联推断可恢复性，恢复风险提示和本地私钥删除由客户端负责。
+原公开入口只允许当前凭据，不新增密码要求以保留本机退出；撤销其他本人凭据必须 UC032 密码＋当前钥证明。UC009 的目标状态变更在该流程内部复用，不提供直接绕过的第二条用户入口。UC033 下界退休视为已失效，不能补版本复活，唯一占用保留。当前凭据撤销后旧 Session 重试 SESSION_INVALID，成功可能是其最后授权请求；未知结果不假定回滚。最后一条凭据仍可撤销，不以邮箱/其他设备推断可恢复性。
 
 撤销凭据不删除 USER、资料、学生关联或其它凭据。物理清理由单独保留策略处理；即使客户端声称已经删除本地私钥，Auth 也不能把该声明当作服务端撤销证据。
 
@@ -55,6 +59,7 @@ CredentialRevoked {}
 | --- | --- | --- |
 | credentialId 缺失或格式非法 | `INVALID_CREDENTIAL_ID` | 400 / INVALID_ARGUMENT |
 | Session 无效或主体不可用 | `SESSION_INVALID` | 401 / UNAUTHENTICATED |
+| 原入口目标不是当前凭据 | `CREDENTIAL_REAUTH_REQUIRED` | 403 / PERMISSION_DENIED |
 | 目标不存在或不属于当前 authId | `CREDENTIAL_NOT_FOUND` | 404 / NOT_FOUND |
 | 仓储不可用或提交结果未知 | `CREDENTIAL_REVOCATION_UNAVAILABLE` | 503 / UNAVAILABLE |
 
@@ -62,7 +67,7 @@ CredentialRevoked {}
 
 ## 测试与验收
 
-1. 有效 Session 可以撤销同一 authId 的当前或其它凭据；不能撤销其它账号凭据。
+1. 原入口仅可撤销当前凭据，其他目标一律要求 UC032，不泄露他人归属；UC032 真实密码＋设备证明可撤销本人其他目标。
 2. 撤销后新设备登录失败，引用该凭据的所有 Session 在随后在线检查中失败，其它凭据和 Session 不受影响。
 3. 重复与并发撤销幂等，revokedAt 不变化，公钥唯一归属不释放。
 4. 撤销当前凭据后当前 Session 失效；注入响应丢失时不把结果未知误报为回滚。

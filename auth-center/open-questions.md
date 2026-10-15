@@ -2,6 +2,29 @@
 
 状态：`ACTIVE`
 
+## 设备登录凭据管理（2026-10-12）
+
+2026-10-13 用户已接受邮箱账号 v3 与 UC006/011/031 修订，三项 ACCEPTED、脚本 brief 后实现。密码注册、目录/登录角色及当前校园依据已接入 v3/Wire 并通过专项；最终全仓真实 Mongo/race 已通过。UC033/034 仍 IN_PROGRESS，密码登录/重置/通知/公开密码端点尚未交付。UC009/025/026 密码防旁路修订已于 2026-10-13 获用户接受，脚本生成 brief 后实施；UC032 已获本次授权继续完成；完整模型不宣布生产就绪。
+
+用户 2026-10-13 授权继续完成 [UC-AUTH-032](use-cases/UC-AUTH-032-manage-own-device-credentials.md)，已 ACCEPTED/后端 COMPLETE；[依赖与验收记录](implements/UC-AUTH-032-readiness.md)记录本轮代码基础和真实回归。本轮先依赖复核、脚本 brief，再实施既有草案范围；四方法、双证明、限额与清理已交付。设备密钥继续退居后台，当前方案不是标准 WebAuthn Passkey。
+
+- 已接受首版：未撤销凭据的有界列表、可选名称和独立 revision、当前凭据标记；不收集 IP/型号/位置，不虚构凭据最近使用时间。移除其他凭据用当前密码＋当前 Session 所引用设备的新签名，与目标撤销同事务提交；当前凭据仍按 UC009 退出。
+- 审核门禁已通过：用户授权继续完成既有范围；UC009 已限制为当前凭据，不能由 UC032 开关关闭而恢复旧旁路。Gateway、客户端与生产启用仍独立交付，不包含扫码新增、WebAuthn 或批量撤销。
+- 邮箱与密码方向已同步权威 UC006/011/031，三项实质修订已 ACCEPTED 并实施；UC012/013/017、客户端与共享契约同步消费边界，代码已改新目录/角色，全仓回归收尾。密码工作包 UC033/034 已接受并实施第一批核心；UC032 仅引用其依赖，不作第二份邮箱/校园规则正文。
+- 已审核接受：[邮箱 v3 契约](../platform/contracts/auth-email-account-v3.md)的新注册/目录/角色协议与校园时间语义；所有地址全局唯一/最多 10 个已确认，不再开放。正式 blocklist/部署压测、通知、重置/登录/危险动作和清理/恢复属于工程交付门禁。扫码后移，不替代密码。
+- 后移：旧设备授权新设备另立 UC；新增设备当前走 UC012。凭据硬上限、自动淘汰、批量撤销、标准 WebAuthn 和真实物理设备识别不进入首版。
+
+## 邮箱账号与应用次数权益（2026-10-12）
+
+此前邮箱显式注册/关联退役和永久独立认证基线已交付；最新密码/邮箱列表/当前学校绑定模型见上方及修订 UC006/011/031，不再永久保留无依据认证。校园成员不等于学生权限，应用次数仍自管。
+
+UC031 本次修订已 ACCEPTED 并实现当前依据模型，旧永久事实仅作历史；应用次数参考保持 GUIDANCE。仍按依赖闭合、用户审核、ACCEPTED、脚本 brief 后才实施；文档修订与代码完成分开，见 implements。
+
+- Auth：旧独立认证 API/最小 claim/清理已验证；新学校绑定与撤回、密码/邮箱列表待交付，不用资料/未验证后缀替代，也不以旧测试证明新增模型已完成。
+- 应用：一次性赠送按账号与活动去重，余额和消费流水由应用服务端持有，不信任客户端可写 UC030 KV。仅提供非权威开发者参考；具体活动/数量/业务/失败定义由应用决定，不是 Auth 实施依赖，不在 Auth 建立次数账本 UC。
+- 边界：按账号一次不承诺按自然人一次；注销新账号可能再次符合条件。若应用不能接受，须先独立设计跨账号防重复方案，不默认为 Auth 保存永久邮箱已消费库。
+- 外部业务：扣次后执行若不能同事务提交，需要幂等执行或结果查询；未知结果不能直接退款或重做。GREY/STABLE 余额隔离与应用账本注销保留也需应用确认。
+
 ## 账号与平台资格治理（2026-10-05）
 
 新增[治理设计草案](design-notes/account-governance-delivery-plan.md)，规划管理员授予/撤销、账号禁用/恢复、Developer 暂停/恢复、Developer 退出及本人注销五个候选 UC。治理设计已接受，既有权限/状态/初始化契约同步修订；代码和部署状态独立跟踪。管理员管理已展开为 [UC021](use-cases/UC-AUTH-021-manage-platform-administrators.md)（ACCEPTED），固定集合、最后管理员保护及一次性初始化仍待接受；系统未上线，不设计旧 bootstrap 迁移，生产应急恢复规程独立交付；App 应用归属处置、暂停的对外生效边界与注销数据清理仍是跨服务交付依赖。具体实现现状以 [实现记录](implements/README.md) 为准，不以本页历史开放问题推断实现缺失。
@@ -55,31 +78,42 @@ session 如何建立，以及 Auth 如何签发 trusted-identity-v1。前两项�
 
 [UC-AUTH-005](use-cases/UC-AUTH-005-edit-own-user-profile.md) 资料编辑规则和配套读取契约已 ACCEPTED。以下事项仍需推进：
 
-- 首批实际字段及其用途；示例学校名称/入学年份不是已批准的收集清单。UC028 已固定第三方披露机制，但不把测试映射变成生产字段清单。
+- 2026-10-10 已由用户审核接受 [BR-UPF-017](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-017) 首批九个实际字段和 UC028 逐字段 scope；活动片区是多选集合，当前年级按 [BR-UPF-018](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-018) 的用户确认锚点阶段内推进并封顶。旧学校名称/入学年份示例不是生产字段；测试中的 `basic.name` fixture 即使 key 相同，其临时目录内容也不能代替正式配置。
 - 普通 USER 创建时的账号/资料初始化，以及既有主体记录的迁移工作包；本用例不在读取或编辑时静默修复。
 - 面向 Auth audience 的用户身份签发、Gateway 受保护路由、登录引导和客户端明确确认上传的交付。
 - 字段目录在线管理、停用与演进；当前首版部署装载与稳定性方向见 [BR-UPF-002](use-cases/UC-AUTH-005-edit-own-user-profile.md#br-upf-002)。
-- 第三方应用访问资料已展开为 [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md)：一字段一 scope、用户 consent、固定 `iwut_profile` claim 与在线当前读取；ApplicationUserStorage 继续后移。
+- STRING_SET、ACADEMIC_GRADE、字段 options/格式约束、UC029 学年时间表及真实生产目录/Scope 已实现但尚未部署；客户端确认交互和生产启用仍需独立验收。
+- 第三方应用访问资料已展开为 [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md)：一字段一 scope、用户 consent、固定 `iwut_profile` claim 与在线当前读取；敏感字段分级/二次确认继续后移。ApplicationUserStorage 已建立为 [UC-AUTH-030](use-cases/UC-AUTH-030-manage-application-user-storage.md) ACCEPTED，与 Profile 完全分离。
+
+### ApplicationUserStorage（UC-AUTH-030）
+
+2026-10-10 已审核接受并完成 Auth/API 后端：按 `(authId, applicationId, channel)` 隔离，使用固定有界 string KV、`storage.read/write` 与 `iwut-auth-center` audience；撤权后保留且重授权恢复访问，用户清空整个 Application 的三个 channel。第三方只开放 Auth 直接消费 opaque Bearer token 的 HTTP 入口；PUBLIC CORS 按当前 callback origin，普通 mutation 不另建逐次审计。Application 关闭复用 UC026 Apply/Get，首次 Apply 与 tombstone/审计同事务建立唯一存储清理任务。Gateway 路由、用户/第三方客户端界面和生产开关仍是交付项，但不再是开放产品问题。
+
+### 学年切换规则在线管理（2026-10-10）
+
+用户提出 `AUTH_ACADEMIC_CALENDAR_FILE` 不应继续是只能由部署修改的权威输入，系统管理员应能修改学年切换设置，缺省为每年 9 月 1 日。[UC-AUTH-029](use-cases/UC-AUTH-029-manage-academic-year-rollover.md) 已 ACCEPTED：读取返回当前学年和下一次更新时间；设置提交带年份且严格晚于当前服务端时间的下一次 Instant，到点后按 `Asia/Shanghai` 公历逐次增加一年。2 月 29 日的下一次为次年 3 月 1 日并从此继续逐年推进。
+
+UC005/028 和配套查询契约随接受同步修订，并生成 UC029 brief 后实施。代码不再读取 `AUTH_ACADEMIC_CALENDAR_FILE`，但外部环境残留同名变量不构成启动错误。
 
 
 ## 创建、登录与撤销的实现交付
 
-UC-AUTH-006 至 009 已 ACCEPTED；设备证明、学号规范化和散列、Session 载体及 RPC 鉴权由[共享契约](../platform/contracts/auth-device-session-v1.md)闭合。设计接受不等于生产交付，本页只跟踪实现工作：
+UC007/008 保持 ACCEPTED；UC006/011/031 的 v3 修订已 ACCEPTED、已实施专项，UC009 防旁路修订已 ACCEPTED、后端完成。设备 LOGIN/Session 字节保留；无密码邮箱 v2 已从公开运行时退役，学号关联亦退役。联合密码交付仍未完成，客户端/Gateway 独立验收，不以旧向量和后端通过替代新需求。
 
 - 后端真实验证器、共享测试向量、生成 Proto、原生 gRPC、方法级 middleware 与生产组合根；不得以 fake verifier 代替认证。
 - Mongo 原子注册、登录/撤销栅栏、会话一致检查、10 会话 LRU 及真实副本集故障测试，按 UC006–009 验收。
-- 学生关联仍是注册必填的客户端声明；启动前离线密钥轮换、正式环境维护窗口、故障测试及备份保留按 [BR-REG-008](use-cases/UC-AUTH-006-create-user.md#br-reg-008) 交付，不等待在线迁移。
+- 学生关联输入、快照、组/成员写入、配置与启动前离线迁移按 BR-REG-004/008 退役；系统未部署，不新增生产历史迁移。邮件/JWS 密钥更新及注销终止清单恢复保留各自门禁。
 - Session 的 AUTH_SESSION_TTL 必填配置、认证入口有界默认参数与非法配置拒绝启动，见 [BR-LGN-004](use-cases/UC-AUTH-007-login.md#br-lgn-004) 和 [BR-LGN-009](use-cases/UC-AUTH-007-login.md#br-lgn-009)；部署调优不改变固定会话及 LRU 语义。
-- Android/iOS 安全存储、客户端兼容矩阵、注册关联披露、签名前检查、自动登录和可靠删除独立验收，组合建议见[客户端生命周期](client-guides/authentication-lifecycle.md)。
+- Android/iOS 安全存储、客户端兼容矩阵、邮箱注册/登录界面、签名前检查、自动登录和可靠删除独立验收，组合建议见[客户端生命周期](client-guides/authentication-lifecycle.md)。
 - Gateway 路由与 Session 到用户身份 JWS 签发已在 UC-GW-001/UC-AUTH-010 分别跟踪。UC010 已接受；现有后端通过不表示 UC005 公网调用链已贯通。
 
-## 后续认证与关联能力
+## 后续认证能力
 
-- k8s 改造时再评审多实例在线密钥轮换；当前单实例离线方案见 [BR-REG-008](use-cases/UC-AUTH-006-create-user.md#br-reg-008)。
+- 关联密钥轮换与 k8s 在线迁移候选已经退役；其它认证密钥维护按各自用途，不重新引入学校关联。
 - Auth 基于有效 Session 签发目标服务身份、Gateway 鉴权 RPC/路由与秘密转发边界，跟踪已接受的 UC-AUTH-010 与 UC-GW-001 草案；首版不引入 Redis 或身份缓存，OAuth2 单独设计。
 - 邮箱设置/注册见 [UC-AUTH-011](use-cases/UC-AUTH-011-set-and-activate-email.md)，已有账号邮箱登录及本机设备授权见 [UC-AUTH-012](use-cases/UC-AUTH-012-login-with-email.md)，Developer 自助申请见 [UC-AUTH-013](use-cases/UC-AUTH-013-apply-for-developer.md)，UC011 已 ACCEPTED，其独立协议与向量已闭合；UC012 的专用签名、向量和接口也已闭合并 ACCEPTED，后端已基于 UC011 完成集成并合回 auth-center/v1，仍需交付 Gateway/客户端；UC013 已 ACCEPTED，后端依赖已满足，协议与默认关闭的恢复就绪声明已固定，进入实现流程。公网资格开通仍等待邮箱恢复链路实际交付，不能仅以后端实现完成视为产品可用。
-- 旧设备明确授权新增凭据、凭据/Session 列表与命名、撤销其它 Session、账号禁用/重新启用和注销仍需独立用例。当前 token 的 Session 撤销由 [UC-AUTH-008](use-cases/UC-AUTH-008-revoke-own-session.md) 定义，本人 credentialId 的凭据撤销由 [UC-AUTH-009](use-cases/UC-AUTH-009-revoke-own-credential.md) 定义，客户端退出组合见[生命周期建议](client-guides/authentication-lifecycle.md)。
-- 外部应用的专属学生关联标识：披露授权、未关联语义、保留/删除/改绑与配额连续性；当前注册仅建立内部关系，不发布新的对外身份 claim。
+- 凭据列表/命名/移除已展开为 UC032 ACCEPTED；旧设备明确授权新增凭据仍后移。Session 列表与回收已有 UC020，账号禁用/恢复和注销已有 UC022/025，当前交付现状以 implements 为准。当前 token 的 Session 撤销由 [UC-AUTH-008](use-cases/UC-AUTH-008-revoke-own-session.md) 定义，当前 Session 凭据撤销由 [UC-AUTH-009](use-cases/UC-AUTH-009-revoke-own-credential.md) 定义，撤销其他凭据由 UC032 定义，客户端退出组合见[生命周期建议](client-guides/authentication-lifecycle.md)。
+- 应用专属学生关联标识取消，对外仍用 pairwise sub；当前学校绑定认证披露由修订中的 UC031 定义，不等于学生权限或自然人标识。
 
 ## OAuth 身份与授权分组已明确
 

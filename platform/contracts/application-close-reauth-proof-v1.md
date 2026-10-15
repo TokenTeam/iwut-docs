@@ -1,10 +1,10 @@
 # Application 关闭近期认证证明 v1
 
-状态：`ACCEPTED`
+状态：`ACCEPTED / IMPLEMENTED`
 
 ## 目的与边界
 
-本契约定义用户在关闭一个 Application 前，如何用当前 Session 所属的同一登记设备完成一次新的 challenge/signature，并由 Auth Center 签发只能交给 App Center、只能用于该 Application 关闭的短期 JWS。
+本次修订定义当前平台密码＋同 Session 设备新签名共同授权 Auth 签发 app.close proof；旧设备-only 基线曾 ACCEPTED/交付，2026-10-13 用户接受新门禁，已实施并通过最终真实回归。既有签名 Frame/JWS 格式保留，Complete 增加密码字段并在 Auth 最终检查版本/下界，不允许遗漏密码回退。App 只消费用途受限 proof，不收平台密码。
 
 普通 USER JWS 的 `iat` 表示可信身份何时签发，不表示用户刚刚重新证明设备私钥控制权。前端确认框、Session 最近使用时间、密码输入字符串和已有 OAuth token 也不能代替本文证明。
 
@@ -29,6 +29,7 @@ message CompleteApplicationCloseReauthRequest {
   string operation_id = 1;
   string application_id = 2;
   bytes signature_der = 3;
+  string current_password = 4; // 已接受修订：必需；仅 TLS 请求秘密，非签名/JWS字段
 }
 
 message CompleteApplicationCloseReauthResponse {
@@ -70,7 +71,7 @@ Frame(
 
 `Frame(part...) = concat(U32BE(len(part)), part)`。UUIDBytes 是 RFC 4122 网络字节序的 16 字节值。签名算法、低 S 规范化、公钥编码和 DER 严格校验沿用 [App 设备认证与 Session v1](auth-device-session-v1.md)，但 domain/action 与其他设备证明完全隔离。
 
-Complete 必须携带 Begin 时的同一 Session。Auth 在最终事务中重新确认 Session、账号、凭据、版本、operation 绑定和未过期，再验证 signature。Session、credential、authId 或 applicationId 任一漂移都失败；不能把另一个有效设备或同账号另一条 Session 替换进已有 operation。
+Complete 同一 Session＋当前密码＋设备新签名；按 UC033 先有界校验密码，最终事务比较原 passwordRevision/accountRevision 和凭据下界/operation/期限。任一漂移拒绝，不能另一设备/Session替代，不持久化密码。请求字段号与生成代码须同步交付；完整新门禁验收独立记录，不改变既有 Frame/JWS 编码或用旧设备-only 证据冒充双证明验收。
 
 ## Proof JWS
 

@@ -7,31 +7,34 @@
 
 ## 当前迭代
 
-当前已有二十六个接受的用例（UC-AUTH-001 至 026）；设计接受与实现完成分别跟踪。早期身份基础如下，OAuth 与治理工作的最新状态见本页后续入口和 [实现覆盖](implements/README.md)：
+当前 34 项 UC；UC009/025/026 的密码防旁路修订已获用户接受，34 项 ACCEPTED，UC032 于 2026-10-13 获用户授权继续完成。UC033/034 于 2026-10-13 获授权开始实现，相关邮箱/设备修订仍独立闭合；旧版本交付不表示新修订完成，见 registry/implements。
+
+2026-10-12 最新方向：注册验证邮箱并设置平台密码；已验证邮箱列表中恰好一个登录/恢复角色，切换需密码，忘记密码仅用当前登录邮箱验证码重置；非登录邮箱不能登录或恢复。UC031 认证由当前学校绑定支撑，删除最后依据撤回，不再无条件永久保存。UC006/011/031 v3 修订已审核接受、脚本 brief 后实施；新目录/密码注册/校园依据专项通过，全仓回归与联合密码启用仍收尾。此前无密码邮箱 v2/永久独立事实仅为历史，公开旧注册/BIND 已退役。次数仍由应用自管，第三方继续用 Application pairwise sub，不公开 authId。
+
+已展开 [UC033 密码管理/恢复](use-cases/UC-AUTH-033-manage-password-and-recovery.md)、[UC034 默认密码登录](use-cases/UC-AUTH-034-login-with-password.md)及[开工检查](implements/UC-AUTH-033-034-readiness.md)：UC012 邮箱码备用、UC007 自动登录；正常改密保留当前设备并换发 Session，重置清退全部旧设备，旧 OAuth 凭据失效但同意/sub/权益保留。UC032 的列表/命名/密码＋设备签名撤销复用已交付密码核心，旧 UC009 已收紧为当前凭据。UC033/034 已生成开工 brief，完整登录/重置/通知仍独立交付，实施状态见 readiness；相关入口不会提前启用。
 
 - `UC-AUTH-001`：授权的内部服务读取 Auth 权威的 Scope Catalog 完整快照。
 - `UC-AUTH-002`：授权的内部服务按 Auth ID 批量读取当前 Developer 状态。
 - `UC-AUTH-003`：授权的内部服务解析指定 purpose 的 SYSTEM 主体。
 - `UC-AUTH-004`：平台管理员独立管理应用公开资料与应用版本审核权限。
 - `UC-AUTH-005`：普通用户显式设置/删除自己的资料，以当前账号状态与资料版本原子确认。
-- `UC-AUTH-006`：客户端已有本地学校账号，提交必需的学生关联声明，通过设备凭据显式创建正式 USER 和首次 Session。
+- `UC-AUTH-006`（ACCEPTED 修订）：验证邮箱、设置密码并原子创建账号；学号关联与无邮箱入口退役，后台密钥保留。
 - `UC-AUTH-007`：设备凭据登录、服务端 Session、在线检查，以及每账号 10 条有效会话的 LRU 管理。
 - `UC-AUTH-008`：由当前 token 定向撤销自己的 Session，不改变设备凭据。
 - `UC-AUTH-009`：有效用户撤销属于自己账号的设备凭据，并使相关 Session 在后续检查中失效。
 
 - `UC-AUTH-010`：受授权 Gateway 根据有效 Session 获取目标服务的可信用户 JWS。
-- `UC-AUTH-011`（ACCEPTED）：无 Session 时通过邮箱验证创建账号；有有效 Session 时绑定或更换邮箱。
+- `UC-AUTH-011`（ACCEPTED 修订）：注册设置密码、邮箱列表与唯一登录角色；切换需密码，非登录绑定不能作为恢复入口。
 - `UC-AUTH-012`（ACCEPTED）：邮箱验证码登录原账号，登记/复用本机设备凭据并建立 Session。
 - `UC-AUTH-013`（ACCEPTED）：具备激活邮箱及可用邮箱登录的普通用户选择唯一 developerHandle 自助申请 Developer；历史已开通账号可显式补设一次。
 
 用户资料的字段定义和编辑规则已归入 UC-AUTH-005 的 `BR-UPF-*`，读取本人资料和表单 schema
 见[配套查询契约](query-contracts/user-profile-editing.md)。可信身份签发由 UC-AUTH-010 定义，
 Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与本机设备恢复、Developer 自助申请
-分别见已接受的 UC-AUTH-011/012/013；Scope 管理后台、Developer 暂停/恢复、旧设备迁移、
+分别见修订中的 UC011 及已接受基线 UC012/013；Scope 管理后台、Developer 暂停/恢复、旧设备迁移、
 第三方应用 OIDC/consent 已有下方 PROPOSED 用例；动态资料开放仍需独立设计。
 
-创建、登录和两项撤销用例已接受，设备签名、关联声明与 Session/RPC 载体统一引用
-[App 设备认证与 Session v1](../platform/contracts/auth-device-session-v1.md)。运行参数及存储原子性由对应 UC 定义。
+设备登录与两项撤销保持已接受基线；密码注册 v3 修订已接受并实施。设备 LOGIN/Session 字节不变，邮箱 v2 为退役历史，当前注册契约为 auth-email-account-v3；学校关联继续退役。
 客户端组合流程见[客户端认证生命周期建议](client-guides/authentication-lifecycle.md)，客户端和 Gateway 独立交付。
 
 用户资料的模型说明保留在
@@ -63,6 +66,14 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 - [UC-AUTH-021](use-cases/UC-AUTH-021-manage-platform-administrators.md)：管理员资格查询、授予/撤销、最后管理员保护与 一次性 bootstrap 草案，ACCEPTED。
 
+- [UC-AUTH-029](use-cases/UC-AUTH-029-manage-academic-year-rollover.md)：平台管理员读取并设置带年份的下一次学年更新时间；缺省逐年 9 月 1 日，ACCEPTED。
+- [UC-AUTH-030](use-cases/UC-AUTH-030-manage-application-user-storage.md)：第三方应用按当前 OAuth 授权读写用户/Application/channel 隔离的有界 KV，ACCEPTED，Auth/API 后端实现完成。
+- [UC-AUTH-031](use-cases/UC-AUTH-031-establish-email-account-and-campus-certification.md)：邮箱账号与校园成员认证，ACCEPTED 修订；当前学校绑定依据、最后依据解绑撤回、最小 OAuth 披露及注销清理；旧永久事实不再授权。
+- [UC-AUTH-032](use-cases/UC-AUTH-032-manage-own-device-credentials.md)：本人凭据列表、命名、单目标移除与当前密码＋当前设备新签名，ACCEPTED/后端 COMPLETE；UC009 防旁路、UC025 清理已同步，Gateway/客户端独立交付；[验收记录](implements/UC-AUTH-032-readiness.md)。
+- [UC-AUTH-033](use-cases/UC-AUTH-033-manage-password-and-recovery.md)：密码策略/存储、正常修改、登录邮箱恢复、危险动作及统一代际/凭据下界，ACCEPTED / IN_PROGRESS。
+- [UC-AUTH-034](use-cases/UC-AUTH-034-login-with-password.md)：默认登录邮箱＋密码＋本机设备证明，ACCEPTED / IN_PROGRESS；[联合 readiness](implements/UC-AUTH-033-034-readiness.md)、[密码协议](../platform/contracts/auth-password-v1.md)。
+- [应用次数权益开发者参考](design-notes/email-first-campus-entitlements.md)：应用自管领取、余额、幂等消费与退回；非权威参考，不分配 Auth/App Center 权益 UC，不把业务数量作为 Auth 依赖。
+
 - [账号与平台资格治理草案](design-notes/account-governance-delivery-plan.md)：管理员授予/撤销、账号禁用/恢复与注销、Developer 暂停/恢复与退出的候选 UC 边界、顺序和交付依赖；尚未接受或实施。
 
 - [UC-AUTH-020](use-cases/UC-AUTH-020-manage-own-sessions.md)：同账号 Session 列表与明确目标集合回收草案，PROPOSED；不包含关联组跨账号管理。
@@ -80,7 +91,7 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [用户资料字段定义](design-notes/user-profile-field-definition.md)：字段目录的最小结构、类型与已接受的校验规则。
 - [用户模型](design-notes/user-model.md)：用户主体固定字段、动态资料实例及相关能力的边界草案。
 - [UC-AUTH-005](use-cases/UC-AUTH-005-edit-own-user-profile.md)：用户编辑自己的资料。
-- [UC-AUTH-006](use-cases/UC-AUTH-006-create-user.md)：创建用户、设备凭据归属与学生关联。
+- [UC-AUTH-006](use-cases/UC-AUTH-006-create-user.md)：邮箱创建用户、后台设备归属及学生关联/离线迁移退役。
 - [UC-AUTH-007](use-cases/UC-AUTH-007-login.md)：设备登录、Session 建立与在线检查。
 - [UC-AUTH-008](use-cases/UC-AUTH-008-revoke-own-session.md)：撤销自己的当前 Session。
 - [UC-AUTH-009](use-cases/UC-AUTH-009-revoke-own-credential.md)：撤销自己的设备凭据。
@@ -98,7 +109,7 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 
 ## 状态
 
-设计使用 `PROPOSED`、`ACCEPTED`、`DEPRECATED`、`SUPERSEDED`；实现覆盖使用
+设计使用 `DRAFT`、`PROPOSED`、`ACCEPTED`、`DEPRECATED`、`SUPERSEDED`；实现覆盖使用
 `NOT_STARTED`、`IN_PROGRESS`、`CORE_COMPLETE`、`COMPLETE`。设计状态和实现状态彼此独立。
 
 ## OAuth / OIDC 设计

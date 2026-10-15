@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-025",
-  "note": "Accepted governance implementation. Preserve DDD, shared authentication fence, exact authentication dispatch, HTTP/native gRPC and default-off public gates. No legacy data migration. Backend acceptance requires real Mongo and cross-service evidence; deployment readiness is separate.",
+  "note": "Accepted password/anti-bypass revision, explicitly approved 2026-10-13. Generate this brief before implementing. Restrict UC009 original entry to the current credential; UC025 requires current password plus existing dedicated proof (including DISABLED purpose); UC026 requires current password plus same-Session device proof. UC032 remains DRAFT. Preserve prior dirty work, public signature bytes, transaction fences, closure/cleanup evidence; no production migration, push or deployment.",
   "uc_sections": [
     "目标与范围",
     "认证与资格",

@@ -204,6 +204,8 @@ App 的未来暂停/恢复命令必须分别检查精确权限并记录其自身
 
 #### 路由边界
 
+2026-10-12 下表仅已交付基线。密码管理/恢复、默认密码登录已展开 UC033/034 DRAFT 和 auth-password-v1 草案，未注册真实入口；旧 REGISTER/BIND/凭据撤销、注销 Prepare/app.close Complete 须同步密码与防旁路门禁，新修订未实施，不提前启用或登记虚构公网清单。
+
 与 [App API 路由](../../platform/contracts/app-center-api-routing.md) 一致，Proto 只声明服务内部 `/v1/...` 路径。
 Gateway 公共入口前缀为 `/auth-center`，在转发前剥离；原生 gRPC full method 不加前缀。
 UC004–009 的 HTTP 绑定由 Auth 后端实现。Gateway 的路由与认证编排按
@@ -211,8 +213,6 @@ UC004–009 的 HTTP 绑定由 Auth 后端实现。Gateway 的路由与认证编
 
 | HTTP method | Auth 服务内部路径 | RPC 方法 | Gateway 策略 | 成功状态 |
 | --- | --- | --- | --- | --- |
-| POST | `/v1/registrations` | AuthenticationService/BeginUserRegistration | DIRECT | 200 |
-| POST | `/v1/registrations/{operation_id}/completion` | AuthenticationService/CompleteUserRegistration | DIRECT | 201 |
 | POST | `/v1/device-logins` | AuthenticationService/BeginDeviceLogin | DIRECT | 200 |
 | POST | `/v1/device-logins/{operation_id}/completion` | AuthenticationService/CompleteDeviceLogin | DIRECT | 201 |
 | DELETE | `/v1/sessions/current` | AuthenticationService/RevokeCurrentSession | DIRECT | 200 |
@@ -226,8 +226,13 @@ UC004–009 的 HTTP 绑定由 Auth 后端实现。Gateway 的路由与认证编
 | GET | `/v1/users/{subject_auth_id}/application-review-permissions` | ReviewerPermissionService/GetApplicationReviewPermissions | SESSION | 200 |
 | PUT | `/v1/users/{subject_auth_id}/application-operation-permissions/{permission}` | ApplicationOperationsPermissionService/ManageApplicationOperationsPermission | SESSION | 200 |
 | GET | `/v1/users/{subject_auth_id}/application-operation-permissions` | ApplicationOperationsPermissionService/GetApplicationOperationsPermissions | SESSION | 200 |
+| GET | `/v1/academic-year-policy/schedule` | AcademicYearPolicyService/GetAcademicYearSchedule | SESSION | 200 |
+| PUT | `/v1/academic-year-policy/schedule/next-rollover` | AcademicYearPolicyService/UpdateNextAcademicYearRollover | SESSION | 200 |
+| DELETE | `/v1/users/me/application-user-storage/{application_id}` | ApplicationUserStorageService/ClearOwnApplicationUserStorage | SESSION | 200 |
 
-UC011 追加三个 DIRECT 路由，完整字段及 Session 例外见 [邮箱设置与注册协议](../../platform/contracts/auth-email-binding-v1.md)：
+原 `/v1/registrations` 和 completion 路径不注册，旧 BeginUserRegistration/CompleteUserRegistration RPC 返回 UNIMPLEMENTED；不重定向、不代为发起注册，也不因启用用户入口恢复旧方法。
+
+UC011 是唯一注册入口，三个 DIRECT 路由的字段及 Session 例外见[邮箱协议 v2](../../platform/contracts/auth-email-binding-v2.md)：
 
 | HTTP method | Auth 服务内部路径 | RPC 方法 | Gateway 策略 | 成功状态 |
 | --- | --- | --- | --- | --- |
@@ -259,6 +264,10 @@ ReviewerPermissionService package 为 `auth_center.v1.reviewer_permission`，四
 
 ApplicationOperationsPermissionService package 为 `auth_center.v1.application_operations_permission`，两个方法由 Auth 校验当前完整平台管理员资格；SESSION 身份本身和 App 操作权限都不能管理他人权限。精确 allowlist、共享 revision、邮箱恢复门禁及投影边界唯一见 [UC027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md)。入口默认关闭；App Center 的暂停/恢复业务路由不属于本契约。
 
+AcademicYearPolicyService package 为 `auth_center.v1.academic_year_policy`，两个方法由 Auth 在线复核当前完整平台管理员资格；精确时间、递推、并发和审计语义唯一见 [UC029](../use-cases/UC-AUTH-029-manage-academic-year-rollover.md)。管理入口由独立 `AUTH_ACADEMIC_YEAR_POLICY_ENDPOINTS_ENABLED` 控制且默认关闭；关闭管理入口不影响 Auth 内部消费已 provision 的时间表。
+
+ApplicationUserStorageService package 为 `auth_center.v1.application_user_storage`。本人清除使用 SESSION 身份，`application_id` 仅由路径绑定，一次删除该用户与 Application 的 TEST/GREY/STABLE 数据，不返回应用 key/value。第三方读写另使用 `POST /v1/application-user-storage:batchGet` 与 `POST /v1/application-user-storage:mutate`；两者是 Auth 直接验证 opaque OAuth Bearer token 的 HTTP-only 资源端点，不经 SESSION 转换、不生成原生 gRPC 第三方方法。三个入口均由 `AUTH_APPLICATION_USER_STORAGE_ENABLED` 控制且默认关闭，精确语义见 [UC030](../use-cases/UC-AUTH-030-manage-application-user-storage.md)。
+
 AuthenticationService package 为 `auth_center.v1.authentication`；UserProfileService package
 为 `auth_center.v1.user_profile`。DIRECT 不代表无鉴权：各方法继续遵守设备证明、token 定向
 撤销或有效 Session 的独立边界。SESSION 路由须经 Gateway 签发 `iwut-auth-center` audience
@@ -271,17 +280,17 @@ Scope Catalog、UC002 内部批量 Developer 状态查询、SYSTEM principal 查
 
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
-- 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。
-- 普通设备注册/登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
+- 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。学年时间表 PUT 只接受 nextRolloverAt、expectedRevision 和 reason，不接受客户端提交 currentAcademicYear。
+- 设备登录的 Complete 消息体仅需 `proof`；`operation_id` 由路径绑定，覆盖消息体中同名值。
   邮箱 Complete 消息体为 code 和条件必需的 registrationProof，路径 operation_id 同样覆盖体中值。
-  凭据撤销的 `credential_id` 仅来自路径。GET/DELETE 不带请求体。
+  凭据撤销的 `credential_id` 和应用存储清除的 `application_id` 仅来自路径。GET/DELETE 不带请求体。
 - 资料编辑保留消息体中的 `expectedRevision` 和显式 ProfileValue oneof，不引入另一套
   原始 KV 或 `If-Match` 协议。具体字段值类型仍按 UC005 校验。
 - 不接受 query 参数作为消息、Session 或身份来源。Session、可信用户身份载体完全遵守
   [设备认证契约](../../platform/contracts/auth-device-session-v1.md#session-载体) 与 [trusted-identity-v1](../../platform/contracts/trusted-identity-v1.md)。
 - JSON 解码拒绝未知字段、重复字段和冲突的 oneof 分支；资料编辑还拒绝 null 操作列表、条目及值分支，
   保留 UC005 的显式编辑规则。不把解析器的原始输入内容返回给客户端。
-- HTTP 请求体在分配前有界读取：认证入口默认 16 KiB（由部署配置），资料编辑 128 KiB。
+- HTTP 请求体在分配前有界读取：认证入口默认 16 KiB（由部署配置），资料编辑 128 KiB，应用用户存储固定 16 KiB。
   业务容量限制另行生效；暂不支持压缩请求体，返回 415。非 JSON POST/PUT/PATCH 同样返回 415。
 - 所有响应设置 `Cache-Control: no-store`；撤销成功响应为 `{}`。错误 reason 复用 gRPC，
   HTTP 状态遵守各 UC：大小超限 413、限流 429、版本冲突/耗尽 409。
@@ -295,7 +304,7 @@ Scope Catalog、UC002 内部批量 Developer 状态查询、SYSTEM principal 查
 `AUTH_USER_ENDPOINTS_ENABLED=false` 时不注册上述 HTTP 用户路由，与 gRPC 开关一致。
 TLS 与公网可达性由部署和 Gateway 决定，监听 HTTP 不代表公网入口已经交付。
 
-验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖九个资料/认证 HTTP 方法、两个旧 Reviewer 管理方法与两个新增应用审核权限方法、
+验收使用生产 Wire、真实 HTTP/gRPC listener 和 MongoDB 副本集，覆盖修订后的资料/认证方法及退役无邮箱路径拒绝、Reviewer/应用运维权限方法、两个学年时间表管理方法及应用用户存储 HTTP/本人清除方法、
 生成客户端、当前用户隔离、重复/替代身份头拒绝、严格 JSON、资料 CAS、撤销幂等性及内部 RPC
 不暴露为 HTTP。保留原生 gRPC 回归测试。
 
@@ -455,7 +464,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-027`（use-cases/UC-AUTH-027-manage-application-operations-permissions.md）：主流程/授予或撤销、主流程/查询、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：治理工作包路由、UC020 同账号 Session 管理
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC020 同账号 Session 管理
 - `platform/contracts/auth-session-identity-issuance-v1.md`（docs 根级共享文档）：范围与权威来源、服务授权扩展、请求与凭据流向
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
 
@@ -464,6 +473,6 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-027-manage-application-operations-permissions.md` | 168 | `bbbc21f935a1` |
-| `platform/contracts/auth-center-api-routing.md` | 125 | `3c4fa072811e` |
+| `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
 | `platform/contracts/auth-session-identity-issuance-v1.md` | 83 | `eb7024a3ea06` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
