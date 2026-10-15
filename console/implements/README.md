@@ -27,6 +27,8 @@
 
 [真实浏览器 Session fencing 验收](2026-10-16-real-session-fencing.md) 已交付7项真实迟到响应头、双标签页、两生产副本及Auth提交点崩溃/依赖故障场景，与原2项UI成功主链联合通过；Begin未知、失败兄弟恢复、Mongo回执丢失及真实UI/cache故障矩阵仍开放。
 
+[未知结果与真实 UI 恢复验收](2026-10-16-unknown-result-and-ui-recovery.md) 已接受并实施中，补充实际恢复按钮、失败兄弟操作与Mongo提交回执丢失两个分支。
+
 ## UC-CONSOLE-002 首个实现工作包
 
 状态：`IMPLEMENTED`（真实浏览器联合验收仍待完成）
