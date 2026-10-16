@@ -40,3 +40,20 @@ Console实现冻结为`4290e3c`。准备器/固定控制边界新增13项合成�
 轮次`iwut-console-real-62095`终态exit0，12项全部通过（1.1分钟浏览器执行、无skip/retry）。两能力的queue/detail四入口均收齐旧200、SESSION_INVALID401及旧清理204交错；B经真实生产React读取另一项获权非空队列，旧投影未回填、无旧401清新代，四个旧204场景保持同document/B路由/投影/精确asOf且无额外自动读取/清理/导航。正式权限/revision、两把non-extractable钥匙与carrier属性保持。准备阶段真实密码429只按既有registration规则等待；DEVICE未重放、未触发额外签发。
 
 本轮五镜像均重新pull，ID与首轮及此前基线一致：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`；App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`；Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`；Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。终态后本轮容器/网络为空；修订后的统一690项Vitest＋103项Node通过。专项不替代无参数63项门禁；该全量已按同冻结源码、新拉latest启动，待终态。
+
+### 最终无参数完整门禁
+
+冻结源码仍为`8233ef1`，轮次`iwut-console-real-69416`无参数执行`pnpm test:real`，终态exit1：63项中59通过、4失败（浏览器12.9分钟），无skip/未运行项。新增12项真实Admin跨Session矩阵在完整轮次再次全部通过；原审核读取/断流恢复、双origin32次签发、双副本/持久提交回执、Developer迟到响应、生命周期、资格下降恢复、Tester及原React登录恢复均已执行。
+
+全部81条失败均落于原缓存响应头soft断言，没有额外功能/协议/Session硬断言失败：
+
+| 失败矩阵 | 精确断言来源 | 数量 |
+| --- | --- | --- |
+| Admin精确权限/游标/路由 | `admin-review.real.spec.ts:433`，28个Reviewer查询400/403/404分别缺private/no-store | 56 |
+| 管理权转让 | `management-transfer.real.spec.ts:257`，三个Application GET404缺no-store | 3 |
+| owned-list游标 | `owned-application-pagination.real.spec.ts:200/201/220/221`，五个List400分别缺private/no-store | 10 |
+| 资格与角色 | `qualification-read-matrix.real.spec.ts:368`，六个Application GET404分别缺private/no-store | 12 |
+
+这些soft断言用于收齐后续真实功能证据，仍令四项和完整门禁失败；没有删除断言、代理补头、修改后端或编译相邻源码。每轮重新pull latest，最终五个image ID与上节完全一致，因此不能把Gateway CI完成表述成App错误头已修复。最终本轮容器/网络为空，本地与远程legacy再核验均未变，提交仅本地、未push。
+
+本包的测试设施及所列跨Session场景已交付，整体状态仍`IN_PROGRESS`。App错误头需新镜像后再次跑完整门禁；原fixture偶发详情异常因果、任意33+迟到carrier容量、完整UC001及审核决定依赖继续OPEN。外部Session fault不是正式撤销命令证据，读取seed不是提交/决定命令证据；不能将本次两单项Reviewer代表所有角色/页面/生命周期交错，也不声称浏览器全heap验收。
