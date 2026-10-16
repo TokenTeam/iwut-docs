@@ -34,3 +34,19 @@
 strict与Edge路由隔离/fail-closed通过。API漂移首轮固定pin远程fetch低速超时，尚待相同命令重试成功；build/fixture和真实25场景尚待终态，不能记作交付完成。本地/远程legacy已再核验仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。
 
 同固定pin漂移重试已成功，build通过；原fixture浏览器本轮10通过/6非目标skip，不关闭此前偶发异常因果。运行时与spec均已冻结，开始新拉latest的25项专项；真实终态仍待记录。
+
+## 首轮真实专项终态
+
+冻结Console `6043f31`，隔离轮次`iwut-console-real-138939`，命令`pnpm test:real tests/real/developer-private-view.real.spec.ts`。25项全部通过（浏览器3.8分钟、exit0），Application/Version/Profile各6项、Tester7项，无跳过、无重试。旧200/401的18项和旧DELETE204的7项均执行完成，包括Tester三路真实401暂缓、同document非空B视图保持及随后明确刷新。仅已有注册密码限流按原合法Retry-After等待，没有新增登录重放或放宽断言。
+
+本轮重新pull已发布latest，解析到的镜像ID如下；一轮内固定所解析ID，不依赖后端源码：
+
+| 角色 | 实际镜像ID |
+| --- | --- |
+| Auth | `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3` |
+| App | `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b` |
+| Gateway | `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9` |
+| Mongo | `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3` |
+| Traefik | `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0` |
+
+终态后核对本轮容器与网络均为空。继续保持同一源码/spec冻结，另起全新隔离环境运行无参数`pnpm test:real`；预期88项，但须以实际终态为准，不以本专项替代完整门禁，现有App缓存头缺口与上层UC仍OPEN，未push。
