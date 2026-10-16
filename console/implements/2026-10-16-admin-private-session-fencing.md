@@ -34,3 +34,9 @@ Console实现冻结为`4290e3c`。准备器/固定控制边界新增13项合成�
 ### 首轮准备失败与身份边界修订
 
 轮次`iwut-console-real-57321`在新增准备器处终态exit1，浏览器12项尚未开始，不能记作通过或12项失败。错误为静态`Admin view fixture unavailable`；终态后容器/网络为空。新准备器错误复用了App资源UUIDv7校验；Auth Session的authId是opaque string，既有bootstrap也未作UUIDv7假设。将合成actor/固定控制输入改成非UUID的安全Auth标识后，原13项中8项稳定失败；修订为测试实例的路径安全字母数字/下划线/连字符约束，保留固定subject、精确相等和Mongo JSON编码，不改变产品AuthId语义。补充空值/路径/query/引号/换行/超长/重复目标负例后14项通过、real strict通过，冻结`8233ef1`后重新拉取latest执行专项。没有自动重放未知grant或失效写，不把准备器错误归于后端或生产Session隔离。
+
+### 修订后真实专项
+
+轮次`iwut-console-real-62095`终态exit0，12项全部通过（1.1分钟浏览器执行、无skip/retry）。两能力的queue/detail四入口均收齐旧200、SESSION_INVALID401及旧清理204交错；B经真实生产React读取另一项获权非空队列，旧投影未回填、无旧401清新代，四个旧204场景保持同document/B路由/投影/精确asOf且无额外自动读取/清理/导航。正式权限/revision、两把non-extractable钥匙与carrier属性保持。准备阶段真实密码429只按既有registration规则等待；DEVICE未重放、未触发额外签发。
+
+本轮五镜像均重新pull，ID与首轮及此前基线一致：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`；App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`；Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`；Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。终态后本轮容器/网络为空；修订后的统一690项Vitest＋103项Node通过。专项不替代无参数63项门禁；该全量已按同冻结源码、新拉latest启动，待终态。
