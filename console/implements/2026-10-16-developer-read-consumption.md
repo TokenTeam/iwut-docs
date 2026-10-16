@@ -22,3 +22,15 @@
 运行统一普通测试、strict、固定API生成漂移、build、fixture浏览器及Edge，冻结运行时源码后重新pull Auth/App/Gateway latest，跑无参数完整真实门禁。组件精确Query证据与真实网络/DOM证据分开登记，原63项不能冒充所有Developer页面的跨Session完整矩阵。
 
 本包不解决App错误响应头、审核决定surface/政策定义/Profile公开指针、任意33+迟到carrier容量或原fixture偶发异常因果；不修改/编译后端源码，不删断言、不补代理响应头，不扩大已接受写权限。完整UC001–007及原门禁保持开放，提交仅本地、未通过完整门禁不push。
+
+## 实现与前置验证
+
+实现已落地：核心保留首次active以适配原挂载，close递增lifetime，旧请求必须同时通过signal/lifetime/当前Session检查；九方法保持原参数/this/序列化。三投影统一共享错误分类；Tester同时检查Query.error和保留包装data.error，明确拒绝后即使显式重试503也不恢复自动读取，只有新成功替换拒绝包装。捕获旧Query对象data同步清空，同key新对象及其它Session/App不受影响。
+
+红绿证据分别为：核心前置57项中45失败/12通过，修订及真实生成方法集成扩展后66项通过；三投影前置120项中34失败/86通过，临时错误交叉扩展后128项通过；Tester前置55项中15失败，修订后55通过。新28项未mock生成client的createRoot StrictMode测试覆盖七页面、Session/DTO各0或15ms异步组合，九RPC真实本地序列化/解码/边界均运行并通过，只是合成wire证据，不当后端或原偶发异常已修复证据。
+
+统一回归837项Vitest＋103项Node全部通过（Developer302项），strict通过。固定API远程拉取首轮60秒低速超时，第二次相同pin生成漂移检查成功，未改为读取相邻源码或绕过检查；随后build通过（保留大chunk警告），Edge路由隔离/fail-closed通过。
+
+fixture首轮9通过/1失败/6非目标skip：Tester页初始`opaque-tester-auth-id`未出现，未取得当时DOM/错误类型因果证据。未改原spec或产品，再独立Tester repeat10为10通过，完整repeat3为30通过/18非目标skip；因此记录为偶发异常OPEN，不猜测StrictMode/HMR或负载原因，不声明已修。原Admin偶发记录也继续OPEN。
+
+运行时已冻结，本地与远程legacy均仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。接着按新拉latest执行无参数63项真实门禁，实际image ID及终态待记录；不把组件红绿或fixture重复通过当完整门禁完成。
