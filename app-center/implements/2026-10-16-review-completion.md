@@ -30,6 +30,19 @@
 
 已另行固定此前验收的 Auth 镜像 `sha256:902dbad234b21951be12c01719bf06f2f5223c7445c6bb8832231405bd821c04` 复验，UC002–005 全部通过（12.349s），诊断目录 `.artifacts/integration/run-Afx9IkPF`。Gateway 输入 `f4d5e5e935ccabfd718cfc493bf51a398776c8ae` / API `a5d504c058c62cd91be451074d21608d69789918`；Traefik digest `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。该证据是固定镜像与 API Session 路径验收，不替代新版 Auth 夹具适配或 Console ADMIN Cookie 接线。
 
+## Gateway 完成与 Console 激活
+
+Gateway 本地提交 `3e8a59cd8b309c8f1e096ea95cac25a624738ba4`，API `27c9743`。两个既有决定路由仅开放 ADMIN；Go 1.25.5 `make check` 与最终完整 protocol gate（42.11s）通过。后者使用新 Auth `22795e...` 与固定 App artifact，验证 18 条 App 路由的三协议拒绝边界、字段保真、Console v2 Cookie、跨 surface、CSRF、伪造身份、缺 Session 和 Set-Cookie 隔离。
+
+证据分层：真实 App 决定请求证明无 Reviewer 权限被拒绝；ADMIN 正向与字段保真使用签名验证 Recorder，不冒称真实成功决定或授权撤销。详细记录在 Gateway 仓库 `docs/verification/2026-10-16-review-decisions-integration.md`。
+
+供 Console 消费的固定本地 artifacts（均未 push/部署）：
+
+- App `iwut-app-center:review-3a83152`，ID `sha256:b6d0b68f921eca043d75708182bcdc5d9ac7d82da1cf0488f7485005cae2cee8`。干净提交/API、Go 1.25.5 CGO0；固定已发布 runtime base，仅替换 binary。
+- Gateway `iwut-gateway:review-3e8a59c`，ID `sha256:951d4a2b3aa923743623a0323f8cbcc445d53d54c438d4fd12d36e4869bbe886`。最终提交/API archive、Go 1.25.5 CGO0、scratch＋CA；容器内生成配置对照通过。
+
+Console owner 已激活第 3 步，仅实现已有已接受审核 UC 内的决定操作。默认 published-latest 门禁保留，单独的 local compatibility 验证应明确记录来源。当前不登记 Console 决定已实现或整体验收完成。
+
 ## 后续串行交接
 
 1. App/API 已完整验收并本地提交，Gateway owner 已激活第 2 步： 更新固定 API，给两个决定 RPC 增加精确 `ADMIN` surface。特别验证 HTTP JSON 不因旧 Proto decoder 丢失新增 definitions/公开资料字段，以及反向 surface、Cookie、CSRF 和伪造身份拒绝。
