@@ -56,3 +56,20 @@ strict与Edge路由隔离/fail-closed通过。API漂移首轮固定pin远程fetc
 同冻结源码的无参数轮次`iwut-console-real-147072`已重新pull上述五镜像并进入88项浏览器套件，前两项Admin交错通过后，宿主命令返回143，未产出完整测试终态。随后只读遍历进程参数，确认runner、Playwright以及本轮临时路径下的BFF均已退出；五容器仍存活，不能把前两项或该外部中断计作完整通过/业务失败。退出原因尚未确定，不归因Gateway或特定产品逻辑。
 
 按精确轮次和一致owner label核对后，仅移除本轮五容器、独立网络及由其mount解析出的临时目录（含本轮测试密钥），未碰其它容器。残留容器复核为空，源码/spec不修改，重新从空环境执行无参数全量；不因观察超时重启仍存活测试，也不删除任何失败断言。
+
+## 最终无参数全量终态
+
+继续冻结Console `6043f31`，新轮次`iwut-console-real-154063`执行无参数`pnpm test:real`，真实终态88项中84通过、4失败（浏览器16.6分钟、exit1），无skip、无retry。新25项再次全部通过；原Admin12项跨Session、双Console实际32次签发上限恢复、双副本与真实依赖故障、三阶段生命周期、管理权/角色及分页/正文断流/登录恢复矩阵均完整执行，未用专项替代全量。
+
+最终报告的81条错误逐个核对源位置，全部仍为既有App缓存响应头断言，无新增硬断言失败：
+
+| 失败用例 | 错误数 | 全部错误位置 |
+| --- | --- | --- |
+| Admin精确权限/撤销/游标/隔离 | 56 | `admin-review.real.spec.ts:433`的private/no-store各28条，Reviewer查询400/403/404 |
+| 管理权转让 | 3 | `management-transfer.real.spec.ts:257`，Application详情404的no-store |
+| owned游标负例 | 10 | `owned-application-pagination.real.spec.ts:200–201,220–221`，五个400各缺private/no-store |
+| 非owner角色 | 12 | `qualification-read-matrix.real.spec.ts:368`，六个Application详情404各缺private/no-store |
+
+本轮五镜像重新pull latest，解析ID与上表逐个一致；未编译后端、代理补头、删除断言或扩大生产业务写范围。终态后复核本轮容器/网络为空，Console工作区无运行时修改，本地/远程legacy仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，提交仅本地、未push。统一837项Vitest＋122项Node、strict、固定pin生成漂移、build、fixture浏览器10通过/6非目标skip、Edge均通过。
+
+本包所列25项证据已补齐，但完整门禁仍`IN_PROGRESS`。原App错误头、fixture偶发异常因果、任意33+迟到carrier容量、其它角色/权限/生命周期组合及完整审核决定依赖继续OPEN，不因此关闭上层UC或把只读阶段当完整产品交付。外部中断轮次不计入上述88项结果。
