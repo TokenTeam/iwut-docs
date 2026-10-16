@@ -29,6 +29,8 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 - [Version 正式审核检查定义](2026-10-16-version-review-check-definitions-proposal.md)：v3 正式人工检查文本、不可变版本、详情输出和严格 JSON 客户端切换。
 - [Reviewer 当前公开 Profile 投影](2026-10-16-reviewer-published-profile-proposal.md)：同一审核详情 snapshot 中的公开资料、显式 NONE、权限与指针 CAS。
 
+App/API 已完成，服务 `3a83152`、API `27c9743`，完整 backend 24/24 通过；Gateway 第 2 步已激活，Console 决定操作待其完成。详见[审核补齐接入记录](2026-10-16-review-completion.md)。
+
 ### 已交付范围
 
 设计状态与实现状态彼此独立，定义见[文档约定](../document-conventions.md#状态)。当前覆盖如下：
