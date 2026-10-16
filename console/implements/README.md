@@ -15,6 +15,8 @@
 
 ## 代码位置
 
+[Admin读取恢复与迟到响应](2026-10-16-admin-read-recovery-and-late-responses.md)已接受：新增同页队列刷新、请求级取消隔离和仅允许已知网络/5xx保留原快照；补两能力队列/详情真实正文断流与明确恢复。实现/验证待完成，不替代完整审核决定或关闭既有错误头门禁。
+
 Gateway CI完成后的[最新无参数复验](2026-10-16-admin-review-queries.md#gateway-ci-完成后的无参数全量复验)：Console `72de336`，轮次`iwut-console-real-924773`，47项终态43通过/4失败（11.7分钟、exit1）；匿名来源修订已纳入完整运行，81条失败全部为既有App查询错误响应头断言（Admin56、转让3、owned游标10、资格角色12），无新增非缓存失败。Edge、普通633项Vitest＋89项Node、strict、生成漂移及仓库独立性再次通过；重新pull latest五镜像ID不变，容器/网络已清理、legacy未变、未push。下文较早“修订后未重跑47项”仅为历史轮次状态；最新完整门禁仍IN_PROGRESS，不缩减完整UC或审核决定范围。
 
 [Admin审核查询首阶段](2026-10-16-admin-review-queries.md)已实现、完整门禁IN_PROGRESS：固定同pin四client、双队列/三元详情、snapshot/current/历史决定分区与能力/Session隔离；普通633项Vitest/89项Node、strict、生成漂移、build、fixture浏览器10通过/6非目标skip及Edge通过。47项无参数全量43通过/4失败（11.6分钟），原三项仅App错误头，新Admin项另有匿名元数据测试预期错误；终态后修订来源/认证分层，最终focused四项3通过/1失败（45.4秒），所列权限/撤重授/Session/匿名/跨surface功能均完整执行，唯一56条错误为Reviewer查询28个400/403/404各缺private/no-store。三轮重新pull latest、digest相同，资源已清理、提交仅本地、legacy本地/远程不变。修订后未重跑47项，不以focused替代完整门禁；完整审核决定与其三类接入依赖仍开放。
