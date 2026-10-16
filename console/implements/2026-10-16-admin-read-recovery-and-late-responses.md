@@ -30,3 +30,9 @@
 普通统一682项Vitest＋89项Node、strict、固定生成漂移、production build、Edge及报告隐私前置回归通过。构建仍保留大chunk警告，不放宽阈值。此时首次完整fixture浏览器为8通过/2失败/6跨surface非目标skip（9.4秒）：两个Admin在同URL重新进入终态详情后找不到region，原断言保留，未获得错误类型/DOM证据，原因未定。不是已确认的StrictMode或HMR问题，也未以推测改产品。
 
 冻结生产源后，原Admin专项2通过/2skip、Admin repeat8共16通过，完整fixture10通过/6skip、完整repeat3共30通过/18skip；临时仅失败synthetic诊断未触发且已移除，fixture源diff为零。未mock client的createRoot＋StrictMode＋异步Session/DTO初始8项对照亦通过。这些只说明目前未复现，不宣称已修复首轮异常；该间歇性验证问题保留OPEN并继续监测。生产dist真实恢复专项将独立验证，不替代开发模式定因，不关闭完整门禁、本包或上层UC。
+
+### 首轮真实专项被宿主机重启中断
+
+生产实现`c11eb25`、真实恢复/StrictMode对照`0b8cebf`已本地提交。轮次`iwut-console-real-956668`重新pull五镜像ID均与此前相同，最后已观察到镜像准备/构建、容器启动及注册密码限流等待；后续主机重启，不能推断未观察部分完成。恢复后原exec handle不存在、无runner/BFF/Playwright进程，五个容器均在`2026-10-16T00:53:13Z`附近以255退出，系统uptime约6分钟。临时目录与本轮真实报告不存在，无可采信通过/失败终态，登记`INTERRUPTED`而非测试失败或成功。
+
+逐一核验五个精确容器ID、统一随机ownership label、原镜像ID、已退出状态和空network后，仅移除本轮五容器、其两个匿名Mongo测试volume及network；复查均为空。临时fixture数据不可恢复但可由runner重新生成；未清理其它Docker资源或镜像，未恢复旧临时Session。接下来仍使用冻结源码重新pull latest运行专项和无参数全量，不把旧未知轮次重放到原Auth/Mongo中。
