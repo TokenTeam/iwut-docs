@@ -170,6 +170,7 @@ ReviewerProfileReviewDetail {
     eligible
     conflicts: (CURRENT_ADMIN | REVISION_CREATOR | REVIEW_SUBMITTER)[]
   }
+  currentPublishedProfile: { oneof state { none | published { profileRevisionId, displayName, description?, icon? } } }
   currentPolicy: {
     version
     requiredCheckIds
@@ -179,6 +180,8 @@ ReviewerProfileReviewDetail {
 ```
 
 `currentPolicy` 来自查询时唯一 ACTIVE 的不可变 ProfileReviewPolicy。Reviewer 将实际阅读的 version 作为 `expectedPolicyVersion` 传给 UC-APP-016。如果在查询后发生策略、Revision、管理员或当前公开指针变化，UC-APP-016 通过自己的前置条件拒绝过期决定。
+
+当前公开资料投影的 presence、授权、snapshot、失败关闭与指针 CAS 交互以 [UC031 当前公开资料投影](../use-cases/UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 为准。`none` 必须显式返回；不能把缺字段或 Catalog 不可见当作 NONE。
 
 已决定 Review 保留 decision 供审计查看。查询本身不领取、锁定、分配或标记审核任务。
 

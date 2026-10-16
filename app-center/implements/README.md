@@ -22,9 +22,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 ## 当前实现覆盖
 
-### 2026-10-16 待审核设计
+### 2026-10-16 已接受的审核补齐工作包
 
-以下提案均为 `PROPOSED`，尚未改变已接受的 UC/BR、API 或实现；用户审核接受后才进入权威文档更新与串行实现。
+以下提案于 2026-10-16 获用户审核通过，已收敛至 UC005/030/031 和资料查询契约。实现状态：`IN_PROGRESS`；按 App/API → Gateway ADMIN → Console 决定操作串行推进。
 
 - [Version 正式审核检查定义](2026-10-16-version-review-check-definitions-proposal.md)：v3 正式人工检查文本、不可变版本、详情输出和严格 JSON 客户端切换。
 - [Reviewer 当前公开 Profile 投影](2026-10-16-reviewer-published-profile-proposal.md)：同一审核详情 snapshot 中的公开资料、显式 NONE、权限与指针 CAS。

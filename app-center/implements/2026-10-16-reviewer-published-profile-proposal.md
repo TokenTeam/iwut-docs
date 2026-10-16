@@ -1,8 +1,8 @@
 # Reviewer 当前公开 Profile 投影设计草案
 
-状态：`PROPOSED`。日期：2026-10-16。
+状态：`ACCEPTED`（2026-10-16 用户审核通过）。本文保留为非权威设计审核记录；实施以 UC005/030/031 与查询契约为准。
 
-本文是待用户审核的变更提案，不改变已接受的 UC、BR 或 API。接受后才更新权威正文、生成 brief 并实现。业务权威为 [UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md)、[资料查询契约](../query-contracts/profile-management.md) 及 [UC016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md)。
+本提案已接受并收敛进权威正文；以下为审核时的设计记录。业务权威为 [UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md)、[资料查询契约](../query-contracts/profile-management.md) 及 [UC016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md)。
 
 ## 问题与建议
 

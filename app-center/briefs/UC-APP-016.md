@@ -295,6 +295,8 @@ APPROVE 针对 Review.snapshot 重新应用 [BR-PRF-003](../use-cases/UC-APP-013
 <!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030 -->
 ### BR-PRF-030：批准后自动公开
 
+Reviewer 从 [UC031 当前公开资料投影](../use-cases/UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 读取替换对象与明确 NONE。
+
 APPROVE 必须提供 Reviewer 作出决定时观察到的 `expectedCurrentPublishedProfileRevisionId`，其值是某个 ProfileRevision ID 或明确的 `NONE`。它必须与当前指针匹配，再与以下变化处于同一原子边界：
 
 ```text
@@ -551,7 +553,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 312 | `32bcd54ca110` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 314 | `d0275995ea8b` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

@@ -290,6 +290,8 @@ Catalog 只返回当前已发布 Profile 的 revision 身份和 displayName、de
 <!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030 -->
 ### BR-PRF-030：批准后自动公开
 
+Reviewer 从 [UC031 当前公开资料投影](../use-cases/UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 读取替换对象与明确 NONE。
+
 APPROVE 必须提供 Reviewer 作出决定时观察到的 `expectedCurrentPublishedProfileRevisionId`，其值是某个 ProfileRevision ID 或明确的 `NONE`。它必须与当前指针匹配，再与以下变化处于同一原子边界：
 
 ```text
@@ -761,7 +763,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-028-suspend-and-restore-application.md` | 269 | `155e654469e7` |
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
 | `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 312 | `32bcd54ca110` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 314 | `d0275995ea8b` |
 | `use-cases/UC-APP-036-clear-test-publication-slot.md` | 180 | `e0aa209d3e5f` |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |

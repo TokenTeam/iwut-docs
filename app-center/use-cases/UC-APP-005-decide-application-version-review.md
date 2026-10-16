@@ -277,7 +277,7 @@ reviewer 作决定时必须提交自己实际阅读的 expectedPolicyVersion。A
 ```text
 VersionReviewPolicy {
   version: ReviewPolicyVersion
-  requiredChecks: []ReviewCheckDefinition
+  requiredChecks: []ReviewCheckDefinition // v3: id/title/description
   status: ACTIVE | RETIRED
 }
 ```
@@ -445,26 +445,36 @@ validator 必须保证：
 
 `application_versions` 不增加字段。决定时原子更新 reviewStatus、revision、updatedBy 和 updatedAt。
 
-App Center 另以 `version_review_policies` 保存自己拥有的不可变正式策略。历史 v1 保留供解释既有决定；引入版本化 OAuth 回调后，新 migration 将 v1 标为 RETIRED，并写入以下 ACTIVE v2。任何已存在同版本但内容不同时 migration 必须失败，运行时不提供覆盖或删除接口：
+App Center 以 `version_review_policies` 保存不可变正式策略。`app-version-review-v1`（三项旧 ID）和 `app-version-review-v2`（增加 OAuth 回调检查）均 RETIRED，保留其原记录及历史决定。新决定必须使用唯一 ACTIVE 的 `app-version-review-v3`。不得原地补写 v1/v2 未定义的政策正文。
 
-```text
-version: app-version-review-v1
-requiredChecks:
-  - content-policy-reviewed
-  - launch-url-content-reviewed
-  - requested-access-reviewed
-status: RETIRED
+v3 的 requiredChecks 按以下顺序保存。每项包含 id、title、description（下表第三列原文），纯文本 UTF-8，title 为 1–80、description 为 1–2000 个 Unicode scalar values，无首尾空白或控制字符。ID 唯一，四项完整；Domain 不硬编码政策文本。正式文本由 migration 精确核对和不可变存储保护。
 
-version: app-version-review-v2
-requiredChecks:
-  - content-policy-reviewed
-  - launch-url-content-reviewed
-  - requested-access-reviewed
-  - oauth-redirects-reviewed
-status: ACTIVE
-```
+### v3 正式人工检查定义
 
-`oauth-redirects-reviewed` 要求 reviewer 确认 pkceRedirectUris 与 confidentialRedirectUris 中的 callback 分别适用于相应 client type；两个数组都为空时明确确认该版本未启用 OAuth/OIDC 回调。未来修改检查项必须使用新的 policy version；不能原地修改 v1 或 v2。`version_review_policies.version` 唯一，历史版本保留。所有新决定必须使用当前 ACTIVE v2；已经用 v1 作出的决定不重写。
+以下文字于 2026-10-16 获用户接受，是 v3 的完整人工检查基线。它不引用尚未交付的学校政策、外部内容标准或隐含评分规则。
+
+| ID | 标题 | 定义与确认条件 |
+| --- | --- | --- |
+| `content-policy-reviewed` | 应用内容与声明 | 已阅读提交快照中的应用声明，并结合实际入口确认其用途可识别且与展示功能一致；未发现冒充平台或其他主体、诱骗提交账号凭据、隐瞒实际收集用途或诱导执行恶意程序的内容。无法辨明用途或无法完成这些确认时，不得确认通过。 |
+| `launch-url-content-reviewed` | 实际入口内容 | 已访问该审核快照的 launchUrl，并检查入口及其正常跳转后可达的主要功能；能实际观察到与声明用途一致的应用内容，未发现伪装登录、凭据窃取或恶意下载引导。入口不可达、仅有占位内容或必须使用 Reviewer 无法取得的访问条件而无法完成检查时，不得确认通过。 |
+| `requested-access-reviewed` | 请求能力与 Scope | 已逐项检查快照声明的能力和 Scope，并结合其正式目录含义与实际功能确认用途可说明、请求范围与所展示功能相符，未发现无关或明显多余的访问请求。空集合表示已明确确认该版本未声明相应访问请求；目录含义或用途无法查明时，不得确认通过。 |
+| `oauth-redirects-reviewed` | OAuth 回调用途 | 已分别检查 pkceRedirectUris 与 confidentialRedirectUris 中每个回调与应用用途、接收方及对应 client type 的关系，确认回调由预期接收方使用，且无明显无关接收方。两个数组均为空时，明确确认该版本未配置 OAuth/OIDC 回调。不能确认接收方或用途时，不得确认通过。 |
+
+人工判断针对审核快照和当次可观察内容，不承诺穷尽所有页面、实际 OAuth 运行成功、远端内容永不变化或所有恶意行为均已排除。系统继续独立执行 Scope requestable、HTTPS/DNS、OAuth 结构及 Developer 暂停门禁；人工勾选不能跳过这些检查。
+
+现有 Version snapshot 没有用途说明正文；这里的“声明”仅指其已有 label、入口、能力、Scope 与回调配置，用途结合实际入口内容判断，不假设已存在额外说明字段，也不以当前可变 Profile 代替提交快照。
+
+Reviewer 不能预勾选、用“全选”代替逐项确认，或在无法观察时猜测通过。不能完成检查时可以保留 PENDING；确认不满足要求并决定拒绝时，REJECT 继续使用有效 reason 和空 confirmedCheckIds，不新增第三种决定或结构化证据系统。
+
+本提案只定义 Version 策略；Profile 策略及其已有检查文本不随同改写。
+
+### v3 迁移与切换
+
+新 migration 精确核对既有 v1/v2 的 ID 和预期状态，保留其业务内容，在同一事务中退役 v2 并插入或精确核对 ACTIVE v3。不得留下多个 ACTIVE；同版本内容不同、历史缺失或损坏时失败，不覆盖。validator 兼容旧记录仅有 ID，v3 必须具有完整定义。重复执行幂等，失败回滚事务。
+
+旧 PENDING Review 不重写 snapshot 或重新提交；新决定读取 v3。旧 expectedPolicyVersion 按既有 OCC 返回 ApplicationReviewPolicyChanged，重新读取并人工确认。历史决定不重写。迁移后不重新激活旧 policy 作为业务回滚；应修复兼容问题或暂时关闭决定入口。
+
+API/Console 升级和页面刷新应先于 App 输出新字段；严格 JSON decoder 的旧页面并不天然兼容新增字段。新客户端可在旧响应缺少定义时只读，但不能开放批准。
 
 ## API 草图
 

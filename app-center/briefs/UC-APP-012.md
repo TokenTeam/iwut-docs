@@ -701,7 +701,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 621 | `971593ee3dfd` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 631 | `e65c1ead652e` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

@@ -1,8 +1,8 @@
 # Version 正式审核检查定义设计草案
 
-状态：`PROPOSED`。日期：2026-10-16。
+状态：`ACCEPTED`（2026-10-16 用户审核通过）。本文保留为非权威设计审核记录；实施以 UC005/030/031 与查询契约为准。
 
-本文是待用户审核的变更提案，不改变已接受的 UC、BR、策略或 API。接受后才更新权威正文、生成 brief 并实现。业务权威仍为 [UC005](../use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016) 与 [UC030](../use-cases/UC-APP-030-query-application-version-reviews.md)。
+本提案已接受并收敛进权威正文；以下为审核时的设计记录。业务权威仍为 [UC005](../use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016) 与 [UC030](../use-cases/UC-APP-030-query-application-version-reviews.md)。
 
 ## 问题与建议
 

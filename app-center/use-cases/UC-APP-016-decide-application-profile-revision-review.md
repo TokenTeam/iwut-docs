@@ -206,6 +206,8 @@ APPROVE 针对 Review.snapshot 重新应用 [BR-PRF-003](UC-APP-013-create-appli
 
 ### BR-PRF-030：批准后自动公开
 
+Reviewer 从 [UC031 当前公开资料投影](UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 读取替换对象与明确 NONE。
+
 APPROVE 必须提供 Reviewer 作出决定时观察到的 `expectedCurrentPublishedProfileRevisionId`，其值是某个 ProfileRevision ID 或明确的 `NONE`。它必须与当前指针匹配，再与以下变化处于同一原子边界：
 
 ```text

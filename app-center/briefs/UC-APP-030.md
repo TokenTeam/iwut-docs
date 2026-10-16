@@ -80,13 +80,17 @@ ApplicationVersionReviewDetail {
     snapshot, scopeCatalogRevision, preflightPolicyVersion,
     submittedBy, submittedAt, draftRestoration?, decision?
   }
-  currentPolicy { version, requiredCheckIds }
+  currentPolicy { version, requiredCheckIds, requiredCheckDefinitions { id, title, description }[] }
   decisionEligibility
   asOf
 }
 ```
 
 审核内容只能取 `ApplicationReview.snapshot`，不能用当前可变 Version 字段替换。终态 Review 仍可读取以支持审计。当前 policy 用于渲染下一次决定输入；它不是授权或并发保证，UC005 仍在写入时复查 policy version、check IDs、Scope Catalog 和 preflight。
+
+currentPolicy 的定义来自 [UC005 正式策略](../use-cases/UC-APP-005-decide-application-version-review.md#v3-正式人工检查定义)，与 policy version 绑定，在同一 snapshot 中读取；requiredCheckIds 与 definitions 的 ID 顺序及集合一致。缺失、重复或结构非法返回 ApplicationReviewStateInconsistent / INTERNAL，不允许客户端按 ID 猜政策。当前 v3 四项按政策声明顺序输出；决定确认和保存继续采用集合及排序规则。
+
+终态详情的 currentPolicy 不解释历史 decision：历史 v1/v2 只显示已记录版本及 ID，不能套用 v3 文本。新字段为 ReviewPolicyContext.required_check_definitions = 3；原字段编号保持不变。Console 逐项展示纯文本且不预勾选；缺少完整定义只读。成功和错误响应 private, no-store。
 
 详情不返回管理员管理页的其他 Version、OAuth secret、Tester 或用户资料。
 
@@ -156,7 +160,7 @@ Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，当�
 <!-- 权威位置: use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-034 -->
 ### BR-REV-034：审核查询一致性与失败关闭
 
-单页和详情必须内部一致；损坏引用或快照导致整次查询 INTERNAL，不能静默跳过。
+单页和详情必须内部一致；损坏引用、快照或当前策略定义导致整次查询 INTERNAL，不能静默跳过或补齐部分定义。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -484,7 +488,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-030-query-application-version-reviews.md` | 130 | `37b2787a1db3` |
+| `use-cases/UC-APP-030-query-application-version-reviews.md` | 135 | `c73790fdc05b` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

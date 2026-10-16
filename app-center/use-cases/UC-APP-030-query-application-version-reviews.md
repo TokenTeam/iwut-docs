@@ -47,13 +47,17 @@ ApplicationVersionReviewDetail {
     snapshot, scopeCatalogRevision, preflightPolicyVersion,
     submittedBy, submittedAt, draftRestoration?, decision?
   }
-  currentPolicy { version, requiredCheckIds }
+  currentPolicy { version, requiredCheckIds, requiredCheckDefinitions { id, title, description }[] }
   decisionEligibility
   asOf
 }
 ```
 
 审核内容只能取 `ApplicationReview.snapshot`，不能用当前可变 Version 字段替换。终态 Review 仍可读取以支持审计。当前 policy 用于渲染下一次决定输入；它不是授权或并发保证，UC005 仍在写入时复查 policy version、check IDs、Scope Catalog 和 preflight。
+
+currentPolicy 的定义来自 [UC005 正式策略](UC-APP-005-decide-application-version-review.md#v3-正式人工检查定义)，与 policy version 绑定，在同一 snapshot 中读取；requiredCheckIds 与 definitions 的 ID 顺序及集合一致。缺失、重复或结构非法返回 ApplicationReviewStateInconsistent / INTERNAL，不允许客户端按 ID 猜政策。当前 v3 四项按政策声明顺序输出；决定确认和保存继续采用集合及排序规则。
+
+终态详情的 currentPolicy 不解释历史 decision：历史 v1/v2 只显示已记录版本及 ID，不能套用 v3 文本。新字段为 ReviewPolicyContext.required_check_definitions = 3；原字段编号保持不变。Console 逐项展示纯文本且不预勾选；缺少完整定义只读。成功和错误响应 private, no-store。
 
 详情不返回管理员管理页的其他 Version、OAuth secret、Tester 或用户资料。
 
@@ -123,8 +127,9 @@ Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，当�
 <a id="br-rev-034"></a>
 ### BR-REV-034：审核查询一致性与失败关闭
 
-单页和详情必须内部一致；损坏引用或快照导致整次查询 INTERNAL，不能静默跳过。
+单页和详情必须内部一致；损坏引用、快照或当前策略定义导致整次查询 INTERNAL，不能静默跳过或补齐部分定义。
 
 ## 变更记录
 
+- 2026-10-16：用户接受 v3 正式检查定义及详情输出扩展，保持历史策略语义。
 - 2026-10-07：补足 UC004/005 未交付的 Reviewer 读取面，设计进入 `ACCEPTED`。

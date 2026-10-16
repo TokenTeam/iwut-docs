@@ -85,6 +85,7 @@ ApplicationProfileReviewDetail {
     submittedBy, submittedAt, decision?
   }
   currentPolicy { version, requiredCheckIds }
+  currentPublishedProfile { oneof state { none | published { profileRevisionId, displayName, description?, icon? } } }
   decisionEligibility
   asOf
 }
@@ -97,6 +98,89 @@ ApplicationProfileReviewDetail {
 单页和详情在 MongoDB majority snapshot 中构造。Application、ProfileRevision、Review 的引用、sourceRevision 或 snapshot 不一致时返回 `ApplicationProfileReviewStateInconsistent` / INTERNAL；不能省略坏项或回退到当前 ProfileRevision 内容。
 
 不存在或路径不匹配返回 `ApplicationProfileReviewNotFound`。合法空队列成功返回空页。pageSize/pageToken 非法返回 INVALID_ARGUMENT。响应使用 `private, no-store`。
+
+### 当前公开资料投影
+
+```text
+ApplicationProfileReviewDetail {
+  ...既有字段
+  currentPublishedProfile {
+    oneof state {
+      none: explicit null marker
+      published {
+        profileRevisionId
+        displayName
+        description?  // 缺省保持缺省
+        icon?         // 普通文本；缺省保持缺省
+      }
+    }
+  }
+}
+```
+
+保留现有字段 1–6，在详情增加 message 字段 `current_published_profile = 7`。该 message 的 oneof 为 `google.protobuf.NullValue none = 1` 与 `PublishedProfileForReview published = 2`；published 内依次使用字段 1–4 表达上面的四项内容，description/icon 使用 optional string。字段编号在共享 API 生成检查中核对。
+
+HTTP JSON 示例：
+
+```json
+{ "currentPublishedProfile": { "none": null } }
+```
+
+```json
+{
+  "currentPublishedProfile": {
+    "published": {
+      "profileRevisionId": "01995000-0000-7000-8000-000000000002",
+      "displayName": "示例应用",
+      "description": "当前公开说明"
+    }
+  }
+}
+```
+
+服务成功返回时必须存在 currentPublishedProfile 且恰有一个 state。缺字段、空对象、未知 state 或非法 ID 都是客户端不可用于批准的响应；不能解释为 NONE。首次公开只由服务端确认的 none 表示。
+
+不返回当前公开修订的 creator、submitter、审核人、完整 Review、其他历史修订或管理字段。icon 保持现有不透明纯文本契约，不当作 URL 自动加载。待审内容仍取 `review.snapshot`，并与 currentPublishedProfile 分开展示；当前资料不替换待审快照。
+
+### 授权与一致性
+
+沿用 UC031：可信 USER 身份、精确 `app.profile.review`，先检查权限，再查对象；Version Reviewer、Developer 或当前 admin 都不隐式取得此读取权。详情路径三元组不匹配继续 NOT_FOUND。
+
+在原有详情 snapshot 内读取 ApplicationProfile、其当前公开修订及批准 Review，并验证：
+
+1. ApplicationProfile 属于同一 Application；公开指针为空才返回 none。
+2. 非空指针是合法 ProfileRevision ID，指向同 Application 的 APPROVED 修订；其批准 Review 与修订、内容和既有批准不变量一致。
+3. published 内容来自被该批准事实确认的不可变资料，不能回退到 working 修订、最新创建修订或待审 snapshot。
+
+ApplicationProfile 缺失、非空指针悬挂、跨 Application 引用、非 APPROVED 状态或批准内容不一致，均使整次详情返回既有 `ApplicationProfileReviewStateInconsistent` / INTERNAL；数据库不可用按既有基础设施错误映射，不能伪装成 none 或返回部分详情。
+
+当前公开在此表示 ApplicationProfile 的公开指针，不要求 Stable 槽位或普通 Catalog 当前可见。SUSPENDED、归档或没有 Stable 不将非空指针转换为 none；CLOSING/CLOSED 的终态详情仍按现有审计读取规则返回事实，不因此授予决定权。
+
+同一响应的 application、待审 Review、currentPolicy、当前公开投影、eligibility 和 asOf 必须来自同一 snapshot。该结果仅是读取时观察；不锁定任务，也不授权后续写入。
+
+### 决定与并发
+
+Console 批准确认页展示“当前公开资料”和“本次拟公开资料”。none 显示“首次公开”，published 显示替换对象 ID 和内容；用户明确确认后，才把本次观察的 pointer 带入现有命令：
+
+| 观察到的状态 | UC016 APPROVE 请求 |
+| --- | --- |
+| `none: null` | 显式 `expectedCurrentPublishedProfileRevisionId: null` |
+| `published.profileRevisionId = X` | `expectedCurrentPublishedProfileRevisionId: X` |
+| 缺失、解析失败或未知状态 | 阻止批准，重新读取；不得猜测 null |
+
+继续提交本次观察的 expectedProfileRevisionRevision 与 expectedPolicyVersion。REJECT 仍省略 expectedCurrentPublishedProfileRevisionId，不检查或改变公开指针。UC016 的写规则、错误和事务边界不改变。
+
+APPROVE 提供的指针与最终事务中的当前指针不同时，由现有指针 CAS 返回 `ApplicationProfilePublicationConflict`（HTTP 409 / gRPC ABORTED）。Console 重新读取并让 Reviewer 重新确认；不替换成最新指针后自动重发。同一 Review 已被其他 Reviewer 决定时，继续返回既有 already-decided 等错误，不强行将所有竞争映射为指针冲突。未知提交结果沿用决定结果回读流程，不假定失败并自动重复执行。
+
+### 大小、缓存和兼容
+
+资料沿用现有界限：displayName 80、description 1000、icon 512 个 Unicode scalar values。单个新增内容投影即使使用 JSON Unicode 转义也应小于 32 KiB；实际编码测试同时覆盖 JSON 与 protobuf。该数值是新增投影的验证界限，不新设更宽的输入界限或放宽 transport 配置；详情整体仍受现有 transport 上限约束，不截断正文或返回只有 pointer 的“成功”。
+
+这里不把 UC039 管理查询的 2 MiB 预算误写成 UC031 已有业务规则。实现若发现合法整体响应可能超过现有 transport 上限，应在编码验证阶段提出具体 gap，再审核预算变更。
+
+成功与错误响应沿用 private, no-store，经 Gateway/BFF 后也必须成立。新增投影只存在于受 Reviewer 精确授权保护的详情，不扩展到公共 Catalog。
+
+共享 API 先生成类型，Console agent 先升级严格解码和 oneof 校验：允许旧服务缺少该字段时继续只读，批准必须等待完整合法投影。随后协调 App 服务启用输出及 Console 页面刷新；现有旧 JSON decoder 不接受未知字段，需要明确切换窗口。不能把接口加字段当成旧页面天然兼容，也不通过全局忽略未知字段掩盖非法状态。
 
 ### 最小查询模型与索引
 
@@ -126,7 +210,7 @@ rpc GetApplicationProfileReview(...)
 
 ### 实现依赖与交付边界
 
-ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。现有查询契约提供读取语义；本工作包新增 API、read port/usecase、Mongo query、必要索引、transport/wiring 和验收，不改变 UC013–016 写模型。
+ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。当前公开投影扩展仅需读取既有数据，不新增写模型或 migration。现有查询契约提供读取语义；本工作包新增 API、read port/usecase、Mongo query、必要索引、transport/wiring 和验收，不改变 UC013–016 写模型。
 
 ## 业务规则（UC-APP-031 权威正文）
 
@@ -143,7 +227,7 @@ ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。�
 <!-- 权威位置: use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-043 -->
 ### BR-PRF-043：资料审核快照权威
 
-队列摘要和详情的内容来自提交时不可变 snapshot，不能用当前 ProfileRevision 替换。
+待审内容来自提交时不可变 snapshot，不能用当前 ProfileRevision 替换。详情另返回当前公开指针对应的批准资料，必须独立标识，不能覆盖待审内容。
 
 <!-- 权威位置: use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-044 -->
 ### BR-PRF-044：利益冲突提示不替代决定检查
@@ -158,7 +242,7 @@ ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。�
 <!-- 权威位置: use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-046 -->
 ### BR-PRF-046：资料审核查询失败关闭
 
-引用、sourceRevision 或 snapshot 损坏导致整次查询 INTERNAL；不能跳项、降级或返回部分详情。
+引用、sourceRevision、snapshot 或当前公开资料/批准事实损坏导致整次查询 INTERNAL；不能跳项、降级、伪造 NONE 或返回部分详情。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -620,6 +704,7 @@ ReviewerProfileReviewDetail {
     eligible
     conflicts: (CURRENT_ADMIN | REVISION_CREATOR | REVIEW_SUBMITTER)[]
   }
+  currentPublishedProfile: { oneof state { none | published { profileRevisionId, displayName, description?, icon? } } }
   currentPolicy: {
     version
     requiredCheckIds
@@ -629,6 +714,8 @@ ReviewerProfileReviewDetail {
 ```
 
 `currentPolicy` 来自查询时唯一 ACTIVE 的不可变 ProfileReviewPolicy。Reviewer 将实际阅读的 version 作为 `expectedPolicyVersion` 传给 UC-APP-016。如果在查询后发生策略、Revision、管理员或当前公开指针变化，UC-APP-016 通过自己的前置条件拒绝过期决定。
+
+当前公开资料投影的 presence、授权、snapshot、失败关闭与指针 CAS 交互以 [UC031 当前公开资料投影](../use-cases/UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 为准。`none` 必须显式返回；不能把缺字段或 Catalog 不可见当作 NONE。
 
 已决定 Review 保留 decision 供审计查看。查询本身不领取、锁定、分配或标记审核任务。
 
@@ -649,11 +736,11 @@ ReviewerProfileReviewDetail {
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-031-query-application-profile-reviews.md` | 131 | `8e19b6a2f239` |
+| `use-cases/UC-APP-031-query-application-profile-reviews.md` | 217 | `5661de03f1af` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
-| `app-center/query-contracts/profile-management.md` | 200 | `a88418222366` |
+| `app-center/query-contracts/profile-management.md` | 203 | `f54db409c9b2` |
