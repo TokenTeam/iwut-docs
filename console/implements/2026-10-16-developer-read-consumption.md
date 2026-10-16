@@ -34,3 +34,15 @@
 fixture首轮9通过/1失败/6非目标skip：Tester页初始`opaque-tester-auth-id`未出现，未取得当时DOM/错误类型因果证据。未改原spec或产品，再独立Tester repeat10为10通过，完整repeat3为30通过/18非目标skip；因此记录为偶发异常OPEN，不猜测StrictMode/HMR或负载原因，不声明已修。原Admin偶发记录也继续OPEN。
 
 运行时已冻结，本地与远程legacy均仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。接着按新拉latest执行无参数63项真实门禁，实际image ID及终态待记录；不把组件红绿或fixture重复通过当完整门禁完成。
+
+## 最终真实门禁与当前边界
+
+源码冻结`0676e64`，轮次`iwut-console-real-112141`无参数`pnpm test:real`终态exit1：63项全部执行、59通过/4失败（浏览器13.1分钟），无skip或未运行项。真实Developer成功主链、旧成功/SESSION_INVALID/清理204三类交错、三阶段历史、管理权转让的非缓存硬断言、资格暂停恢复、Profile预算413、Tester三个区域及Version正文断流/键盘恢复、双origin32次签发、持久提交与实际React登录恢复都已执行。Admin12项跨Session和四项审核断流恢复亦再次通过。
+
+81条错误逐源定位全部属于原App缓存头，没有新增非缓存失败：`admin-review.real.spec.ts:433`为28个Reviewer查询400/403/404各缺private/no-store共56条；`management-transfer.real.spec.ts:257`为Application GET404缺no-store共3条；`owned-application-pagination.real.spec.ts:200/201/220/221`为五个List400共10条；`qualification-read-matrix.real.spec.ts:368`为六个Application GET404共12条。soft只为收齐其它实际证据，仍令四项与全量失败；不删除断言或改成功状态。
+
+五镜像本轮均重新pull，实际ID：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`；App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`；Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`；Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。ID与上一轮相同，未编译/修改后端源码或增加本地路径依赖。终态后容器（含停止容器）及本轮网络为空，本地与远程legacy再次核验未变，提交仅本地、未push。
+
+针对fixture偶发异常的额外只读诊断：核心/边界/未mock客户端激活/Tester149项通过，独立打乱次序的Tester四种异步激活组合也通过。`requestRegion`确实会包装obsolete error并阻止自动重试，但正常已消费signal的取消先终结TanStack retryer，尚无有效当前query提交该包装并卡住的因果证据；不能据局部行为认定首轮故障原因。未为猜测关闭产品取消或放宽分类，偶发问题继续OPEN。
+
+本包实现与上述验证已完成，整体状态保持`IN_PROGRESS`：原App错误头门禁需新镜像复验；未知错误/ignored-abort直接内存证据仍来自组件，当前真实套件不等于所有Developer页面/角色的跨Session完整矩阵。上层UC001/fencing、完整审核决定、carrier容量及原偶发异常均不关闭，不能用此次加固重新定义完整目标。
