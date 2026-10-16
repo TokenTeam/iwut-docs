@@ -15,6 +15,8 @@
 - 普通describe、单worker、零retry。按Application/Version/Profile/Tester四组使用独立BrowserContext，每组各EMAIL生成两把自己的non-extractable设备钥匙，后续仅DEVICE切换；每context最多2＋7×2＝16次签发，不改变既有32次上限。新context是独立浏览器配置，不复制钥匙/storageState或通过产品reset绕过上限；原真实32次测试保留。
 - 跨组邮箱沿用上一正式Begin返回的resendAfter等待，DEVICE开始至少间隔2100ms；时间只尊重真实准备预算，不当正确性oracle。429使准备/该例失败，不自动重放未知Begin/Complete/DEVICE；worker失败重建造成的冷却/前置失败与产品断言分开登记。
 - 旧200/401在初始深链接读取前arm透明TLS响应gate，先独立同源读取证明A有真实材料或明确失效。B由另一标签页真实登录，再释放旧响应。按真实上游status、产品在线Session协调、旧材料未进入新私有投影及B实际获权读取分层证明；保留Abort，不要求DevTools读取被正确取消的旧正文。Tester只观察被控region的独有标识，不把先成功兄弟区块或URL中的App ID误当迟到泄露。
+- Tester初始读取同时发送三RPC。旧401场景须分别暂缓三路真实401，避免未受控兄弟先触发Session清理；B建立后先释放本例主目标，完成B生产视图协调，再放兄弟旧401并确认无新清理/旧投影。三个gate均独立核验并清理，不把额外两路当增加场景数，也不伪造其业务结果。
+- 原透明proxy只允许一个非终态gate。为上述协调增加原子、有界2–3项的独立RESPONSE/HOLD batch，拒绝重复method/path、其它action/phase或与活跃single/batch混用；原single行为不放宽。loopback控制只允许本轮A的三条Tester读取组成完整batch，不接受任意地址/路径集合。主401协调时产品可能取消兄弟，此时须已先证明真实401为HELD，再接受DROPPED而不强求读取被取消正文；仍HELD的才释放。纯传输Node回归单独证明batch不修改上游status/headers/body及释放/取消隔离。
 - 旧204须先建立A真实视图，令其Session失效并触发产品清理，确认真实旧DELETE已提交且204仍HELD。另一标签页建立B后，原SPA通过header Router Link确认B，经正式入口/链接建立同类B页面；再释放旧204，检查同一document、B路由/内容/各独立时间投影、权威Session和carrier属性保持，无额外Session/业务/DELETE/导航。后续明确刷新仍可读取B。仅被动包装fetch计数/status且返回原参数、Promise、Response，不读认证body。
 - B拥有自己不同资源，不用伪造空数据或A的管理权限替代。各成功200检查private/no-store，401/204保留既有no-store和reason/status契约。不同区域时间来自各真实asOf，页面分钟格式不能被夸大成DOM纳秒精度证明。
 - 故障gate每例清理；未命中ARMED仅可用捕获的精确真实读取或预期旧binding/generation DELETE有界消耗，再释放HELD，不能留下影响后续例的fault。无页面响应拦截、MSW、QueryClient调试接口、外部资产读取、业务写请求或Auth资料补查。
