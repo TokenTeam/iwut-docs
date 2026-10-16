@@ -15,6 +15,8 @@
 
 ## 代码位置
 
+Gateway CI完成后的[最新无参数复验](2026-10-16-admin-review-queries.md#gateway-ci-完成后的无参数全量复验)：Console `72de336`，轮次`iwut-console-real-924773`，47项终态43通过/4失败（11.7分钟、exit1）；匿名来源修订已纳入完整运行，81条失败全部为既有App查询错误响应头断言（Admin56、转让3、owned游标10、资格角色12），无新增非缓存失败。Edge、普通633项Vitest＋89项Node、strict、生成漂移及仓库独立性再次通过；重新pull latest五镜像ID不变，容器/网络已清理、legacy未变、未push。下文较早“修订后未重跑47项”仅为历史轮次状态；最新完整门禁仍IN_PROGRESS，不缩减完整UC或审核决定范围。
+
 [Admin审核查询首阶段](2026-10-16-admin-review-queries.md)已实现、完整门禁IN_PROGRESS：固定同pin四client、双队列/三元详情、snapshot/current/历史决定分区与能力/Session隔离；普通633项Vitest/89项Node、strict、生成漂移、build、fixture浏览器10通过/6非目标skip及Edge通过。47项无参数全量43通过/4失败（11.6分钟），原三项仅App错误头，新Admin项另有匿名元数据测试预期错误；终态后修订来源/认证分层，最终focused四项3通过/1失败（45.4秒），所列权限/撤重授/Session/匿名/跨surface功能均完整执行，唯一56条错误为Reviewer查询28个400/403/404各缺private/no-store。三轮重新pull latest、digest相同，资源已清理、提交仅本地、legacy本地/远程不变。修订后未重跑47项，不以focused替代完整门禁；完整审核决定与其三类接入依赖仍开放。
 
 [Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)增量已实现、整体门禁仍IN_PROGRESS：正式reason先红后绿，400/成功协议错误精确退场与每批asOf已实现；普通452项Vitest/32项Node、strict、生成漂移、fixture浏览器、Edge及focused真实4项通过，含四状态/恢复DRAFT、20+5与断流恢复。无参数完整门禁终态33项中32通过/1失败（8.9分钟），仍仅3条App管理详情404 no-store断言失败，其余全部通过；资源已清理、提交仅本地、legacy不变。不套用Profile预算或Tester token绑定，不因本包独立通过关闭上层UC。

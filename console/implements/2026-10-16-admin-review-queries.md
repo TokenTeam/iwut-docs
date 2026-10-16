@@ -83,3 +83,20 @@ Admin最终矩阵收齐了两种token页大小/绑定负例、单项Reviewer交�
 本轮五个image ID仍与前两轮相同；containers（含停止）/network终态后额外查询为空。源码、设计与证据仅本地提交，未push；本地和本次只读核验的远程legacy均为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未覆盖备份。
 
 完整门禁仍按最近47项43通过/4失败记录，修订后只重跑了本专项，未假称全量已绿。本阶段代码/所列真实功能已实现，但工作包保持IN_PROGRESS：App需在Application管理及这四个Reviewer查询的错误路径补齐正式私有响应头、发布新镜像，再重新pull latest跑无参数全量。完整UC006/007的决定、正式策略解释/绑定、写冲突与结果未知恢复仍未交付；Version正式检查定义、两个决定ADMIN surface、Profile批准公开指针/对照内容继续开放，不能借本次读取阶段缩减最终范围。
+
+### Gateway CI 完成后的无参数全量复验
+
+用户通知Gateway CI完成后，冻结Console `72de336`，重新执行`pnpm edge:e2e`及无参数`pnpm test:real`，不读取相邻后端作为构建输入。两项均重新pull已发布latest；Gateway仍解析为上文`sha256:a048de73…`，Auth/App/Mongo/Traefik五个完整image ID均与上一轮相同，不根据CI完成推断tag内容已经改变。镜像内`/gateway-config`生成与实际Traefik加载、四条ADMIN审核查询及Developer api-deny隔离、伪造头不旁路、私有ForwardAuth不外露和认证上游不可用时失败关闭再次通过。
+
+真实轮次`iwut-console-real-924773`终态**43通过/4失败**（47项、11.7分钟、exit1）。这是匿名来源测试修订后的完整运行，不再只引用focused结果。全部81条失败位置均为既有缓存响应头断言：
+
+| 失败项 | 实际错误断言 |
+| --- | --- |
+| Admin权限/游标/隔离矩阵 | 28个Reviewer查询400/403/404各缺private和no-store，共56条 |
+| 管理权转让 | 3个Application GET404缺no-store，共3条 |
+| owned Application游标负例 | 5个List400各缺private和no-store，共10条 |
+| 资格/角色读取边界 | 6个Application GET404各缺private和no-store，共12条 |
+
+Admin匿名真实浏览器401、缺元数据Node403、两项权限正式撤销/重授及Session保持等本轮所列非缓存断言完整执行，没有旧匿名预期硬失败；原43项也无新增非缓存失败。其它通过项不抵消这些失败，不补代理头、不跳过或放宽断言。普通633项Vitest＋89项Node、strict、同pin生成漂移、仓库独立性及报告隐私前置回归再次通过；生产build由真实runner在本轮完成，仍保留chunk体积警告。
+
+终态后额外检查该轮全部容器（含停止）及network均为空；本地和本次远程只读核验的legacy仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。未修改后端或生产页面/测试源码，未push。Gateway当前接线已满足本阶段读取联调要求，但完整门禁仍IN_PROGRESS，需修复上述App查询错误响应头并发布后再重拉latest复验；完整UC和审核决定依赖不因此关闭。
