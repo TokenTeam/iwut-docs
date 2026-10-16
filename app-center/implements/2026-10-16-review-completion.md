@@ -1,6 +1,6 @@
 # 审核依赖补齐与串行接入
 
-状态：`IN_PROGRESS`。用户于 2026-10-16 接受两份审核补齐设计并授权继续。
+状态：`IN_PROGRESS`（本轮依赖补齐与决定接线已本地实现；完整 Console UC 验收和发布仍开放）。用户于 2026-10-16 接受两份审核补齐设计并授权继续。
 
 业务权威已收敛至 UC005/030/031、UC016 的查询来源引用及资料查询契约；设计提交 `3b16200`。两份原提案保留为审核记录，不替代正式 UC/BR。
 
@@ -41,7 +41,7 @@ Gateway 本地提交 `3e8a59cd8b309c8f1e096ea95cac25a624738ba4`，API `27c9743`�
 - App `iwut-app-center:review-3a83152`，ID `sha256:b6d0b68f921eca043d75708182bcdc5d9ac7d82da1cf0488f7485005cae2cee8`。干净提交/API、Go 1.25.5 CGO0；固定已发布 runtime base，仅替换 binary。
 - Gateway `iwut-gateway:review-3e8a59c`，ID `sha256:951d4a2b3aa923743623a0323f8cbcc445d53d54c438d4fd12d36e4869bbe886`。最终提交/API archive、Go 1.25.5 CGO0、scratch＋CA；容器内生成配置对照通过。
 
-Console owner 已激活第 3 步，仅实现已有已接受审核 UC 内的决定操作。默认 published-latest 门禁保留，单独的 local compatibility 验证应明确记录来源。当前不登记 Console 决定已实现或整体验收完成。
+移交当时 Console owner 已激活第 3 步，仅实现已有已接受审核 UC 内的决定操作。默认 published-latest 门禁保留，单独的 local compatibility 验证应明确记录来源；当时尚未登记决定已实现。后续终态见下节。
 
 ## Console 验收反馈与决定响应修复
 
@@ -57,10 +57,24 @@ Console 冻结提交 `543fe2a` 的固定镜像决定专项已 12/12 通过（浏
 
 该 12 项是 focused 证据，不替代 Console 完整门禁。其无参数 full compatibility 和最终冻结 published-latest 全量尚在执行。默认早期诊断轮为 pre-70 working snapshot（运行期间来源变更，不能作为最终冻结提交验收），100 项中 84 通过、4 失败、12 个新决定用例明确 skip；四个失败仍为既有查询错误缓存头矩阵。Console 所有用例暂不登记 COMPLETE。
 
-## 后续串行交接
+## Console 最终交付与证据分层
 
-1. App/API 已完整验收并本地提交，Gateway owner 已激活第 2 步： 更新固定 API，给两个决定 RPC 增加精确 `ADMIN` surface。特别验证 HTTP JSON 不因旧 Proto decoder 丢失新增 definitions/公开资料字段，以及反向 surface、Cookie、CSRF 和伪造身份拒绝。
-2. Gateway 验证完成后，Console owner 更新固定生成输入与严格校验，再接入已有审核用例内的批准、拒绝、指针确认、409 重新确认和未知结果回读。任何新业务设计缺口按用户约定暂停审核。
-3. Console 的既有 Application 管理详情/列表错误 no-store 失败仍是独立已知问题；本包只补齐审核查询的缓存头，不将其当作整个 Console 门禁已通过。
+Console 最终本地源码提交 `52d2598397f7e0f7e400fa32af5d4cf94d191df9`；产品主体 `70e7522`、键盘验收 `543fe2a`、隔离测试 Reviewer 准备 `2e783ac`、最后恢复边界加固 `52d2598`。Console 专属文档分支提交 `475f4dce74218bb7bce234695d8d21b712009bf7`，详见该分支 `console/implements/2026-10-16-admin-review-decisions.md`；源码及该文档工作树均干净。
+
+- `543fe2a` 固定镜像 focused 决定专项 12/12 通过。
+- 首轮冻结 `543fe2a` 完整兼容轮为 85 通过、4 失败、11 未运行：三项为旧 Application 缓存头，另一项在新决定 beforeAll 复用账号的登录准备阶段失败，未执行决定。仅能证明准备失败，冷却原因是诊断推断，未直接观察 429。随后只改测试准备：独立真实注册的普通 Reviewer、正式 CAS grant/readback，不修改 Auth 冷却规则。
+- 冻结 `2e783ac` 无参数完整 local compatibility：100 项中 97 通过、3 失败、无 skip，浏览器 17.9m、exit1。新 12 项在全部真实前置之后均通过，16 个决定响应全部 private/no-store；仅旧管理转让、owned 游标和资格矩阵的 25 条 Application 查询错误缓存断言失败。此前 App/Reviewer 查询的 56 条缓存错误已消除。固定输入仍为 App `52ea87a` 对应 candidate ID `a34ff33...`、Gateway `951d4a2...`、Auth `22795e...`。
+- 此后 `52d2598` 只加固既有恢复规则：unknown 回读遇撤权并清私有数据后保留条件式“结果仍无法确认”提示；决定请求的精确利益冲突 403 要求同一 Review 重读，不再误撤其他同能力目标。精确权限不足、错能力/短名 reason 及普通查询仍保持原清理。Admin 158 项组件/core、strict 通过；普通 889 Vitest、124 Node、生成漂移证据绑定 `2e783ac`。没有宣称 `52d2598` 重跑完整本地真实决定链路，也未重复第三轮兼容全量。
+- 最终干净冻结 `52d2598` 的无参数 published-latest 全量（`iwut-console-real-607614`）：100 项中 84 通过、4 失败、12 因未发布依赖明确 skip，浏览器 16.5m、exit1。81 条错误全部为原缓存位置：Admin 56、管理转让 3、owned 10、资格 12；无新增非缓存硬失败。runner 在启动服务前实际完成该最终源码的两套 Console production build。
+
+最终 published 镜像重新 pull，未以本地镜像静默替换：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`、App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`、Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`；Mongo/Traefik 固定输入不变。各轮测试容器（含停止状态）及 network 均已清理，legacy 本地/remote 仍为 `e68851e`。
+
+## 本轮结论与后续
+
+1. 三项依赖与 ADMIN 决定接线已按 App/API → Gateway → Console 顺序实现、本地提交。Version 正式定义、Reviewer 当前公开 Profile 与显式 NONE、两决定 ADMIN surface，以及前端批准/拒绝、CAS 输入、逐项确认、实际终态和明确恢复均已交付；完整 Console UC 不因此标记 COMPLETE。
+2. API `27c9743` 尚未发布，远端 CI 拉取仍待可获取的正式 revision。后续须协调发布固定版本，再把 Formal 准备和决定 spec 纳回默认 published-latest 全量、解除临时 source gate 并复验。当前默认 skip 不能长期保留，也不代表线上决定已验收。
+3. 旧 Application 管理详情/列表错误响应的 private/no-store 缺口仍独立开放。当前修复限定审核查询和决定，不代理补头、不删旧断言、不以局部结果宣称整个 Console 门禁通过。
+4. Console 的策略退休、Scope 失效、全部依赖故障与跨 Session 决定交错仍有未验收项。UC007 的“不同修订并发改公开指针”尚未找到符合单 working 修订约束的正式 UI 准备路径；真实 NONE→UUID 替换、错误 pointer 409 和 App Mongo CAS 证据不能冒充该 UI 并发证明。保留结构化 gap，不擅改 UC 或增加发布/回滚功能。
+5. App 自带 UC005 联合夹具对新 Auth bootstrap 的兼容缺口仍如上记录。Console 使用新 Auth 的正式注册/授权/决定证据不等于该旧夹具已修复。
 
 所有提交、兼容镜像及验证仅在本地完成，不 push、不部署。不改 Auth、客户端 Catalog/Filter、受控 icon 或其他暂缓功能。

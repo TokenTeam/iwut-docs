@@ -29,7 +29,7 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 - [Version 正式审核检查定义](2026-10-16-version-review-check-definitions-proposal.md)：v3 正式人工检查文本、不可变版本、详情输出和严格 JSON 客户端切换。
 - [Reviewer 当前公开 Profile 投影](2026-10-16-reviewer-published-profile-proposal.md)：同一审核详情 snapshot 中的公开资料、显式 NONE、权限与指针 CAS。
 
-App/API 已完成，服务 `52ea87a`（含 Console 验收发现的决定响应缓存头修复）、API `27c9743`，两轮完整 backend 均 24/24 通过；Gateway 第 2 步已完成（`3e8a59c`，check/完整协议门禁通过）。Console 第 3 步已实现，冻结 `543fe2a` 的真实决定专项 12/12 通过，完整兼容/已发布镜像门禁仍在执行，暂不登记完整 UC 已完成。详见[审核补齐接入记录](2026-10-16-review-completion.md)。
+App/API 已完成，服务 `52ea87a`（含决定响应缓存头修复）、API `27c9743`，两轮完整 backend 均 24/24 通过；Gateway `3e8a59c` 的 check/完整协议门禁通过。Console 最终本地源码 `52d2598`：真实决定专项 12/12，完整固定镜像兼容轮在 `2e783ac` 为 97 通过/3 个旧管理缓存失败；最终源码恢复加固通过 Admin158 项与 strict，最终已发布镜像全量为 84 通过/4 个旧缓存失败/12 个未发布依赖明确 skip。代码接线已交付，完整 UC 与发布验收继续 IN_PROGRESS。详见[审核补齐接入记录](2026-10-16-review-completion.md)。
 
 ### 已交付范围
 
