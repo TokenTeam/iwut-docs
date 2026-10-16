@@ -46,3 +46,22 @@
 原队列/详情/owner冲突三项和最后权限/撤重授/三元隐藏/匿名/跨surface/最终Session非缓存断言全部执行。唯一56条错误位置均为审核错误缓存头断言：28个Reviewer查询400/403/404各缺private和no-store，没有新增断流或功能失败。保留全部断言，focused不替代无参数完整门禁；首轮开发fixture异常仍OPEN，真实生产dist通过不代替其定因。
 
 本轮实际image ID：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`，App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`，Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，均与此前相同。额外核验该轮容器（含停止）和network为空。下一步无参数51项完整运行，未把本包或上层UC记作完成，未push。
+
+### 无参数51项完整门禁
+
+冻结`3eea0fb`（生产实现仍`c11eb25`、测试`0b8cebf`），轮次`iwut-console-real-26753`重新pull latest，五个实际image ID均与上述专项相同。无参数`pnpm test:real`完整终态**47通过/4失败**（51项、11.9分钟、exit1），没有skip或未运行。新增四项恢复在全量中再次通过，Version队列/详情3.5/2.4秒、Profile队列/详情3.4/2.0秒；原47项非缓存断言也全部收齐。
+
+81条错误的全部安全源位置已核对：
+
+| 失败项 | 错误响应/断言 |
+| --- | --- |
+| Admin权限、撤重授、游标和路由矩阵 | 28个Reviewer查询400/403/404各缺private/no-store，56条 |
+| 管理权转让 | 3个Application GET404缺no-store，3条 |
+| owned Application游标负例 | 5个List400各缺private/no-store，10条 |
+| 资格/角色读取边界 | 6个Application GET404各缺private/no-store，12条 |
+
+没有新增非缓存失败，不通过代理补头、改状态、删断言或替换后端源码掩盖它们。真实Session/权限矩阵末尾检查仍完成；上述通过不证明未列出的Admin跨Session交错、真实App5xx或完整审核决定。开发fixture首轮两异常仍未定因，继续OPEN，未把后续多轮绿写成已修复。
+
+终态后额外检查本轮及专项所有容器（含停止）/network均为空。普通690项Vitest＋89项Node、strict、固定生成漂移、build、Edge和报告隐私回归已通过，fixture完整及重复结果见上；本地和本次只读核验的远程legacy均仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。源码/设计/证据仅本地提交，未push。
+
+本增量功能及所列真实恢复已实现，门禁保持IN_PROGRESS。后续需补实际Admin跨Session交错、保留间歇性fixture问题的定因，以及待App发布错误头修复后重新pull latest跑完整门禁；完整UC006/007的政策定义、决定ADMIN surface、Profile批准公开对照来源及决定/冲突/结果未知恢复继续开放，不能以本包读取恢复取代或缩减最终范围。
