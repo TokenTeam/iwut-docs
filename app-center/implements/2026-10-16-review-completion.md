@@ -43,6 +43,20 @@ Gateway 本地提交 `3e8a59cd8b309c8f1e096ea95cac25a624738ba4`，API `27c9743`�
 
 Console owner 已激活第 3 步，仅实现已有已接受审核 UC 内的决定操作。默认 published-latest 门禁保留，单独的 local compatibility 验证应明确记录来源。当前不登记 Console 决定已实现或整体验收完成。
 
+## Console 验收反馈与决定响应修复
+
+Console 真实调用发现：Version 决定 HTTP 200 缺少 Cache-Control；Profile 决定 HTTP 200/409 仅有 no-store；两类决定的原生 gRPC metadata 也未声明私有缓存边界。这是既有私有审核事实传输约束的遗漏，不增加业务规则、权限或写命令。
+
+App 本地修复提交 `52ea87aff89e66d32621d508bc2eb6cd486bd984`：两个决定入口、身份 middleware、HTTP 早期过滤及错误编码统一使用 `private, no-store`。新增真实生成 handler/原生 gRPC 回归，先复现失败再通过，覆盖成功、401/403/409/500、Version 503 和 HTTP JSON 绑定 400；原有真实决定 E2E 也补充响应头断言。
+
+修复后 `make check-full` 24/24 PASSED，报告 `.artifacts/verification/20261016T081304Z-muguvlfv/report.json`，changed_sources=[]；Go 1.25.5，Mongo race 1279.308s、HTTP/gRPC E2E 162.054s，最终集成 stage 1285.093s。被测来源为 `3a83152` 加 staged patch SHA-256 `2243592d3da95f2dd40c93529c3decc18ce407c2ad0aa09d2c58e3ec24eb78af`，逐字节相同地提交为 `52ea87a`；API 仍为 `27c9743`，App 工作区干净。
+
+Console 当前使用的修复 artifact 为 `iwut-app-center:review-cache-candidate`，另有等价 tag `iwut-app-center:review-52ea87a`，两者均指向 ID `sha256:a34ff33dd624ca55a162006c51580282aecf73ea42c676b81582c654568cf166`。该镜像是在正式提交前从上述冻结 patch 构建，标签如实保留 `3a83152+review-cache` 及 patch hash；Go 1.25.5 CGO0，仅替换固定 runtime base 中的 binary。它替代上节的初始 App artifact，Gateway artifact 不变；未 push/部署。
+
+Console 冻结提交 `543fe2a` 的固定镜像决定专项已 12/12 通过（浏览器 1.2m）：Version 批准/拒绝、Profile 显式 NONE 首次公开和已观察 UUID 替换、错误 pointer 409 保持原态、真正重叠的单次决定串行化、已提交响应正文截断后的未知结果回读、在途请求/30 秒 deadline/PENDING 不自动重放、页面退场与迟到回执隔离、精确权限/跨 surface/利益冲突、正式撤权与重授，以及 APPROVE 终检实际 SYSTEM REJECTED。决定 200/403/409 的私有缓存头已在该真实链路观察通过。
+
+该 12 项是 focused 证据，不替代 Console 完整门禁。其无参数 full compatibility 和最终冻结 published-latest 全量尚在执行。默认早期诊断轮为 pre-70 working snapshot（运行期间来源变更，不能作为最终冻结提交验收），100 项中 84 通过、4 失败、12 个新决定用例明确 skip；四个失败仍为既有查询错误缓存头矩阵。Console 所有用例暂不登记 COMPLETE。
+
 ## 后续串行交接
 
 1. App/API 已完整验收并本地提交，Gateway owner 已激活第 2 步： 更新固定 API，给两个决定 RPC 增加精确 `ADMIN` surface。特别验证 HTTP JSON 不因旧 Proto decoder 丢失新增 definitions/公开资料字段，以及反向 surface、Cookie、CSRF 和伪造身份拒绝。
