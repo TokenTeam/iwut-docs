@@ -15,7 +15,7 @@
 
 ## 代码位置
 
-[Admin读取恢复与迟到响应](2026-10-16-admin-read-recovery-and-late-responses.md)已接受：新增同页队列刷新、请求级取消隔离和仅允许已知网络/5xx保留原快照；补两能力队列/详情真实正文断流与明确恢复。实现/验证待完成，不替代完整审核决定或关闭既有错误头门禁。
+[Admin读取恢复与迟到响应](2026-10-16-admin-read-recovery-and-late-responses.md)已实现、门禁IN_PROGRESS：同页队列刷新、请求级取消隔离、未许可错误精确退场及语义精确数据时间已接入；690项Vitest＋89项Node、strict/生成漂移通过。重启后真实专项7通过/1失败（57.2秒），新增四项两能力队列/详情的原生200正文TypeError、React原投影/asOf保留、键盘明确恢复及前页栈均通过，仅原Reviewer56条错误头断言失败。首轮因宿主机重启中断，已精确清理；重跑轮次资源也已清理。首轮fixture两项异常后多轮未复现但因果仍OPEN，不宣称已修；无参数51项待执行，不替代完整审核决定或关闭既有错误头门禁。
 
 Gateway CI完成后的[最新无参数复验](2026-10-16-admin-review-queries.md#gateway-ci-完成后的无参数全量复验)：Console `72de336`，轮次`iwut-console-real-924773`，47项终态43通过/4失败（11.7分钟、exit1）；匿名来源修订已纳入完整运行，81条失败全部为既有App查询错误响应头断言（Admin56、转让3、owned游标10、资格角色12），无新增非缓存失败。Edge、普通633项Vitest＋89项Node、strict、生成漂移及仓库独立性再次通过；重新pull latest五镜像ID不变，容器/网络已清理、legacy未变、未push。下文较早“修订后未重跑47项”仅为历史轮次状态；最新完整门禁仍IN_PROGRESS，不缩减完整UC或审核决定范围。
 

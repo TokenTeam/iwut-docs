@@ -36,3 +36,13 @@
 生产实现`c11eb25`、真实恢复/StrictMode对照`0b8cebf`已本地提交。轮次`iwut-console-real-956668`重新pull五镜像ID均与此前相同，最后已观察到镜像准备/构建、容器启动及注册密码限流等待；后续主机重启，不能推断未观察部分完成。恢复后原exec handle不存在、无runner/BFF/Playwright进程，五个容器均在`2026-10-16T00:53:13Z`附近以255退出，系统uptime约6分钟。临时目录与本轮真实报告不存在，无可采信通过/失败终态，登记`INTERRUPTED`而非测试失败或成功。
 
 逐一核验五个精确容器ID、统一随机ownership label、原镜像ID、已退出状态和空network后，仅移除本轮五容器、其两个匿名Mongo测试volume及network；复查均为空。临时fixture数据不可恢复但可由runner重新生成；未清理其它Docker资源或镜像，未恢复旧临时Session。接下来仍使用冻结源码重新pull latest运行专项和无参数全量，不把旧未知轮次重放到原Auth/Mongo中。
+
+### 重启后的统一检查与真实专项终态
+
+冻结`0b8cebf`，重新运行统一普通测试：**690项Vitest＋89项Node全部通过**，含Admin114项（页面62、核心40、初始异步StrictMode8、原Session4）；strict和同pin生成漂移再次通过。新增StrictMode测试没有RED，不把对照绿当作首轮fixture异常已定因/修复。
+
+轮次`iwut-console-real-20065`重新pull latest并从空隔离环境准备，八项真实专项终态**7通过/1失败**（57.2秒、exit1）。新增四项均通过：Version队列3.6秒/详情1.9秒，Profile队列3.1秒/详情2.1秒。每项独立原生fetch证明实际200/private/no-store及正文TypeError；另一gate证明生产React保留原投影、官方Timestamp精确datetime和原分钟警告，键盘明确成功后wire asOf更新且语义time匹配。两队列在非空第二页保留请求token和上一页栈，可键盘返回原第一页；两详情不可变材料/current上下文保持，没有生产写或Session清理。
+
+原队列/详情/owner冲突三项和最后权限/撤重授/三元隐藏/匿名/跨surface/最终Session非缓存断言全部执行。唯一56条错误位置均为审核错误缓存头断言：28个Reviewer查询400/403/404各缺private和no-store，没有新增断流或功能失败。保留全部断言，focused不替代无参数完整门禁；首轮开发fixture异常仍OPEN，真实生产dist通过不代替其定因。
+
+本轮实际image ID：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`，App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`，Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，均与此前相同。额外核验该轮容器（含停止）和network为空。下一步无参数51项完整运行，未把本包或上层UC记作完成，未push。
