@@ -248,3 +248,5 @@ Console 侧已增加共享 Traefik 的 BFF/SPA 动态配置生成器，并以固
 接入调查与分包见 [App API 接入计划](2026-10-15-app-api-integration-plan.md)。Console 页面的业务授权由相应 App/Auth UC 拥有；新提案仅规定前端编排、安全与恢复。Tester 本人 UC038/040 入口继续暂缓，未创建其 Console UC，未伪造宿主 runtime。
 
 本次没有修改 Console 源码、App/Auth/Gateway/API 或生成 brief。正式检查定义、Reviewer 公开指针等后端缺口只记录交接方案；不得以 BFF 数据库读取、管理员查询或临时 DTO 绕过。设计接受前仅可做已授权工程核对，不将草案标记为已实现。最终页面验收仍需真实 Browser/BFF/Gateway/Auth/App，mock 不计真实 E2E。
+
+[Admin审核决定接入](2026-10-16-admin-review-decisions.md)按已接受UC006–007与用户串行授权实施；精确API生成、正式定义/指针、决定UI、恢复与独立local-compatibility验证的分层证据见该记录。完整UC及默认published门禁继续IN_PROGRESS。
