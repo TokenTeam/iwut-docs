@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+[Developer私有读取消费边界](2026-10-16-developer-read-consumption.md)已接受：补请求级Abort/lifetime和本地Session消费检查，未知错误及其它明确非临时错误精确退场、Tester区域自动恢复限制和旧Query对象数据清理。先红后绿并在冻结源码后跑完整真实门禁；不关闭原错误头或所有页面跨Session矩阵。
+
 | 工作包 | 设计 | 实现 | 缺口 |
 | --- | --- | --- | --- |
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
