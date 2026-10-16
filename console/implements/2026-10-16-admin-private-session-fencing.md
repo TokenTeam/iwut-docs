@@ -30,3 +30,7 @@ API输入固定pin不变；不修改后端源码、业务规则、治理/决定s
 Console实现冻结为`4290e3c`。准备器/固定控制边界新增13项合成负例先因缺失实现全部失败，再全部通过；统一回归为690项Vitest＋102项Node通过，strict、固定API生成漂移、build通过。fixture浏览器10通过/6非目标skip，Edge真实Traefik路由隔离与fail-closed通过。上述合成/fixture证据不代替正式Auth grant或真实跨Session矩阵，也不关闭原fixture偶发异常的未定因记录。
 
 真实运行从本轮重新pull的latest开始，实际image ID和专项/无参数终态待记录。不得登记本包、UC001/fencing或完整审核UC完成。提交仅本地；legacy本地及本次远程只读核验仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。
+
+### 首轮准备失败与身份边界修订
+
+轮次`iwut-console-real-57321`在新增准备器处终态exit1，浏览器12项尚未开始，不能记作通过或12项失败。错误为静态`Admin view fixture unavailable`；终态后容器/网络为空。新准备器错误复用了App资源UUIDv7校验；Auth Session的authId是opaque string，既有bootstrap也未作UUIDv7假设。将合成actor/固定控制输入改成非UUID的安全Auth标识后，原13项中8项稳定失败；修订为测试实例的路径安全字母数字/下划线/连字符约束，保留固定subject、精确相等和Mongo JSON编码，不改变产品AuthId语义。补充空值/路径/query/引号/换行/超长/重复目标负例后14项通过、real strict通过，冻结`8233ef1`后重新拉取latest执行专项。没有自动重放未知grant或失效写，不把准备器错误归于后端或生产Session隔离。
