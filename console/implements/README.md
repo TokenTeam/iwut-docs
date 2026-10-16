@@ -15,6 +15,8 @@
 
 ## 代码位置
 
+[Admin私有视图真实跨会话隔离](2026-10-16-admin-private-session-fencing.md)已接受：两个独立单项Reviewer、四读取入口×旧200/401/204十二例，使用正式授权和真实生产React，不改现有R权限相位。新旧Cookie/Session/DOM与同document清理回执均须真实验证，不以已有组件或Developer证据关闭Admin矩阵；实现/验收待完成。
+
 [Admin读取恢复与迟到响应](2026-10-16-admin-read-recovery-and-late-responses.md)已实现、门禁IN_PROGRESS：同页队列刷新、请求级取消隔离、未许可错误精确退场及语义精确时间已接入；690项Vitest＋89项Node、strict/生成漂移/build/Edge通过。重启后专项7通过/1失败（57.2秒），最终无参数51项47通过/4失败（11.9分钟、exit1）；新增四项两能力队列/详情的原生200正文TypeError、React原投影/asOf保留、键盘恢复和前页栈均再次通过。81条失败全部为原App错误头（Admin56/转让3/owned10/资格12），无新增非缓存失败。首轮宿主机重启中断已核验清理，后续两轮资源也为空；五镜像ID不变、legacy未变、未push。首轮fixture两项多轮未复现但因果仍OPEN，不宣称已修；完整审核决定、真实Admin跨Session及原错误头门禁继续开放。
 
 Gateway CI完成后的[最新无参数复验](2026-10-16-admin-review-queries.md#gateway-ci-完成后的无参数全量复验)：Console `72de336`，轮次`iwut-console-real-924773`，47项终态43通过/4失败（11.7分钟、exit1）；匿名来源修订已纳入完整运行，81条失败全部为既有App查询错误响应头断言（Admin56、转让3、owned游标10、资格角色12），无新增非缓存失败。Edge、普通633项Vitest＋89项Node、strict、生成漂移及仓库独立性再次通过；重新pull latest五镜像ID不变，容器/网络已清理、legacy未变、未push。下文较早“修订后未重跑47项”仅为历史轮次状态；最新完整门禁仍IN_PROGRESS，不缩减完整UC或审核决定范围。
