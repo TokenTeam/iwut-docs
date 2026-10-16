@@ -22,6 +22,15 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 ## 当前实现覆盖
 
+### 2026-10-16 待审核设计
+
+以下提案均为 `PROPOSED`，尚未改变已接受的 UC/BR、API 或实现；用户审核接受后才进入权威文档更新与串行实现。
+
+- [Version 正式审核检查定义](2026-10-16-version-review-check-definitions-proposal.md)：v3 正式人工检查文本、不可变版本、详情输出和严格 JSON 客户端切换。
+- [Reviewer 当前公开 Profile 投影](2026-10-16-reviewer-published-profile-proposal.md)：同一审核详情 snapshot 中的公开资料、显式 NONE、权限与指针 CAS。
+
+### 已交付范围
+
 设计状态与实现状态彼此独立，定义见[文档约定](../document-conventions.md#状态)。当前覆盖如下：
 
 2026-10-15 UC002–005 的真实 Gateway/Auth 后端联合验收均已闭合：见 [UC002 记录](2026-10-15-uc002-gateway-auth.md) 与 [UC003–005 记录](2026-10-15-uc003-005-gateway-auth.md)。当前后端接入范围为 COMPLETE，cross-service 28/28；该结论从有效 Session 开始，不包含密码登录、邮件、Console 页面或生产部署。Console 六份新草案保持 PROPOSED；历史工作与交接见 [串行审计](2026-10-14-backlog-audit.md)。
