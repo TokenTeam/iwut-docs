@@ -63,3 +63,23 @@ Admin最终57项（页面44、核心9、原Session4）通过：入口缺导航1�
 终态后额外查询本轮containers（含停止）/network均为空，随后只修订spec定位：按section中的字段dt/dd配对断言source/current/restoration revision、终态结果及当前DRAFT，不删数值检查或改产品显示。另给最终权限矩阵增加测试善后：先正式观察R，仅明确单权限的既定相位才调用对应固定重授；未决写仍只读确认，不重放revoke/unknown CAS，不让一个UI断言失败污染后续资格包，也不吞掉原失败。修订`9f0bb0a`严格real types与diff通过，产品代码未变；接下来直接无参数47项完整门禁验收，不以focused替代全量。
 
 本轮重新pull实际image ID：Auth `sha256:22795e28977547d2b71179dd7478bd5f3f82c6ae22201c9d3ec40755e3e2c7a3`，App `sha256:6f20c469a0e9566e045a5966fd51d81ce0b1293c650e2b277fa62bc3b5a3579b`，Gateway `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。相邻后端只作设计/源码核对，不成为测试编译输入。
+
+### 无参数完整门禁
+
+冻结修订`9f0bb0a`，轮次`iwut-console-real-905126`，47项终态**43通过/4失败**（11.6分钟、exit1），五个实际image ID与首轮相同。Admin前三项全部通过：两个默认队列与分页/过滤、全部PENDING/APPROVED/REJECTED/恢复DRAFT/原文详情和bigint/asOf、真实owner三冲突。原有43项中40通过，三失败仅为管理转让3条Get404 no-store、owned分页5个List400各缺private/no-store共10条、资格角色6个Application GET404各缺private/no-store共12条。资格角色的原生/React/G/R/T/最终Session断言均完成，没有上轮正文取消硬失败；Admin准备及有限重授未污染旧矩阵。
+
+Admin最终矩阵收齐了两种token页大小/绑定负例、单项Reviewer交叉、G无权限/Developer无隐式权限、两能力分别正式revoke/regrant及另一能力保留、各次Session/设备保持、Version三元不匹配隐藏和重新读正确目标。已有26个Reviewer查询错误响应各缺private/no-store，累计52条soft断言；这把App缺头范围实际扩大至Reviewer队列/详情400/403/404，不能通过代理补头或删检查解除。
+
+该项另外一条硬失败位于匿名POST的预期：Playwright APIRequestContext不发送浏览器Fetch Metadata，因此实际先得到403 CONSOLE_REQUEST_REJECTED，而不是401。读取当前BFF request-boundary并对本轮实际入口做只读诊断：无元数据403，同源完整元数据但无Session401 SESSION_INVALID，附无效客户端Session/identity头仍401；两种Developer查询均404。诊断只选择当前子进程的非敏感公开origin，未输出/传出环境或凭据，也不替代浏览器spec。原项在首次匿名预期处停止，Profile三元/剩余路由与最后整体Session断言未执行，不能记作完整矩阵已绿。
+
+终态后containers（含停止）/network额外查询为空，随后仅在spec修订来源/认证分层：Node无元数据明确验证403，真正同源匿名浏览器fetch（包含无效客户端头负例）由浏览器自动提供Origin/Fetch Metadata并核验401及SESSION_INVALID；不手工伪造元数据来冒充浏览器。生产BFF/页面未改，修订`f9bc0f3`严格real types/diff通过，四项专项重新pull latest复验中；尚未再次运行47项，不以专项替代完整门禁。
+
+### 最终修订专项与当前门禁边界
+
+冻结`f9bc0f3`，轮次`iwut-console-real-915568`终态**3通过/1失败**，45.4秒、exit1。前三项分别4.5/7.1/3.2秒，最后矩阵28.0秒。治理控制负例、角色与26 App正式准备、事务自检再次通过；默认分页/过滤/空cursor重置、全部不可变/终态/恢复/原文详情、bigint/asOf和三冲突再次通过。
+
+最后矩阵这次完整执行：token绑定caller/filter且pageSize可变，V/P单项交叉、G与Developer无隐式权限，R两项权限各自真实撤销/重授及另一能力保留，Version/Profile三元404的React隐藏和正确目标重新进入，Node缺浏览器元数据403、真实同源匿名浏览器401（含无效客户端头负例、实际Origin/Sec-Fetch-Site核对），Developer两条查询404，末尾Session/不可导出设备、无DELETE/业务写入/外部资源/个人资料补查与有限控制善后全部通过。无硬失败；报告56条错误全部为28个Reviewer查询400/403/404响应各缺private/no-store。保留每条断言，未补代理头、改状态或吞正文失败。它证明本轮选定负例拒绝，不扩大为所有可能有效恶意凭据/标头组合的完整安全证明。
+
+本轮五个image ID仍与前两轮相同；containers（含停止）/network终态后额外查询为空。源码、设计与证据仅本地提交，未push；本地和本次只读核验的远程legacy均为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未覆盖备份。
+
+完整门禁仍按最近47项43通过/4失败记录，修订后只重跑了本专项，未假称全量已绿。本阶段代码/所列真实功能已实现，但工作包保持IN_PROGRESS：App需在Application管理及这四个Reviewer查询的错误路径补齐正式私有响应头、发布新镜像，再重新pull latest跑无参数全量。完整UC006/007的决定、正式策略解释/绑定、写冲突与结果未知恢复仍未交付；Version正式检查定义、两个决定ADMIN surface、Profile批准公开指针/对照内容继续开放，不能借本次读取阶段缩减最终范围。

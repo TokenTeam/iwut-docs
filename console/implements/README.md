@@ -7,7 +7,7 @@
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
 | 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 边界、登录/重发/页面回调隔离及双 Console 真实邮件/设备主链通过；跨请求 Cookie fencing 和完整恢复/并发矩阵仍待完成 |
 | Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002–005`（只读管理） | `IN_PROGRESS` | 独立构建、认证入口和 Application/Version/Profile/Tester 只读页面已实现；UC001 后续增量及真实浏览器联合验收待完成 |
-| Admin Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-006–007`（审核） | `IN_PROGRESS` | 独立认证入口已实现；完整审核UC已接受，先实施[查询阶段](2026-10-16-admin-review-queries.md)，决定依赖及完整验收继续开放 |
+| Admin Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-006–007`（审核） | `IN_PROGRESS` | 双审核队列/不可变详情及能力失效已实现；[查询阶段](2026-10-16-admin-review-queries.md)真实功能矩阵通过，Reviewer错误头仍使门禁失败，完整决定依赖及验收继续开放 |
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 | Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |
@@ -15,13 +15,15 @@
 
 ## 代码位置
 
+[Admin审核查询首阶段](2026-10-16-admin-review-queries.md)已实现、完整门禁IN_PROGRESS：固定同pin四client、双队列/三元详情、snapshot/current/历史决定分区与能力/Session隔离；普通633项Vitest/89项Node、strict、生成漂移、build、fixture浏览器10通过/6非目标skip及Edge通过。47项无参数全量43通过/4失败（11.6分钟），原三项仅App错误头，新Admin项另有匿名元数据测试预期错误；终态后修订来源/认证分层，最终focused四项3通过/1失败（45.4秒），所列权限/撤重授/Session/匿名/跨surface功能均完整执行，唯一56条错误为Reviewer查询28个400/403/404各缺private/no-store。三轮重新pull latest、digest相同，资源已清理、提交仅本地、legacy本地/远程不变。修订后未重跑47项，不以focused替代完整门禁；完整审核决定与其三类接入依赖仍开放。
+
 [Version分页与正式错误码恢复](2026-10-16-version-pagination-and-recovery.md)增量已实现、整体门禁仍IN_PROGRESS：正式reason先红后绿，400/成功协议错误精确退场与每批asOf已实现；普通452项Vitest/32项Node、strict、生成漂移、fixture浏览器、Edge及focused真实4项通过，含四状态/恢复DRAFT、20+5与断流恢复。无参数完整门禁终态33项中32通过/1失败（8.9分钟），仍仅3条App管理详情404 no-store断言失败，其余全部通过；资源已清理、提交仅本地、legacy不变。不套用Profile预算或Tester token绑定，不因本包独立通过关闭上层UC。
 
 [保留生命周期历史读取矩阵](2026-10-16-retained-lifecycle-read-matrix.md)增量已实现、整体门禁仍IN_PROGRESS：四正式Create/二正式Archive、三阶段readseed与12组合×8RPC和React代表路径focused3项通过；默认生命周期文案、关闭摘要展示先红后绿，普通455项Vitest/49项Node、strict、生成漂移、fixture浏览器和Edge通过。无参数全量终态36项中35通过/1失败（9.9分钟），新增三阶段含加强计数全部通过，仍仅原3条App详情404 no-store断言失败；首两轮准备暴露的密码429/全局hash冲突已修复并保留门禁。资源已清理、提交仅本地、legacy不变；平台/关闭历史seed不当治理/关闭命令或Auth撤销收敛证据，不绕过当前密码＋新设备签名近期认证、不扩展生产写UI，资格下降另包。
 
 [UC002累计分页与正式错误恢复](2026-10-16-owned-application-pagination-and-recovery.md)增量已实现、完整门禁仍IN_PROGRESS：正式reason、拒绝投影精确退场/后续503不复活及每批asOf先红后绿，普通512项Vitest/56项Node、strict、生成漂移、fixture浏览器和Edge通过。仅测试实例以正式初始quota配置30准备25个真实Create的App，不seed owner/quota、不改变生产默认10；独立peer只注册并遵守邮件冷却。focused三项2通过/1失败（13.5秒）；最终无参数39项全量为37通过/2失败（10.1分钟、exit1），新20+5/非空cursor刷新与筛选重置/空详情及正文断流恢复、原其余35项全部通过。两失败项仅为原Get404的3条no-store及5个List400各缺private/no-store的10条soft断言，功能/Session断言仍收齐；未删断言或补代理头。每轮重拉latest、digest相同，资源已清理、提交仅本地、legacy不变。UC029 token不套用Tester ownershipRevision、父App或HMAC假设，当前包不关闭资格下降、UC001/fencing或UC006–007。
 
-[资格下降与非管理员角色读取边界](2026-10-16-qualification-and-role-read-boundaries.md)增量已实现、完整门禁仍IN_PROGRESS：四个真实专用账号正式停服bootstrap、grant、Create依附资源、Join及SUSPEND/RESTORE，不seed本包Auth权限/资格或App依附数据、不扩生产写UI。普通512项Vitest/77项Node及strict通过，生成漂移首轮Git网络超时后独立重试通过，最新Edge通过。无参数43项全量40通过/3失败（10.6分钟、exit1）：两项仅App错误头；角色项还因测试读取被正常共享退场取消的overview正文而提前退出，R/T未执行。终态清理后仅修正Tester深链等待首个完整真实响应，保留原生八RPC/全部隐藏与Header断言；修订focused四项终态3通过/1失败，A三阶段及G/R/T全部功能与末尾Session断言执行通过，仅Application GET404缺private/no-store的12条soft错误。每轮重新pull latest、五镜像ID相同、轮次资源已清理、提交仅本地；修订后未重跑43项，不以focused替代完整门禁。WITHDRAWN/账号禁用及上层UC继续开放。
+[资格下降与非管理员角色读取边界](2026-10-16-qualification-and-role-read-boundaries.md)增量已实现、完整门禁IN_PROGRESS：四真实角色正式bootstrap/grant/Create/Join/SUSPEND/RESTORE，不seed本包权限/资格/依附数据，不扩生产写UI。原43项全量40通过/3失败含Tester取消正文测试竞态，修订focused4项3通过/1失败；后续Admin无参数47项回归已包含修订及全部原43项，终态43通过/4失败（11.6分钟、exit1）。本包三阶段通过，G/R/T全部原生/React/最终Session断言完成，唯一12条soft错误仍是Application GET404缺private/no-store，没有正文取消硬失败；Admin权限相位恢复双权限未污染本包。五镜像ID相同、资源已清理、提交仅本地；WITHDRAWN/账号禁用、原错误头及上层UC继续开放。
 
 [真实Tester分页、容量与最小披露](2026-10-16-tester-pagination-and-privacy.md)已接受：补25条ACTIVE成员、历史episode、独立链接分页/筛选、容量与无当前链接的真实读取矩阵，以及畸形成功的区域级退场；不增加产品写入口或REMOVED成员入口。
 
