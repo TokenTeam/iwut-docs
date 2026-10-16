@@ -26,3 +26,11 @@
 准备器/控制先做Node红绿及负例，API pin保持不变；运行普通测试、strict、生成漂移、build、fixture浏览器、Edge。运行时源码冻结后从空隔离环境重新pull Auth/App/Gateway latest，先专项、再无参数完整门禁；不因已知App错误头删断言或代理补头，不编译后端源码、不重启仍存活轮次。
 
 本包的25场景只证明相应真实跨Session读取/回执交错，不覆盖全部生命周期/角色/权限下降组合或全浏览器heap。App缓存头、fixture偶发未定因、任意33+迟到carrier容量、完整UC001及审核决定依赖仍OPEN；实际准备、场景数、image ID、失败原因与清理结果逐轮登记，未过门禁不push。
+
+## 实现与前置证据
+
+准备器/固定控制首12项因缺导出/模块全部RED，后新增固定三路batch校验2项RED→GREEN，共14项通过；qualification原默认资源13项回归保持不变。透明proxy新增4项batch测试先全部RED，最小实现后通过，另补真实TLS三响应回归；最初TLS测试错误传递listener额外配置导致一项失败，已只修测试配置，随后统一837项Vitest＋122项Node全部通过。batch最多三响应、完整验证后才原子注册、与原single互斥，保留TLS trust、原status/body/header/Cookie数组和逐连接取消，不扩大为通用并发故障工具。
+
+strict与Edge路由隔离/fail-closed通过。API漂移首轮固定pin远程fetch低速超时，尚待相同命令重试成功；build/fixture和真实25场景尚待终态，不能记作交付完成。本地/远程legacy已再核验仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。
+
+同固定pin漂移重试已成功，build通过；原fixture浏览器本轮10通过/6非目标skip，不关闭此前偶发异常因果。运行时与spec均已冻结，开始新拉latest的25项专项；真实终态仍待记录。
