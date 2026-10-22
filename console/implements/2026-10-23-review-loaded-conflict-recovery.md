@@ -31,3 +31,9 @@ finally尽力按已确认相位恢复：forward尚未accept且已知PENDING可�
 先固定相位/OCC/绑定/未知回执/错序并发/敏感错误的Node合成红绿回归，再普通903项Vitest及扩展Node、strict、官方固定pin生成漂移、Edge。冻结全部runtime/runner/spec后，每轮pull发布latest，先15项专项再默认无参数103项全量，以实际终态数为准。保留原25条Application错误缓存头断言，不代理补头、不编译后端、不用local兼容artifact。全量仍红不push。
 
 本包只补Version所列加载后关系变化。Profile同类组合、不同修订公开指针并发、策略退休、Scope与全部依赖故障、全部决定Session交错及UC001/fencing仍OPEN。若真实链路揭示产品缺陷，终态并清理后再最小修复、重新冻结和复验，不能在运行中改源或以专项代全量。
+
+## 实施与预检
+
+源码冻结`77201dd`，仅新增固定准备控制及第15项浏览器spec，无产品UI变更。新增工厂首12项先RED（缺factory）后GREEN，再补4项Cancel竞态/反向readfail/只读unknown/权限漂移，以及1项正式Proto adapter合成接线，共17项新增Node。adapter拒绝早于前14项权限相位的控制调用，硬校验初始grant revision＋4后才允许任何资格/转让写；既有三个Node DEVICE保持不增。合成证据不当作真实治理命令或浏览器验证。
+
+统一`pnpm test`903项Vitest＋160项Node全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin）与`pnpm edge:e2e`均exit0；Admin158组件亦独立通过，diff/Node语法检查通过。已再次通过当日Cloudflare HTTPS DNS查询核验显式NSS fixture的公共A仍为198.35.26.224，不访问其HTTP内容，也不当部署DNS证据。开始published-latest 15项专项，未达终态前不算通过；runtime、runner与spec保持冻结，未push。
