@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-2026-10-22重新拉取已发布镜像的[审核决定接线前置检查](2026-10-16-admin-review-decisions.md#2026-10-22重新拉取已发布镜像后的接线前置检查)：Auth/App latest已更新，官方API固定pin远程生成检查通过；Gateway latest仍为`a048de73…`，实际镜像内生成配置确认缺少两条ADMIN决定router，四条查询存在。按用户许可暂时停在该发布依赖，不切回本地artifact、不启动缺路由的完整回归，不把上次结果当新App/Auth验收；默认完整门禁仍IN_PROGRESS。
+2026-10-22[已发布审核决定验收](2026-10-16-admin-review-decisions.md#已发布无参数全量终态)：Gateway latest已更新为`2953ae7f…`并补齐两条ADMIN决定接线，API同pin官方远程检查通过，决定12项已迁入默认门禁、不再skip。冻结Console `65a9ea0`的published专项12/12通过（1.1分钟）；最终默认无参数100项97通过/3失败、无skip（17.8分钟、exit1），新增12再次全过。仅25条原Application错误缓存头断言仍红（转让3/owned10/资格12），Admin原56条已全部通过。903项Vitest＋132项Node、strict/生成漂移/六入口Edge通过；两轮资源均清理、legacy本地/远程不变、未push。完整门禁及未列明决定故障/不同修订指针并发仍IN_PROGRESS；下文较早镜像和只读阶段为历史记录。
 
 [Developer全读取入口跨会话矩阵](2026-10-16-developer-private-session-matrix.md)专项25项全部通过（3.8分钟、exit0），冻结`6043f31`的最终无参数88项中84通过/4失败（16.6分钟、exit1），新增25项再次全过。81条错误逐条仍是原App缓存头（Admin56/转让3/owned10/资格12），无新增硬失败。统一837项Vitest＋122项Node、strict/固定生成漂移/build/fixture浏览器/Edge通过；首轮外部中断单独记录并精确清理，最终轮资源为空、legacy本地/远程不变、未push。完整门禁仍IN_PROGRESS，不把本25项或组件测试当所有角色/生命周期完成。
 
@@ -13,7 +13,7 @@
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
 | 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 边界、登录/重发/页面回调隔离及双 Console 真实邮件/设备主链通过；跨请求 Cookie fencing 和完整恢复/并发矩阵仍待完成 |
 | Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002–005`（只读管理） | `IN_PROGRESS` | 独立构建、认证入口和 Application/Version/Profile/Tester 只读页面已实现；UC001 后续增量及真实浏览器联合验收待完成 |
-| Admin Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-006–007`（审核） | `IN_PROGRESS` | 双审核队列/不可变详情及能力失效已实现；[查询阶段](2026-10-16-admin-review-queries.md)真实功能矩阵通过，Reviewer错误头仍使门禁失败，完整决定依赖及验收继续开放 |
+| Admin Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-006–007`（审核） | `IN_PROGRESS` | 双审核队列/不可变详情、权限隔离及批准/拒绝已实现；[决定接入](2026-10-16-admin-review-decisions.md)所列12项在published专项/默认全量均通过，完整决定矩阵与整体Application错误缓存头门禁继续开放 |
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 | Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |

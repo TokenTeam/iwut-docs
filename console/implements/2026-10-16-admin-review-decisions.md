@@ -154,3 +154,21 @@ App负责方随后报告相同内容已通过check-full24/24且changed_sources=[
 冻结`65a9ea0`，轮次`iwut-console-real-202804`执行`pnpm test:real tests/real/review-decisions.real.spec.ts`，12项全部通过（浏览器1.1分钟、exit0、无skip/retry）。全部正式准备及产品React操作使用published-latest来源；16个真实决定响应的private/no-store均为true，200/403/409检查全部保留。两类批准/拒绝、NONE→UUID公开替换、重叠决定一次性提交、200正文丢失后的unknown回查、30秒deadline后PENDING不推断失败、单权限/利益冲突/撤权、实际System拒绝均收齐本spec列明证据。
 
 Auth ID为`sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`，App为`sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`，Gateway为`sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`；Mongo/Traefik仍为既有固定输入。本轮容器（含退出）与network均为空后，保持相同源码/spec冻结，启动另一空环境的默认无参数全量100项。不把上述12项或本次路由补齐当作所有决定故障组合/不同修订指针并发或完整UC已完成，也未复用本地compat结果。
+
+#### 已发布无参数全量终态
+
+冻结同一`65a9ea0`，全新轮次`iwut-console-real-209098`执行默认无参数`pnpm test:real`，终态100项：**97通过、3失败、无skip/retry**，浏览器17.8分钟、exit1。源码、spec和输入来源运行期间未改；真实生产build、strict/报告隐私前置通过。原88项和新增决定12项全部执行，16个决定响应的private/no-store均true，没有通过source gate排除决定。当前源码已包括52d恢复边界加固，但12项仍只证明本spec列明的实际交错，不扩大为其每个分支都已真实验收。
+
+三个后端latest逐轮重拉，解析ID与专项逐个相同；Mongo为`sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik为`sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。没有使用local-compat、显式镜像override或相邻源码编译。DNS输入继续明确标为测试NSS fixture，不记作部署DNS验证。
+
+全部25条错误逐个对照可信调用栈与实际源码，只有Application管理查询错误缓存头：
+
+| 用例 | 断言数 | 全部失败位置与含义 |
+| --- | --- | --- |
+| 管理权转让 | 3 | `management-transfer.real.spec.ts:257`，Application详情404缺no-store |
+| owned游标负例 | 10 | `owned-application-pagination.real.spec.ts:200–201,220–221`，五个List400各缺private/no-store |
+| 非owner角色读取 | 12 | `qualification-read-matrix.real.spec.ts:368`，六个Application详情404各缺private/no-store |
+
+原Admin查询的56条错误缓存头断言本轮全部通过，六条审核查询/决定入口及所列业务场景不再被Gateway发布阻塞；无新增非缓存硬断言失败。原管理权/角色功能和最终Session检查仍完整执行，soft断言未删除、未代理补头，也未把三个失败当作通过。
+
+终态后复核本轮全部容器与network为空，两仓库工作区在证据更新前干净，本地及本次远端只读核验legacy仍`e68851e343bd0e077e5ccd0b680fe6813216ced0`，提交仅本地、未push。903项Vitest＋132项Node、strict、官方同pin生成漂移和六入口Edge均通过；完整门禁仍IN_PROGRESS，下一发布依赖是上述Application管理错误响应头，不再是ADMIN决定接线或API发布。不同修订指针并发、全部决定故障组合、Session遗留边界与完整UC继续开放。
