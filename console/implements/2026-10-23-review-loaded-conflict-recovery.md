@@ -36,7 +36,7 @@ finally尽力按已确认相位恢复：forward尚未accept且已知PENDING可�
 
 源码冻结`77201dd`，仅新增固定准备控制及第15项浏览器spec，无产品UI变更。新增工厂首12项先RED（缺factory）后GREEN，再补4项Cancel竞态/反向readfail/只读unknown/权限漂移，以及1项正式Proto adapter合成接线，共17项新增Node。adapter拒绝早于前14项权限相位的控制调用，硬校验初始grant revision＋4后才允许任何资格/转让写；既有三个Node DEVICE保持不增。合成证据不当作真实治理命令或浏览器验证。
 
-统一`pnpm test`903项Vitest＋160项Node全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin）与`pnpm edge:e2e`均exit0；Admin158组件亦独立通过，diff/Node语法检查通过。已再次通过当日Cloudflare HTTPS DNS查询核验显式NSS fixture的公共A仍为198.35.26.224，不访问其HTTP内容，也不当部署DNS证据。开始published-latest 15项专项，未达终态前不算通过；runtime、runner与spec保持冻结，未push。
+统一`pnpm test`903项Vitest＋160项Node全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin）与`pnpm edge:e2e`均exit0；Admin158组件亦独立通过，diff/Node语法检查通过。已再次通过当日Cloudflare HTTPS DNS查询核验显式NSS fixture的公共A仍为198.35.26.224，不访问其HTTP内容，也不当部署DNS证据。随后按顺序执行published-latest 15项专项与无参数全量，实际终态见下文；runtime、runner与spec保持冻结，未push。
 
 ## Published专项终态
 
@@ -44,4 +44,28 @@ finally尽力按已确认相位恢复：forward尚未accept且已知PENDING可�
 
 每轮重拉published-latest：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`、App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`、Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，均与上一发布轮次相同，无本地backend编译/替代。全部决定响应private/no-store为true。
 
-专项进程exit0后检查所有该prefix容器（含退出）及network为空，才在同源码/spec/runner冻结下启动另一空环境的默认无参数103项。全量尚未终态，不能用15项专项替代它；原25条错误缓存头及全部未列明矩阵继续开放，未push。
+专项进程exit0后检查所有该prefix容器（含退出）及network为空，才在同源码/spec/runner冻结下启动另一空环境的默认无参数103项。不能用15项专项替代它；原25条错误缓存头及全部未列明矩阵继续开放，未push。
+
+## 无参数全量终态
+
+`iwut-console-real-310582`执行默认无参数`pnpm test:real`，冻结源码`77201dd91a6905bde2a6e53197c1ddfbffc6d09b`全程干净。终态103项：**100通过、3失败，无skip/retry**，浏览器22.5分钟、exit1。原102项和新增第15决定场景均实际执行，全部15项决定再次通过，第15项10.4秒；正式双向转让、仅CURRENT_ADMIN的重读和恢复、跨目标/capability/Session保持、一次决定与零Session DELETE证据再次收齐。生产build、严格类型及标准报告隐私前置通过，没有为使测试通过改产品UI。
+
+25个错误的可信坐标逐条与上一轮相同，且全部仍为原缓存头断言：
+
+| 场景 | 断言坐标与次数 | 缺口 |
+| --- | --- | --- |
+| 管理转让 | `management-transfer.real.spec.ts:257:29` ×3 | Application GET404缺no-store |
+| owned游标 | `owned-application-pagination.real.spec.ts:200:57` ×4、`:201:58` ×4、`:220:66` ×1、`:221:67` ×1 | 五个List400各缺private/no-store，共10条 |
+| 资格/角色 | `qualification-read-matrix.real.spec.ts:368:54` ×6、`:368:116` ×6 | 六个Application GET404各缺private/no-store，共12条 |
+
+无新增非缓存硬失败。Admin查询原56条错误头继续通过；19个实际决定响应为Version200×7/403×4/409×1、Profile200×5/403×1/409×1，private/no-store全部true，afterAll通过。没有删soft断言、补代理头或把3个失败算通过，原管理/角色功能及最终Session断言仍执行完整。
+
+本轮再次pull五个latest，全部ID与上述专项一致，没有本地兼容artifact或后端编译。终态后检查所有本轮容器（含退出）与network为空，本地和本次远程只读核验legacy仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。提交仅本地、未push；所列Version加载后利益冲突真实证据已补齐，但Application错误头完整门禁仍红，UC006/007及全部其它明确开放矩阵继续IN_PROGRESS。
+
+## 后续候选（未实施）
+
+下一候选是UC007同Review双Reviewer决定、真实deadline后的PENDING恢复、离开后迟到决定回执。可复用`resources[1].applicationId`、现有main与profileOnly两个context及原Node owner transport，按[UC013](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md)/[UC015](../../app-center/use-cases/UC-APP-015-submit-application-profile-revision-review.md)先后正式Create/Submit两份新资料：A供双Reviewer重叠决定并终态释放工作位，B供deadline与后续用户重新确认的独立明确提交/迟到响应。需要另建接受工作包，不在本轮中实现；不重新调用本包已结束的转让factory，不增加账号/App/quota/登录。主Reviewer仍为APPROVED，不能回写成普通USER。
+
+Create没有客户端幂等键、displayName不唯一，不能只按名字认领未知结果。候选准备须写前正式List固定已有ID/最大sequence及空working，单writer只发一次Create；未知后仅List/Get确认唯一新增sequence、同一工作指针、完整content/creator/revision1/DRAFT。Submit同样只尝试一次，之后按[UC039](../../app-center/use-cases/UC-APP-039-query-owned-application-profile-revisions.md)读同修订/审核历史确认SUBMITTED revision2、唯一attempt/sourceRevision/PENDING，再以Reviewer正式详情核对三元与snapshot。仍DRAFT或查不到新项不是未在途证明，不能据此重放。没有取消/删除草稿或撤回Review入口，失败残留留至隔离环境销毁，不补决定“清理”。
+
+Profile重叠仅证明同一Review一次性决定，不是不同修订公开指针并发。deadline后新提交必须由用户重新评审并明确确认，区分初次未知请求和新请求计数；迟到成功回执候选应采用实际上游200的RESPONSE/HOLD并在30秒deadline前释放，以免冒称另一种取消。ARMED不能靠重复业务POST消耗，HELD仅释放原请求/响应，未知准备或未解决gate必须令serial场景失败。该候选尚非实施或通过证据，不关闭本包列明的其它开放矩阵。

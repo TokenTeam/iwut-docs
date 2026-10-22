@@ -54,6 +54,8 @@ Console源码冻结于`dcdb08f`。本次仅增加固定准备控制和两项真�
 
 ## 后续候选（未实施、非本轮验收）
 
+以下保留本包结束时的候选决定；其后已由[加载后关系变化工作包](2026-10-23-review-loaded-conflict-recovery.md)独立接受、实现并通过15项专项及103项全量中的该场景，不能把后续证据归入本包原14项。
+
 2026-10-23只读盘点后，下一优先候选是Version加载后的`CURRENT_ADMIN`变化：复用仍PENDING的`resources[2].versions[2]`，通过[UC026正式双向转让](../../app-center/use-cases/UC-APP-026-transfer-application-administration.md)构造；不改数据库或历史createdBy/submittedBy，不以初次加载三重冲突替代。原表单提交实际CONFLICT_OF_INTEREST 403后须保留能力并要求同Review重读，显示仅CURRENT_ADMIN；其它目标/另一能力与Session保持，反向转让后重新读取恢复eligible。此处仅记录可行性，须另建接受工作包、准备控制和红绿验证后才能算交付。
 
 主Reviewer目前不是Developer，UC026要求目标ACTIVE＋APPROVED，因此必须先按[UC013](../../auth-center/use-cases/UC-AUTH-013-apply-for-developer.md)以现有Node DEVICE transport正式申请本人资格。可以保留当前准备时已建立但未保留引用的transport，不能新增登录或用G直接设置admin。Apply不能撤回成普通USER，故只能追加在原14项之后，不改写前面普通Reviewer的证据；双向转让只恢复管理权而不声称恢复资格。源30→29→30、目标0→1→0，不扩额或创建App。未知Apply/Initiate/Accept回执必须由正式查询确认原目标/相位，不能为清理盲目重放。Profile的PENDING资源已由本14项消费，后续对应验证需在现有App正式Create/Submit新资料，不能seed终态回PENDING。当前轮不实现此候选，也不关闭UC007指针并发、策略/Scope、全部依赖与决定跨Session矩阵。
