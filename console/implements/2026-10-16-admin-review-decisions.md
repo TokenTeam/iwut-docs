@@ -107,3 +107,26 @@ App负责方随后报告相同内容已通过check-full24/24且changed_sources=[
 81条错误全部为原缓存头断言：Admin查询28个响应各缺private/no-store共56，管理转让Application404缺no-store共3，owned游标错误共10，资格角色共12。可信调用栈全部落在原cache断言源码位置，无新增非缓存硬失败。全部旧88项均执行，新增12只因未发布依赖明确skip，不能称完整审核已发布验收通过；默认临时source gate解除条件和后续命令仍按上文规定。两个签发上限、25个Developer跨Session、12个Admin跨Session、真实双副本与Mongo提交故障等按原场景通过，不扩大为所有决定矩阵。
 
 最终轮次容器（含已退出容器）及network均为空，Console工作区干净。本地及远端只读核验legacy仍`e68851e343bd0e077e5ccd0b680fe6813216ced0`；提交仅本地、没有push或部署。本包工程可审阅，但整体Console/UC与已发布门禁仍IN_PROGRESS。直接真实成功决定证据为543 focused12/12及2e完整轮中的12/12；52边界追加仅有上述158项组件/core与strict、最终生产构建及默认全量证据，不能混称其已重跑本地决定完整链路。
+
+### 2026-10-22：重新拉取已发布镜像后的接线前置检查
+
+用户通知已push并授权重拉镜像继续；若Gateway未接入，允许暂时中止。本轮Console仍为干净`52d2598397f7e0f7e400fa32af5d4cf94d191df9`，没有修改生产代码、spec、source gate或本地compat输入。
+
+三个已发布`latest`均实际重新pull并inspect，解析到的image ID/RepoDigest如下：
+
+| 镜像 | 实际ID/digest | 相对上轮已发布验收 |
+| --- | --- | --- |
+| Auth | `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9` | 已更新 |
+| App | `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a` | 已更新 |
+| Gateway | `sha256:a048de73b03ca6eaefb3b9897d64c73b2956a80738aea4eea343730c8bab48e9` | 未变化 |
+
+不只根据digest推断缺口：以该精确Gateway镜像，在`--network none --read-only`下实际运行镜像内`/gateway-config --render --routes /config/routes.v3.yaml`，配置独立的`admin.example.test`、`developer.example.test`及测试服务地址，直接核对生成Traefik配置。四条ADMIN审核查询均存在；下列两条ADMIN决定router均不存在：
+
+- `admin-console-app-decide-application-version-review-http`
+- `admin-console-app-decide-application-profile-revision-review-http`
+
+两条普通API host决定路由和BFF internal决定路由仍存在，但没有ADMIN host对应决定路由，不能用其它入口替代既定Browser→Admin Session→Gateway链路。本次是已发布镜像配置证据，不是相邻Gateway源码检查或运行中身份链路E2E；没有启动明知缺路由的完整套件。生成配置SHA256为`c6aebb57b24296ab3244f02c5b50bbc18e8d25df7239a6493bed413ab6cffa7c`（只适用于本次上述测试地址）。
+
+同时，不使用本地mirror重定向执行`pnpm generate:check`成功：官方API精确pin `27c9743d2d7476511932a83563e103aee5b4e28e`已可远程取得，现有生成物与固定输入一致。API发布依赖已有新证据，但不能因此解除Gateway或整个默认决定门禁。
+
+按用户允许的条件暂时停止后续联调，不编译后端、不换回本地artifact、不删断言或把新增决定长期skip当通过。尚未对新App/Auth运行完整回归，因此不声称旧缓存头已修复或新镜像业务验收通过。解除条件是已发布Gateway包含上述两条ADMIN决定接线；之后重新pull latest、将正式准备/决定spec纳入默认门禁并执行最终源码的真实决定与无参数全量。临时配置目录已清理，未留下运行容器；本地和本次远端只读核验legacy不变，未push Console或docs。

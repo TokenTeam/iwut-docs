@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-10-22重新拉取已发布镜像的[审核决定接线前置检查](2026-10-16-admin-review-decisions.md#2026-10-22重新拉取已发布镜像后的接线前置检查)：Auth/App latest已更新，官方API固定pin远程生成检查通过；Gateway latest仍为`a048de73…`，实际镜像内生成配置确认缺少两条ADMIN决定router，四条查询存在。按用户许可暂时停在该发布依赖，不切回本地artifact、不启动缺路由的完整回归，不把上次结果当新App/Auth验收；默认完整门禁仍IN_PROGRESS。
+
 [Developer全读取入口跨会话矩阵](2026-10-16-developer-private-session-matrix.md)专项25项全部通过（3.8分钟、exit0），冻结`6043f31`的最终无参数88项中84通过/4失败（16.6分钟、exit1），新增25项再次全过。81条错误逐条仍是原App缓存头（Admin56/转让3/owned10/资格12），无新增硬失败。统一837项Vitest＋122项Node、strict/固定生成漂移/build/fixture浏览器/Edge通过；首轮外部中断单独记录并精确清理，最终轮资源为空、legacy本地/远程不变、未push。完整门禁仍IN_PROGRESS，不把本25项或组件测试当所有角色/生命周期完成。
 
 [Developer私有读取消费边界](2026-10-16-developer-read-consumption.md)已实现、完整门禁IN_PROGRESS：请求级Abort/lifetime＋本地Session检查、未知错误精确退场、Tester区域自动恢复限制及旧Query对象数据清理先红后绿。统一837项Vitest＋103项Node、strict/固定生成漂移/build/Edge通过；fixture首轮Tester偶发失败，独立10次和完整3轮随后通过，但因果仍OPEN。冻结`0676e64`后新拉latest无参数63项59通过/4失败（13.1分钟），81条均为原App缓存头，未增非缓存失败。资源清理、legacy不变、提交仅本地；不关闭所有页面/角色跨Session矩阵或完整UC。
