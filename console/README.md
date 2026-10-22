@@ -11,7 +11,7 @@
 - **吾理开放平台**：面向 Developer 的应用管理入口。
 - **吾理平台管理**：面向平台管理员与 Reviewer 的治理入口。
 
-代码位于 `worktrees/iwut-console`。pnpm workspace、两个独立应用/BFF 与共享认证基线已经初始化；UC-CONSOLE-001 的登录业务编排仍在实现中。
+代码位于独立的 `iwut-console` 仓库。pnpm workspace、两个独立应用/BFF 与共享认证基线已经初始化；UC-CONSOLE-001 的登录业务编排仍在实现中。
 
 ## 权威边界
 
@@ -47,6 +47,10 @@ Console 文档不重新定义 Auth Center、App Center 或 Gateway 的业务规�
 ## 当前用例
 
 - [UC-CONSOLE-001](use-cases/UC-CONSOLE-001-establish-console-session.md)：建立浏览器 Console Session，当前为 `ACCEPTED / IN_PROGRESS`；工程、生成类型、BFF Session 边界与浏览器设备协议基线已实现，正在接入设备/邮箱 Begin、Complete、恢复与真实 E2E。
+- [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md)：查询本人管理的 Application 列表与只读概览，当前为 `ACCEPTED / IMPLEMENTED`；真实浏览器联合验收待补。
+- [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md)：只读管理 Application Version，当前为 `ACCEPTED / IMPLEMENTED`；当前内容与最新审核摘要分区，真实浏览器联合验收待补。
+- [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md)：只读管理 Application 资料修订，当前为 `ACCEPTED / IMPLEMENTED`；权威指针、原文内容和独立审核历史分页已实现，真实浏览器联合验收待补。
+- [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md)：只读查询 Application Tester 管理，当前为 `ACCEPTED / IMPLEMENTED`；容量、ACTIVE Membership 与 JoinLink 历史三个独立区域已实现，真实浏览器联合验收待补。
 
 ## 开工规则
 

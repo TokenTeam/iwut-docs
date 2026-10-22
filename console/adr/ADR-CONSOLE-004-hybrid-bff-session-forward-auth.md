@@ -4,6 +4,8 @@
 
 日期：2026-10-07
 
+2026-10-16 会话载体修订由 [ADR-CONSOLE-005](ADR-CONSOLE-005-durable-session-and-login-fencing.md) 接受：共享 Mongo 持久状态、匿名 context 与不同代 opaque 认证 carrier 替换无状态加密 Session Cookie。本文的流量/所有权/来源边界保持；后文“解密 Cookie”在新实现中指恢复并验证本 surface 的持久 Session，不表示 Gateway 接管 Cookie，也不允许回退到旧无状态载体。迁移与联合验收仍在实施。
+
 ## 背景
 
 [ADR-CONSOLE-001](ADR-CONSOLE-001-repository-and-application-boundaries.md) 已决定 Developer Console 与 Admin Console 使用独立应用、BFF、Origin、Cookie 和 Session 边界。[UC-CONSOLE-001](../use-cases/UC-CONSOLE-001-establish-console-session.md) 又要求 Auth Session token 永不进入浏览器可读状态，并由 Console 服务端设施把安全 Cookie 恢复为 Gateway 使用的 `x-iwut-session`。

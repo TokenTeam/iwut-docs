@@ -163,7 +163,7 @@ Developer BFF 与 Admin BFF 使用不同 origin、密钥、Cookie 名和会话�
 
 所有建立 Session 的 BFF 命令只接受本 Console 精确 Origin 的同源请求，不开放凭据式跨域 CORS；对缺失或不匹配的 Origin/Fetch Metadata 失败关闭。页面跳转目标只能是当前 Console 内经校验的相对路径，不能由任意外部 URL 控制。
 
-每个 Console、每条本地凭据同一时刻最多有一个有效的设备登录流程；每个邮箱表单同一时刻最多有一个当前邮箱登录操作。开始新操作、切换方式、取消流程或离开登录上下文时，旧响应即使稍后成功返回也不能覆盖新状态或设置 Cookie。BFF 也必须把一次 Complete 绑定到自身签发/记录的登录事务上下文，不能仅凭浏览器给出的 operationId 设置会话。
+每个 Console、每条本地凭据同一时刻最多有一个有效的设备登录流程；每个邮箱表单同一时刻最多有一个当前邮箱登录操作。开始新操作、切换方式、取消流程或离开登录上下文时，页面立即隔离旧回调；BFF 确认相应意图转换后，旧结果不能覆盖、恢复或清除当前有效身份。已发出的 HTTP 响应无法召回：迟到载体不得覆盖当前载体，且不得再被 Session query/ForwardAuth 接受；具体持久 fence、不同代载体与取消确认点按 [ADR-CONSOLE-005](../adr/ADR-CONSOLE-005-durable-session-and-login-fencing.md)。本地取消未送达时不能声称服务端已撤销，恢复页面必须重新读取权威状态。BFF 也必须把一次 Complete 绑定到自身签发/记录的登录事务上下文，不能仅凭浏览器给出的 operationId 设置会话。
 
 DIRECT 登录请求不得因浏览器已有无效 Cookie 而自动携带上游 Session。邮箱登录要求 `x-iwut-session` 键完全缺失，不能发送空值后再依赖 Gateway 清理。
 
@@ -197,6 +197,8 @@ Complete 超时、连接中断或 BFF 写 Cookie 失败时，页面必须进入�
 | 凭据冲突 | `EMAIL_LOGIN_CREDENTIAL_UNAVAILABLE` | 不披露原归属；保留现有本地材料并引导选择另一安全恢复路径。 |
 | requestId 冲突 | `EMAIL_LOGIN_REQUEST_CONFLICT` | 停止该请求，生成新 requestId 前先确认仍使用原密钥与表单意图。 |
 | 限流或容量 | `AUTHENTICATION_LIMIT_EXCEEDED`、`EMAIL_LOGIN_RATE_LIMITED` | 尊重有效 `Retry-After`，倒计时期间禁止自动轮询/重试。 |
+| Console context签发用尽 | `CONSOLE_CONTEXT_EXHAUSTED` | 停止旧流程、清一次性表单但保留钥匙；按[Session v2显式重建契约](../query-contracts/console-session-v2.md#context用尽后的显式重建)由用户终止旧context，再明确返回入口重新确认；不当作等待可恢复的限流。 |
+| Console Cookie硬上限 | `CONSOLE_COOKIE_LIMIT_EXCEEDED` | 失败关闭；说明仅清理本Console Cookie而非删除设备站点存储，不自动降低验证或wildcard删除。 |
 | 邮件或认证依赖不可用 | `EMAIL_DELIVERY_UNAVAILABLE`、`AUTHENTICATION_UNAVAILABLE`、`EMAIL_LOGIN_UNAVAILABLE` | 显示暂时不可用；使用有界退避，保留可恢复上下文，不改成“凭据错误”。 |
 | Session 无效 | `SESSION_INVALID` | BFF 清除本 Console Cookie，浏览器回到未登录状态；不删除设备私钥。 |
 
