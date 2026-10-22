@@ -130,3 +130,17 @@ App负责方随后报告相同内容已通过check-full24/24且changed_sources=[
 同时，不使用本地mirror重定向执行`pnpm generate:check`成功：官方API精确pin `27c9743d2d7476511932a83563e103aee5b4e28e`已可远程取得，现有生成物与固定输入一致。API发布依赖已有新证据，但不能因此解除Gateway或整个默认决定门禁。
 
 按用户允许的条件暂时停止后续联调，不编译后端、不换回本地artifact、不删断言或把新增决定长期skip当通过。尚未对新App/Auth运行完整回归，因此不声称旧缓存头已修复或新镜像业务验收通过。解除条件是已发布Gateway包含上述两条ADMIN决定接线；之后重新pull latest、将正式准备/决定spec纳入默认门禁并执行最终源码的真实决定与无参数全量。临时配置目录已清理，未留下运行容器；本地和本次远端只读核验legacy不变，未push Console或docs。
+
+### 2026-10-22：已发布审核决定迁入默认门禁（ACCEPTED / IN_PROGRESS）
+
+用户通知Gateway CI完成后，重新pull得到`sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`。以该精确镜像实际运行`/gateway-config`，已确认两条ADMIN决定router均存在，且中间件为scrub→Admin Session→remove-cookie→对应Gateway ForwardAuth→post-auth scrub→strip-prefix；官方API同pin远程`generate:check`再次通过。这仅解除镜像接线前置阻塞，不能代替真实决定验收。
+
+按既有用户授权自行接受本增量，范围和决定如下：
+
+1. 移除新增12项决定spec的local-only skip；主Reviewer正式独立注册、邮件冷却等待、固定空body/bearer控制及Formal Create/Submit准备同样接入默认`pnpm test:real`。保留原正式授权、CAS/unknown不重放、actor隔离和旧88项全部断言，不seed决定资源、不伪造响应。
+2. runner对镜像实际生成的两条决定router增加缺失/重复即失败的轻量前置检查；此检查只证明生成入口存在，不冒称鉴权正确。Edge扩大到六条ADMIN查询/决定入口，检查认证上游不可用和伪造头均失败关闭、Developer拒绝、无SPA兜底。任何未来latest退回缺路由时直接失败，不自动skip。
+3. 保留显式local-compat命令仅用于历史诊断，但不再控制决定是否执行，绝不把其结果冒称published-latest。默认仍逐轮pull并固定本轮解析ID，不编译相邻后端、不隐式回退本地artifact。
+4. DNS准备边界显式延续：本次`getent ahostsv4 www.wikipedia.org`实际为`198.18.3.15`，Cloudflare HTTPS DNS同次查询的公网A为`198.35.26.224`。测试App容器统一使用此前已接受的固定NSS输入`www.wikipedia.org:198.35.26.224`，不再只限local来源；真实App Submit/Decide预检仍执行，不发外部HTTP、不修改App网络规则，也不证明宿主/部署DNS或内容安全。该输入不是产品DNS配置。
+5. 先普通回归、strict/生成漂移/Edge，再冻结源码跑published专项12项和无参数全量100项，必须以实际运行数/失败/skip为准。专项不替代完整门禁；未过原缓存头或其它断言不push，不关闭完整UC、不同修订指针并发、全部决定故障矩阵或Session遗留缺口。
+
+当前仅完成上述接线/远程API/DNS前置证据；源码迁移和真实测试终态后续追加。
