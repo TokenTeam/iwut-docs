@@ -37,3 +37,11 @@ finally尽力按已确认相位恢复：forward尚未accept且已知PENDING可�
 源码冻结`77201dd`，仅新增固定准备控制及第15项浏览器spec，无产品UI变更。新增工厂首12项先RED（缺factory）后GREEN，再补4项Cancel竞态/反向readfail/只读unknown/权限漂移，以及1项正式Proto adapter合成接线，共17项新增Node。adapter拒绝早于前14项权限相位的控制调用，硬校验初始grant revision＋4后才允许任何资格/转让写；既有三个Node DEVICE保持不增。合成证据不当作真实治理命令或浏览器验证。
 
 统一`pnpm test`903项Vitest＋160项Node全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin）与`pnpm edge:e2e`均exit0；Admin158组件亦独立通过，diff/Node语法检查通过。已再次通过当日Cloudflare HTTPS DNS查询核验显式NSS fixture的公共A仍为198.35.26.224，不访问其HTTP内容，也不当部署DNS证据。开始published-latest 15项专项，未达终态前不算通过；runtime、runner与spec保持冻结，未push。
+
+## Published专项终态
+
+`iwut-console-real-302865`在干净冻结`77201dd`下运行`pnpm test:real tests/real/review-decisions.real.spec.ts`，终态15/15通过（浏览器1.7分钟、exit0，无skip/retry）。第15项实际7.9秒，正式Apply与双向转让均完成；旧已加载REJECT仅一次实际403 CONFLICT_OF_INTEREST、无预先刷新，React明确拒绝并聚焦同Review重读，未撤销整个capability或误报unknown。重读GET200仅CURRENT_ADMIN，原snapshot/createdBy/submittedBy保持；同cap另一目标和另一cap原DOM及明确刷新200通过。正式转回后同Review仍PENDING、eligible、无冲突，四批准检查均未确认，无新决定/Session DELETE，原Session/设备钥匙保持，权限及revision不变。主Reviewer此时确为APPROVED，不冒称恢复普通USER。
+
+每轮重拉published-latest：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`、App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`、Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，均与上一发布轮次相同，无本地backend编译/替代。全部决定响应private/no-store为true。
+
+专项进程exit0后检查所有该prefix容器（含退出）及network为空，才在同源码/spec/runner冻结下启动另一空环境的默认无参数103项。全量尚未终态，不能用15项专项替代它；原25条错误缓存头及全部未列明矩阵继续开放，未push。
