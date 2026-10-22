@@ -27,3 +27,11 @@
 ## 实施与预检
 
 Console源码冻结于`dcdb08f`。本次仅增加固定准备控制和两项真实spec，无产品UI变更。统一903项Vitest、143项Node回归全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin输入）与`pnpm edge:e2e`均exit0；Node新增11项只证明相位/CAS/错序/未知回执及固定subject接线，不代替真实Auth治理。已启动published-latest专项，实际终态尚待记录；不把预期14/102写成通过结果。运行时、runner和spec在轮次期间冻结，未push。
+
+## 已发布镜像专项终态
+
+`iwut-console-real-267241`执行`pnpm test:real tests/real/review-decisions.real.spec.ts`，冻结源码`dcdb08f`，终态14/14通过（浏览器1.3分钟、exit0，无skip/retry）。原12项及新增Version/Profile两项均实际执行，后两项分别4.5秒/4.3秒；正式撤/重授权、原页403退场/聚焦与同Review REJECTED恢复、另一能力刷新200、Session/设备钥匙保持、一次决定POST及零Session DELETE全部通过。生产UI保持52d实现，没有为使测试通过改产品或模拟业务响应。
+
+每轮重拉published-latest，本轮Auth/App/Gateway分别为`sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`、`sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`、`sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，与此前发布轮次相同。Mongo为`sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik为`sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。显式NSS fixture继续只用于测试准备，不当部署DNS证据；未读相邻后端或编译后端。
+
+专项终态后精确核验该prefix全部容器（含退出）和network为空，才在同源码冻结下启动另一空环境的默认无参数全量。全量尚未终态，不以专项14项替代102项完整门禁；原25条缓存头断言保留，完整UC继续IN_PROGRESS。
