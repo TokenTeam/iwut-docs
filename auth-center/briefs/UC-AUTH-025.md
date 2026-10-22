@@ -385,9 +385,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-032-manage-own-device-credentials.md` | 269 | `66997dc9aa54` |
-| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

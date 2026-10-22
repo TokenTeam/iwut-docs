@@ -444,7 +444,7 @@ UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contra
 | `use-cases/UC-AUTH-032-manage-own-device-credentials.md` | 269 | `66997dc9aa54` |
 | `use-cases/UC-AUTH-031-establish-email-account-and-campus-certification.md` | 201 | `beaa795c7419` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
-| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
 | `platform/contracts/auth-credential-management-v1.md` | 38 | `764369dff51a` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

@@ -1,10 +1,10 @@
 # 平台密码与密码登录协议 v1 草案
 
-状态：`ACCEPTED / IMPLEMENTATION_PENDING`
+状态：`ACCEPTED / BACKEND_COMPLETE`（UC033/034 Auth 后端；Gateway/客户端独立，生产入口默认关闭）
 
 ## 权威与兼容边界
 
-业务规则唯一见 [UC033 密码管理/恢复](../../auth-center/use-cases/UC-AUTH-033-manage-password-and-recovery.md)、[UC034 密码登录](../../auth-center/use-cases/UC-AUTH-034-login-with-password.md)，邮箱角色见 UC011、密码注册见 UC006。本文只固定客户端/Auth/Gateway 的消息与安全载体提案，不是可执行 Proto，也未提供已验收的公开向量。
+业务规则唯一见 [UC033 密码管理/恢复](../../auth-center/use-cases/UC-AUTH-033-manage-password-and-recovery.md)、[UC034 密码登录](../../auth-center/use-cases/UC-AUTH-034-login-with-password.md)，邮箱角色见 UC011、密码注册见 UC006。本文固定客户端/Auth/Gateway 的消息与安全载体；可执行 Proto 与独立公开向量已交付，运行验收分别记录，不以协议存在宣称生产启用。
 
 2026-10-13 用户授权开始实现，本文字段号、编码和默认参数随 UC033/034 接受。既有设备 LOGIN、邮箱码 LOGIN_WITH_EMAIL 和无密码邮箱注册 v2 字节不被改写；新密码字段/入口必须显式版本化，不通过向旧消息追加秘密、复用退役字段或自动降级实现。公开向量、可执行 API 和启用验证独立跟踪，接受不表示交付完成。
 
@@ -54,7 +54,7 @@ PasswordChangeStatus：UNSPECIFIED=0（不允许成功）、NOT_FOUND=1、COMPLE
 
 注册还需单独受版本保护的“邮箱验证＋密码设置＋设备证明”完成请求（UC011），不能让旧无密码 REGISTER 绕过新模型。添加非登录邮箱与切换登录角色须区分：Session＋新邮箱码不足以切换。危险动作采用所属 UC 的 Complete 带当前密码，在 Auth 最终提交边界复核；不签发通用解锁 token。
 
-2026-10-13 六个消息/RPC 已进入独立 API Proto 并生成 Go/gRPC/HTTP 客户端；Auth 公开服务仍未注册。新注册/邮箱目录方案见[已接受的邮箱账号 v3 契约](auth-email-account-v3.md)，已实施邮箱核心，但不属于已交付的普通密码登录/重置 API。
+2026-10-15 六个消息/RPC 已进入独立 API Proto 并生成 Go/gRPC/HTTP 客户端；UC033 四方法、UC034 两方法已接入 Auth 并通过真实 Wire/Mongo/race。新注册/邮箱目录方案见[已接受的邮箱账号 v3 契约](auth-email-account-v3.md)；[后端验收记录](../../auth-center/implements/UC-AUTH-033-034-readiness.md)不表示生产启用或 Gateway/客户端已交付。
 
 ## 密码登录签名字节
 

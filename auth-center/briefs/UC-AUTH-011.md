@@ -674,10 +674,10 @@ Switch/Remove 幂等 24 小时，按 `(authId,purpose,requestId)` 固定目标/�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
-| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
 | `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

@@ -2,6 +2,18 @@
 
 状态：`ACTIVE`
 
+## 2026-10-22 宿主 OAuth 与客户端续作中止
+
+用户提出无需独立网页登录，第三方在宿主内通过 RPC/自己的后端发起 OAuth。三个只读 subagent 与父任务复核后建立 [UC035 DRAFT](../use-cases/UC-AUTH-035-authorize-application-in-host.md)，受信宿主交互/code 交付尚无契约，按用户要求中止实现。第二项复用 UC-GW-002，不重复建 UC；账号 UI 需按当前 Console Session v2 与目标客户端划分。详见 [依赖与阻塞](UC-AUTH-035-readiness.md)。本轮未 ACCEPTED、未生成 UC035 brief、未改 API/服务代码。
+
+后续确认：官方宿主可信 consent 界面方向已获用户同意，正确参考库为 `TokenTeam/native-rpc-h5`。已检查源码并补充[适配设计说明](../design-notes/host-oauth-rpc-design.md)；库可扩展，不继承为安全规范。两类 client 的交付/兑换绑定及宿主→Auth 确认接口仍待冻结，UC035 继续 DRAFT；实际 Native 上下文归宿主交付。
+
+职责收敛：RPC 传输和 Native 内部实现属于宿主，不作为 Auth 后端开工依赖；尚待接受的是宿主→Auth 授权交互与 code 交付/兑换协议。账号管理 UI 和通用资源委托另立工作包，不与此相互阻塞。
+
+## 2026-10-15 串行实现 UC033 → UC034
+
+已按 UC033 → UC034 串行完成 Auth 后端：前者四项改密/恢复方法、通知 outbox/worker，后者两项密码＋设备证明登录方法；统一额度/版本/凭据下界、幂等、Session/LRU、审计与 UC025 清理均已接入。make check、普通 race、全仓真实 Mongo race（Wire 244.829s / Mongo 737.131s）、专项与最终补测通过。两开关缺省关闭；正式列表来源/部署压测、Gateway/客户端与联合验收独立门禁。完整证据见 [readiness](UC-AUTH-033-034-readiness.md)。未提交/推送/部署；下方旧批次描述均为历史快照。
+
 ## 2026-10-13 UC032 设备登录凭据管理
 
 用户要求继续完成既有 UC032；以 docs/Auth/API HEAD 加工作树复核依赖，ACCEPTED 后脚本生成 brief 再实施。已实现四个 HTTP/native gRPC 方法：有界 no-touch 列表、label 独立 revision/CAS、Begin 单目标挑战和当前密码＋当前 Session 设备新签名的 Complete。旧 UC009 仅当前凭据，新开关关闭不会恢复旁路。
@@ -96,8 +108,9 @@ UC012/013/017/025 的 COMPLETE/CORE_COMPLETE 记录仅指已交付基线；新�
 | [UC-AUTH-030](../use-cases/UC-AUTH-030-manage-application-user-storage.md) | `ACCEPTED` | `COMPLETE` | `storage.read/write` 与固定 audience、Bearer HTTP/CORS、channel 隔离 Mongo KV、整 namespace CAS/配额/严格 JSON、本人三 channel 清空、账号清理、Application tombstone 同事务清理任务与可恢复 worker；独立 API、生产 Wire、真实 Mongo 并发验收 | 入口默认关闭；Gateway 路由、用户/第三方客户端界面与生产启用独立交付 |
 | [UC-AUTH-031](../use-cases/UC-AUTH-031-establish-email-account-and-campus-certification.md) | `ACCEPTED` | `COMPLETE` | 当前 WHUT 依据、校园 ADD 别名、最后依据移除/旧事实不复活专项 | OAuth/清理全仓回归、客户端独立交付；Auth 不管理次数 |
 | [UC-AUTH-032](../use-cases/UC-AUTH-032-manage-own-device-credentials.md) | `ACCEPTED` | `COMPLETE` | 脚本 brief；四方法、label CAS、双证明、同事务撤销/审计、限额与清理；公开向量/生产 Wire/真实 Mongo 全仓与补充 race 通过 | 默认关闭，Gateway/客户端及生产启用独立交付；不包含扫码新增或 WebAuthn |
-| [UC-AUTH-033](../use-cases/UC-AUTH-033-manage-password-and-recovery.md) | `ACCEPTED` | `IN_PROGRESS` | 脚本 brief；策略/crypto/正常改密内部事务/凭据下界/额度/公开向量及密码 Proto 已交付 | 重置、目录依赖、通知 worker、公开 Transport/Wire/危险动作门禁与完整启用验收未交付 |
-| [UC-AUTH-034](../use-cases/UC-AUTH-034-login-with-password.md) | `ACCEPTED` | `IN_PROGRESS` | 脚本 brief；独立 Frame/公开向量/Session来源与 API 生成物 | 登录 orchestration/新邮箱角色/公开接入与真实密码登录联测未交付 |
+| [UC-AUTH-033](../use-cases/UC-AUTH-033-manage-password-and-recovery.md) | `ACCEPTED` | `COMPLETE` | 密码管理四方法、重置、通知 worker、共享额度/容量、最终版本与 Wire/Mongo race 已交付 | 后端完成；Gateway/客户端、正式策略来源与部署压测独立门禁 |
+| [UC-AUTH-034](../use-cases/UC-AUTH-034-login-with-password.md) | `ACCEPTED` | `COMPLETE` | 密码/设备证明、唯一登录角色、dummy/额度/容量、原子 Session/LRU、严格 Transport/Wire/Mongo race 已交付 | 后端完成；默认前台入口、Gateway/客户端和生产联合启用独立交付 |
+| [UC-AUTH-035](../use-cases/UC-AUTH-035-authorize-application-in-host.md) | `DRAFT` | `NOT_STARTED` | 目标、候选安全边界与三个 subagent 只读依赖检查 | 受信宿主/consent/code 交付未冻结，DESIGN_BLOCKED；未开工 |
 
 此前基线：UC006/011/007/012 与协议/关联退役已同步代码/真实回归，UC031 永久事实基线接受后交付；最新密码/邮箱列表/当前校园依据修订见本页顶部，尚未实施。[次数方案](../design-notes/email-first-campus-entitlements.md)仅参考，不是 Auth 账本或开工依赖。
 

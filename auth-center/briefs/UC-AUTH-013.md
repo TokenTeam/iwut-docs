@@ -448,7 +448,7 @@ UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contra
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-013-apply-for-developer.md` | 203 | `ec453447f9eb` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |

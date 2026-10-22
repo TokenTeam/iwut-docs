@@ -1,10 +1,26 @@
 # UC033/034 开工检查：密码生命周期与登录
 
-状态：`ACCEPTED / IN_PROGRESS`（公开服务未交付）
+状态：`ACCEPTED / COMPLETE`（UC033/034 Auth 后端；生产入口默认关闭）
 
-2026-10-13 用户授权开始实现；[UC033](../use-cases/UC-AUTH-033-manage-password-and-recovery.md)、[UC034](../use-cases/UC-AUTH-034-login-with-password.md)与[密码协议](../../platform/contracts/auth-password-v1.md)已接受并用脚本生成 brief。下面第一节是本轮现状；其后的 2026-10-12 DRAFT 检查保留作历史记录，不表示当前尚无代码。
+2026-10-13 用户授权开始实现；[UC033](../use-cases/UC-AUTH-033-manage-password-and-recovery.md)、[UC034](../use-cases/UC-AUTH-034-login-with-password.md)与[密码协议](../../platform/contracts/auth-password-v1.md)已接受并用脚本生成 brief。下面第一节是本轮现状；后续 2026-10-12/13 批次均保留作历史记录，其中“未实现/未交付”不覆盖最新结论。
 
-## 2026-10-13 UC009/025/026 密码门禁修订
+## 2026-10-15 串行续作：先 UC033，再 UC034
+
+最终两项 Auth 后端 COMPLETE：UC033 验收后才开始 UC034，未调用 subagent。UC034 已接入两项精确 HTTP/native gRPC 方法及生产 Wire；普通密码与独立设备证明同操作验证，最终版本/归属/下界/审计/Session/LRU 原子提交，完成不重返 token，退休/撤销/他人钥不复活，参数重哈希不改安全代际。没有新增产品恢复方式或旧数据迁移。
+
+最终验证：make check（build/test/vet/Wire/proto）、make test-race 通过；真实 Mongo 全包 `-race -timeout=25m` 通过（Wire 244.829s / Mongo 737.131s / transport 1.795s）。密码登录专项通过（Wire 13.993s / Mongo 54.452s），含永久 dummy/非登录邮箱、NFC/重哈希、五次共享失败/容量、并发同公钥与完成、实际重置竞争、换角色/禁用恢复/注销、审计回滚/未知提交、部署与严格 BSON、清理隔离、真实重置后新钥登录。最终新增混合 Session LRU、跨挑战/冷换操作 key 不补地址额度、损坏 verifier 不计密码失败的真实 race 补测通过（16.144s）。OAuth reset 专项使用隔离 App provider，不冒称 Auth+App 双服务或 Gateway 联测。
+
+两 API proto-check 与密码 Proto 输入一致性通过；71 份 brief、30 项 docs 工具测试、App registry、独立 libargon2 密码向量及设备/邮箱 v2/v3/UC032 向量通过。测试容器自动清理；本轮无提交、推送、部署或生产数据修改。入口仍默认关闭：正式 blocklist 来源/发布、目标机器参数及容量压测、Gateway DIRECT 与联合回归、Console/移动 UI/安全存储属于独立交付和启用门禁，不能据后端 COMPLETE 宣称完整产品可用。
+
+UC033 后端验收完成：make check、普通 race、全仓真实 Mongo race（Wire 189.683s / Mongo 567.703s）通过；最终补充真实 race（Wire 12.385s / Mongo 60.408s）覆盖重置 OAuth 失效但 grant/sub 保留、注销清理隔离、严格 BSON/部署上下文、未知提交/审计回滚，以及关闭公开开关后 outbox 仍投递。通知是有界至少一次，不承诺 SMTP exactly-once。四方法已接入 HTTP/native gRPC/Wire，不表示 Gateway/客户端或生产启用。
+
+随后开始 UC034：复用已验证的 UC033 runtime/统一额度及邮箱 v3 角色，独立 auth_password_logins 严格挑战记录，5 分钟/五次失败/24 小时请求幂等、每 owner 或受保护地址最多五个活跃操作，计入共享 10000 PENDING/1000000 物理保留上限。AUTH_PASSWORD_LOGIN_ENABLED 缺省关闭，启用要求 UC033 management/password runtime；无 SMTP 调用。不可接受操作永久 dummy，使用配置成本的随机 dummy verifier；最终 Auth 事务复核角色/密码/账号/凭据下界，不能复活旧钥。新增集合接入保留清理与 UC025；先重生成 brief 再实现。正式 blocklist 来源、部署压测、Gateway/客户端仍为独立门禁。
+
+用户授权按顺序继续实现；以 docs b3eaad1、Auth a9003f3、API d1a8ac5（Auth 子模块 7a723bc）和工作树为现状。UC006/011/031 邮箱 v3、UC009/025/026 双证明及 UC032 已交付，UC033 的目录、共享密码计算/额度、凭据下界、退出屏障均可复用；不再将旧快照中的缺口当成当前阻塞。UC033/034 已 ACCEPTED，先刷新脚本 brief 再开工；本轮不新增产品恢复方式、不动 Gateway/客户端、不部署或自动迁移。
+
+UC033 先完成：默认关闭的 `AUTH_PASSWORD_MANAGEMENT_ENABLED` 精确四方法（依赖已有 password/email runtime），独立 `auth_password_resets` 的严格记录/版本/码与完成 HMAC/24 小时幂等，接入共享操作容量、验证码发送额度及 UC025 清理。通知沿用唯一事件 outbox；每秒批次最多 32 条、租约覆盖 SMTP deadline，最多 8 次指数退避（1 分钟起、1 小时封顶），24 小时保留，到期每集合最多清理 64。SMTP 在事务外且可取消；固定事件 Message-ID 用于排重，网络未知投递可重复通知，但绝不重复密码变更。关闭公开入口仍维护保留数据；无 SMTP 配置时仅清理、不把未投递状态伪装成功。完成 UC033 的真实 API/Wire/SMTP/Mongo/race 后才开始 UC034。
+
+## 2026-10-13 UC009/025/026 密码门禁修订（历史快照）
 
 用户明确接受三项修订后标为 ACCEPTED，脚本生成 brief 后实现；UC032 仍 DRAFT，未生成新 brief 或开放跨设备管理。UC009 的旧入口只可撤销当前 Session 的凭据；其它合法形状目标在最终检查后统一 403，不查询目标归属。UC025 Prepare 字段 3、UC026 Complete 字段 4 强制 currentPassword＋原登记设备新签名，无旧省略密码旁路。
 
