@@ -22,6 +22,8 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 ## 当前实现覆盖
 
+2026-10-22 核对：现行 38 个 ACCEPTED UC 的 App 后端均为 COMPLETE；没有新增已接受但未实现的后端 UC。最新完整验收仍是 2026-10-20 的固定输入 28/28 PASS，以下覆盖表按当前能力汇总，后续带日期的工作记录保留当轮证据。剩余暂缓与未来方向集中见[概述](../README.md#current-delivery-and-followups)，不把 Console/客户端或上线状态混记为后端缺口。
+
 ### 2026-10-20 UC033/036 夹具适配与完整验收通过
 
 App 本地提交 `a3b41a3`：UC033/036 改用正式邮箱注册、设备登录和 Auth 生成的邮箱目录/凭据/Session。UC033 → UC036 两项串行专项通过后，冻结输入重跑完整 `check-auth-app`，28/28 全部 PASS，`changed_sources=[]`。固定 Auth `22795e…`，前述 bootstrap、关闭认证和 OAuth 账号夹具阻塞均已解除，没有修改 Auth 实现。当前 App 后端跨服务验收为 COMPLETE；详见[本轮完整验收记录](2026-10-20-uc033-036-oauth-fixture.md)。下列历史 BLOCKED 结论仅对应各轮当时输入。
@@ -32,22 +34,22 @@ App 本地提交 `b1c8562`：关闭账号改用正式注册、设备登录及当
 
 ### 2026-10-20 UC003–005 夹具修复与串行复验
 
-App 夹具已按当前 Auth 正式注册/邮箱目录/设备 Session 流程更新，本地提交 `945b625`。UC003 → UC004 → UC005 组合专项两轮 PASS，旧 bootstrap 阻塞已解除，无需修改 Auth。完整固定镜像跨服务门禁前 25 项通过，第 26 项旧 Auth/App 专项因另一处关闭二次认证夹具未适配密码运行时失败，已按用户要求中止；第 27/28 项未运行。这是当轮历史结论；当前第 26 项已解除、第 27 项阻塞见上节，仍不能登记完整跨服务 PASS。历史证据、指纹和解除方案见[修复与复验记录](2026-10-20-uc003-005-fixture-repair.md)；此前[中止记录](2026-10-20-uc003-005-serial-recheck.md)保留为历史证据。
+App 夹具已按当前 Auth 正式注册/邮箱目录/设备 Session 流程更新，本地提交 `945b625`。UC003 → UC004 → UC005 组合专项两轮 PASS，旧 bootstrap 阻塞已解除，无需修改 Auth。完整固定镜像跨服务门禁前 25 项通过，第 26 项旧 Auth/App 专项因另一处关闭二次认证夹具未适配密码运行时失败，已按用户要求中止；第 27/28 项未运行。这是当轮历史结论；当时的第 26/27 项阻塞均已在后续夹具修复中解除；当前结论以本页最新的 28/28 PASS 记录为准。历史证据、指纹和解除方案见[修复与复验记录](2026-10-20-uc003-005-fixture-repair.md)；此前[中止记录](2026-10-20-uc003-005-serial-recheck.md)保留为历史证据。
 
 ### 2026-10-16 已接受的审核补齐工作包
 
-以下提案于 2026-10-16 获用户审核通过，已收敛至 UC005/030/031 和资料查询契约。实现状态：`IN_PROGRESS`；按 App/API → Gateway ADMIN → Console 决定操作串行推进。
+以下提案于 2026-10-16 获用户审核通过，已收敛至 UC005/030/031 和资料查询契约。App/API 与 Gateway 接线已完成；该节保留当时的跨端验收记录，Console/发布状态不用于判定当前 App 后端完成度。
 
 - [Version 正式审核检查定义](2026-10-16-version-review-check-definitions-proposal.md)：v3 正式人工检查文本、不可变版本、详情输出和严格 JSON 客户端切换。
 - [Reviewer 当前公开 Profile 投影](2026-10-16-reviewer-published-profile-proposal.md)：同一审核详情 snapshot 中的公开资料、显式 NONE、权限与指针 CAS。
 
-App/API 已完成，服务 `52ea87a`（含决定响应缓存头修复）、API `27c9743`，两轮完整 backend 均 24/24 通过；Gateway `3e8a59c` 的 check/完整协议门禁通过。Console 最终本地源码 `52d2598`：真实决定专项 12/12，完整固定镜像兼容轮在 `2e783ac` 为 97 通过/3 个旧管理缓存失败；最终源码恢复加固通过 Admin158 项与 strict，最终已发布镜像全量为 84 通过/4 个旧缓存失败/12 个未发布依赖明确 skip。代码接线已交付，完整 UC 与发布验收继续 IN_PROGRESS。详见[审核补齐接入记录](2026-10-16-review-completion.md)。
+App/API 已完成，服务 `52ea87a`（含决定响应缓存头修复）、API `27c9743`，两轮完整 backend 均 24/24 通过；Gateway `3e8a59c` 的 check/完整协议门禁通过。Console 最终本地源码 `52d2598`：真实决定专项 12/12，完整固定镜像兼容轮在 `2e783ac` 为 97 通过/3 个旧管理缓存失败；最终源码恢复加固通过 Admin158 项与 strict，最终已发布镜像全量为 84 通过/4 个旧缓存失败/12 个未发布依赖明确 skip。这些是 2026-10-16 当轮 Console/发布验收结果；当前 App 后端固定输入已通过 2026-10-20 完整门禁，Console 最新状态由其自身记录维护。详见[审核补齐接入记录](2026-10-16-review-completion.md)。
 
 ### 已交付范围
 
 设计状态与实现状态彼此独立，定义见[文档约定](../document-conventions.md#状态)。当前覆盖如下：
 
-2026-10-15 UC002–005 的真实 Gateway/Auth 后端联合验收均已闭合：见 [UC002 记录](2026-10-15-uc002-gateway-auth.md) 与 [UC003–005 记录](2026-10-15-uc003-005-gateway-auth.md)。当前后端接入范围为 COMPLETE，cross-service 28/28；该结论从有效 Session 开始，不包含密码登录、邮件、Console 页面或生产部署。Console 六份新草案保持 PROPOSED；历史工作与交接见 [串行审计](2026-10-14-backlog-audit.md)。
+2026-10-15 UC002–005 的真实 Gateway/Auth 后端联合验收均已闭合：见 [UC002 记录](2026-10-15-uc002-gateway-auth.md) 与 [UC003–005 记录](2026-10-15-uc003-005-gateway-auth.md)。当前后端接入范围为 COMPLETE，cross-service 28/28；该结论从有效 Session 开始，不包含密码登录、邮件、Console 页面或生产部署。Console 六份草案是当时的交接状态，不作为当前跨端交付结论；历史工作与交接见 [串行审计](2026-10-14-backlog-audit.md)。
 
 | Use Case | 设计状态 | 实现状态 | 已闭合 | 尚未闭合 |
 | --- | --- | --- | --- | --- |
@@ -55,46 +57,46 @@ App/API 已完成，服务 `52ea87a`（含决定响应缓存头修复）、API `
 | [UC-APP-002](../use-cases/UC-APP-002-create-application-version.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、Mongo 事务、Version 依附 OAuth 双数组配置、0015 migration、Scope cache、Proto/HTTP/gRPC/Wire、真实 Traefik/Gateway 三协议、Auth Session→USER 签发及持久 Catalog revision/TTL/停用/故障/回退/恢复；服务 `15250b9`，cross-service 28/28 | —（当前创建版本后端与接入范围；登录、Console 和生产部署独立验收） |
 | [UC-APP-003](../use-cases/UC-APP-003-update-draft-application-version.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、Mongo 原子完整替换、OAuth 同 revision、no-op/OCC、HTTP If-Match/ETag、真实 Auth USER/持久 Scope 与 Gateway 三协议编辑、Scope 故障与事务回滚；服务 `f9d944b`，cross-service 28/28 | —（当前后端接入范围；Console 编辑页面独立设计） |
 | [UC-APP-004](../use-cases/UC-APP-004-submit-application-version-review.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、不可变 snapshot、Review migration/事务、Scope/OAuth/公网 HTTPS 复检、HTTP/gRPC/Wire、编辑后经真实 Gateway/Auth 提交、目录变化/故障与插入回滚、三协议 PENDING attempt；服务 `f9d944b`，cross-service 28/28 | —（当前后端接入范围；Console 提交交互独立设计） |
-| [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `COMPLETE` | Mongo 不可变 app-version-review-v2、决定事务/并发、真实 Auth Reviewer grant/revoke/USER、真实 PENDING 批准/拒绝、单项权限与利益冲突隔离、Scope/DNS/依赖门禁、决定回滚、真实 Developer/SYSTEM 自动拒绝与当前策略查询；服务 `f9d944b`，cross-service 28/28 | —（当前后端接入范围；Console 审核草案待审、生产部署独立交付） |
+| [UC-APP-005](../use-cases/UC-APP-005-decide-application-version-review.md) | `ACCEPTED` | `COMPLETE` | 不可变 app-version-review-v3 正式检查定义/历史策略、决定事务/OCC、真实 Reviewer grant/revoke/USER 与 PENDING 批准/拒绝、Scope/DNS/资格门禁、SYSTEM 自动拒绝及三协议联合验收；服务 `52ea87a` + 夹具 `a3b41a3`、API `27c9743`，cross-service 28/28 | —（当前后端范围；Console/生产部署分别验收） |
 | [UC-APP-006](../use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、0006 migration、MongoDB 原子 Repository、资源化 Proto、Kratos HTTP/gRPC Transport、可信身份 JWS、Wire Composition Root、真实 MongoDB 事务/并发集成测试与端到端测试 | — |
 | [UC-APP-007](../use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、Publication/History MongoDB Repository、0008/0015 migrations、管理员/Version/Review/Profile 事务写入栅栏、当前 APPROVED Profile gate、批准 OAuth snapshot 一致性复查、按非空双数组检查 TEST PUBLIC/CONFIDENTIAL registration 与 credential、并发与回滚集成测试、复用 Auth Scope Catalog cache 与 DNS-only URL 预检、资源化 Proto、可信身份 HTTP/gRPC Transport、Wire、真实 MongoDB consumer E2E；服务 `f0ffd06`、API `88f182d` | —（当前 App Center 后端范围） |
-| [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、真实 CSPRNG/SHA-256、env 可配置 mock URL、MongoDB 原子轮换与管理员栅栏、0009 migration、并发/回滚/脱敏集成测试、资源化 Proto、可信身份 HTTP/gRPC Transport、no-store、Wire、默认/自定义前缀真实 MongoDB E2E | —（当前 mock 入口后端工作包；前端及 UC-APP-009 独立交付） |
+| [UC-APP-008](../use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | Domain、UseCase、真实 CSPRNG/SHA-256、env 可配置 mock URL、MongoDB 原子轮换与管理员栅栏、0009 migration、并发/回滚/脱敏集成测试、资源化 Proto、可信身份 HTTP/gRPC Transport、no-store、Wire、默认/自定义前缀真实 MongoDB E2E | —（当前加入链接后端范围；UC009 加入后端已完成，客户端入口分别验收） |
 | [UC-APP-009](../use-cases/UC-APP-009-join-application-as-tester.md) | `ACCEPTED` | `COMPLETE` | Membership Domain/UseCase、0010 migration、Application 写栅栏与事务内 ACTIVE 统计/插入、普通用户可信身份、API/Wire、并发/回滚/脱敏测试及真实 MongoDB HTTP/gRPC E2E | —（当前后端工作包；生产 Gateway 身份签发与客户端独立交付） |
-| [UC-APP-010](../use-cases/UC-APP-010-remove-application-tester.md) | `ACCEPTED` | `COMPLETE` | 精确 episode 移除、不可变审计、幂等无 Clock、共享写栅栏与人数统计、500/INTERNAL 安全告警、API/Wire、真实并发/回滚/HTTP/gRPC E2E | —（当前后端工作包；列表查询、前端与生产 Gateway 独立交付） |
-| [UC-APP-011](../use-cases/UC-APP-011-revoke-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | 精确链接 MANUAL 撤销、无 Clock 幂等、ROTATED 历史保护、写栅栏、500/INTERNAL 安全告警、API/Wire、真实 MongoDB 并发及 HTTP/gRPC E2E | —（当前后端工作包；前端和生产 Gateway 独立交付） |
+| [UC-APP-010](../use-cases/UC-APP-010-remove-application-tester.md) | `ACCEPTED` | `COMPLETE` | 精确 episode 移除、不可变审计、幂等无 Clock、共享写栅栏与人数统计、500/INTERNAL 安全告警、API/Wire、真实并发/回滚/HTTP/gRPC E2E | —（管理查询由 UC037 补齐；前端/Gateway 接入分别验收） |
+| [UC-APP-011](../use-cases/UC-APP-011-revoke-tester-join-link.md) | `ACCEPTED` | `COMPLETE` | 精确链接 MANUAL 撤销、无 Clock 幂等、ROTATED 历史保护、写栅栏、500/INTERNAL 安全告警、API/Wire、真实 MongoDB 并发及 HTTP/gRPC E2E | —（链接历史查询由 UC037 补齐；前端/Gateway 接入分别验收） |
 | [UC-APP-012](../use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | `ACCEPTED` | `COMPLETE` | Catalog Domain/UseCase、只读 MongoDB snapshot、ACTIVE Tester 授权、exact-major 解析、批准事实校验、HTTP/gRPC/Wire、真实并发与 E2E；服务 `95f3feb`、API `acfab91` | —（当前后端范围；前端宿主和生产认证链路独立交付） |
 | [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、严格 NFC、0011 migration、事务/指针/序号、HTTP/gRPC/Wire 与完整 backend 验收；服务 `d121d4e`、API `219419b` | —（当前后端范围） |
 | [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（015已闭合真实编辑/提交双命令竞争） |
-| [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（当前后端范围；审核决定、资料查询、前端与生产Gateway独立交付） |
-| [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | —（当前App Center后端范围；Auth资料权限授予/签发、管理查询与前端独立交付） |
-| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前管理员管理范围；Version OAuth配置与Auth provider已由后续工作包交付，Auth授权和后续渠道独立交付） |
-| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC Provider 方法、本地 service caller registry 与逐方法权限、secret revision 验证、TEST exact-major/批准 Version/Review/Profile/Tester 单 Mongo snapshot、5秒 runtime tuple、sector 回调事实并集及完整 cross-service 验收；服务 `657eccd`、API `310fc10` | —（当前 TEST 后端范围；Auth grant/code/token、Scope enabled 过滤、sector/sub 与未来渠道由 Auth/后续 UC 交付） |
-| [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major stable set/replace/clear、共享 Publication OCC、EMPTY 保留与 History、0016 migration、HTTP/gRPC、STABLE OAuth 管理及五个 Auth-only Provider 方法、完整 cross-service 验收；服务 `531f077`、API `90519af` | —（当前 App Center 后端范围；Grey、test clear、Catalog 与 Auth grant/code/token 独立交付） |
-| [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `ACCEPTED` | `COMPLETE` | Stable-backed Grey set/adjust/replace/clear、固定 HMAC cohort、共享 Publication OCC/History、0017 migration、双协议、GREY OAuth 与 Provider cohort 复算、完整 cross-service 验收；服务 `d8369b1`、API `59436f1` | —（当前 Grey 管理与 Auth provider 范围；统一 test>grey>stable 解析、Catalog、test clear 与 Auth grant/token 独立交付） |
-| [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL 与客户端求值契约 | API、0018 migration、Domain/UseCase、双协议和完整后端验收已交付 |
-| [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（当前单 Application 解析范围；候选列表、详情、Filter 分发与前端独立交付） |
-| [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（当前普通 Catalog 后端范围；客户端 Filter 求值、“我参与的测试”、搜索与排名独立交付） |
+| [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（审核决定 UC016、管理查询 UC039 已完成；前端分别验收） |
+| [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | —（当前 App 后端范围；Auth 权限能力已提供，跨端页面与发布分别验收） |
+| [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前 App 后端范围；STABLE/GREY 与 Version/provider 配置已由后续 UC 补齐，Auth 拥有授权/token 实现） |
+| [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC Provider 方法、本地 service caller registry 与逐方法权限、secret revision 验证、TEST exact-major/批准 Version/Review/Profile/Tester 单 Mongo snapshot、5秒 runtime tuple、sector 回调事实并集及完整 cross-service 验收；服务 `657eccd`、API `310fc10` | —（TEST/STABLE/GREY provider 已由 UC020/021 补齐并联验；Auth 拥有 grant/code/token 与 sector/sub） |
+| [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major stable set/replace/clear、共享 Publication OCC、EMPTY 保留与 History、0016 migration、HTTP/gRPC、STABLE OAuth 管理及五个 Auth-only Provider 方法、完整 cross-service 验收；服务 `531f077`、API `90519af` | —（Grey、Test clear、Catalog 已由 UC021/036/024 完成；Auth 拥有 grant/code/token） |
+| [UC-APP-021](../use-cases/UC-APP-021-manage-grey-rollout.md) | `ACCEPTED` | `COMPLETE` | Stable-backed Grey set/adjust/replace/clear、固定 HMAC cohort、共享 Publication OCC/History、0017 migration、双协议、GREY OAuth 与 Provider cohort 复算、完整 cross-service 验收；服务 `d8369b1`、API `59436f1` | —（统一解析、Catalog、Test clear 已由 UC023/024/036 完成；Auth 拥有 grant/token） |
+| [UC-APP-022](../use-cases/UC-APP-022-manage-application-filter.md) | `ACCEPTED` | `COMPLETE` | Application 级无审核 Filter、不可变 Revision、类型化 `profile-filter-v1`、默认 ALLOW_ALL、API、0018 migration、Domain/UseCase 与双协议完整后端验收 | —（App 管理/分发后端范围；客户端目录和求值器暂缓） |
+| [UC-APP-023](../use-cases/UC-APP-023-resolve-unified-launch-target.md) | `ACCEPTED` | `COMPLETE` | 可选可信身份的 exact-major `TEST > GREY > STABLE` 统一解析、capability-only 回退、完整批准快照复查、只读 MongoDB snapshot、HTTP/gRPC、隐私边界与完整后端验收；服务 `17530b9`、API `d90283e` | —（候选列表、公开详情和 Filter 分发由 UC024 完成；客户端独立交付） |
+| [UC-APP-024](../use-cases/UC-APP-024-query-public-application-catalog.md) | `ACCEPTED` | `COMPLETE` | Stable-backed 普通列表/详情、当前批准 Profile、UC023 `TEST > GREY > STABLE` 唯一目标、Filter 分发、ApplicationId keyset、批量 Mongo snapshot、0019 索引、HTTP/gRPC 与完整后端验收；服务 `4dfe8d6`、API `8f7ad35` | —（本人测试参与由 UC038 完成；客户端 Filter 求值暂缓，搜索/排名不纳入首版） |
 | [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `COMPLETE` | App b346cfa/API 1d7b87b；App 归属屏障、持久终局/个人清理、认证回查、0020 迁移、状态消费者、真实 Mongo 与 Auth＋App 验收 | 默认关闭；不含应用转让/关闭与生产部署 |
-| [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `COMPLETE` | Domain/API、0021 migration、共享 fence、配额/名称原子移动、KEEP/ROTATE、Tester link 撤销和真实 Auth/App 验收已交付；服务 `8f6159b`、API `f6841f2` | —（当前后端范围；通知、平台接管和 Application 关闭独立交付） |
+| [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `COMPLETE` | Domain/API、0021 migration、共享 fence、配额/名称原子移动、KEEP/ROTATE、Tester link 撤销和真实 Auth/App 验收已交付；服务 `8f6159b`、API `f6841f2` | —（关闭已由 UC027 完成；平台强制接管、通知等后续治理能力独立设计） |
 | [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `COMPLETE` | 不可逆 CLOSING/CLOSED、0022 migration、高风险 proof 消费、原子本地隔离、全部 ACTIVE gate、持久 Auth Apply/Get 收敛及真实双服务验收；服务 `90142d6`、API `b00b8e0` | —（当前后端范围；公网/Gateway 入口默认关闭） |
 | [UC-APP-028](../use-cases/UC-APP-028-suspend-and-restore-application.md) | `ACCEPTED` | `COMPLETE` | 正交 AVAILABLE/SUSPENDED 状态、0023 migration、双 revision OCC、原子审计/告警 outbox、精确运维权限、UC009/012/023/024 及五个 UC019 provider 门禁、HTTP/gRPC 和真实 Auth/App 验收已交付；服务 `cab3749`、API `a1bf6dd` | —（当前后端范围；可靠通知、自动恢复和批量运维仍不在本 UC 范围） |
-| [UC-APP-029](../use-cases/UC-APP-029-query-owned-application-management.md) | `ACCEPTED` | `COMPLETE` | 当前管理员私有 Application 列表与组合管理详情、生命周期/平台状态过滤、降序绑定 keyset、批量计数、Mongo snapshot、0024 索引、HTTP/gRPC 与 no-store；服务 `155e122`、API `1cea981` | —（当前 Application 管理摘要范围；版本/Profile 历史列表和 Tester 明细由独立查询补充） |
-| [UC-APP-030](../use-cases/UC-APP-030-query-application-version-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.version.review`、PENDING/ACTIVE 队列、SUSPENDED 保留、CLOSING/CLOSED 排除、不可变 snapshot、当前策略、利益冲突提示、升序 keyset、HTTP/gRPC；服务 `7cf1fc2`、API `0217177` | —（分配、锁单、SLA、通知和决定写入不属于本查询 UC） |
-| [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.profile.review`、资料待审队列与终态详情、不可变 snapshot/当前策略/完整冲突提示、快照失败关闭、0025 队列索引、HTTP/gRPC 与真实 Mongo 验收；服务 `c15aa59`、API `507e252` | —（管理员 ProfileRevision 历史列表/详情仍是独立工作包） |
+| [UC-APP-029](../use-cases/UC-APP-029-query-owned-application-management.md) | `ACCEPTED` | `COMPLETE` | 当前管理员私有 Application 列表与组合管理详情、生命周期/平台状态过滤、降序绑定 keyset、批量计数、Mongo snapshot、0024 索引、HTTP/gRPC 与 no-store；服务 `155e122`、API `1cea981` | —（Version/Profile 历史与 Tester 明细分别由 UC034/039/037 完成） |
+| [UC-APP-030](../use-cases/UC-APP-030-query-application-version-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.version.review`、PENDING/ACTIVE 队列、SUSPENDED 保留、CLOSING/CLOSED 排除、不可变 snapshot、当前策略、利益冲突提示、升序 keyset、HTTP/gRPC；服务 `7cf1fc2`、API `0217177` | —（当前队列/详情后端已完成；正式 v3 检查定义已补齐，分配/锁单/SLA/通知独立设计） |
+| [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.profile.review`、队列/终态详情、不可变 snapshot/当前策略、同快照当前公开 Profile/指针与显式 NONE、完整冲突提示、索引、HTTP/gRPC 与真实 Mongo 验收；服务 `52ea87a`、API `27c9743` | —（管理员资料历史 UC039 已完成；Console/部署分别验收） |
 | [UC-APP-033](../use-cases/UC-APP-033-archive-and-unarchive-application.md) | `ACCEPTED` | `COMPLETE` | 独立 archive status/revision、0026 migration、原子审计/OCC、HTTP/gRPC API、UC029 私有管理投影、UC009/012/023/024 与五个 UC019 OAuth Provider 在线门禁、转让/关闭并发语义及真实 Auth OAuth 归档/恢复验收；服务 `c1c43a4`、API `c0dc59b` | —（当前 App Center 后端范围；前端与生产部署独立交付） |
 | [UC-APP-034](../use-cases/UC-APP-034-query-owned-application-versions.md) | `ACCEPTED` | `COMPLETE` | 当前管理员 Version 列表/详情、四种审核状态与全生命周期历史可见性、最新 Review 最小投影、HMAC 防篡改绑定 keyset、Mongo snapshot、0027 查询索引、HTTP/gRPC 与真实 MongoDB 验收；服务 `90cc40e`、API `592b351` | —（当前 ApplicationVersion 管理查询范围；平台跨 Application 检索、完整 Review 历史与写命令独立交付） |
 | [UC-APP-035](../use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | `ACCEPTED` | `COMPLETE` | 当前管理员放弃从未审核 DRAFT、revision 幂等、最小不可变 abandonment、Version/OAuth 原子删除、身份序号不复用与标签再用、共享 fence 并发顺序、0028 migration、HTTP/gRPC 与真实 MongoDB 验收；服务 `caa193b`、API `e1bc059` | —（当前 App Center 后端范围；已审核 Version 处置、恢复、批量清理与前端独立交付） |
 | [UC-APP-036](../use-cases/UC-APP-036-clear-test-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major Test clear、共享 OCC/fence、EMPTY 保留、不可变 History、0029 migration、保留 Tester/其他槽位、运行读取兼容、HTTP/gRPC 与真实 Auth 验收；服务 `f3a6539` / `b94611e`、API `3398bf4` | —（当前后端范围；前端独立交付） |
 | [UC-APP-037](../use-cases/UC-APP-037-query-application-tester-management.md) | `ACCEPTED` | `COMPLETE` | 管理员 Tester 容量/当前链接概览、ACTIVE/REMOVED/ALL episode 和 ACTIVE/REVOKED/ALL 链接分页、签名 ownership-bound keyset、只读 snapshot、0030 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cf71c0b`、API `a0c214f` | —（当前后端范围；REMOVED 前端入口不要求交付，用户资料和新写能力不在本 UC） |
-| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `COMPLETE` | 本人 ACTIVE 参与列表/详情、公开 Profile 与四类可用性、纯 Test 无 Filter、共享 UC012 批量核心、签名 runtime-bound 分页、500 扫描/响应预算、0031 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cda84cd`、API `aee1dc6` | —（当前后端范围；前端、主动退出和新的 Auth/Tester 写能力独立交付） |
+| [UC-APP-038](../use-cases/UC-APP-038-query-my-test-applications.md) | `ACCEPTED` | `COMPLETE` | 本人 ACTIVE 参与列表/详情、公开 Profile 与四类可用性、纯 Test 无 Filter、共享 UC012 批量核心、签名 runtime-bound 分页、500 扫描/响应预算、0031 索引、HTTP/gRPC 与真实 Mongo 验收；服务 `cda84cd`、API `aee1dc6` | —（主动退出 UC040 已完成；前端及其他 Auth/Tester 扩展独立交付） |
 | [UC-APP-039](../use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | `ACCEPTED` | `COMPLETE` | 管理员全部保留状态的资料修订列表/详情、原文与审核历史、ownership-bound 游标、只读 snapshot、2 MiB 双协议预算、0032 与完整验收；服务 `3bc2d8c`、API `10c95e3` | —（当前后端范围；前端/Gateway 独立交付） |
 | [UC-APP-040](../use-cases/UC-APP-040-leave-application-as-tester.md) | `ACCEPTED` | `COMPLETE` | 本人指定 episode 退出、保留状态、幂等审计、原子容量、最小私有响应、API/Wire 与真实 Mongo/HTTP/gRPC 完整验收 | Gateway/客户端由用户分派，见 UC040 交接记录 |
 
 UC-APP-013 → UC-APP-014 → UC-APP-015 已按顺序完成，UC016、UC018 至 UC031、UC033 至 UC035 也已完成。UC002 → UC003 → UC004 → UC005 → UC007 的 Version OAuth 扩展已按同一依附配置纵切片交付。后续任务必须先在代码仓库的 `AGENTS.md`“Current work package”中声明目标 UC、涉及的 BR/ADR 小节、代码范围、非目标和验证命令；不得依据最近编辑的文档猜测当前任务。
 
-API 与真实 Auth transport 作为后续独立工作包接入。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
+现行 API 与真实 Auth transport 已在对应工作包接入并验收。MongoDB document、driver error、Auth transport、环境读取和 cache 状态不能进入领域对象或 UseCase。
 
-## 当前串行工作包
+## 已完成的 UC036–038 串行工作包（历史）
 
 | Use Case | 设计状态 | 实现状态 | 审核范围 |
 | --- | --- | --- | --- |
@@ -111,7 +113,7 @@ API 与真实 Auth transport 作为后续独立工作包接入。MongoDB documen
 - 最终 `check-auth-app` / cross-service 22/22 通过，报告 `.artifacts/verification/20261012T061950Z-glyatprd/report.json`，`changed_sources=[]`；真实 Mongo race `1223.385s`、HTTP/gRPC E2E `116.787s`、已发布 Auth 通用 E2E `8.669s`。UC036 专项真实 Auth 报告目录 `.artifacts/integration/run-pFmEOTiF`，测试 `7.689s`，证明 Test 授权/code/refresh/UserInfo/delegation 清空后失效，其他 major/Stable/Grey 不受影响，重设后原 Tester 可继续使用。
 - 验收冻结服务 `b94611e`、API `3398bf4`、文档 `910a691`，使用 Go 1.25.5 与 Auth 镜像 `sha256:902dbad234b21951be12c01719bf06f2f5223c7445c6bb8832231405bd821c04`。持久工作区为 `.codex-worktrees/app-center-uc036-038-recovered`；临时目录清理后以保存的服务提交恢复 API/生成物并重新完整验收，不把已丢失的旧报告当作当前交付证据。
 - 工程修正 `d7900ef` 已闭合 UC035 遗留的 docs clone 布局问题，并将 Mongo 包超时调整到 45 分钟；五项既有验证文件修改继续保留、未纳入本工作包提交。
-- UC037 的 ACCEPTED brief 已就绪，按既有审核边界激活；UC038 尚未开工。REMOVED/ALL 分页只保留后端能力，不增加前端历史入口要求。
+- 当轮 UC037 brief 已就绪、UC038 尚未开工；后续 UC037/038 均已交付，当前见上方覆盖表。REMOVED/ALL 分页只保留后端能力，不增加前端历史入口要求。
 
 ### 2026-10-12 UC037 完成与 UC038 激活
 
@@ -209,16 +211,13 @@ brief 未覆盖、或两条权威规则冲突时，不要自行发明：产出�
 - 新增业务语义时，先修改 UC/BR，而不是只把规则藏在代码中。
 - commit message 遵循 [实现约定](implementation-conventions.md#commit-message)。
 
-## 已知的后续交付事项
+## 当前剩余交付边界
 
-UC-APP-001 已闭合其当前所需的 Proto、可信身份、Transport、进程组装和端到端验证。以下事项不影响 UC-APP-002 至 UC-APP-005 保持各自已登记的设计与实现状态，但对应实现完成前不能把它们标记为 `COMPLETE`：
+现行 App 后端 UC 已完成，Auth Reviewer 权限管理、Session→USER、Test clear、Filter 管理/分发、普通目录与本人测试查询均已有对应交付和联合验收，不再列为未来提供方缺口。
 
-- Auth 的 reviewer 权限签发/撤销生命周期。
-- Auth 普通 USER provision 与 trusted identity 签发。
-- test clear、Filter 和 Catalog 的后续设计。
-- CI/CD 和生产部署。
+此前明确暂缓的内容保持不变：客户端目录/Filter 求值、版本批准资格撤销、可靠告警投递和受控 icon 资产。团队角色、平台强制接管、通用审核工作流及 AI 等仍需独立设计，不是本次新增排期。
 
-它们进入对应工作包前必须有明确契约，但不能提前渗入 Application 领域模型。
+Console、客户端、CI/CD 和生产部署的验证分别维护。现有后端验收与本地提交不代表它们已上线；相邻服务实现仍由其 owner 负责。
 
 ## 后续工作包依赖检查
 
@@ -466,7 +465,7 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 - `0032_application_profile_management_query` 部署资料状态/序号查询索引并提升 readiness；ledger、现有精确索引断言、幂等及 sequential 升级链同步到 32 项。启动不隐式迁移。
 - Go 1.25.5 `make check-full` / backend 23/23 通过，`changed_sources=[]`；服务工作树报告 `.artifacts/verification/20261014T142903Z-_pn42yj5/report.json`。Mongo race 1726.549s、HTTP/gRPC E2E race 142.414s，最终阶段 1735.472s。被测服务 `cda84cd` + 最终未提交内容、API `10c95e3`、committed docs `e0690d4`；后续上述提交只保存相同源码，无测试后代码变更。真实 Auth tier 未运行，当前工作未改变 Auth 契约。
 - 验收入口：服务 `internal/profile/usecase/management_query_test.go`、`internal/adapter/mongo/profile_management_cursor_test.go`、`profile_management_repository_integration_test.go`、`internal/adapter/transport/profile_management_service_test.go` 和 `cmd/app-center/profile_management_e2e_integration_test.go`。完整 tier 同时保持既有管理、审核、目录及运行消费测试通过。
-- UC002–005 的真实签发/生产 Scope/Reviewer 联合验收仍为 IN_PROGRESS，按串行审计交接用户分派相邻服务。UC040 已接受并完成 App/API 实现与完整验收；客户端目录与其他暂缓项不进入本次实现。
+- 当轮待补的 UC002–005 真实签发/生产 Scope/Reviewer 联合验收已在后续完成，当前固定输入已通过 2026-10-20 的 28/28 门禁。UC040 已接受并完成 App/API 实现与完整验收；客户端目录与其他暂缓项不进入本次实现。
 
 
 ## 2026-10-15 UC040 Tester 主动退出测试
@@ -485,6 +484,6 @@ App `b346cfa` 固定 API `1d7b87b`，已合入 `app-center/v1`。原生内部 gR
 | --- | --- |
 | Gateway | 外部 `POST /app-center/v1/applications/{application_id}/tester-memberships/{membership_id}:leave`，只剥离 `/app-center`；内部路径由 App Proto 定义。可信 USER，沿用既有写操作 USER/CSRF 流程，不要求 Developer APPROVED。HTTP 无正文/query，透传 private,no-store 和标准错误。原生 RPC 为 `/app_center.v1.tester_membership.TesterMembership/LeaveApplicationAsTester`，gRPC-Web 仍由 Traefik 终止。 |
 | 客户端/Console | 以 UC038 取得的 membershipId 定位退出按钮；保留 applicationId/membershipId 做相同目标重试，处理 left=true/false 后刷新当前参与事实。迟到结果只对应原 episode，不能删除重新加入的新卡片。不可用应用仍遵循 UC038 可见性，首版无新增离线列表/历史接口。退出不承诺强制断开运行页面或即时撤销 Auth 会话。 |
-| Auth 联合验收 | UC002–005 的真实 USER 签发、生产 Scope、Reviewer grant/revoke 联合验收仍为 IN_PROGRESS，沿用串行审计交接；UC040 未新增 Auth 实现要求。 |
+| Auth 联合验收 | UC002–005 的真实 USER 签发、生产 Scope 与 Reviewer grant/revoke 联合验收已完成；UC040 未新增 Auth 实现要求，相关外部入口仍按各 owner 的交付验收。 |
 
 App 本轮获准串行工作已完成。客户端普通目录/Filter 求值、版本批准撤销、可靠告警投递和受控 icon 继续暂缓；相邻服务代码由用户安排其他 agent。

@@ -46,7 +46,7 @@ Client User Data + Filter 规则 ───────────────�
 | Developer / Application Admin | 登记应用，维护资料与版本，组织测试，控制发布和回退，转让管理权，并在必要时不可逆关闭 Application |
 | Application Operations Staff | 使用独立授予的 suspend 或 restore 权限临时停止或恢复 Application 的平台分发与在线授权资格 |
 | Reviewer | 审核确定的版本或公开资料快照，并留下可追溯决定 |
-| Tester | 通过加入链接取得 Application 级测试资格，并使用兼容的 test 版本 |
+| Tester | 通过加入链接取得资格，查询本人参与、使用兼容 Test 版本，并可主动退出指定 episode |
 | 普通用户 | 在官方客户端中取得候选应用，由客户端执行 Filter 后看到最终列表，并使用已解析的发布目标 |
 | 平台运营者 | 在内容或运行风险出现时停止分发，并查看必要的审核与发布历史 |
 
@@ -56,7 +56,7 @@ Auth 继续拥有身份、Developer 资格、Reviewer 权限和 Scope Catalog；
 
 ### 1. 开发者完成应用准备
 
-开发者资格获批后，用户创建 Application，并成为当前管理员。日常停止维护使用未来的可恢复归档；确认不再使用且需要解除 owner 义务时，依据 UC-APP-027 执行不可逆关闭。两者都保留历史记录，不物理删除 Application。
+开发者资格获批后，用户创建 Application，并成为当前管理员。日常停止维护使用 UC-APP-033 已交付的可恢复归档；确认不再使用且需要解除 owner 义务时，依据 UC-APP-027 执行不可逆关闭。两者都保留历史记录，不物理删除 Application。
 
 管理员分别准备两类内容：
 
@@ -146,10 +146,10 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 
 | 能力 | 首版纳入 | 说明 |
 | --- | --- | --- |
-| Application Ownership | 是 | 创建、账号退出屏障、显式接受式管理员转让、不可逆关闭，以及 UC-APP-028 提出的平台暂停/恢复；读取、改名和管理员日常可恢复归档继续独立设计 |
+| Application Ownership | 是 | 创建、账号退出屏障、管理员转让、不可逆关闭、UC028 平台暂停/恢复、UC029 私有查询与 UC033 可恢复归档均已实现；技术名称保持不可修改 |
 | Public Profile | 是 | 资料草稿、审核、批准后自动公开和读取；icon 先作为不透明字符串 |
 | Version Review | 是 | Version 草稿、编辑、提交、决定、拒绝后恢复、查询和未提交草稿放弃 |
-| Tester Management | 是 | 加入链接、加入、移除、撤销链接和 test 目标解析 |
+| Tester Management | 是 | 加入链接、加入、移除、撤销链接、管理查询、本人参与查询/主动退出和 Test 目标解析 |
 | Runtime Publication | 是 | 按 RPC API major 的 test、grey、stable、回退和停止分发 |
 | Catalog & Resolution | 是 | 候选应用聚合、Filter 规则分发、客户端展示过滤和服务端发布目标解析 |
 | OAuth/OIDC Application Integration | 扩展纳入 | Application＋channel 级稳定 PUBLIC/CONFIDENTIAL clientId、独立 secret credential，以及从批准 Version 解析回调和 scopes |
@@ -188,17 +188,19 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 10. 当前管理员可以发起管理权转让；目标显式接受后，Application、双方配额、可选 credential 轮换和 Tester 加入链接处置原子收敛。
 11. 当前管理员经过近期重新认证可以不可逆关闭 Application；本地能力立即停止，Auth 永久撤销最终通过持久回执收敛，故障期间不恢复服务。
 12. 获独立授权的平台运维人员可以暂停或恢复 ACTIVE Application；暂停保留配置和 owner 义务，OAuth 在线路径在短期凭据残余窗口后停止。
-13. 当前管理员可以归档或重新上线 ACTIVE Application；该提案只有在归档统一阻止所有 Catalog、启动、Tester Join 与 OAuth 在线资格时才成立，单纯普通 Catalog 隐藏继续使用 Stable clear。
+13. 当前管理员可以归档或重新上线 ACTIVE Application；UC033 已确定归档统一阻止 Catalog、启动、Tester Join 与 OAuth 在线资格，单纯普通 Catalog 隐藏继续使用 Stable clear。
 
-## 后续用例前仍需要决定
+## 当前已交付与后续设计边界
 
-以下问题会改变尚未具体化的能力边界，应在对应 UC 开始前确认：
+UC028 平台暂停/恢复（含告警 outbox）、UC036 Test clear、UC037/038 Tester 查询、UC039 资料历史和 UC040 主动退出均已完成 App 后端/API 验收。UC033/036 的真实 Auth OAuth 专项也已于 2026-10-20 在固定镜像下通过完整门禁，见[验收记录](implements/2026-10-20-uc033-036-oauth-fixture.md)。不再把这些能力列作后续设计或待实现事项。
 
-1. **测试参与查询已接受**：[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 按本人 ACTIVE Membership 查询 test-only 和 stable-backed 应用；无公开资料/兼容 Test 时保留不可用卡片，移除后不可见，暂停/归档/关闭遵守在线门禁隐藏。实现按既定串行工作包交付。
-2. **UC028 的交付细节**：业务状态、权限和 OAuth 残余窗口已经接受；当前实现需固定 API 字段号、告警 outbox 复用点并完成真实 Auth/App 联合测试。
-3. **受控图标资产**：当前 icon 只是可空不透明字符串；何时升级为受控资产、由谁拥有并如何迁移，等待真实需求后决定，不阻塞首版资料审核。
-4. **Filter 客户端交付**：App Center 规则模型与管理流程已由 UC-APP-022 确定；官方客户端仍需实现求值器、共享向量和管理 UI。
+后续仍保持原范围：
 
-这些选择不阻塞当前已有 UC-APP-001 至 UC-APP-016、OAuth/OIDC 扩展 UC-APP-018/019 以及 Stable/Grey UC-APP-020/021 作为需求发现成果保留，但会影响后续 Capability Map、领域模型和生命周期模型。
+1. **版本批准资格撤销与决定纠错**：暂缓，独立用例获审前不改变现有决定和发布资格模型。
+2. **可靠告警投递**：日志、审计和 outbox 已有；投递闭环暂缓。
+3. **受控图标资产**：icon 仍为不透明字符串；资产所有权、内容稳定性与迁移需未来设计。
+4. **客户端目录/Filter 交付**：App 管理、查询和规则分发已完成；官方客户端求值器与页面仍暂缓。
+
+协作者、平台接管、通用审核工作流、AI 审核等保持“明确不纳入首版”的边界，不构成本轮新增排期。Console、客户端与部署验收分别维护，设计状态不用于推断实现状态。
 
 OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

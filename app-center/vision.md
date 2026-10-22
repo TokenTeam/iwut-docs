@@ -27,7 +27,7 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 当前管理员可以向另一名 ACTIVE＋APPROVED Developer 发起转让；目标显式接受后，App Center 原子移动 adminId 与双方配额，并按接受者选择保留或轮换 CONFIDENTIAL secret，见 [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md)。
 - 当前管理员经近期重新认证可以不可逆关闭 Application；CLOSING 立即停止本地运行与管理能力并释放 owner 义务，Auth 永久撤销完成后收敛 CLOSED，见 [UC-APP-027](use-cases/UC-APP-027-close-application.md)。
 - 平台运维人员可以依据 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 临时暂停或恢复 ACTIVE Application；暂停保留 owner 和配置，恢复后各运行路径重新检查当前资格。
-- 每个开发者受到可调整的应用创建配额限制；初始配额暂定为 10。
+- 每个开发者受到可调整的应用创建配额限制；初始配额由进程配置提供、未设置默认 10，已有配额记录保持权威，见 [UC001](use-cases/UC-APP-001-create-application.md)。
 - 记录 createdAt，作为后续审计事实。
 - name 在同一 adminId 下按大小写不敏感方式唯一。
 - 面向目录的资料不直接写入 Application；当前管理员可以依据 [BR-PRF-002](use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-002) 创建独立的 DRAFT ApplicationProfileRevision。
@@ -55,16 +55,17 @@ App Center 为开发者提供登记和管理应用的能力，并让 iWUT 客户
 - 当前管理员可以在 Stable 基线上管理确定性 Grey rollout，并用 Application 级 Filter 控制 Stable 与 Grey 的客户端展示范围。
 - UC-APP-023 由 App Center 对单个 Application 按 Test、Grey、Stable 顺序返回唯一 LaunchTargetDescriptor；匿名用户只考虑 Stable，已认证用户的 Test 和 Grey 资格由服务端判定。
 
+Tester 主动退出、Test clear、本人测试参与查询和管理员资料历史后端均已完成，分别见 UC040、UC036、UC038、UC039。当前完整验收和后续范围见 [README 当前交付](README.md#current-delivery-and-followups)。
+
 ## 当前尚未设计或明确后置的能力
 
 - 管理员日常可恢复的整 Application 归档已由 UC-APP-033 接受；若只需普通 Catalog 隐藏则使用 Stable clear。Application 管理查询已经交付，技术名称明确创建后不可修改；物理删除仍不是首版目标。不可逆关闭由 UC-APP-027 定义，平台暂停/恢复由 UC-APP-028 定义。
 - 协作者和角色。
-- 平台强制转让、争议仲裁和管理员紧急接管；普通双方确认式转让由 UC-APP-026 提案定义。
+- 平台强制转让、争议仲裁和管理员紧急接管；普通双方确认式转让由 UC-APP-026 定义并已实现。
 - ApplicationVersion 的审核撤回、决定推翻和已批准资格撤销。
 - versionLabel 语义比较和 SemVer 校验。
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
-- Tester 主动退出、test clear，以及独立于 UC-APP-024 普通 Catalog 的“我参与的测试”入口。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
 - Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；App Center 只登记版本申请的 scopes/redirect URIs 并提供资格快照。
 - 兼容现有 App Center API 和 MongoDB 文档。

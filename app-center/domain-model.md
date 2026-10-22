@@ -270,13 +270,15 @@ ReviewPolicyProvider 与 ProfileReviewPolicyProvider 分别提供版本化的运
 
 [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md) 已确认 ApplicationFilter＋不可变 ApplicationFilterRevision。Filter 无需审核，每次修改立即发布；它与 Profile、Version 和 Publication 独立演进。客户端求值线格式由 [Application Filter v1](../platform/contracts/application-filter-v1.md) 固定。
 
-## 需要后续 UC 验证的聚合切分
+## 已完成的一致性验证
 
-- ApplicationProfile 在实现中是否能如 UC-APP-013 和 UC-APP-016 要求的那样，在并发创建和审核时同时保护单一 DRAFT/SUBMITTED 工作修订与当前公开指针。
-- ApplicationTesterAccess 在并发加入时是否应作为单一聚合，还是拆分后使用显式一致性协议。
-- ApplicationReview 作为独立聚合后，与 ApplicationVersion 状态迁移的本地原子协调方式。
-- ApplicationClosure 的实现是否能以有界本地事务完成配额、转让、链接和 OAuth slot 的原子变化，并在 Auth 长期故障时可靠保留收敛任务。
+此前列出的聚合切分问题已在对应工作包中验证，不再作为尚未实施的设计依赖：
 
-这些问题用于验证边界，不要求现在为每个问题创建独立 UC。
+- UC013–016 已验证单一 DRAFT/SUBMITTED 工作修订与当前公开资料指针的并发保护；UC031 已补齐 Reviewer 同快照当前公开资料读取。
+- UC009/010/040 已验证 Tester 加入、移除、本人退出的共享栅栏、容量与 episode 竞争。
+- UC004/005/006 已验证独立 Review 与 Version 迁移的本地原子协调、回滚及 OCC。
+- UC027 已验证有界本地关闭事务、持久 Auth Apply/Get 协议、故障重试与最终 CLOSED；当前密码加同设备签名的真实关闭认证夹具也已完成。
+
+实现证据和固定输入见[覆盖表](implements/README.md#当前实现覆盖)及[2026-10-20 完整验收](implements/2026-10-20-uc033-036-oauth-fixture.md)。后续改变聚合边界仍需独立设计，不由覆盖状态推导新业务规则。
 
 OAuth 身份隔离：client/credential 按渠道隔离；major 共用同渠道 client。Application 级 sector 与用户 sub 仅由 Auth 保存，App 仅提供 client 归属及批准回调事实，见 [提供方契约](../platform/contracts/app-oauth-client-v1.md)。

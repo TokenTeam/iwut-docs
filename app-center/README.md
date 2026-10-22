@@ -2,11 +2,27 @@
 
 状态：`PROPOSED`
 
+<a id="current-delivery-and-followups"></a>
+
+## 当前交付与后续目标（2026-10-22 核对）
+
+这里的状态表示概述文档的设计状态，不代表后端尚未实现。现行 38 个 `ACCEPTED` UC（UC001–040，排除已废弃的 UC017/032）均已登记 App 后端 `COMPLETE`。最近完整跨服务验收为 2026-10-20 的 `check-auth-app` 28/28 PASS，对应 App `a3b41a3`、API `27c9743` 与固定 Auth 镜像 `22795e…`；本次仅同步文档，没有重新验证其他镜像或生产部署。输入指纹和边界见[验收记录](implements/2026-10-20-uc033-036-oauth-fixture.md)，完整覆盖见[实现入口](implements/README.md#当前实现覆盖)。
+
+| 后续目标 | 当前边界与状态 |
+| --- | --- |
+| 版本批准资格撤销、决定纠错 | 此前明确暂缓；现有决定不可原地改写，未来能力需独立设计 |
+| 可靠告警投递 | 已有日志、审计和告警 outbox；可靠投递闭环暂缓 |
+| 受控 icon 资产 | 目前只有不透明字符串；上传、所有权、内容版本和失效生命周期暂缓 |
+| 客户端目录与 Filter 求值 | 客户端工作暂缓；App 的目录查询、Filter 管理与分发已完成 |
+| 团队角色、平台接管、审核工作流、AI 审核、SemVer/release notes 等 | 仅为后续设计方向，不是已接受但漏实现的 UC，见[愿景](vision.md#当前尚未设计或明确后置的能力) |
+
+Console 的实现与发布状态由其自身记录维护。其未完成内容不计为 App 后端未实现；相邻服务接入和上线验收也不由本页推定完成。UC017/032 已被替代，不再进入待实现清单。此前暂缓范围见[串行工作边界](implements/2026-10-14-backlog-audit.md#执行边界)。
+
 本目录从业务用例出发设计 App Center 的首个正式版本。旧实现已经雪藏，只作为历史需求证据，不是迁移来源，也不是当前模型的规范。
 
 ## 当前迭代
 
-当前已经定义三十六个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–038 已接受：
+当前已经定义三十八个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，UC-APP-001–016、UC-APP-018–031、UC-APP-033–040 已接受：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -20,7 +36,7 @@
 - `UC-APP-010`：当前管理员按 membershipId 移除一个 ACTIVE Tester episode，并释放容量。
 - `UC-APP-011`：当前管理员按 joinLinkId 显式撤销加入链接，不创建替代链接或移除 Tester。
 - `UC-APP-012`：App Center 为已认证 Tester 解析当前兼容的 test 启动目标。
-- `UC-APP-013`：当前管理员创建只含公开显示名称和可空简介的 DRAFT ApplicationProfileRevision。
+- `UC-APP-013`：当前管理员创建包含公开显示名称、可空简介和可空 icon 字符串的 DRAFT ApplicationProfileRevision。
 - `UC-APP-014`：当前管理员以乐观并发控制完整替换 DRAFT ApplicationProfileRevision。
 - `UC-APP-015`：当前管理员提交 DRAFT ProfileRevision，创建独立 PENDING ProfileReview 快照并迁移为 SUBMITTED。
 - `UC-APP-016`：无利益冲突的资料 reviewer 批准或拒绝 ProfileReview；批准后自动成为当前公开资料。
@@ -44,6 +60,8 @@
 - `UC-APP-036`：当前管理员清空 exact-major Test 槽位，保留 Tester、其他槽位与 EMPTY Publication。
 - `UC-APP-037`：当前管理员读取 Tester 容量、Membership episode 与加入链接元数据历史。
 - `UC-APP-038`：用户查询本人 ACTIVE 测试参与列表与详情，取得纯 Test 目标或暂不可用卡片。
+- `UC-APP-039`：当前管理员查询公开资料修订列表、详情和有界审核历史。
+- `UC-APP-040`：Tester 主动退出指定参与 episode，保留历史并原子释放容量。
 
 Application 的稳定业务字段仍为：
 
@@ -58,13 +76,13 @@ UC-APP-026 增加技术业务 OCC 字段 `ownershipRevision`；它只跟踪当�
 
 UC-APP-027 增加 `lifecycleStatus` 与 `lifecycleRevision`，并以独立 ApplicationClosure 保存不可逆关闭过程和 Auth 收敛回执。
 
-UC-APP-028 提出独立的 `platformAvailabilityStatus` 与 `platformAvailabilityRevision`；它不扩展关闭状态机，也不修改下级配置或 owner 义务。
+UC-APP-028 定义并已实现独立的 `platformAvailabilityStatus` 与 `platformAvailabilityRevision`；它不扩展关闭状态机，也不修改下级配置或 owner 义务。
 
 UC-APP-033 增加独立的 `archiveStatus` 与 `archiveRevision`；它与平台暂停、不可逆关闭和 Publication clear 分离。
 
 除此之外的字段和能力都必须由后续具体用例引入。
 
-创建还需要一个独立的开发者应用配额记录，但它不是 Application 字段。初始配额暂定为 10。
+创建还需要一个独立的开发者应用配额记录，但它不是 Application 字段。初始上限由进程配置提供，未配置时默认 10；已存在的配额记录保持权威，见 [UC001](use-cases/UC-APP-001-create-application.md)。
 
 面向用户公开的资料由独立且需要审核的 ApplicationProfileRevision 表达，不属于 Application 创建字段。UC-APP-013 已建立 displayName、可空 description 和可空不透明 icon 字符串；受控资产能力留待以后显式扩展。
 
@@ -75,7 +93,7 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [implements/README.md](implements/README.md)：新实现参与者和 agent 的首个阅读入口、当前工作范围与完成标准。
 - [implementation-conventions.md](implements/implementation-conventions.md)：新实现的统一代码、测试、持久化、API 与 commit message 约定。
 - [product-scope.md](product-scope.md)：首版端到端用户旅程、能力边界、Filter 含义和明确非目标。
-- [capability-map.md](capability-map.md)：六项一级业务能力、事实流向、当前覆盖度和首版缺口。
+- [capability-map.md](capability-map.md)：一级业务能力、事实流向、当前覆盖度和首版缺口。
 - [domain-model.md](domain-model.md)：聚合、实体、值对象、领域服务及其关系。
 - [lifecycle-models.md](lifecycle-models.md)：Version、ProfileRevision 与 Publication 的集中生命周期模型。
 - [profile-management.md](query-contracts/profile-management.md)：Application Profile 管理员与 Reviewer 的读取语义。
@@ -104,7 +122,7 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-017 归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md)：被否决的资料恢复提案；现行规则改为新建独立修订。
 - [UC-APP-032 归档提案](archive/UC-APP-032-rename-application.md)：被否决的技术名称修改提案；现行技术名称创建后不可修改。
 - [UC-APP-018-manage-oauth-client.md](use-cases/UC-APP-018-manage-oauth-client.md)：管理稳定 OAuth client identity、状态和 confidential credential。
-- [UC-APP-019-resolve-oauth-authorization-context.md](use-cases/UC-APP-019-resolve-oauth-authorization-context.md)：为 Auth 提供 OAuth client 与当前 TEST 运行上下文。
+- [UC-APP-019-resolve-oauth-authorization-context.md](use-cases/UC-APP-019-resolve-oauth-authorization-context.md)：为 Auth 提供 OAuth client 与运行/授权上下文；TEST/STABLE/GREY 扩展已由 UC020/021 接入。
 - [UC-APP-020-manage-stable-publication-slot.md](use-cases/UC-APP-020-manage-stable-publication-slot.md)：管理 stable 槽位并启用 STABLE OAuth channel。
 - [UC-APP-021-manage-grey-rollout.md](use-cases/UC-APP-021-manage-grey-rollout.md)：管理 Stable 基线上的确定性 Grey rollout。
 - [UC-APP-022-manage-application-filter.md](use-cases/UC-APP-022-manage-application-filter.md)：管理 Application 级客户端展示 Filter。
@@ -123,6 +141,8 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 - [UC-APP-036-clear-test-publication-slot.md](use-cases/UC-APP-036-clear-test-publication-slot.md)：清空 Test 槽位。
 - [UC-APP-037-query-application-tester-management.md](use-cases/UC-APP-037-query-application-tester-management.md)：Tester 管理查询。
 - [UC-APP-038-query-my-test-applications.md](use-cases/UC-APP-038-query-my-test-applications.md)：“我参与的测试”列表与详情。
+- [UC-APP-039-query-owned-application-profile-revisions.md](use-cases/UC-APP-039-query-owned-application-profile-revisions.md)：当前管理员查询资料修订列表、详情与有界审核历史。
+- [UC-APP-040-leave-application-as-tester.md](use-cases/UC-APP-040-leave-application-as-tester.md)：本人退出指定测试参与 episode。
 - [administrator-transfer.md](design-notes/administrator-transfer.md)：已由 UC-APP-026 取代的早期设计说明。
 - [application-version.md](design-notes/application-version.md)：版本、审核和发布的拆分建议。
 - [ADR-001-scope-catalog-cache.md](adr/ADR-001-scope-catalog-cache.md)：Scope Catalog 权威来源、缓存与消息策略。
@@ -134,6 +154,6 @@ UC-APP-002 为 Application 的持久化投影增加 nextVersionSequence 技术�
 
 ## 当前已接受与实现覆盖
 
-UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-031 及 UC-APP-033 至 UC-APP-038 均为 `ACCEPTED`；UC-APP-017、UC-APP-032 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准。
+UC-APP-001 至 UC-APP-016、UC-APP-018 至 UC-APP-031 及 UC-APP-033 至 UC-APP-040 均为 `ACCEPTED`；UC-APP-017、UC-APP-032 为 `SUPERSEDED`。设计状态不代表实现状态，逐项实现证据以 [implements/README.md](implements/README.md) 为准。
 
 OAuth/OIDC 的 App Center TEST 范围已经由 UC-APP-018/019 及 UC-APP-002 至 UC-APP-007 的 Version OAuth 扩展交付，UC-APP-020/021 已启用 STABLE/GREY。Auth 的 consent、code、token、grant、sector 和 sub 继续由 Auth Center 拥有。

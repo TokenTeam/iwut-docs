@@ -91,7 +91,7 @@ Runtime Publication 不读取客户端本地用户字段，也不执行 Filter�
 
 已有设计覆盖 displayName、可空 description 和可空不透明 icon 字符串的资料草稿创建、更新、提交审核、批准或拒绝，以及批准时自动公开。UC-APP-031 已交付 Reviewer 待审队列与审核详情；[UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) 已交付并完成管理员 ProfileRevision 历史列表/详情及有界审核历史的完整后端验收。SUBMITTED 继续占用唯一工作修订位，不能并行创建下一份 DRAFT；REJECTED Revision 保持终态，网页端可预填旧内容后调用普通创建用例，但服务端不提供恢复/复制接口。普通用户当前公开资料由 UC-APP-024 返回；受控 icon 资产是以后可选扩展，不提供旧资料回滚。
 
-紧急隐藏不属于资料修订撤销。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 提出由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格。
+紧急隐藏不属于资料修订撤销。[UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 已实现由具备精确平台运维权限的人员暂停整个 Application，并统一影响目录、运行分发和 OAuth 在线资格。
 
 这项能力提供“展示什么”，不决定“运行哪个 Version”。
 
@@ -142,20 +142,22 @@ Filter 结果只影响客户端展示。服务端的身份鉴权、Tester 资格
 | Catalog & Resolution | Ownership（含管理员归档门禁）、Platform Availability、Public Profile、Runtime Publication、Tester Management、Version Review | 构造内部一致的候选目录与启动目标 |
 | 官方客户端 | Catalog & Resolution 返回的候选与 Filter 规则；客户端本地用户信息 | 执行 Filter 并展示最终列表 |
 
-这张表描述领域事实流向。跨能力的一致性策略由后续领域模型和生命周期模型决定；它本身不隐含共享数据库或分布式事务要求。
+这张表描述领域事实流向。跨能力的一致性策略见现行领域模型、生命周期模型及对应 UC/ADR；它本身不隐含共享数据库或分布式事务要求。
 
 ## 当前设计覆盖度
 
-| 能力 | 已有设计证据 | 首版主要缺口 |
+| 能力 | 已有设计证据 | 当前后端覆盖与后续边界 |
 | --- | --- | --- |
-| Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029`、`UC-APP-033` | 管理员整应用归档已接受；技术名称明确保持不可变 |
+| Application Ownership | `UC-APP-001`、`UC-APP-025`–`UC-APP-029`、`UC-APP-033` | 当前所有权/归档后端已完成；技术名称保持不可变，平台强制接管仍后置 |
 | Platform Availability | `UC-APP-028` | 可靠告警投递、自动恢复与批量运维不在首版 |
-| Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030`、`UC-APP-034`–`UC-APP-035` | 批准资格撤销或紧急处置 |
+| Version Review | `UC-APP-002`–`UC-APP-006`、`UC-APP-030`、`UC-APP-034`–`UC-APP-035` | 批准资格撤销暂缓；Application 级紧急暂停已由 UC028 完成 |
 | Runtime Publication | `UC-APP-007`、`UC-APP-020`、`UC-APP-021`、`UC-APP-023`、`UC-APP-033`、`UC-APP-036` | —（当前发布管理后端范围） |
-| Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`；`UC-APP-024` 的公开读取 | UC039 管理员 ProfileRevision 历史查询实施中；受控 icon 资产为以后扩展 |
-| Tester Management | `UC-APP-008`–`UC-APP-011`、`UC-APP-037` | 主动退出待定；管理查询后端已实现 |
+| Public Profile | `UC-APP-013`–`UC-APP-016`、`UC-APP-031`、`UC-APP-039`；`UC-APP-024` 的公开读取 | 资料修订、审核、当前公开资料和私有历史查询已完成；受控 icon 资产暂缓 |
+| Tester Management | `UC-APP-008`–`UC-APP-011`、`UC-APP-037`–`UC-APP-038`、`UC-APP-040` | 管理/本人参与查询及主动退出均已完成；客户端独立交付 |
 | Catalog & Resolution | `UC-APP-012`、`UC-APP-022`–`UC-APP-024`、`UC-APP-038` | —（当前目录/解析后端范围） |
-| OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 与跨服务验证已完成；Auth grant/code/token 继续独立交付 |
+| OAuth Client Integration | `UC-APP-018`–`UC-APP-021` | TEST/STABLE/GREY 后端、API、Auth-only provider 及固定 Auth 镜像联合验收已完成；grant/code/token 的实现所有权仍在 Auth |
+
+2026-10-22 核对：38 个 ACCEPTED UC 的 App 后端均为 COMPLETE；最近固定输入的完整跨服务验收为 28/28 PASS，见[实现入口](implements/README.md#当前实现覆盖)。
 
 “已有设计证据”只表示存在相应设计文档；应沿链接查看其设计状态，并到 `implements/` 查看独立的实现状态。`ACCEPTED` 不等于实现 `COMPLETE`。
 

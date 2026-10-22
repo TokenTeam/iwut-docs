@@ -70,7 +70,7 @@ App Center Context
 - Application 级永久授权关闭 tombstone，以及它对 grant、code、token、refresh、introspection/delegation 的最终执行。
 - 能证明用户刚完成认证、绑定具体高风险用途与 Application 的短时证明。
 
-客户端在申请时进行弱师生验证，平台后续自行联系确认。App Center 使用 authId 和 developerStatus，但不接收学生证明材料，也不重新执行验证。
+Developer 资格的申请、核验和审核由 Auth Center 拥有。App Center 消费 authId 和 developerStatus，不接收学生证明材料，也不重新执行资格核验；相邻系统的具体申请流程以 Auth 的现行契约为准。
 
 ## 当前依赖方向
 

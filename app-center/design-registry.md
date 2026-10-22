@@ -52,8 +52,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-014` | 更新应用公开资料修订草稿 | `ACCEPTED` | [UC-APP-014-update-draft-application-profile-revision.md](use-cases/UC-APP-014-update-draft-application-profile-revision.md) | — | — |
 | `UC-APP-015` | 提交应用公开资料修订审核 | `ACCEPTED` | [UC-APP-015-submit-application-profile-revision-review.md](use-cases/UC-APP-015-submit-application-profile-revision-review.md) | — | — |
 | `UC-APP-016` | 审核应用公开资料修订 | `ACCEPTED` | [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md) | — | — |
-| `UC-APP-017` | 将被拒绝的应用公开资料修订恢复为草稿 | `SUPERSEDED` | [归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md) | [UC-APP-013](use-cases/UC-APP-013-create-application-profile-revision.md)＋[UC-APP-016 / BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | 未实现；以新建独立修订取代服务端恢复。 |
-| `UC-APP-018` | 管理应用 OAuth Client | `ACCEPTED` | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md) | — | TEST-only 管理后端已完成；provider/runtime 由 UC019 完成。 |
+| `UC-APP-017` | 将被拒绝的应用公开资料修订恢复为草稿 | `SUPERSEDED` | [归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md) | [UC-APP-013](use-cases/UC-APP-013-create-application-profile-revision.md)＋[UC-APP-016 / BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | 提案已废弃，不进入待实现清单；以新建独立修订取代服务端恢复。 |
+| `UC-APP-018` | 管理应用 OAuth Client | `ACCEPTED` | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md) | — | 管理后端及 UC019 provider/runtime 已完成；STABLE/GREY 由 UC020/021 补齐。 |
 | `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `ACCEPTED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | Auth-only 原生 gRPC provider 已完成；实现证据见 `implements/README.md`。 |
 | `UC-APP-020` | 管理稳定发布槽位 | `ACCEPTED` | [UC-APP-020](use-cases/UC-APP-020-manage-stable-publication-slot.md) | — | Stable set/replace/clear、EMPTY Publication 与 STABLE OAuth channel 已完成；实现证据见 `implements/README.md`。 |
 | `UC-APP-021` | 管理灰度发布 | `ACCEPTED` | [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) | — | Stable 基线、确定性 cohort、比例调整、清空与 GREY OAuth 已实现；见 implements。 |
@@ -67,15 +67,15 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-029` | 查询我的 Application 列表与管理详情 | `ACCEPTED` | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md) | — | 当前管理员私有列表与一致管理快照。 |
 | `UC-APP-030` | 查询 ApplicationVersion 审核队列与审核详情 | `ACCEPTED` | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md) | — | 精确 Version Reviewer 权限、不可变快照与稳定待审队列。 |
 | `UC-APP-031` | 查询 ApplicationProfileRevision 审核队列与审核详情 | `ACCEPTED` | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md) | — | 精确 Profile Reviewer 权限、不可变资料快照与稳定待审队列。 |
-| `UC-APP-032` | 修改 Application 技术名称 | `SUPERSEDED` | [归档提案](archive/UC-APP-032-rename-application.md) | [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 未实现；技术名称创建后不可修改，用户可见名称由 ProfileRevision.displayName 承担。 |
+| `UC-APP-032` | 修改 Application 技术名称 | `SUPERSEDED` | [归档提案](archive/UC-APP-032-rename-application.md) | [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 提案已废弃，不进入待实现清单；技术名称创建后不可修改，显示名称由 ProfileRevision.displayName 承担。 |
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 | `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
 | `UC-APP-035` | 放弃从未提交审核的 ApplicationVersion 草稿 | `ACCEPTED` | [UC-APP-035](use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md) | — | 仅允许放弃无任何 Review attempt 的 DRAFT；通用“未发布版本删除”不在范围内。 |
-| `UC-APP-036` | 清空测试发布槽位 | `ACCEPTED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | 已接受 Test clear、共享 OCC、EMPTY、审计与在线资格；串行实现。 |
-| `UC-APP-037` | 查询 Application Tester 管理视图 | `ACCEPTED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 已接受容量与私有历史查询；REMOVED 分页后端保留、界面可不展示。 |
-| `UC-APP-038` | 查询我参与的测试 Application | `ACCEPTED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 已接受本人 ACTIVE 参与、暂不可用卡片、门禁隐藏与纯 Test。 |
+| `UC-APP-036` | 清空测试发布槽位 | `ACCEPTED` | [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) | — | Test clear、共享 OCC、EMPTY、审计及真实 Auth 在线门禁已实现并验收；见 implements。 |
+| `UC-APP-037` | 查询 Application Tester 管理视图 | `ACCEPTED` | [UC-APP-037](use-cases/UC-APP-037-query-application-tester-management.md) | — | 容量与私有历史查询后端已完成；REMOVED 分页保留、界面可不展示。 |
+| `UC-APP-038` | 查询我参与的测试 Application | `ACCEPTED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 本人 ACTIVE 参与、暂不可用卡片、门禁隐藏与纯 Test 后端已完成；见 implements。 |
 | `UC-APP-039` | 查询我的 ApplicationProfileRevision 列表与详情 | `ACCEPTED` | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | — | 管理员私有查询后端 COMPLETE；API/完整验收见 implements。 |
-| `UC-APP-040` | Tester 主动退出 Application 测试 | `ACCEPTED` | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) | — | 用户纳入串行范围；本人指定 episode 退出、历史/幂等/容量与保留状态设计已接受。 |
+| `UC-APP-040` | Tester 主动退出 Application 测试 | `ACCEPTED` | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) | — | 本人指定 episode 退出、历史/幂等/容量与保留状态后端已完成并验收；见 implements。 |
 
 ## Business Rules
 

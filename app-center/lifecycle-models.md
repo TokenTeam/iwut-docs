@@ -126,7 +126,7 @@ every real change
   append PublicationHistory
 ```
 
-当前权威设计已覆盖设置 Test 和 Stable 的设置/替换/清空；[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 定义 Grey 的 set/adjust/replace/clear。槽位共享 Publication revision，并且一个槽位的命令不自动改变其他槽位，参见 [BR-PUB-006](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-006)、[BR-PUB-019](use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-019) 与 [BR-PUB-030](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-030)。
+当前权威设计已覆盖 Test（UC007/036）和 Stable（UC020）的设置/替换/清空；[UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 定义 Grey 的 set/adjust/replace/clear。槽位共享 Publication revision，并且一个槽位的命令不自动改变其他槽位，参见 [BR-PUB-006](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-006)、[BR-PUB-019](use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-019) 与 [BR-PUB-030](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-030)。
 
 ### Publication 记录生命周期
 
@@ -135,19 +135,19 @@ every real change
 | ABSENT | 该 Application 与 RPC major 尚无 Publication | 已由首次设置 test 的预期 revision 语义间接定义 |
 | CONFIGURED | 至少一个槽位存在 | Test/Stable/Grey 已实现 |
 | EMPTY | Publication 保留 revision 与历史，但所有槽位为空 | UC-APP-020 已接受由 clear stable 形成并保留空记录 |
-| SUSPENDED | 平台临时停止该分区分发，但保留槽位 | 候选方案；尚未决定是否需要独立状态 |
 
-首版需要在两种停止分发模型中作出选择：清空相关槽位，或者增加独立 SUSPENDED 状态。前者模型更小但恢复需要重新设置指针；后者恢复更直接，但增加权限、原因、期限和解析规则。
+ABSENT/CONFIGURED/EMPTY 描述槽位配置情况，不新增 Publication 的持久化状态枚举。停止单一渠道使用其 clear 命令；整 Application 暂停/恢复由 [UC028](use-cases/UC-APP-028-suspend-and-restore-application.md) 的平台可用状态负责，管理员可恢复下线由 [UC033](use-cases/UC-APP-033-archive-and-unarchive-application.md) 负责。Publication 不增加独立 SUSPENDED 状态。
 
 ### 槽位变化
 
-| 行为 | 影响 | 当前或目标 |
+| 行为 | 影响 | 当前实现 |
 | --- | --- | --- |
-| Set/Replace Test | 只改变 testVersionId | UC007 已实现；[UC036](use-cases/UC-APP-036-clear-test-publication-slot.md) 已接受 clear |
+| Set/Replace Test | 只改变 testVersionId | UC007 已实现设置/替换；UC036 已实现 clear 并通过真实 Auth 验收 |
+| Clear Test | 只清空指定 major 的 testVersionId，保留 Membership 和其他槽位 | [UC036](use-cases/UC-APP-036-clear-test-publication-slot.md) 已实现 |
 | Set/Adjust/Replace Grey | 设置目标 Version、万分比与稳定 cohort | UC-APP-021 已实现 |
 | Clear Grey | 停止灰度选择，保留 stable | UC-APP-021 已实现 |
-| Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 已接受；允许直接设置，不强制先经过 test/grey |
-| Clear Stable | 停止普通公开访问；test 可以继续，grey 存在时拒绝 | UC-APP-020 已接受 |
+| Set/Replace Stable | 改变普通公开访问默认 Version | UC-APP-020 已实现；允许直接设置，不强制先经过 test/grey |
+| Clear Stable | 停止普通公开访问；test 可以继续，grey 存在时拒绝 | UC-APP-020 已实现 |
 | Roll Back | 将某一槽位重新指向仍具资格的历史 Version | UC-APP-020 已确认 stable 回退是普通受审计 replace |
 
 所有槽位继续引用同一 Application、兼容当前 rpcApiMajor 且具有发布资格的 Version。Test 资格规则见 [BR-PUB-003](use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003)，Stable 见 [BR-PUB-012](use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-012)，Grey 见 [BR-PUB-022](use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-022)。

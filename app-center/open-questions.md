@@ -1,57 +1,35 @@
 # App Center 开放问题
 
-以下问题不阻塞当前文档设计；其中标在具体用例“实现前需要确认”部分的项目，会阻塞对应设计进入 `ACCEPTED`，或阻塞实现进入其声明的下一状态。
+2026-10-22 按已接受 UC 和最新实现记录核对。本页只把真正未决定的扩展保留为开放问题；38 个现行 ACCEPTED UC 的 App 后端已完成，固定输入的完整门禁为 2026-10-20 的 28/28 PASS，见[验收记录](implements/2026-10-20-uc033-036-oauth-fixture.md)。这次同步不改变 UC/BR、设计状态或此前暂缓决定。
 
-## 身份
+## 仍需后续设计的问题
 
-- developerStatus 被暂停后，已有应用是否继续可用，还是只禁止创建和管理？
-- `app.version.review` 权限由谁申请、授予、暂停和撤销？当前只确认 Auth 是权限事实来源。
-- 是否需要双人批准、按 scope/风险等级分配 reviewer，或在高风险应用上升级审核？当前 UC-APP-005 只要求一名无利益冲突的 reviewer。
+- 是否需要双人批准、按风险分配 Reviewer、SLA 或系统内申诉？现行 UC005/016 仍使用单次、一次性决定；新增工作流需独立设计。
+- 外部自托管 URL 内容可在 URL 不变时变化。现有正式人工检查已描述弱保证；内容变化检测、摘要或平台托管仍属后续能力。
+- requiredCapabilities 是否需要独立命名目录与治理上下文？现有兼容范围和能力匹配不因本问题暂停。
+- Scope 删除、deprecated/retired 后，已批准 Version 与已授权 token 的联合处置如何扩展？新提交/批准的 scope 校验和 Auth 在线授权已有当前门禁；新的撤销政策需单独确定。
+- 如何提升已有应用创建配额：人工调整、业务公式或独立申请流程？初始默认值已经确定，不再开放。
+- 是否新增 CreateApplication 幂等键？现行创建仍按 UC001 的名称唯一和配额事务执行。
+- 已完成审核决定的独立纠错/推翻与版本批准资格撤销如何审计并影响发布/OAuth？这些扩展暂缓，现有 decision 不原地改写。
+- 受控 icon 资产由哪个上下文拥有，如何上传、固定内容版本、失效并迁移旧字符串？当前 icon 仍为不透明字符串，该扩展暂缓。
+- 可靠告警投递如何衔接已有日志、审计和 outbox？投递闭环暂缓。
+- AI DRAFT 审核读取哪些内容、怎样标识模型与政策版本、结论如何生效？当前不实现，也不增加 AI 状态或自动迁移。
 
-## 字段
+## 已闭合的问题与接受依赖
 
-- 外部自托管 URL 的内容可以在不改 URL 的情况下变化；审核如何描述和限制这一弱保证？
-- requiredCapabilities 的正式命名规范是什么，是否需要由某个上下文维护 catalog？
-- Scope 被 Auth 删除、deprecated 或 retired 时，已批准版本和已授权 token 分别如何处理？当前 DRAFT 可以保留，但 UC-APP-004 会阻止仍申请该 scope 的版本提交审核；开发者需要先从草稿中移除它。
-- 当前 icon 只是可空不透明字符串。若未来升级为受控图标资产，由 App Center 还是 Resource Hub 保存、如何保证内容版本稳定，以及怎样迁移既有字符串？
+- **初始配额**：[UC001](use-cases/UC-APP-001-create-application.md) 已确定进程配置 `APP_CENTER_INITIAL_APPLICATION_QUOTA`，未配置默认 10；首次建档使用该值，已有记录的 limit 保持权威。
+- **Developer/账号状态消费**：[UC025 / BR-APP-011](use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-011) 已确定普通身份、开发者写入口与角色敏感的审核批准门禁。Version 资格撤销不由状态投影隐式新增；相关扩展仍见上节。
+- **Reviewer 权限与真实 USER**：权限管理由 [Auth UC004](../auth-center/use-cases/UC-AUTH-004-manage-reviewer-permission.md) 拥有，Session→USER 由 [Auth UC010](../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md) 拥有；App 的真实 grant/revoke、权限隔离和待审决定联合验收已完成，不再等待 Auth 重设计。
+- **正式检查政策**：UC005/030 已交付不可变 v3 正式检查定义、历史策略与当前策略投影；UC031 已交付同一快照的当前公开 Profile/指针，见[审核补齐记录](implements/2026-10-16-review-completion.md)。
+- **审核自动拒绝**：现行角色资格门禁和 SYSTEM principal 解析由 UC005/025 与 Auth 契约确定，依赖故障保持 PENDING，不使用占位身份或把故障当作资格不符。
+- **关闭证明与持久撤销**：Auth application tombstone 已纳入授权/换码/token/refresh/UserInfo/delegation；当前密码加同设备新签名签发 app.close proof，App 只消费 proof，不接收密码。真实关闭、重试与收敛已经验收，见[关闭认证记录](implements/2026-10-20-application-close-auth-fixture.md)。
+- **Test clear、本人测试查询和主动退出**：UC036、UC038、UC040 的后端已实现；不再列为未决用例。
+- **管理员资料历史**：UC039 已实现并验收，公开资料审核读取上下文也已由 UC031 补齐。
+- **Filter**：UC022 已固定 ApplicationFilterRevision、`profile-filter-v1` 和无审核的立即发布；规则管理/分发已实现。客户端目录与求值器仍按用户要求暂缓。
+- **转让/关闭/暂停/归档/灰度**：UC026、027、028、033、021 均已接受并实现。平台强制接管、争议仲裁和通用工作流仍为后续扩展。
 
-## 用例行为
+## 相邻边界与旧实现
 
-- 配额初始值是否确认为 10？本文根据“初始是是个”暂按“十个”处理。
-- 上线应用数量如何提升配额：固定公式、人工审核还是二者结合？
-- CreateApplication 是否需要幂等键？当前名称唯一规则已能阻止同名重复创建，暂不增加幂等键。
-- reviewer decision 当前写入后不可修改。资料审核不建立系统内申诉渠道，开发者需要直接联系平台；若未来确有纠错需求，应设计独立、可审计行为，不原地改写 decision。
-- [UC-APP-036](use-cases/UC-APP-036-clear-test-publication-slot.md) 已接受允许当前 APPROVED 管理员在有 ACTIVE Tester 时清空指定 major 的 Test，保留 Membership。
-- AI DRAFT 审核未来读取哪些内容、如何标识模型与策略版本、结论是建议还是门禁，以及怎样进入生命周期？当前不实现，也不增加 AI 状态或自动迁移。
+Reviewer 打开自托管页面的隔离环境、Console 页面、官方客户端和生产部署分别维护，不计为 App 后端未实现目标。Auth 拥有用户身份、资格、权限及 grant/code/token；App 通过现行契约消费，不复制其业务规则。
 
-## UC-APP-027 已关闭的接受依赖
-
-- [UC-AUTH-026](../auth-center/use-cases/UC-AUTH-026-apply-application-closure.md) 已把 application closure tombstone 纳入 authorize、code exchange、token/refresh、UserInfo 和在线 delegation 的最终检查边界，并与 [Application Closure v1](../platform/contracts/application-closure-v1.md) 对齐。
-- [Application 关闭近期认证证明 v1](../platform/contracts/application-close-reauth-proof-v1.md) 已固定当前 Session 所属同一登记设备的新 challenge/signature、`purpose=app.close`、applicationId、sub、jti、auth_time 和 5 分钟上限；普通 USER JWS `iat` 明确不能替代。
-
-## 旧实现（已确认，不再开放）
-
-- 旧实现已雪藏；当前实现是 App Center 首个正式版本，不作为独立第二代 module。
-- 服务从未上线，因此不迁移旧 application 数据，也不维护旧 API 兼容；旧代码只作为需求参考。
-
-## 已确认的相邻边界
-
-- UC-APP-005 的真实 reviewer 身份/permission transport 等待 Auth Center 重新设计；核心实现不猜测 token KV、claim 或 header 形状。
-- UC-APP-005 的 VersionReviewPolicy 首版由 App Center 本地拥有；仍需发布第一版
-  正式检查项和内容政策，并实现不可变的历史版本 repository。
-- reviewer 打开自托管页面的 iframe/隔离浏览环境属于前端与安全运行环境，不属于 UC-APP-005 后端核心。
-- UC-APP-005 批准时发现当前 admin 或 submittedBy 已暂停，由注入的 System Auth ID 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
-
-在对应新用例出现前，不为了回答这些问题提前扩充领域模型。
-
-## 已确认的后续设计方向
-
-- Test-only Application 进入独立的“我参与的测试”入口，不因 Tester 资格混入普通公开目录。[UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) 已接受本人 ACTIVE 在线参与查询，正常无目标保留卡片、门禁隐藏，纯 Test 解析且不执行 Filter。
-- Stable 可以直接选择任意当前合格的 APPROVED Version，不强制要求它先进入 Test 或 Grey；回退是重新设置历史合格 Version。
-- 管理员日常停止某个渠道使用 clear；平台紧急处置使用 [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 的 Application 级 suspension，不销毁原槽位配置。
-- [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) 已接受管理员日常整 Application 归档：统一阻止 Catalog、启动、Tester Join 与 OAuth 在线 provider，但保留配额、owner 义务和全部配置；普通 Catalog 隐藏继续使用 Stable clear。
-- [UC-APP-026](use-cases/UC-APP-026-transfer-application-administration.md) 已提出普通管理员转让的完整规则：原管理员发起、目标显式接受，接受时原子移动配额；目标容量不足或存在同名应用时拒绝。平台强制转让、争议仲裁和紧急接管明确后置为独立治理用例。
-- [UC-APP-027](use-cases/UC-APP-027-close-application.md) 已确定不可逆关闭语义：CLOSING 立即停止本地运行与管理、释放配额和 owner 义务，保留历史与技术名称；Auth application tombstone 持久收敛后进入 CLOSED。归档、临时停用和平台 suspension 仍是不同的可恢复能力。
-- [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) 已确定平台 suspension/restore：两项精确权限独立授予，平台可用状态与关闭正交，暂停保留配置和 owner 义务，统一阻止 Catalog、启动、Tester Join 与 OAuth 在线 provider，恢复后重新执行当前资格。它与 UC-APP-033 定义的管理员归档正交。
-- [UC-APP-021](use-cases/UC-APP-021-manage-grey-rollout.md) 已接受 Grey 首版只面向已登录用户、要求 Stable 基线、使用万分比和 per-rollout CSPRNG seed 的 HMAC 确定性分桶。
-- Filter 使用独立 ApplicationFilterRevision 方向，避免把规则塞进 Application 或强制与 Profile 同步修订；规则语言和审核策略仍待定义。
+旧实现只保留需求参考；不为旧 API 或数据增加兼容。被废弃的 UC017 资料恢复和 UC032 技术名称修改不是待实现工作。本文和概述中的设计状态不因实现完成自动升级；未来新业务仍先审核设计，再实现。
