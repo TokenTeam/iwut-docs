@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+[结果未知后的权限撤销恢复](2026-10-22-review-uncertain-permission-recovery.md)已接受：复用现有正式PENDING资源和主双权限Reviewer，补Version/Profile两项unknown→正式revoke→真实GET403→regrant→同Review终态读取，保留另一能力/Session且不重放决定。不增加账号、配额或业务seed；实施与真实验收待完成，原完整门禁失败继续保留。
+
 2026-10-22[已发布审核决定验收](2026-10-16-admin-review-decisions.md#已发布无参数全量终态)：Gateway latest已更新为`2953ae7f…`并补齐两条ADMIN决定接线，API同pin官方远程检查通过，决定12项已迁入默认门禁、不再skip。冻结Console `65a9ea0`的published专项12/12通过（1.1分钟）；最终默认无参数100项97通过/3失败、无skip（17.8分钟、exit1），新增12再次全过。仅25条原Application错误缓存头断言仍红（转让3/owned10/资格12），Admin原56条已全部通过。903项Vitest＋132项Node、strict/生成漂移/六入口Edge通过；两轮资源均清理、legacy本地/远程不变、未push。完整门禁及未列明决定故障/不同修订指针并发仍IN_PROGRESS；下文较早镜像和只读阶段为历史记录。
 
 [Developer全读取入口跨会话矩阵](2026-10-16-developer-private-session-matrix.md)专项25项全部通过（3.8分钟、exit0），冻结`6043f31`的最终无参数88项中84通过/4失败（16.6分钟、exit1），新增25项再次全过。81条错误逐条仍是原App缓存头（Admin56/转让3/owned10/资格12），无新增硬失败。统一837项Vitest＋122项Node、strict/固定生成漂移/build/fixture浏览器/Edge通过；首轮外部中断单独记录并精确清理，最终轮资源为空、legacy本地/远程不变、未push。完整门禁仍IN_PROGRESS，不把本25项或组件测试当所有角色/生命周期完成。
