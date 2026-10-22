@@ -26,7 +26,7 @@
 
 ## 实施与预检
 
-Console源码冻结于`dcdb08f`。本次仅增加固定准备控制和两项真实spec，无产品UI变更。统一903项Vitest、143项Node回归全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin输入）与`pnpm edge:e2e`均exit0；Node新增11项只证明相位/CAS/错序/未知回执及固定subject接线，不代替真实Auth治理。已启动published-latest专项，实际终态尚待记录；不把预期14/102写成通过结果。运行时、runner和spec在轮次期间冻结，未push。
+Console源码冻结于`dcdb08f`。本次仅增加固定准备控制和两项真实spec，无产品UI变更。统一903项Vitest、143项Node回归全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin输入）与`pnpm edge:e2e`均exit0；Node新增11项只证明相位/CAS/错序/未知回执及固定subject接线，不代替真实Auth治理。随后按顺序执行published-latest专项与无参数全量，实际终态见下文。运行时、runner和spec在轮次期间冻结，未push。
 
 ## 已发布镜像专项终态
 
@@ -34,4 +34,26 @@ Console源码冻结于`dcdb08f`。本次仅增加固定准备控制和两项真�
 
 每轮重拉published-latest，本轮Auth/App/Gateway分别为`sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`、`sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`、`sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，与此前发布轮次相同。Mongo为`sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik为`sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。显式NSS fixture继续只用于测试准备，不当部署DNS证据；未读相邻后端或编译后端。
 
-专项终态后精确核验该prefix全部容器（含退出）和network为空，才在同源码冻结下启动另一空环境的默认无参数全量。全量尚未终态，不以专项14项替代102项完整门禁；原25条缓存头断言保留，完整UC继续IN_PROGRESS。
+专项终态后精确核验该prefix全部容器（含退出）和network为空，才在同源码冻结下启动另一空环境的默认无参数全量。不以专项14项替代102项完整门禁；原25条缓存头断言保留，完整UC继续IN_PROGRESS。
+
+## 无参数全量终态
+
+2026-10-23，`iwut-console-real-274562`在同一干净`dcdb08f81705d868e17aadb2d76dbc017ec3d901`下运行默认无参数`pnpm test:real`，终态102项：**99通过、3失败，无skip/retry**，浏览器17.9分钟，exit1。原100项及新增2项全部执行；14项审核决定再次全部通过，新增Version/Profile分别4.3秒/4.6秒。真实生产build、严格类型及报告隐私前置亦通过，未在运行中改runtime/spec/runner或镜像来源。
+
+本轮全部25个错误的可信源码坐标仍精确落在原缓存头断言：
+
+| 场景 | 断言位置与次数 | 缺少的响应指令 |
+| --- | --- | --- |
+| 管理转让 | `management-transfer.real.spec.ts:257:29` ×3 | Application GET404的no-store |
+| owned-list游标 | `owned-application-pagination.real.spec.ts:200:57` ×4、`:201:58` ×4、`:220:66` ×1、`:221:67` ×1 | 五个List400各缺private/no-store，共10条 |
+| 资格/角色 | `qualification-read-matrix.real.spec.ts:368:54` ×6、`:368:116` ×6 | 六个Application GET404各缺private/no-store，共12条 |
+
+没有新增非缓存硬失败；Admin查询原56条错误头检查继续通过。观察到18个决定响应：Version200×7/403×3/409×1，Profile200×5/403×1/409×1，private/no-store均true；afterAll通过。权限恢复两例另行校验精确GET403的完整reason和private/no-store，未重发决定。原管理权/角色功能与最终Session断言仍执行收齐，不把soft失败改为通过。
+
+本轮再次pull五个latest，全部ID与上述专项一致，不编译后端或回退本地兼容artifact。终态后核验全部本轮容器（含退出）与network为空；本地和本次远端只读核验legacy均仍`e68851e343bd0e077e5ccd0b680fe6813216ced0`，Console源码全程干净，提交仅本地、未push。本包所列两项真实恢复证据已补齐，但整体门禁仍红、完整UC继续IN_PROGRESS；Application错误头需新发布镜像解决，其他明确开放矩阵继续推进，不把本两项替代全部决定/Session验收。
+
+## 后续候选（未实施、非本轮验收）
+
+2026-10-23只读盘点后，下一优先候选是Version加载后的`CURRENT_ADMIN`变化：复用仍PENDING的`resources[2].versions[2]`，通过[UC026正式双向转让](../../app-center/use-cases/UC-APP-026-transfer-application-administration.md)构造；不改数据库或历史createdBy/submittedBy，不以初次加载三重冲突替代。原表单提交实际CONFLICT_OF_INTEREST 403后须保留能力并要求同Review重读，显示仅CURRENT_ADMIN；其它目标/另一能力与Session保持，反向转让后重新读取恢复eligible。此处仅记录可行性，须另建接受工作包、准备控制和红绿验证后才能算交付。
+
+主Reviewer目前不是Developer，UC026要求目标ACTIVE＋APPROVED，因此必须先按[UC013](../../auth-center/use-cases/UC-AUTH-013-apply-for-developer.md)以现有Node DEVICE transport正式申请本人资格。可以保留当前准备时已建立但未保留引用的transport，不能新增登录或用G直接设置admin。Apply不能撤回成普通USER，故只能追加在原14项之后，不改写前面普通Reviewer的证据；双向转让只恢复管理权而不声称恢复资格。源30→29→30、目标0→1→0，不扩额或创建App。未知Apply/Initiate/Accept回执必须由正式查询确认原目标/相位，不能为清理盲目重放。Profile的PENDING资源已由本14项消费，后续对应验证需在现有App正式Create/Submit新资料，不能seed终态回PENDING。当前轮不实现此候选，也不关闭UC007指针并发、策略/Scope、全部依赖与决定跨Session矩阵。
