@@ -23,3 +23,7 @@
 每例仅清理自己的页面和故障gate，finally尽力恢复已尝试撤销的固定权限。HELD可释放；ARMED不得通过重发业务POST消耗，应明确失败并终止该轮后续serial场景，最终整体清理隔离环境。TRUNCATE之后不能为清理再写相同决定。任何失败、准备未执行或serial skip均按实际记录，不算通过。
 
 本包只关闭上述两种权限恢复组合的证据缺口；不同修订公开指针并发、加载后关系冲突、策略退休、Scope/全部依赖故障、全部Session交错及UC001/fencing仍OPEN。发现真实产品缺陷时按最小范围修复并追加红绿证据，不能以两项通过关闭完整UC。
+
+## 实施与预检
+
+Console源码冻结于`dcdb08f`。本次仅增加固定准备控制和两项真实spec，无产品UI变更。统一903项Vitest、143项Node回归全部通过，`pnpm typecheck`、`pnpm generate:check`（官方同pin输入）与`pnpm edge:e2e`均exit0；Node新增11项只证明相位/CAS/错序/未知回执及固定subject接线，不代替真实Auth治理。已启动published-latest专项，实际终态尚待记录；不把预期14/102写成通过结果。运行时、runner和spec在轮次期间冻结，未push。
