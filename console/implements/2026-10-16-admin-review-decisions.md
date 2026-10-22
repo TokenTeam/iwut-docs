@@ -148,3 +148,9 @@ App负责方随后报告相同内容已通过check-full24/24且changed_sources=[
 迁移已本地提交并冻结为`65a9ea0`：新增8项路由准备检查先8 RED后8 GREEN，普通统一903项Vitest＋132项Node全部通过，strict/真实spec类型、远程同pin生成漂移、shell/Node语法及仓库独立性通过。新Edge六入口均通过认证上游不可用、伪造头不旁路与Developer api-deny检查，使用已发布Gateway `2953ae7f…`；这是路由隔离证据，不当作成功审核E2E。生产App/BFF代码未改；源码、spec与来源在后续真实轮次保持冻结。
 
 开始默认published-latest的12项决定专项，仍逐轮重拉五镜像并运行真实生产build/报告隐私前置；该专项未达终态前不记作通过，之后须另起空环境执行无参数全量100项。原local-only skip已删除，不再将12项排除在默认门禁。
+
+#### 已发布专项终态
+
+冻结`65a9ea0`，轮次`iwut-console-real-202804`执行`pnpm test:real tests/real/review-decisions.real.spec.ts`，12项全部通过（浏览器1.1分钟、exit0、无skip/retry）。全部正式准备及产品React操作使用published-latest来源；16个真实决定响应的private/no-store均为true，200/403/409检查全部保留。两类批准/拒绝、NONE→UUID公开替换、重叠决定一次性提交、200正文丢失后的unknown回查、30秒deadline后PENDING不推断失败、单权限/利益冲突/撤权、实际System拒绝均收齐本spec列明证据。
+
+Auth ID为`sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`，App为`sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`，Gateway为`sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`；Mongo/Traefik仍为既有固定输入。本轮容器（含退出）与network均为空后，保持相同源码/spec冻结，启动另一空环境的默认无参数全量100项。不把上述12项或本次路由补齐当作所有决定故障组合/不同修订指针并发或完整UC已完成，也未复用本地compat结果。
