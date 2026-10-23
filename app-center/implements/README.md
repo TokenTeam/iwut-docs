@@ -22,6 +22,10 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 ## 当前实现覆盖
 
+### 2026-10-23 UC029 错误响应缓存头回归
+
+Console 联调反馈揭示 UC029 已交付查询的错误响应缺少私有缓存头。App 本地提交 `d3f510e` 已在 App 直连和真实 Gateway 链路先复现后修复；生成 HTTP/native gRPC、22 个真实链路对照响应及完整 `check-full` **24/24 PASS**，`changed_sources=[]`。原 400/404、reason、统一隐藏和游标绑定保持。镜像未发布，Console 原 25 条 App 断言仍待新镜像复验；另 4 条 Gateway Session401 由其独立处理。详见[修复范围、责任层与验证记录](2026-10-23-management-error-cache.md)。以下 COMPLETE/28 项验收记录保留对应历史输入，不代替 Console 发布验收。
+
 2026-10-22 核对：现行 38 个 ACCEPTED UC 的 App 后端均为 COMPLETE；没有新增已接受但未实现的后端 UC。最新完整验收仍是 2026-10-20 的固定输入 28/28 PASS，以下覆盖表按当前能力汇总，后续带日期的工作记录保留当轮证据。剩余暂缓与未来方向集中见[概述](../README.md#current-delivery-and-followups)，不把 Console/客户端或上线状态混记为后端缺口。
 
 ### 2026-10-20 UC033/036 夹具适配与完整验收通过
