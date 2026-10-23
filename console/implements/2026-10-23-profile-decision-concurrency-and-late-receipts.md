@@ -41,3 +41,19 @@ Console冻结`a89e2e4`，仅固定准备器、runner控制和3项浏览器spec�
 统一`pnpm test`903项Vitest＋172项Node全部通过，`pnpm typecheck`、`pnpm generate:check`官方同pin、`pnpm edge:e2e`均exit0，Node语法与diff检查通过。开始18项published专项，运行期冻结runtime/runner/spec，未push。
 
 本次Cloudflare HTTPS DNS再次查询`www.wikipedia.org`所得CNAME为`dyna.wikimedia.org`、A为`103.102.166.224`，与此前轮次`198.35.26.224`不同。因此冻结前将两入口共用的测试App显式NSS fixture和日志同步到103地址；不修改后端网络规则、不访问外部HTTP，也不当部署DNS/内容安全证据。每轮published latest依然必须重新pull、轮内固定解析ID；本输入变化不回写此前轮次历史。
+
+## Published 专项终态
+
+冻结Console `a89e2e41b4955b9d81fb3281d20e54ca6e7f503a`，`pnpm test:real tests/real/review-decisions.real.spec.ts`实际18项全部通过（2.1分钟、exit0，无skip或retry）。原15项全部保留并通过；新增Profile重叠决定5.1秒、真实deadline恢复32.6秒、重新确认后迟到成功回执3.1秒。22个实际决定响应的private/no-store均为真：Version 200×7、403×4、409×1；Profile 200×7、403×1、409×2。
+
+本轮`iwut-console-real-34189`容器及network在进程终态后均核验为空。专项不代替默认完整门禁，也不关闭完整UC。随后已启动同冻结源码的无参数全量，运行结果待终态确认；运行期间不改变runtime/runner/spec，不push。
+
+两轮均重新pull published latest；当前全量拉取所得Auth/App/Gateway ID与专项相同，支持组件ID亦记录如下，不能用标签不变代替实际解析ID：
+
+| 组件 | 本轮专项解析的镜像ID |
+| --- | --- |
+| Auth | `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9` |
+| App | `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a` |
+| Gateway | `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303` |
+| Mongo | `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3` |
+| Traefik | `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0` |

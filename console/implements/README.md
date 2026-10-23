@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-[Profile决定并发与迟到回执](2026-10-23-profile-decision-concurrency-and-late-receipts.md)已接受：原15项后复用已有账号/App/context/Session，正式Create/Submit两份新Profile补同Review双决定、真实deadline/PENDING恢复及重新明确提交后的迟到成功回执。固定准备未知写只读确认、不扩Developer写UI；实施与18项专项/106项全量证据待补，整体门禁仍IN_PROGRESS。
+[Profile决定并发与迟到回执](2026-10-23-profile-decision-concurrency-and-late-receipts.md)所列增量已实现：原15项后复用已有账号/App/context/Session，正式Create/Submit两份新Profile补同Review双决定、真实deadline/PENDING恢复及重新明确提交后的迟到成功回执。固定准备未知写只读确认、不扩Developer写UI。冻结`a89e2e4`，903项Vitest＋172项Node、strict/官方固定pin生成/Edge通过；published专项18/18通过（2.1分钟、exit0，无skip/retry），22个决定响应private/no-store全真，专项资源已清理。默认无参数完整门禁已开始、终态待补，整体仍IN_PROGRESS；不以专项关闭完整UC。
 
 [Version加载后管理关系变化](2026-10-23-review-loaded-conflict-recovery.md)所列增量已实现：既有Reviewer正式Apply/双向转让制造加载后的CURRENT_ADMIN，实际403保留能力并同Review重读冲突，转回后重新读取eligible，Session/钥匙保持、无决定重放。不扩账号/App/quota/登录或前端写UI，资格APPROVED不可逆只发生在原14项后。冻结`77201dd`，903项Vitest＋160项Node、strict/生成/Edge通过；published专项15/15（1.7分钟），默认无参数103项100通过/3失败、无skip（22.5分钟、exit1），15项决定再次全过。全部25条错误仍是原Application缓存头（转让3/owned10/资格12），无新增非缓存硬失败。两轮资源为空、legacy本地/远程不变、未push；完整门禁和UC仍IN_PROGRESS，Profile并发/迟到响应仅为未实施候选。
 
