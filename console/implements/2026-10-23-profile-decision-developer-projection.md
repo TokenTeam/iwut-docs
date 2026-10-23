@@ -4,7 +4,7 @@
 
 ## 用户价值与有限范围
 
-开发者应能在自己管理的Application中看见管理员已实际批准的资料、哪份当前公开、哪份旧修订仅保留APPROVED历史，而不是只在Admin看到“已自动公开”。引用[UC004 BR-CMG-007/008](../use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md#br-cmg-007)、[UC002管理概览](../use-cases/UC-CONSOLE-002-query-owned-applications.md)、[UC007](../use-cases/UC-CONSOLE-007-review-application-profile-revisions.md)。后端决定/指针规则由其权威UC拥有，本包不重新定义。
+开发者应能在自己管理的Application中看见管理员已实际批准的资料、哪份当前公开、哪份旧修订仅保留APPROVED历史，而不是只在Admin看到“已自动公开”。引用[UC004 BR-CMG-007/008](../use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md#br-cmg-007)、[UC002管理概览](../use-cases/UC-CONSOLE-002-query-owned-applications.md)、[UC007](../use-cases/UC-CONSOLE-007-review-application-profiles.md)。后端决定/指针规则由其权威UC拥有，本包不重新定义。
 
 这是尚未覆盖的跨端联合证据，不是已确认页面未实现。只加一个贯穿闭环，不扩成每个决定×每个页面组合，也不引入Developer创建/编辑/提交/发布UI。现有Profile只读组件已表达指针及最小审核事实；若真实读回揭示违约，先记录再最小修复，不伪造响应或放宽断言。
 
