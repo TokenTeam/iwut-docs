@@ -59,3 +59,15 @@ Runner仅为Auth gRPC新增随机loopback发布和固定TCP relay；App连接指
 本轮30个实际决定响应仅原4个Gateway Session401缺private，其余26个200/403/409/新503全部private/no-store为真。原4失败保持，前包Application25条仍须默认全量重验，不能从专项宣称消除。
 
 每轮pull published latest，本轮Auth/App/Gateway/Mongo/Traefik五解析ID均与前c60dd59轮一致，API固定pin不变，strict/报告隐私和runner构建前置通过。专项容器/网络已检查为空，未编译后端或push；已在同一09f7805冻结启动默认无参数114项全量，当前尚无其终态，不以专项功能收齐标绿完整UC/门禁。下文或上文“尚无专项结果”为先前阶段记录。
+
+## 同冻结无参数全量终态
+
+冻结`09f7805b096eceac27f288327abf67a92c5005b5`，轮次`iwut-console-real-162274`，114项全部执行、无skip/retry：110通过/4失败（19.5分钟、exit1）。26项决定body功能断言再次完成，新增真实依赖故障用时3.6秒；其后Tester/真实UI恢复/Version分页等场景亦完成，正常TCP转发和恢复未造成新增功能失败。不能据此扩大为未列明Auth内部故障或完整UC。
+
+全部29个失败安全坐标逐项核对，仅为原缓存头断言：管理转让`management-transfer.real.spec.ts:257:29`×3；owned-list的`:200:57`×4/`:201:58`×4/`:220:66`×1/`:221:67`×1（同`owned-application-pagination.real.spec.ts`，共10）；资格角色`qualification-read-matrix.real.spec.ts:368:54`×6/`:368:116`×6（共12）；决定afterAll `review-decisions.real.spec.ts:40:143`×4。前25条是Application错误响应头，后4条是Gateway Session401缺private；无新增非缓存硬失败，未删除断言或代理补头。
+
+本轮30个实际决定响应观察与专项一致：新真实App503 private/no-store均真，只有原4个Gateway Session401缺private。新增fault保持仅断App内部Auth传输、Gateway鉴权/另一能力可用；页面未重放/清Cookie，明确读回PENDING/null decision、原revision/snapshot，四检查需重新确认。该读取证明失败后已观察状态，不把PENDING推断为任意未知请求一定未在途。
+
+本轮重新pull latest且轮内固定解析ID：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`，App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`，Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。官方API pin及显式NSS fixture同前轮，strict/报告隐私/runner构建前置通过；未编译后端、未改运行期product/runtime/runner/spec。
+
+专项和全量容器/网络均已核对为空，本地及本次远端legacy仍`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。统一954 Vitest＋221 Node、strict/官方生成/Edge及本包所列真实业务功能证据已收齐；完整门禁仍IN_PROGRESS，外部29缓存头与其它明确缺口保持OPEN。后续[Admin→Developer资料投影闭环](2026-10-23-profile-decision-developer-projection.md)仅已接受、尚未实现，不当本包完成项。
