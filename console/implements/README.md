@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+[决定跨Session边界](2026-10-23-review-decision-session-boundaries.md)已接受：先验证并修复决定Session错误未进入详情退场路径的等待清理缺口，再补两能力旧401/204/200的六项真实交错。精确当前Session/Query实例绑定、不重放决定、不清新身份；本阶段实现和改后真实门禁待补，不以原19项或读取矩阵代替。
+
 [Profile加载后管理关系变化](2026-10-23-profile-loaded-conflict-recovery.md)所列增量已实现：在原18项后正式Create/Submit第三份资料，复用既有APPROVED主Reviewer且零重复Apply，以固定独立双向转让验证旧表单实际403只要求同Review重读、不撤整个能力，转回后仍PENDING且须重新确认。无新账号/App/quota/Session/seed或Developer写UI。冻结`040cfc7`，903项Vitest＋183项Node、strict/官方同pin生成/Edge通过；published专项19/19（2.2分钟），默认无参数107项104通过/3失败、无skip/retry（18.8分钟、exit1），全部19项决定再次通过，23决定响应private/no-store全真。25条失败仍为原Application错误缓存头（转让3/owned10/资格12），无新增非缓存硬失败；两轮资源为空、legacy本地/本次远端不变、未push。完整门禁与UC继续IN_PROGRESS，其它决定/Session矩阵仍开放。
 
 [Profile决定并发与迟到回执](2026-10-23-profile-decision-concurrency-and-late-receipts.md)所列增量已实现：原15项后复用已有账号/App/context/Session，正式Create/Submit两份新Profile补同Review双决定、真实deadline/PENDING恢复及重新明确提交后的迟到成功回执。固定准备未知写只读确认、不扩Developer写UI。冻结`a89e2e4`，903项Vitest＋172项Node、strict/官方固定pin生成/Edge通过；published专项18/18通过（2.1分钟），默认无参数106项103通过/3失败、无skip/retry（18.7分钟、exit1），全部18项决定再次通过，22个决定响应private/no-store全真。25条失败仍全部为原Application错误缓存头（转让3/owned10/资格12），无新增非缓存硬失败。两轮资源清理、legacy本地/远程不变、未push；完整门禁与UC仍IN_PROGRESS，不以本包关闭其余矩阵。
