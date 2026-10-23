@@ -71,3 +71,5 @@ Console新冻结`b4d8d1a`：每次fetch捕获attempt lifetime，原signal与本�
 冻结b4d8d1a首轮已终态exit1：17通过、1失败、7未执行（3.4分钟），轮次`iwut-console-real-121103`资源已清空。第18项既有同Session离页成功回执同样卡finished：新lifetime护栏正确取消已离开详情页的旧正文，它并非仍存活的“正常消费”响应，旧spec还强读receipt JSON也不再兼容。不能为保持这项旧断言而恢复消费失效详情/发Session读。
 
 接受将第18项也应用同一分层证据：实际200、原生fetch只记status、代理真实finish与30秒内到达；原“明确重开同Review”继续验证APPROVED及实际公开指针，不能删除。原队列同document/URL/投影保持、无结果回填/决定表单/第二POST或DELETE保持，增加释放后的零额外Session/私有读/导航计数。释放后立即清本地gate待清理引用，避免测试到期后finally控制请求覆盖原始失败坐标。此修订不扩大产品范围、也不改变原业务命令数或缓存头；上文“既有正常finished未动”仅描述上一冻结，不适用于已离页的第18项。新冻结须重新专项和全量，不借这轮17项算通过。
+
+dcb520a轮次在真实邮件冷却准备期间主动SIGINT结束（exit1，未开始25项业务测试），不是观察等待超时自动重跑，也不是业务失败：静态检查发现bound client构建时捕获fetch，页面加载后才包装window.fetch无法记录旧决定。独立本机Chromium有限HTTP实验确认cached fetch调用的观察计数为0。停止后进程终态及本轮全部容器/网络为空才修改spec；被动status观察器改为在open/page.goto之前addInitScript，使生产client捕获原样转发的包装fetch。仍返回原promise、不clone/读body或改signal、仅记静态status。此轮不能借作任何业务通过证据；新冻结另跑。
