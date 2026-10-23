@@ -33,3 +33,9 @@
 先新增工厂和adapter的Node合成红绿回归，再普通测试、strict、官方固定pin生成漂移及Edge。冻结runtime/runner/spec，每轮重新pull已发布latest：先19项审核决定专项，再默认无参数107项完整门禁，以实际终态数量为准。旧25条Application错误缓存头断言不删除、不代理补头；全量仍红不push，不编译相邻后端或替换本地artifact。
 
 不同修订公开指针UI并发可达性、策略退休/Scope/全部依赖故障、完整决定跨Session、其它角色/生命周期及UC001/fencing继续OPEN。单一working约束与UC007的不同修订并发要求不能靠非法双PENDING seed“补齐”；需另行记录和论证可达流程。本包不关闭完整UC006/007或整体目标。
+
+## 实施与预检
+
+Console已本地提交并冻结`040cfc78dba70f5ced2375a124f23542effd5efb`，只改固定准备器、runner及真实spec/合成回归，无生产UI变化。工厂新增10项先RED后GREEN（旧27项仍通过，最终37/37）；包括C前置Get与基线List之间B公开指针漂移仍必须拒绝。adapter新增1项，首轮暴露控制未静态包装、随后合成List summary错误包含完整history字段，按既有生成Schema修正后22/22通过；不是修改生产Proto或放宽unknown字段。验证原三DEVICE、唯一一次Apply、两个独立固定App转让、C前置/重复只读、正反KEEP及无新资源，合成证据不当真实命令证明。
+
+统一`pnpm test`903项Vitest＋183项Node全部通过，`pnpm typecheck`、官方同pin`pnpm generate:check`和`pnpm edge:e2e`均exit0；真实spec strict、Node语法、仓库独立性（288文件）及diff检查通过。已启动19项published-latest专项，运行期不改runtime/runner/spec，真实终态及后续无参数全量证据待补；未push。
