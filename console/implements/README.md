@@ -4,7 +4,7 @@
 
 截至2026-10-23，最新实际验收为[Version批准Auth依赖恢复](2026-10-23-version-decision-auth-dependency-recovery.md)，冻结`09f7805`：published专项26项25通过/1失败（2.9分钟），同冻结默认无参数114项110通过/4失败、无skip/retry（19.5分钟、exit1）。两轮26项body功能断言全部完成；29条失败逐项仅为原Application错误缓存头25条＋Gateway决定Session401缺private的4条，无新增功能失败。954项Vitest＋221项Node、strict、官方固定pin生成及Edge通过；五镜像每轮重拉published latest且ID不变，轮次资源已清理、legacy本地/远程未变、未push。**完整门禁仍`IN_PROGRESS`，不把body完成称为套件全绿或完整UC完成。**
 
-当前[Admin→Developer资料投影闭环](2026-10-23-profile-decision-developer-projection.md)为`ACCEPTED / IN_PROGRESS`，仅一个跨端只读闭环：spec与概览占位文案已改、组件先红后绿，预期27项专项/115项默认全量仍待实际运行结果。本页以下先登记当前有界覆盖，再保留历史轮次及首包说明。历史段落中的“待真实验收”“尚无终态”“尚未接线”只描述当时冻结，不重新生成当前待办；最新实际证据以上述冻结和对应工作包为准。
+当前[Admin→Developer资料投影闭环](2026-10-23-profile-decision-developer-projection.md)为`ACCEPTED / IN_PROGRESS`：冻结32e83da，published27项专项26通过/1失败（3.0分钟），27项body全部完成，新跨端只读场景通过，唯一失败仍是afterAll原4条Gateway Session401缺private。统一954 Vitest＋221 Node、strict/官方生成/Edge通过，专项资源已清理；同冻结默认115项全量正在运行，尚无终态，不借前09的114项替代。本页以下先登记当前有界覆盖，再保留历史轮次及首包说明。历史段落中的“待真实验收”“尚无终态”“尚未接线”只描述当时冻结，不重新生成当前待办；最新实际证据以对应工作包为准。
 
 ## 当前能力与有界覆盖
 
@@ -26,7 +26,7 @@
 | 类型 | 当前开放项与推进条件 | 依据 |
 | --- | --- | --- |
 | 外部实现门禁 | Application错误头25条（转让3、owned游标10、资格角色12）及Gateway决定Session401缺private4条。保留断言，等待对应published镜像修复后再冻结复验；不由前端代理补头或抹掉失败 | [最新114项终态](2026-10-23-version-decision-auth-dependency-recovery.md)、[Session边界](2026-10-23-review-decision-session-boundaries.md) |
-| 验收未覆盖，非已确认产品缺陷 | 同一正式资料批准/替换结果贯穿Admin与Developer概览/列表/详情；spec已接线，预期27/115尚待实际终态 | [跨端只读闭环](2026-10-23-profile-decision-developer-projection.md) |
+| 跨端闭环全量待验收 | 同一正式资料批准/替换结果贯穿Admin与Developer概览/列表/详情的专项body已通过；27项专项26通过/1原header失败，同冻结115项全量尚待终态，不将专项冒称完整门禁 | [跨端只读闭环](2026-10-23-profile-decision-developer-projection.md) |
 | 有界角色验收未覆盖 | WITHDRAWN及账号禁用后的管理读取，不能由已有SUSPEND/RESTORE或CLOSED历史readseed外推；本页不据此宣称产品缺失，也不自动扩成全部角色×页面组合 | [资格与角色边界](2026-10-16-qualification-and-role-read-boundaries.md)、[保留生命周期历史](2026-10-16-retained-lifecycle-read-matrix.md) |
 | 缺正式变更API | 策略发布/退休及Scope启停不能通过当前只读事实查询制造；错误expectedPolicyVersion、合成policy JSON或直接改库不是真实加载后变化证明 | [Version策略](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016)、[Profile策略](../../app-center/use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)、[Scope快照范围](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) |
 | 契约可达性需外部决定 | UC007不同修订并发批准的准备受同一App单一DRAFT/SUBMITTED工作位约束；现有错误pointer409不替代该证据，不seed平行PENDING。须由App/Console权威设计明确可达准备或验收处理 | [UC007验收](../use-cases/UC-CONSOLE-007-review-application-profiles.md#验收与完成标准)、[单一工作修订](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006) |
