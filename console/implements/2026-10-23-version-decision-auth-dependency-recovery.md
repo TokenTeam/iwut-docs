@@ -47,3 +47,15 @@ Runner仅为Auth gRPC新增随机loopback发布和固定TCP relay；App连接指
 新增一项spec在原25之后复用peer及原PENDING，确认真实503/reason、有效断链计数、只有一个决定POST；原profileOnly队列在断链期间仍可经真实Gateway/Auth明确刷新。生产bound fetch的正常post-response Session校验允许一次，不等于自动详情重读；用户明确重读后累计两次校验/一个详情GET。断链/恢复未知回执先observe、不重放，finally不能靠补决定消费PENDING。
 
 统一954 Vitest＋221 Node、strict/真实spec类型、官方同pin生成、Edge、Node语法/diff检查通过。尚未取得本包published26项专项或114项全量结果，不能把前包25/113或新合成测试作为本次真实依赖故障证据。接下来冻结产品/runtime/runner/spec运行，每轮重新pull latest、原29缓存头失败断言保持。
+
+## published专项终态
+
+冻结Console `09f7805`，轮次`iwut-console-real-155670`，26项全部执行、无skip/retry：25通过/1失败（2.9分钟、exit1）。全部26项body功能断言完成；最后一项被afterAll原4条Gateway Session401缺private的soft失败标红，安全坐标均`review-decisions.real.spec.ts:40:143`，无新功能失败。原25项在正常TCP转发路径再次通过，本包新增依赖场景用时3.8秒。
+
+真实App在固定App→Auth断链后返回HTTP503及`ERROR_REASON_DEVELOPER_STATUS_UNAVAILABLE`，响应private/no-store均存在；不是代理业务JSON。实际断开的既存/拒绝的新连接计数大于零；Gateway→Auth仍直连，profileOnly经真实链路明确刷新非空队列成功。Version页面展示稳定reason且RESULT_UNCERTAIN聚焦，无自动决定/详情读取/Session DELETE；一次post-response Session校验按原路径完成，Session/carrier/钥匙与另一能力保持。
+
+恢复仅切换relay接纳新连接，再由用户明确GET同Review：PENDING/null decision、Version原revision/SUBMITTED、完整Review与snapshot未变，四检查未确认、必须重新评审。总决定POST1/详情GET1/Session校验2/DELETE0，无补第二决定。此终态读取证明业务未变化，不冒称再次批准或Auth内部数据库故障；恢复新TCP字节由单测分层证明，不把控制RESTORED本身当新批准成功。
+
+本轮30个实际决定响应仅原4个Gateway Session401缺private，其余26个200/403/409/新503全部private/no-store为真。原4失败保持，前包Application25条仍须默认全量重验，不能从专项宣称消除。
+
+每轮pull published latest，本轮Auth/App/Gateway/Mongo/Traefik五解析ID均与前c60dd59轮一致，API固定pin不变，strict/报告隐私和runner构建前置通过。专项容器/网络已检查为空，未编译后端或push；已在同一09f7805冻结启动默认无参数114项全量，当前尚无其终态，不以专项功能收齐标绿完整UC/门禁。下文或上文“尚无专项结果”为先前阶段记录。

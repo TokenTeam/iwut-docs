@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+[Version批准Auth依赖恢复](2026-10-23-version-decision-auth-dependency-recovery.md)已实现且published专项功能收齐：冻结09f7805，26项25通过/1失败（2.9分钟、无skip/retry）。新场景真实App503/DEVELOPER_STATUS_UNAVAILABLE，断链仅App→Auth、Gateway与另一能力仍工作；unknown/reason/焦点、不重放/不清Session、恢复后明确读同Review PENDING/revision/snapshot保持通过。最后项仅被原4条Gateway Session401缺private的afterAll标红，新503本身private/no-store均存在。954 Vitest＋221 Node、strict/官方生成/Edge通过，专项资源清理；同冻结114项默认全量已启动，尚无终态，完整门禁/UC保持IN_PROGRESS、不push。策略退休/Scope启停等缺口不以此替代。
+
 决定Session边界最新终态：同冻结`c60dd59`的published专项25项24通过/1失败（2.7分钟），默认无参数113项109通过/4失败、无skip/retry（19.0分钟、exit1）。两轮25项body功能断言全部完成，29条失败逐项仅为原Application缓存头25＋新Gateway决定Session401缺private4；不删断言、不推送红门禁。950 Vitest＋195 Node、strict/官方生成/Edge通过，五镜像每轮重拉latest且解析ID未变、测试资源清空、legacy不变。完整UC/门禁仍IN_PROGRESS；下一项[Version批准Auth依赖恢复](2026-10-23-version-decision-auth-dependency-recovery.md)仅ACCEPTED/NOT_STARTED，不把缺失的策略退休/Scope启停API用合成响应替代。下文“全量正在运行”属于前阶段记录。
 
 [决定跨Session边界](2026-10-23-review-decision-session-boundaries.md)已补齐固定外部失效fault和两cap旧401/旧DELETE204/旧200六项实际交错，并修复旧attempt返回后仍读Session/解码正文的问题。最终c60dd59冻结published专项25项24通过/1失败（2.7分钟、无skip/retry）：25项body功能断言完成，afterAll保留4条Gateway Session401缺private的失败（no-store存在），不宣称全绿。950 Vitest＋195 Node、strict/官方生成/Edge通过；专项资源清理、legacy本地/远程不变、未push。同冻结无参数113全量正在运行，不能用前040的107或本专项替代新全量。下文第一阶段尚未接线/19项等为历史，完整UC及其它缺口继续OPEN。
