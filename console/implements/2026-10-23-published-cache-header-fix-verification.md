@@ -1,6 +1,6 @@
 # 已发布App/Gateway错误缓存头修复复验
 
-状态：`ACCEPTED / IN_PROGRESS`，2026-10-23。用户通知修复镜像可能已更新，按[阶段收口继续条件](2026-10-23-console-stage-closeout.md#继续条件与验证顺序)仅复验原缓存头门禁，不扩展业务或关闭其它设计边界。
+状态：`ACCEPTED / VERIFIED`，2026-10-23。35项专项及默认115项完整门禁全部通过，本包验证完成。用户通知修复镜像可能已更新，按[阶段收口继续条件](2026-10-23-console-stage-closeout.md#继续条件与验证顺序)仅复验原缓存头门禁，不扩展业务或关闭其它设计边界。
 
 ## 输入与不变项
 
@@ -30,4 +30,10 @@ Console冻结`6b8834e2687aac5562c8865b53ed808bd07a524c`，产品/runtime/runner/
 
 ## 默认完整门禁
 
-同一冻结继续无参数`pnpm test:real`，预期115项，以实际终态为准。当前尚无全量结果，专项35/35不替代完整门禁，也不关闭策略/Scope正式变更、不同修订并发可达性或33+carrier架构开放项。
+同一冻结`6b8834e2687aac5562c8865b53ed808bd07a524c`执行无参数`pnpm test:real`，轮次`iwut-console-real-291690`，115项全部通过（19.5分钟、exit0、无skip/retry）。本轮重新pull latest、五解析ID与上方专项相同；全部原29条缓存头断言再次通过，无新功能失败，不是借35项专项替代全量。
+
+原全部既有登录/隔离/私有读取/决定/恢复/预算/分页场景完成；正常业务错误仍是原400/404/401，权限隐藏、游标绑定和Session恢复行为不变。运行期产品/runtime/runner/spec未改，未编译后端、未由代理补头；Console与32e83da的差异只有AGENTS.md及测试README记录。
+
+专项及全量轮次容器（含退出）与network均已核对为空，Console工作区干净，legacy本地及本次远端仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。原缓存头红门禁已在该组published镜像解除；这是当前既有套件全绿，不等于所有UC或原广泛目标COMPLETE，策略/Scope正式变更、不同修订并发可达性及33+carrier架构问题仍开放。
+
+并行复核`pnpm test`的954项Vitest＋221项Node全部通过，仓库独立性294文件通过；`pnpm typecheck`通过。`pnpm generate:check`首轮因GitHub拉取固定27c提交时低速60秒超时而exit1，不能计作通过；未改源/配置，同一官方源有界重试一次exit0、生成物与固定输入一致。保留首轮网络失败，不回退本地mirror/后端源码，不改运行中的真实测试。

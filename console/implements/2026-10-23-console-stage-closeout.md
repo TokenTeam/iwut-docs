@@ -2,7 +2,7 @@
 
 状态：`ACCEPTED / WAITING_EXTERNAL`，2026-10-23，按持续授权自行决定。不标记完整目标或任何UC为COMPLETE，不修改既有完成标准。本记录承接[当前覆盖索引](README.md)和[115项真实终态](2026-10-23-profile-decision-developer-projection.md#同冻结无参数全量终态)，用于停止重复验收与无界扩展，不是新业务用例。
 
-后续状态：用户通知App/Gateway镜像更新后，已按本页继续条件启动[已发布缓存头复验](2026-10-23-published-cache-header-fix-verification.md)。新输入35项专项全部通过、原29条缓存头断言恢复，全量115项待终态；下述“镜像未变/缓存头仍红”保留为原收口时证据，不覆盖后续复验，其它设计边界仍等待处理。
+后续状态：用户通知App/Gateway镜像更新后，已按本页继续条件完成[已发布缓存头复验](2026-10-23-published-cache-header-fix-verification.md)。新输入35项专项及默认115项全量全部通过（exit0、无skip/retry），原29条缓存头断言两轮恢复。原缓存头阻塞已解除，不再要求后端重复修复或重复无变化全量；下述“镜像未变/缓存头仍红”仅保留为原收口时证据。策略/Scope、不同修订并发可达性和33+carrier架构边界仍待处理，完整目标/UC不因此COMPLETE。
 
 ## 目标逐项核对
 
