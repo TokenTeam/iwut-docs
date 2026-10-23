@@ -67,3 +67,7 @@ Console新冻结`b4d8d1a`：每次fetch捕获attempt lifetime，原signal与本�
 代理finish证明先在现有原样响应测试增加明确断言而RED，再由真实finish事件驱动GREEN；全代理测试通过，DROP/TRUNCATE既有精确状态对象断言未改。跨Session旧200只被动观察原生fetch状态，不clone/读旧body，不改响应与请求；既有同Session的正常finished断言未动。
 
 本冻结统一950 Vitest＋195 Node、strict/真实spec类型、官方同pin生成、Edge、diff及独立性290文件均通过。published25项专项已启动，本轮仍pull latest，五镜像ID与前轮相同；运行期冻结产品/runtime/runner/spec。尚未登记本轮真实结果，也未启动其后无参数113全量，不以单元绿替代实际验收。
+
+冻结b4d8d1a首轮已终态exit1：17通过、1失败、7未执行（3.4分钟），轮次`iwut-console-real-121103`资源已清空。第18项既有同Session离页成功回执同样卡finished：新lifetime护栏正确取消已离开详情页的旧正文，它并非仍存活的“正常消费”响应，旧spec还强读receipt JSON也不再兼容。不能为保持这项旧断言而恢复消费失效详情/发Session读。
+
+接受将第18项也应用同一分层证据：实际200、原生fetch只记status、代理真实finish与30秒内到达；原“明确重开同Review”继续验证APPROVED及实际公开指针，不能删除。原队列同document/URL/投影保持、无结果回填/决定表单/第二POST或DELETE保持，增加释放后的零额外Session/私有读/导航计数。释放后立即清本地gate待清理引用，避免测试到期后finally控制请求覆盖原始失败坐标。此修订不扩大产品范围、也不改变原业务命令数或缓存头；上文“既有正常finished未动”仅描述上一冻结，不适用于已离页的第18项。新冻结须重新专项和全量，不借这轮17项算通过。
