@@ -57,3 +57,23 @@ Console冻结`a89e2e4`，仅固定准备器、runner控制和3项浏览器spec�
 | Gateway | `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303` |
 | Mongo | `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3` |
 | Traefik | `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0` |
+
+## 默认无参数完整门禁终态
+
+`iwut-console-real-41545`在相同干净冻结`a89e2e41b4955b9d81fb3281d20e54ca6e7f503a`下执行`pnpm test:real`，实际106项全部执行：**103通过、3失败，无skip/retry**，浏览器18.7分钟、exit1。原103项和新增3项均运行，不用专项代替完整门禁。源码、runner/spec及artifact来源运行期间未变；严格类型、标准报告隐私前置和生产build通过。
+
+全部18项决定再次通过；新增Profile重叠决定4.5秒、真实deadline/PENDING恢复32.7秒、重新确认后的迟到成功回执3.2秒。22个决定响应的private/no-store再次全部为真，分布与专项一致。原Admin查询56条错误头断言继续通过；未知结果不自动重放、正式双向转让和权限恢复等原矩阵未被跳过。
+
+25条失败断言逐条核对可信源码坐标和实际断言，全部仍为原Application管理查询错误响应缓存头，没有新增非缓存硬失败：
+
+| 场景 | 断言数 | 可信失败位置与含义 |
+| --- | --- | --- |
+| 管理权转让 | 3 | `management-transfer.real.spec.ts:257:29` ×3，Application GET404缺no-store |
+| owned游标负例 | 10 | `owned-application-pagination.real.spec.ts:200:57` ×4、`:201:58` ×4、`:220:66` ×1、`:221:67` ×1，五个List400各缺private/no-store |
+| 非owner角色读取 | 12 | `qualification-read-matrix.real.spec.ts:368:54` ×6、`:368:116` ×6，六个Application GET404各缺private/no-store |
+
+soft断言仍令三个用例和完整门禁失败，未补代理头、删断言或改变成功标准。管理权/角色的其它功能与最终Session断言照常收齐。当前发布接线已支持审核决定链路；待后端发布补齐上述错误头后再拉latest复验，不把此问题误报为Gateway未接入。
+
+本轮五镜像逐轮pull的解析ID与上表专项逐项相同，来源仍是published-latest，没有编译相邻后端或回退local-compat。轮内显式NSS输入保持103地址，仅属测试fixture。终态后本轮及全部real测试前缀容器（含退出）与network均为空，源码仍为上述冻结且干净；legacy本地/本次远端只读核验均为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。提交仅本地、未push。
+
+本包所列三项已实现并获专项/完整回归证据；整体门禁仍IN_PROGRESS，原Console完整目标不缩减。Profile加载后关系冲突、不同修订公开指针UI并发可达性、策略退休/Scope/全部依赖故障、完整决定跨Session、其它资格/生命周期组合及UC001/fencing继续OPEN。不同修订指针场景须遵守单一working修订约束，不能seed出平行PENDING或用故意错误pointer协议负例冒充UI并发。

@@ -62,7 +62,9 @@ finally尽力按已确认相位恢复：forward尚未accept且已知PENDING可�
 
 本轮再次pull五个latest，全部ID与上述专项一致，没有本地兼容artifact或后端编译。终态后检查所有本轮容器（含退出）与network为空，本地和本次远程只读核验legacy仍为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。提交仅本地、未push；所列Version加载后利益冲突真实证据已补齐，但Application错误头完整门禁仍红，UC006/007及全部其它明确开放矩阵继续IN_PROGRESS。
 
-## 后续候选（未实施）
+## 后续候选（本轮历史，已由后续独立包实施）
+
+下列候选在本15项轮次尚未实施；随后由[Profile决定并发与迟到回执](2026-10-23-profile-decision-concurrency-and-late-receipts.md)独立接受/实施，published专项18/18、默认完整106项103通过/3个既有缓存头用例失败。不将后续证据归入本轮冻结`77201dd`，其它开放项不因此关闭。
 
 下一候选是UC007同Review双Reviewer决定、真实deadline后的PENDING恢复、离开后迟到决定回执。可复用`resources[1].applicationId`、现有main与profileOnly两个context及原Node owner transport，按[UC013](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md)/[UC015](../../app-center/use-cases/UC-APP-015-submit-application-profile-revision-review.md)先后正式Create/Submit两份新资料：A供双Reviewer重叠决定并终态释放工作位，B供deadline与后续用户重新确认的独立明确提交/迟到响应。需要另建接受工作包，不在本轮中实现；不重新调用本包已结束的转让factory，不增加账号/App/quota/登录。主Reviewer仍为APPROVED，不能回写成普通USER。
 
