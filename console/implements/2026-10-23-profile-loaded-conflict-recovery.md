@@ -49,3 +49,23 @@ Console已本地提交并冻结`040cfc78dba70f5ced2375a124f23542effd5efb`，只�
 三个后端latest重新pull后解析ID与前包相同：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`、App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`、Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。沿用显式103地址NSS测试输入，不冒称部署DNS证据。
 
 终态后专项容器（含退出）和network均为空，源码仍干净。已另起默认无参数完整门禁、逐轮重新pull，运行期间继续冻结runtime/runner/spec，终态待补；未push。
+
+## 默认无参数完整门禁终态
+
+`iwut-console-real-71728`在同一干净冻结`040cfc78dba70f5ced2375a124f23542effd5efb`下执行默认`pnpm test:real`，实际107项：**104通过、3失败，无skip/retry**，浏览器18.8分钟、exit1。原106项及新增加载后Profile关系变化均实际执行；全部19项决定再次通过，第19项7.2秒。旧表单实际403、同Review仅CURRENT_ADMIN、正式转回后的PENDING/eligible与清空检查、旧公开B/其它审核视图/Session/钥匙保持、一次决定与零Session DELETE证据再次收齐。
+
+23个决定响应private/no-store全部true，分布与专项逐项相同，afterAll通过。原Admin查询56条错误头继续通过。全量前置strict/报告隐私/生产build通过，运行期未改runtime/runner/spec或来源；五镜像每轮重新pull，解析ID与专项逐项相同，无local-compat/相邻后端编译替代。
+
+全部25条失败逐条对应原缓存头断言，没有新增非缓存硬失败：
+
+| 场景 | 断言数 | 可信失败坐标及含义 |
+| --- | --- | --- |
+| 管理权转让 | 3 | `management-transfer.real.spec.ts:257:29` ×3，Application GET404缺no-store |
+| owned游标负例 | 10 | `owned-application-pagination.real.spec.ts:200:57` ×4、`:201:58` ×4、`:220:66` ×1、`:221:67` ×1，五个List400各缺private/no-store |
+| 非owner角色读取 | 12 | `qualification-read-matrix.real.spec.ts:368:54` ×6、`:368:116` ×6，六个Application GET404各缺private/no-store |
+
+soft断言继续使对应三用例及完整门禁失败，功能和最终Session断言仍收齐；不删断言、补代理头或把失败算通过。发布接线已满足本例，当前全量发布缺口仍是上述Application错误头，不是缺Gateway路由。
+
+进程终态后，本轮及全部real测试前缀容器（含退出）/network均为空，源码仍为原冻结且干净。本地legacy为`e68851e343bd0e077e5ccd0b680fe6813216ced0`；本次远端首次只读查询网络超时，收尾有界重试成功且SHA相同，不将超时当远端已验证。提交仅本地、未push。
+
+本包所列Profile加载后冲突已实施并取得专项/完整回归证据；整体门禁与完整Console目标仍IN_PROGRESS。保留前述不同修订公开指针可达性、策略/Scope/依赖故障、完整决定跨Session、其它角色/生命周期及UC001/fencing缺口，不把本19项扩大为所有矩阵完成。

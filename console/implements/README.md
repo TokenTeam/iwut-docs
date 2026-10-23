@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-[Profile加载后管理关系变化](2026-10-23-profile-loaded-conflict-recovery.md)已接受：在原18项后正式Create/Submit第三份资料，复用既有APPROVED主Reviewer和固定独立双向转让，验证旧表单实际403只要求同Review重读、不撤整个能力，转回后仍PENDING且须重新确认。无新账号/App/quota/Session/seed或Developer写UI；实现及19项专项/107项完整门禁证据待补。
+[Profile加载后管理关系变化](2026-10-23-profile-loaded-conflict-recovery.md)所列增量已实现：在原18项后正式Create/Submit第三份资料，复用既有APPROVED主Reviewer且零重复Apply，以固定独立双向转让验证旧表单实际403只要求同Review重读、不撤整个能力，转回后仍PENDING且须重新确认。无新账号/App/quota/Session/seed或Developer写UI。冻结`040cfc7`，903项Vitest＋183项Node、strict/官方同pin生成/Edge通过；published专项19/19（2.2分钟），默认无参数107项104通过/3失败、无skip/retry（18.8分钟、exit1），全部19项决定再次通过，23决定响应private/no-store全真。25条失败仍为原Application错误缓存头（转让3/owned10/资格12），无新增非缓存硬失败；两轮资源为空、legacy本地/本次远端不变、未push。完整门禁与UC继续IN_PROGRESS，其它决定/Session矩阵仍开放。
 
 [Profile决定并发与迟到回执](2026-10-23-profile-decision-concurrency-and-late-receipts.md)所列增量已实现：原15项后复用已有账号/App/context/Session，正式Create/Submit两份新Profile补同Review双决定、真实deadline/PENDING恢复及重新明确提交后的迟到成功回执。固定准备未知写只读确认、不扩Developer写UI。冻结`a89e2e4`，903项Vitest＋172项Node、strict/官方固定pin生成/Edge通过；published专项18/18通过（2.1分钟），默认无参数106项103通过/3失败、无skip/retry（18.7分钟、exit1），全部18项决定再次通过，22个决定响应private/no-store全真。25条失败仍全部为原Application错误缓存头（转让3/owned10/资格12），无新增非缓存硬失败。两轮资源清理、legacy本地/远程不变、未push；完整门禁与UC仍IN_PROGRESS，不以本包关闭其余矩阵。
 
@@ -21,7 +21,7 @@
 | Console 工程初始化 | `UC-CONSOLE-001`（`ACCEPTED`） | `IMPLEMENTED` | pnpm workspace、严格 TypeScript、固定统一 API 生成输入与验证命令已建立；真实服务 E2E 仍属于 UC001 整体缺口 |
 | 共享浏览器 Session | `UC-CONSOLE-001`（`ACCEPTED`） | `IN_PROGRESS` | 浏览器密钥/协议、BFF 边界、登录/重发/页面回调隔离及双 Console 真实邮件/设备主链通过；跨请求 Cookie fencing 和完整恢复/并发矩阵仍待完成 |
 | Developer Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-002–005`（只读管理） | `IN_PROGRESS` | 独立构建、认证入口和 Application/Version/Profile/Tester 只读页面已实现；UC001 后续增量及真实浏览器联合验收待完成 |
-| Admin Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-006–007`（审核） | `IN_PROGRESS` | 双审核队列/不可变详情、权限隔离及批准/拒绝已实现；决定接入、权限恢复、加载后关系变化及[Profile并发/迟到回执](2026-10-23-profile-decision-concurrency-and-late-receipts.md)所列18项在published专项/默认全量均通过，完整决定矩阵与整体Application错误缓存头门禁继续开放 |
+| Admin Console 功能 | `UC-CONSOLE-001`（认证入口）、`UC-CONSOLE-006–007`（审核） | `IN_PROGRESS` | 双审核队列/不可变详情、权限隔离及批准/拒绝已实现；决定接入、权限恢复、Version/Profile加载后关系变化及并发/迟到回执所列19项在published专项/默认全量均通过，完整决定矩阵与整体Application错误缓存头门禁继续开放 |
 | Developer Application 管理概览 | `UC-CONSOLE-002`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API、同源 client、列表/详情、筛选/分页、错误与 Session 失效回收均已实现；真实 Gateway/Auth/App 浏览器验收待完成 |
 | Developer Application Version | `UC-CONSOLE-003`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的 Version 查询类型/client、列表/详情、单状态筛选与当前内容/latestReview 分区均已实现；真实浏览器联合验收待完成 |
 | Developer Application 资料修订 | `UC-CONSOLE-004`（`ACCEPTED`） | `IMPLEMENTED` | 固定 API 的资料查询类型/client、列表/详情、权威指针、原文与独立审核历史分页已实现；真实浏览器联合验收待完成 |

@@ -77,3 +77,5 @@ soft断言仍令三个用例和完整门禁失败，未补代理头、删断言�
 本轮五镜像逐轮pull的解析ID与上表专项逐项相同，来源仍是published-latest，没有编译相邻后端或回退local-compat。轮内显式NSS输入保持103地址，仅属测试fixture。终态后本轮及全部real测试前缀容器（含退出）与network均为空，源码仍为上述冻结且干净；legacy本地/本次远端只读核验均为`e68851e343bd0e077e5ccd0b680fe6813216ced0`。提交仅本地、未push。
 
 本包所列三项已实现并获专项/完整回归证据；整体门禁仍IN_PROGRESS，原Console完整目标不缩减。Profile加载后关系冲突、不同修订公开指针UI并发可达性、策略退休/Scope/全部依赖故障、完整决定跨Session、其它资格/生命周期组合及UC001/fencing继续OPEN。不同修订指针场景须遵守单一working修订约束，不能seed出平行PENDING或用故意错误pointer协议负例冒充UI并发。
+
+后续[Profile加载后管理关系变化](2026-10-23-profile-loaded-conflict-recovery.md)已独立接受/实施，专项19/19、默认完整107项104通过/3个原缓存头用例失败。上文Profile加载后关系冲突OPEN是本18项冻结轮次的历史状态，后续证据不归入`a89e2e4`；其它开放矩阵不因此关闭。
