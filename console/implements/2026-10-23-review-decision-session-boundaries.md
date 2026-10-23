@@ -83,3 +83,18 @@ dcb520a轮次在真实邮件冷却准备期间主动SIGINT结束（exit1，未�
 每轮重新pull published latest，本轮解析ID：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`，App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`，Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，均与前轮相同。报告隐私/strict/runner构建前置通过；未编译相邻后端或用本地artifact。显式NSS仍103.102.166.224，不作部署DNS证明。
 
 专项容器/网络已清空；legacy本地与本次远端只读核对均为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。已在同一c60dd59冻结启动默认无参数113项完整回归，运行期不改产品/runtime/runner/spec；本记录尚无其终态，不能把专项当完整门禁通过。整体仍IN_PROGRESS。
+
+## 同冻结无参数全量终态
+
+Console `c60dd59`，轮次`iwut-console-real-136597`，默认无参数113项全部执行，无skip/retry：109通过、4失败（19.0分钟、exit1）。审核决定25项body的全部功能断言再次完成，最后一项仍仅被afterAll四条Session401 private断言标红，29个实际决定响应与专项相同；其余Admin/Developer跨Session、生命周期、真实登录/恢复、双副本及Mongo故障等本轮所列测试完成，不能据此扩大为未列明角色/故障或完整UC。
+
+全部29个失败安全坐标已逐项核对，均为保留的缓存头检查，没有新增非缓存硬失败：
+
+- 原管理转让Application GET404缺no-store：`management-transfer.real.spec.ts:257:29`×3。
+- 原owned-list List400缺private/no-store：`owned-application-pagination.real.spec.ts:200:57`×4、`:201:58`×4、`:220:66`×1、`:221:67`×1，共10。
+- 原资格角色Application GET404缺private/no-store：`qualification-read-matrix.real.spec.ts:368:54`×6、`:368:116`×6，共12。
+- 新Gateway决定Session401缺private：`review-decisions.real.spec.ts:39:143`×4；Version/Profile各旧401及旧204前的实际决定401，no-store均存在。
+
+本轮重新pull latest后五个镜像解析ID与上述专项完全一致，official API pin不变、types/报告隐私及runner构建前置通过。产品/runtime/runner/spec在运行期未改；未编译后端、删断言、代理补头或push。专项及全量的容器/网络均已检查为空，本地legacy仍原SHA；整体门禁维持IN_PROGRESS，而非因功能断言收齐而标绿。
+
+下一增量[Version批准Auth依赖恢复](2026-10-23-version-decision-auth-dependency-recovery.md)仅已接受，当前尚未实现；它不消除上述缓存头缺口。策略退休、Scope变化、不同修订公开指针并发及其它完整UC/UC001/fencing缺口继续OPEN。
