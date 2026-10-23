@@ -73,3 +73,13 @@ Console新冻结`b4d8d1a`：每次fetch捕获attempt lifetime，原signal与本�
 接受将第18项也应用同一分层证据：实际200、原生fetch只记status、代理真实finish与30秒内到达；原“明确重开同Review”继续验证APPROVED及实际公开指针，不能删除。原队列同document/URL/投影保持、无结果回填/决定表单/第二POST或DELETE保持，增加释放后的零额外Session/私有读/导航计数。释放后立即清本地gate待清理引用，避免测试到期后finally控制请求覆盖原始失败坐标。此修订不扩大产品范围、也不改变原业务命令数或缓存头；上文“既有正常finished未动”仅描述上一冻结，不适用于已离页的第18项。新冻结须重新专项和全量，不借这轮17项算通过。
 
 dcb520a轮次在真实邮件冷却准备期间主动SIGINT结束（exit1，未开始25项业务测试），不是观察等待超时自动重跑，也不是业务失败：静态检查发现bound client构建时捕获fetch，页面加载后才包装window.fetch无法记录旧决定。独立本机Chromium有限HTTP实验确认cached fetch调用的观察计数为0。停止后进程终态及本轮全部容器/网络为空才修改spec；被动status观察器改为在open/page.goto之前addInitScript，使生产client捕获原样转发的包装fetch。仍返回原promise、不clone/读body或改signal、仅记静态status。此轮不能借作任何业务通过证据；新冻结另跑。
+
+## 修订后published专项终态
+
+最终源码冻结`c60dd59`（产品仍b4d8d1a，后两提交仅spec/元数据），轮次`iwut-console-real-131162`：25项无skip/retry，24通过/1失败（2.7分钟、exit1）。全部25项测试body的功能断言通过；第25项被afterAll的4条缓存头soft失败标红，安全坐标均`review-decisions.real.spec.ts:39:143`，没有新增功能失败。原19再次通过；新增两cap各旧401/旧DELETE204/旧200的六项均完成，包括等待清理期间私有内容退场、B另一能力非空队列/精确asOf/同document/URL、真实Session/carrier/设备钥匙保持、释放后零额外Session/私有API/DELETE/决定/导航及明确刷新。旧200通过实际200/原生status/真实代理finish/30秒内到达和独立Reviewer正式终态/决定人，不消费旧body。所列交错通过不等于完整UC或所有提交点/角色组合完成。
+
+29个实际决定响应观察中，4个Session401（Version旧401和旧204各一个、Profile同样两个）均`private=false, noStore=true`；其余25个200/403/409全部private/no-store为真。4条private失败全部保留，属于新暴露的Gateway Session错误响应门禁，不得临时代理补头或从afterAll排除。此前默认107全量的25条Application错误头是独立既有缺口，尚不能用本专项声称已重验/消除。
+
+每轮重新pull published latest，本轮解析ID：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`，App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`，Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，均与前轮相同。报告隐私/strict/runner构建前置通过；未编译相邻后端或用本地artifact。显式NSS仍103.102.166.224，不作部署DNS证明。
+
+专项容器/网络已清空；legacy本地与本次远端只读核对均为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。已在同一c60dd59冻结启动默认无参数113项完整回归，运行期不改产品/runtime/runner/spec；本记录尚无其终态，不能把专项当完整门禁通过。整体仍IN_PROGRESS。

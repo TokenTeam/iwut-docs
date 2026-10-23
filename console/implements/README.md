@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+[决定跨Session边界](2026-10-23-review-decision-session-boundaries.md)已补齐固定外部失效fault和两cap旧401/旧DELETE204/旧200六项实际交错，并修复旧attempt返回后仍读Session/解码正文的问题。最终c60dd59冻结published专项25项24通过/1失败（2.7分钟、无skip/retry）：25项body功能断言完成，afterAll保留4条Gateway Session401缺private的失败（no-store存在），不宣称全绿。950 Vitest＋195 Node、strict/官方生成/Edge通过；专项资源清理、legacy本地/远程不变、未push。同冻结无参数113全量正在运行，不能用前040的107或本专项替代新全量。下文第一阶段尚未接线/19项等为历史，完整UC及其它缺口继续OPEN。
+
 [决定跨Session边界](2026-10-23-review-decision-session-boundaries.md)已接受并完成第一阶段局部修复：两cap组件先红复现决定401后等待旧DELETE ACK时snapshot/表单残留，修复将精确Session错误送入原捕获详情Query并cancel旧读、清data，由父详情统一恢复；新增17 core＋6组件先红后绿。产品`238bc07`，统一926 Vitest＋183 Node、strict/官方同pin生成/build/Edge通过，fixture浏览器10通过/6既有非目标skip。六项真实决定Session交错/计划25专项与113全量尚未接线执行，改后真实门禁未过，仍IN_PROGRESS/未push；不把前040轮次19/107挪作新证据。
 
 [Profile加载后管理关系变化](2026-10-23-profile-loaded-conflict-recovery.md)所列增量已实现：在原18项后正式Create/Submit第三份资料，复用既有APPROVED主Reviewer且零重复Apply，以固定独立双向转让验证旧表单实际403只要求同Review重读、不撤整个能力，转回后仍PENDING且须重新确认。无新账号/App/quota/Session/seed或Developer写UI。冻结`040cfc7`，903项Vitest＋183项Node、strict/官方同pin生成/Edge通过；published专项19/19（2.2分钟），默认无参数107项104通过/3失败、无skip/retry（18.8分钟、exit1），全部19项决定再次通过，23决定响应private/no-store全真。25条失败仍为原Application错误缓存头（转让3/owned10/资格12），无新增非缓存硬失败；两轮资源为空、legacy本地/本次远端不变、未push。完整门禁与UC继续IN_PROGRESS，其它决定/Session矩阵仍开放。
