@@ -49,3 +49,13 @@ Console已本地提交并冻结`badf1f559983ab9e0da893bed0a563364ef17f40`，产�
 旧200回执可能被产品post-response Session fence取消正文，不将取消当失败或强读未消费DevTools JSON；以真实上游200/完整传输及现有另一Reviewer context的实际终态/决定人读回分层证明。主context三EMAIL＋六例12DEVICE合计15签发，不因终态读回追加登录。旧401/204/200、B投影精确asOf、同document和无额外Session/业务/DELETE/导航均保留明确断言；原全部决定缓存头检查未改。
 
 开始本冻结的published25项专项，每轮仍拉latest、轮内固定解析ID，运行期不改产品/runtime/runner/spec。真实专项与其后113项完整门禁均未达终态，不登记为通过、不push。
+
+## 第二阶段首轮失败与修订决定
+
+冻结`badf1f5`的published专项已终态exit1：21通过、1失败、3未执行（5.3分钟），轮次`iwut-console-real-109373`容器/网络已清空。原19与新增Version旧401/旧204均通过；Version旧200实际上游决定成功且浏览器已见200，但卡在`Response.finished()`，180秒测试到期。afterAll另外保留两条Version Session401缺`private`的失败（`no-store`存在），不得删除该断言，也不得把未执行的Profile三例登记通过。默认113全量尚未运行，先修正此轮暴露的问题再新冻结。
+
+修订已接受：本机真实Chromium、有限HTTP JSON、原生fetch收到200后经独立请求再cancel旧正文的最小实验，同样令Playwright finished持续未决。这是观测API与主动取消正文不兼容，不是后端未决定证据。对这两个跨Session旧200场景不再要求消费/下载旧正文，也不靠删除等待直接判通过；改为代理完整读取真实上游、原样发送后的ServerResponse finish布尔证据、浏览器实际200与30秒内到达，以及独立Reviewer正式GET终态/决定人。服务端finish只证明代理已交出完整字节，不冒称浏览器解析完整正文。旧同Session正常消费的既有finished断言保留。
+
+静态检查另发现bound fetch在页面attempt已close或本地Session换代后仍会先发Session校验，再被外层read拒绝。按原“B稳定后零额外Session读”契约增加每请求捕获lifetime断言：发请求前、收到响应且发Session校验前、Session校验完成后都验证原attempt/lifetime/本地Session/signal；过期时cancel旧body并原样抛Obsolete/Abort，不清新Session、不广播能力失效、不解析正文、不自动重放。存活请求仍保留真实Session校验，不能用本地状态替代权威校验；close再activate也不能复活旧请求。先用两能力各场景RED复现，再实现，组件真实client回归与完整门禁另记实际结果。
+
+代理只对RESPONSE/HOLD追加`downstreamFinished: true`，须由真实response finish事件触发；ARMED/HELD/REQUEST/DROP/TRUNCATE不能伪报，控制不暴露正文/头/认证材料，不伪造业务成功。此为测试传输证据，不改变产品、业务准备数量、15次签发预算或原全部缓存头断言。
