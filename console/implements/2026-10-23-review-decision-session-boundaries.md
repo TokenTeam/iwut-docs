@@ -39,3 +39,13 @@
 **未完成项不缩减**：本次尚未新增固定Auth失效fault或六项真实spec，未重跑改后19/107，更未运行计划25/113；前040轮次不能挪作新产品证据。下一阶段须接入上述已接受六项，在同一最终源码冻结后重新pull latest，完成25专项与113无参数全量，原25缓存头仍为失败门禁，不以本阶段组件绿宣布完成。
 
 真实接线注意：首次外部失效前固定并正式读出C/Version目标，后续不调用依赖旧main Node Auth Session的准备观察（该账号旧Session会被fault失效）；不通过复制新浏览器token或暗中替换Node Session规避。原owner/governor及B两个单项Reviewer不作为失效目标，未知fault写不能重发。真实DOM/网络与组件Query对象证据继续分层。
+
+## 第二阶段：固定控制与六项真实spec接线
+
+Console已本地提交并冻结`badf1f559983ab9e0da893bed0a563364ef17f40`，产品修复仍为前238，新增固定失效控制/runner/六项serial spec，不增业务资源。控制新增12项Node先12 RED后12 GREEN：精确空JSON/媒体/16KiB、固定Mongo集合和活跃Session filter、ready、4次上限、并发拒绝不占次数、未知或零修改冻结、静态错误及外层bearer均覆盖；未知写不重放。ready仅证明本轮决定fixture已正式准备，原19项与恢复完成顺序仍由真实serial验收，控制不冒称治理业务授权。
+
+统一926项Vitest＋195项Node、strict/官方同pin生成/Edge、Node语法/diff及独立性290文件通过。新增spec strict首轮暴露exactOptionalPropertyTypes的字段形状，已对齐真实driver返回；清理gate沿用既有精确method/path，另直接校验真实DELETE正文为原contextBinding/generation，不增加不存在的gate参数或伪造清理请求。旧401可能已触发产品正式Session重读/导航，工作台Link不强求重复GET；B非空队列仍经真实受Session绑定的API和独立权威Session/carrier验证。
+
+旧200回执可能被产品post-response Session fence取消正文，不将取消当失败或强读未消费DevTools JSON；以真实上游200/完整传输及现有另一Reviewer context的实际终态/决定人读回分层证明。主context三EMAIL＋六例12DEVICE合计15签发，不因终态读回追加登录。旧401/204/200、B投影精确asOf、同document和无额外Session/业务/DELETE/导航均保留明确断言；原全部决定缓存头检查未改。
+
+开始本冻结的published25项专项，每轮仍拉latest、轮内固定解析ID，运行期不改产品/runtime/runner/spec。真实专项与其后113项完整门禁均未达终态，不登记为通过、不push。
