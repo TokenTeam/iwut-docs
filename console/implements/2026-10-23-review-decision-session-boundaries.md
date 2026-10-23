@@ -59,3 +59,11 @@ Console已本地提交并冻结`badf1f559983ab9e0da893bed0a563364ef17f40`，产�
 静态检查另发现bound fetch在页面attempt已close或本地Session换代后仍会先发Session校验，再被外层read拒绝。按原“B稳定后零额外Session读”契约增加每请求捕获lifetime断言：发请求前、收到响应且发Session校验前、Session校验完成后都验证原attempt/lifetime/本地Session/signal；过期时cancel旧body并原样抛Obsolete/Abort，不清新Session、不广播能力失效、不解析正文、不自动重放。存活请求仍保留真实Session校验，不能用本地状态替代权威校验；close再activate也不能复活旧请求。先用两能力各场景RED复现，再实现，组件真实client回归与完整门禁另记实际结果。
 
 代理只对RESPONSE/HOLD追加`downstreamFinished: true`，须由真实response finish事件触发；ARMED/HELD/REQUEST/DROP/TRUNCATE不能伪报，控制不暴露正文/头/认证材料，不伪造业务成功。此为测试传输证据，不改变产品、业务准备数量、15次签发预算或原全部缓存头断言。
+
+## 修订实现与冻结前检查
+
+Console新冻结`b4d8d1a`：每次fetch捕获attempt lifetime，原signal与本地Session在发送、响应后、Session校验后共同失败关闭。核心新增16项首轮14失败/2已绿：12项两cap×close/close后activate/本地换代×200/401均复现额外Session读，另两项真实校验已开始后close/activate再成功会消费旧正文；校验失败后的旧取消本来就绿，保留。修复后83 core全部通过。新增8项未mock生成client的StrictMode组件先8红（Session/Page更换×两cap×200/401）再8绿，真实hook接线后只有原决定请求、无额外Session/正文解码/新页变更。旧8项正常读取激活仍通过，合计99/99。
+
+代理finish证明先在现有原样响应测试增加明确断言而RED，再由真实finish事件驱动GREEN；全代理测试通过，DROP/TRUNCATE既有精确状态对象断言未改。跨Session旧200只被动观察原生fetch状态，不clone/读旧body，不改响应与请求；既有同Session的正常finished断言未动。
+
+本冻结统一950 Vitest＋195 Node、strict/真实spec类型、官方同pin生成、Edge、diff及独立性290文件均通过。published25项专项已启动，本轮仍pull latest，五镜像ID与前轮相同；运行期冻结产品/runtime/runner/spec。尚未登记本轮真实结果，也未启动其后无参数113全量，不以单元绿替代实际验收。
