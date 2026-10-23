@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-截至2026-10-23，最新实际验收为[Version批准Auth依赖恢复](2026-10-23-version-decision-auth-dependency-recovery.md)，冻结`09f7805`：published专项26项25通过/1失败（2.9分钟），同冻结默认无参数114项110通过/4失败、无skip/retry（19.5分钟、exit1）。两轮26项body功能断言全部完成；29条失败逐项仅为原Application错误缓存头25条＋Gateway决定Session401缺private的4条，无新增功能失败。954项Vitest＋221项Node、strict、官方固定pin生成及Edge通过；五镜像每轮重拉published latest且ID不变，轮次资源已清理、legacy本地/远程未变、未push。**完整门禁仍`IN_PROGRESS`，不把body完成称为套件全绿或完整UC完成。**
+截至2026-10-23，最新实际验收为[Admin→Developer资料投影闭环](2026-10-23-profile-decision-developer-projection.md)，冻结`32e83da`：published专项27项26通过/1失败（3.0分钟），同冻结默认无参数115项111通过/4失败、无skip/retry（19.5分钟、exit1）。两轮27项body功能断言全部完成；29条失败逐项仅为原Application错误缓存头25条＋Gateway决定Session401缺private的4条，无新增功能失败。954项Vitest＋221项Node、strict、官方固定pin生成及Edge通过；五镜像每轮重拉published latest且ID不变，轮次资源已清理、legacy本地/远程未变、未push。**完整门禁仍`IN_PROGRESS`，不把body完成称为套件全绿或完整UC完成。**
 
-当前[Admin→Developer资料投影闭环](2026-10-23-profile-decision-developer-projection.md)为`ACCEPTED / IN_PROGRESS`：冻结32e83da，published27项专项26通过/1失败（3.0分钟），27项body全部完成，新跨端只读场景通过，唯一失败仍是afterAll原4条Gateway Session401缺private。统一954 Vitest＋221 Node、strict/官方生成/Edge通过，专项资源已清理；同冻结默认115项全量正在运行，尚无终态，不借前09的114项替代。本页以下先登记当前有界覆盖，再保留历史轮次及首包说明。历史段落中的“待真实验收”“尚无终态”“尚未接线”只描述当时冻结，不重新生成当前待办；最新实际证据以对应工作包为准。
+当前跨端投影已实现并收齐所列真实证据，门禁仍`ACCEPTED / IN_PROGRESS`。生产Developer概览/列表/两详情对照原Admin两次实际批准，独立owner EMAIL/context/钥匙、业务只读、唯一replacement公开指针均验证；不把旧APPROVED当当前公开，不新增发布操作。本页以下先登记当前有界覆盖，再保留历史轮次及首包说明。历史段落中的“待真实验收”“尚无终态”“尚未接线”只描述当时冻结，不重新生成当前待办；最新实际证据以对应工作包为准。
 
 ## 当前能力与有界覆盖
 
@@ -14,11 +14,11 @@
 | --- | --- | --- | --- |
 | Console工程初始化 | UC001 `ACCEPTED`；工程范围`IMPLEMENTED` | pnpm workspace、严格TypeScript、固定统一API生成和校验；双应用/BFF及独立surface真实链已接入 | 不再把“尚未建立真实E2E”作为工程待办；UC001整体仍未关闭 |
 | 共享浏览器Session | UC001 `ACCEPTED / IN_PROGRESS`；设备/邮箱码与Session v2基线已实现 | 双origin真实邮件/设备登录、原Begin恢复、提交/恢复等待取消、旧carrier/清理回执、双生产副本/提交点故障，以及两个origin实际32次签发后的显式重建，见[Session v2接线](2026-10-16-session-v2-wiring.md)和[context恢复](2026-10-16-context-exhaustion-recovery.md) | 任意33+迟到carrier的无损Cookie自助恢复仍需独立架构处理；不以此关闭完整UC001/fencing |
-| Developer Console功能 | UC001–005 `ACCEPTED`；认证入口与四类只读页面已实现，整体`IN_PROGRESS` | 真实成功读取、25项[跨Session读取矩阵](2026-10-16-developer-private-session-matrix.md)、正式管理权转让退场、SUSPEND/RESTORE资格读取与保留生命周期历史投影；Admin→Developer资料闭环专项body完成 | WITHDRAWN/账号禁用读取未列为已覆盖；新115项全量待终态；外部错误头门禁仍红 |
+| Developer Console功能 | UC001–005 `ACCEPTED`；认证入口与四类只读页面已实现，整体`IN_PROGRESS` | 真实成功读取、25项[跨Session读取矩阵](2026-10-16-developer-private-session-matrix.md)、正式管理权转让退场、SUSPEND/RESTORE资格读取与保留生命周期历史投影；Admin→Developer资料闭环专项/全量body完成 | WITHDRAWN/账号禁用读取未列为已覆盖；外部错误头门禁仍红 |
 | Admin Console功能 | UC001/006/007 `ACCEPTED`；双队列/详情、批准/拒绝、独立权限/Session恢复已实现，整体`IN_PROGRESS` | [查询及权限读取](2026-10-16-admin-review-queries.md)、12项[读取跨Session矩阵](2026-10-16-admin-private-session-fencing.md)，以及最新26项决定body功能：双Reviewer、真实期限/结果未知、撤重授、加载后利益冲突、六项决定跨Session交错和真实App→Auth断链/恢复 | 原4条Gateway Session401缺private；策略/Scope真实变化和不同修订公开指针并发仍未覆盖，原因见下表；不再把决定surface/正式定义/Reviewer公开指针接入列为当前缺失 |
 | Developer Application概览 | UC002 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [25个正式Create的20+5累计分页](2026-10-16-owned-application-pagination-and-recovery.md)、筛选/游标/空态、正式转让后的管理权回收、跨Session及SUSPEND/RESTORE、ACTIVE/CLOSING/CLOSED保留历史读取 | 原Application错误头；WITHDRAWN/账号禁用的有界验收未覆盖，不表示列表/详情或真实浏览器主链尚未实现 |
 | Developer Application Version | UC003 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [四状态/恢复DRAFT、20+5、正式错误码与断流恢复](2026-10-16-version-pagination-and-recovery.md)，当前内容与latestReview分区、bigint/惰性文本、管理权/Session及上述保留历史读取 | WITHDRAWN/账号禁用未覆盖；不新增完整审核历史或发布管理，APPROVED不解释为已发布 |
-| Developer Application资料修订 | UC004 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [四状态、20+5列表及独立历史、页外指针、原文/隐私与真实413](2026-10-16-profile-pagination-and-budget.md)，管理权/Session、SUSPEND/RESTORE及保留历史读取；[Admin→Developer实际批准投影](2026-10-23-profile-decision-developer-projection.md)专项body完成 | 本冻结115全量待终态；WITHDRAWN/账号禁用未覆盖，不把已有读取重新登记为未验收 |
+| Developer Application资料修订 | UC004 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [四状态、20+5列表及独立历史、页外指针、原文/隐私与真实413](2026-10-16-profile-pagination-and-budget.md)，管理权/Session、SUSPEND/RESTORE及保留历史读取；[Admin→Developer实际批准投影](2026-10-23-profile-decision-developer-projection.md)专项/全量body完成 | 外部错误头；WITHDRAWN/账号禁用未覆盖，不把已有读取重新登记为未验收 |
 | Developer Application Tester管理 | UC005 `ACCEPTED`；三个独立只读区域`IMPLEMENTED` | [25条ACTIVE成员/26条链接、分页/筛选/空态、区域断流及真实精确撤销](2026-10-16-tester-pagination-and-privacy.md)，权威容量与成员保持、管理权/Session和上述资格/历史读取 | WITHDRAWN/账号禁用未覆盖；REMOVED/ALL成员、secret恢复与本人Tester入口仍非本阶段范围，不因索引整理新增待办 |
 
 ## 有限开放项与外部边界
@@ -26,7 +26,6 @@
 | 类型 | 当前开放项与推进条件 | 依据 |
 | --- | --- | --- |
 | 外部实现门禁 | Application错误头25条（转让3、owned游标10、资格角色12）及Gateway决定Session401缺private4条。保留断言，等待对应published镜像修复后再冻结复验；不由前端代理补头或抹掉失败 | [最新114项终态](2026-10-23-version-decision-auth-dependency-recovery.md)、[Session边界](2026-10-23-review-decision-session-boundaries.md) |
-| 跨端闭环全量待验收 | 同一正式资料批准/替换结果贯穿Admin与Developer概览/列表/详情的专项body已通过；27项专项26通过/1原header失败，同冻结115项全量尚待终态，不将专项冒称完整门禁 | [跨端只读闭环](2026-10-23-profile-decision-developer-projection.md) |
 | 有界角色验收未覆盖 | WITHDRAWN及账号禁用后的管理读取，不能由已有SUSPEND/RESTORE或CLOSED历史readseed外推；本页不据此宣称产品缺失，也不自动扩成全部角色×页面组合 | [资格与角色边界](2026-10-16-qualification-and-role-read-boundaries.md)、[保留生命周期历史](2026-10-16-retained-lifecycle-read-matrix.md) |
 | 缺正式变更API | 策略发布/退休及Scope启停不能通过当前只读事实查询制造；错误expectedPolicyVersion、合成policy JSON或直接改库不是真实加载后变化证明 | [Version策略](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016)、[Profile策略](../../app-center/use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)、[Scope快照范围](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) |
 | 契约可达性需外部决定 | UC007不同修订并发批准的准备受同一App单一DRAFT/SUBMITTED工作位约束；现有错误pointer409不替代该证据，不seed平行PENDING。须由App/Console权威设计明确可达准备或验收处理 | [UC007验收](../use-cases/UC-CONSOLE-007-review-application-profiles.md#验收与完成标准)、[单一工作修订](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006) |
