@@ -37,3 +37,20 @@ Node v24.22.0运行时实际`http.maxHeaderSize=16384`。使用临时loopback原
 官方API仓库`refs/heads/master`实际只读查询仍为`27c9743d2d7476511932a83563e103aee5b4e28e`，与Console固定输入一致；没有据此启动相同完整测试或编译后端。既有策略/Scope在线变更与不同修订并发准备问题仍按各权威UC处理，不能由本次传输实验或镜像缓存头修复关闭。
 
 Console产品/runtime/runner/spec均未改，原全绿证据仍限定原35/115套件；未push、未联系其它聊天，临时诊断资源均关闭。后续选择仍是正式跨系统契约处理或完整Cookie恢复架构，不自动增加无限测试排列。
+
+## Clear-Site-Data候选复核
+
+另一个候选是让浏览器不发送巨大Cookie头，并用响应`Clear-Site-Data: "cookies"`清理HttpOnly载体。2026-10-23实际读取[W3C Editor’s Draft的Fetch集成与Cookie清理算法](https://w3c.github.io/webappsec-clear-site-data/#fetch-integration)：草案规定受凭据条件约束，Cookie清理范围覆盖注册域；`storage`另涉及IndexedDB。该来源仍是工作草案，不当作所有浏览器已一致实现的最终标准，也不从搜索摘要外推行为。
+
+为确认当前Chromium行为，用隔离loopback HTTPS诊断server、自签临时证书、固定host resolver建立`developer.example.test`和`admin.example.test`两个origin。每组全新BrowserContext，两个host各置一枚短小Secure/HttpOnly/Strict的`__Host-synthetic-*` Cookie（不设Domain）；Developer的IndexedDB保存一把临时non-extractable P-256私钥。不含真实Console/Auth凭据，忽略的只是该临时证书校验，不证明生产TLS信任或部署配置。
+
+两组都对Developer同源`POST /clear`，响应200及相同`Clear-Site-Data: "cookies"`；实际计数如下：
+
+- `credentials: omit`：secureContext=true，server收到的请求无Cookie；Developer/Admin各仍有1枚Cookie，IndexedDB中的不可导出私钥仍可读取。
+- `credentials: include`：secureContext=true，server收到Cookie；Developer/Admin均变为0枚Cookie，IndexedDB中的不可导出私钥仍可读取。
+
+因此本环境中“不带Cookie绕过请求头限制，再靠该响应清Cookie”的组合未实现预期；带Cookie方式又会清掉同注册域的另一个Console Cookie，不能把host-only/__Host误认为该清理指令的隔离边界。只用`cookies`没有删除本实验的IndexedDB钥匙，不能反过来声称Clear-Site-Data必然破坏钥匙；真正冲突是凭据行为与跨surface清理范围。
+
+首轮纯内存证书准备失败，未进入浏览器、未作为行为证据；改为新建隔离临时目录生成证书后，两组实验完成、命令exit0，浏览器/HTTPS server及两份临时证书文件均已精确清理。没有在产品origin发清理指令、启用`storage`/`*`、写入生产路由或改认证代码。
+
+决定：不把该header直接接为当前恢复按钮；在未有独立注册域等新架构与部署边界证明前，不承诺它仅影响一个Console。更换站点边界不是无成本前端小修，也不由本诊断替用户购买/迁移域名。当前仍保留原失败关闭与手动仅处理Cookie的说明，任意33+carrier无损自助恢复保持OPEN。跨聊天的新增设计协调尚未收到人类明确授权，自动goal续跑不作替代授权。
