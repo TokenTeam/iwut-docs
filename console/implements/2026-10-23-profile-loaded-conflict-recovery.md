@@ -39,3 +39,13 @@
 Console已本地提交并冻结`040cfc78dba70f5ced2375a124f23542effd5efb`，只改固定准备器、runner及真实spec/合成回归，无生产UI变化。工厂新增10项先RED后GREEN（旧27项仍通过，最终37/37）；包括C前置Get与基线List之间B公开指针漂移仍必须拒绝。adapter新增1项，首轮暴露控制未静态包装、随后合成List summary错误包含完整history字段，按既有生成Schema修正后22/22通过；不是修改生产Proto或放宽unknown字段。验证原三DEVICE、唯一一次Apply、两个独立固定App转让、C前置/重复只读、正反KEEP及无新资源，合成证据不当真实命令证明。
 
 统一`pnpm test`903项Vitest＋183项Node全部通过，`pnpm typecheck`、官方同pin`pnpm generate:check`和`pnpm edge:e2e`均exit0；真实spec strict、Node语法、仓库独立性（288文件）及diff检查通过。已启动19项published-latest专项，运行期不改runtime/runner/spec，真实终态及后续无参数全量证据待补；未push。
+
+## Published 专项终态
+
+`iwut-console-real-65940`在干净冻结`040cfc78dba70f5ced2375a124f23542effd5efb`下执行`pnpm test:real tests/real/review-decisions.real.spec.ts`，实际19/19通过（浏览器2.2分钟、exit0，无skip/retry）。新增第19项7.1秒：第三份资料正式准备、APPROVED资格零重复Apply、旧表单唯一403后同Review重读仅CURRENT_ADMIN、双向KEEP转让与原公开B/其它视图/Session/钥匙保持、恢复后两检查未确认均收齐。决定POST1/Session DELETE0，最终C仍PENDING，未补决定清理。
+
+23个实际决定响应的private/no-store均真：Version 200×7、403×4、409×1；Profile 200×7、403×2、409×2。原18项完整保留并再次通过，专项不关闭完整UC或替代全量。
+
+三个后端latest重新pull后解析ID与前包相同：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`、App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`、Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。沿用显式103地址NSS测试输入，不冒称部署DNS证据。
+
+终态后专项容器（含退出）和network均为空，源码仍干净。已另起默认无参数完整门禁、逐轮重新pull，运行期间继续冻结runtime/runner/spec，终态待补；未push。
