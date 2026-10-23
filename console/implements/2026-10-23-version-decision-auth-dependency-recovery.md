@@ -1,6 +1,6 @@
 # UC006：Version批准的真实Auth依赖不可用与恢复
 
-状态：`ACCEPTED / NOT_STARTED`，2026-10-23，按用户持续授权自行接受。承接[决定跨Session边界](2026-10-23-review-decision-session-boundaries.md)，本包只补UC006的一项依赖故障联合验收；当前c60dd59的113项全量仍运行，未实施本包，不修改其冻结源码。
+状态：`ACCEPTED / IN_PROGRESS`，2026-10-23，按用户持续授权自行接受。承接[决定跨Session边界](2026-10-23-review-decision-session-boundaries.md)，本包只补UC006的一项依赖故障联合验收；前c60dd59的113项全量已终态109通过/4缓存头失败后才开始本包，未改其运行期冻结源码。
 
 ## 权威与范围
 
@@ -35,3 +35,15 @@
 先用产品组件回归证明reason缺口RED→GREEN；TCP转发/限额/固定控制也先红后绿，覆盖正常字节、既存连接关闭、新连接拒绝、恢复新连接、背压/异常/关闭、边界和静态错误。严禁将TCP控制单测当真实依赖业务证据。
 
 当前113项全量终态收齐后才允许实现本包；实现后统一测试、strict、官方固定pin生成/Edge检查并冻结，再每轮pull published latest跑26专项及114无参数全量。前包四条Gateway Session401及25条既有Application缓存头失败全部保留，不编译后端、不用本地compat、不push红门禁。完整UC006/007及其余角色/策略/Scope/并发和UC001/fencing继续开放。
+
+## 已实现接线与冻结前检查
+
+产品新增两cap×合法/非法reason四项组件回归，先4失败/原89通过，修复后93/93。5xx仅追加既有safeReason输出，非法reason退回HTTP_503、不呈现原message，RESULT_UNCERTAIN/焦点/明确同Review重读/清确认及Session与其它能力保持。不是新增Profile依赖业务证明。
+
+纯TCP代理10项＋固定控制最初15项先25 RED，再25 GREEN；追加事后确认读失败回归后共26/26。固定loopback上游、listener host白名单、32连接、计数饱和2147483647、原样pipe背压/双端错误清理、正常/断链/恢复与未知变更冻结均覆盖。CLOSED仅finally资源关闭后的清理终态，不能恢复或第二次断链；observe返回四个有限公开字段，不含认证材料/地址/正文。
+
+Runner仅为Auth gRPC新增随机loopback发布和固定TCP relay；App连接指向relay，Gateway继续原Auth容器直连。控制与原ready共享已正式准备的reviewDecisionFixture，loopback bearer/空JSON边界接入真实spec；finally只关闭本轮relay，断链时先直接恢复资源，不重发业务命令。
+
+新增一项spec在原25之后复用peer及原PENDING，确认真实503/reason、有效断链计数、只有一个决定POST；原profileOnly队列在断链期间仍可经真实Gateway/Auth明确刷新。生产bound fetch的正常post-response Session校验允许一次，不等于自动详情重读；用户明确重读后累计两次校验/一个详情GET。断链/恢复未知回执先observe、不重放，finally不能靠补决定消费PENDING。
+
+统一954 Vitest＋221 Node、strict/真实spec类型、官方同pin生成、Edge、Node语法/diff检查通过。尚未取得本包published26项专项或114项全量结果，不能把前包25/113或新合成测试作为本次真实依赖故障证据。接下来冻结产品/runtime/runner/spec运行，每轮重新pull latest、原29缓存头失败断言保持。
