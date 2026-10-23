@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+[Profile决定并发与迟到回执](2026-10-23-profile-decision-concurrency-and-late-receipts.md)已接受：原15项后复用已有账号/App/context/Session，正式Create/Submit两份新Profile补同Review双决定、真实deadline/PENDING恢复及重新明确提交后的迟到成功回执。固定准备未知写只读确认、不扩Developer写UI；实施与18项专项/106项全量证据待补，整体门禁仍IN_PROGRESS。
+
 [Version加载后管理关系变化](2026-10-23-review-loaded-conflict-recovery.md)所列增量已实现：既有Reviewer正式Apply/双向转让制造加载后的CURRENT_ADMIN，实际403保留能力并同Review重读冲突，转回后重新读取eligible，Session/钥匙保持、无决定重放。不扩账号/App/quota/登录或前端写UI，资格APPROVED不可逆只发生在原14项后。冻结`77201dd`，903项Vitest＋160项Node、strict/生成/Edge通过；published专项15/15（1.7分钟），默认无参数103项100通过/3失败、无skip（22.5分钟、exit1），15项决定再次全过。全部25条错误仍是原Application缓存头（转让3/owned10/资格12），无新增非缓存硬失败。两轮资源为空、legacy本地/远程不变、未push；完整门禁和UC仍IN_PROGRESS，Profile并发/迟到响应仅为未实施候选。
 
 [结果未知后的权限撤销恢复](2026-10-22-review-uncertain-permission-recovery.md)已实现所列两项：复用正式PENDING资源和主双权限Reviewer，Version/Profile的unknown→正式revoke→真实GET403→regrant→同Review终态读取通过，保留另一能力/Session且不重放决定，不增加账号、配额或业务seed。冻结`dcdb08f`，published专项14/14通过；2026-10-23最终无参数102项99通过/3失败、无skip（17.9分钟、exit1），14项决定再次全过。全部25条错误仍为原Application缓存头（转让3/owned10/资格12），无新增非缓存硬失败。903项Vitest＋143项Node、strict/生成漂移/Edge通过；资源清理、legacy本地/远程不变、未push。完整门禁及其余决定/Session矩阵仍IN_PROGRESS；后续加载后CURRENT_ADMIN仅为已记录候选，尚未实施。

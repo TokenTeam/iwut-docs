@@ -1,0 +1,35 @@
+# UC007：资料审核并发、真实超时与迟到回执
+
+状态：`ACCEPTED / IN_PROGRESS`，2026-10-23，按用户持续授权自行决定并接受。承接[加载后关系变化](2026-10-23-review-loaded-conflict-recovery.md)之后的候选，补UC007 BR-CRV-008引用的BR-CRV-003/004真实交错；不新增业务用例或Developer写UI，不以Version证据冒称Profile分支已验收。
+
+## 资源与准备决定
+
+原15项保留顺序，在其后追加3项普通serial场景。复用`resources[1].applicationId`、原owner Node transport、主Reviewer context/driver及profileOnly context/driver。App原Profile已REJECTED且无工作位，主Reviewer在前包正式Apply后仍为APPROVED、管理权已转回；不重复转让factory，不新建账号/App/quota/BrowserContext/Session或seed。
+
+仅正式Create/Submit两份新Profile：A先完成双Reviewer重叠REJECT并释放工作位，B先完成真实deadline/PENDING恢复，下一独立case在同一B上经用户重新评审确认提交APPROVE并观察迟到回执。B的第二次请求是新的明确用户提交，不是第一次未知请求的自动重放；两个case累计POST明确计为2。Profile批准自动公开仍取当前详情的正式revision/指针，不硬编码NONE，不提供第二Publish。
+
+## 固定准备控制与未知写
+
+仅增加`/fixtures/review-decisions/prepare-profile-overlap`和`prepare-profile-timing`两个loopback bearer控制，精确POST、application/json、无query空对象。不接收subject、App、profile/review ID、content、revision、DB或URL。内部固定App、创建者与两份完整内容（icon/description显式null），返回三元定位值，不返回凭据、原始Auth响应或审核正文。仅当前包既有权限四相位完成、主Reviewer已正式开通且前次管理权转回的正式观察通过后可进入；不通过调用准备控制补做转让或Apply。
+
+按[UC013](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md)、[UC015](../../app-center/use-cases/UC-APP-015-submit-application-profile-revision-review.md)、[UC039](../../app-center/use-cases/UC-APP-039-query-owned-application-profile-revisions.md)正式准备，不改变后端规则。A→B有限相位；不同准备并发失败关闭，同命令in-flight共享promise；重复完成只读确认原目标。B创建前必须读回A的同一Review REJECTED、修订终态及空working，不能创建平行工作修订。
+
+Create无幂等键，displayName非唯一。每一阶段写前正式List捕获全部旧ID/最大sequence、固定公开指针及空working，完整页必须无后续cursor；登记attempt后仅一次Create。未知回执只能List/Get确认唯一新增sequence=max+1、旧ID集合未变、working指针匹配、完整固定content/createdBy/revision1/DRAFT。没有新项不能证明未在途，保持未知并失败，不再次Create。已知Create响应仍须正式读回，不仅信名字/response。
+
+Submit同样登记attempt，仅一次expectedRevision=1写；已知或丢失回执后仅Get同一修订/历史，确认SUBMITTED revision2、工作指针不变、唯一attempt1/sourceRevision1/PENDING/decision=null，再以真实Reviewer详情核对三元、snapshot/提交归因及eligible。仍DRAFT、无历史或读失败不能作为重试理由。不能借管理员投影伪造Reviewer snapshot。未知状态重复准备只读原相位，不能跳到B；错误静态包装，无数据库兜底。
+
+## 三项真实生产React场景
+
+1. **同Profile Review双Reviewer重叠**：主context与profileOnly真实加载A并预览REJECT。透明代理只扣留主请求REQUEST/HOLD，确认HELD后另一个Reviewer正常提交并实际200 REJECTED。释放未修改的主请求，实际409 `ERROR_REASON_APPLICATION_PROFILE_REVIEW_ALREADY_DECIDED`及private/no-store；主页聚焦明确重读说明，键盘重读同Review实际终态及peer决定归因，不重发。两人各一次POST、零Session DELETE，双方Session/设备钥匙保持。此场景不是不同修订公开指针并发。
+2. **真实30秒deadline后仍PENDING**：主页面真实加载B、逐项确认两项APPROVE检查、预览并提交一次，透明REQUEST/HOLD直到实际AbortSignal deadline使请求DROPPED，React必须实际进入RESULT_UNCERTAIN。键盘重读精确同Review实际GET200/PENDING，焦点说明PENDING不能证明旧请求未在途；两项checks清空、确认禁用，原Session/钥匙保持，POST仍一次。不能仅用gate推断JS失败或把PENDING称为原写失败。
+3. **重新明确提交后的迟到成功回执**：新case复用同一B，重新真实读取、重新主动确认并明确APPROVE（累计第二POST）。透明RESPONSE/HOLD实际已获上游200后，SPA返回资料审核队列，捕获新页投影；在30秒deadline前释放原成功回执并确认浏览器完整响应结束。新队列/URL不得被旧终态、理由、snapshot或确认表单污染，Session/钥匙保持、无第三POST或Session DELETE；再明确打开B才显示实际APPROVED/自动公开、无第二Publish。不把超时取消当迟到成功，也不把此次决定归因成第一次未知请求完成。
+
+DOM/网络证据不扩大为同QueryClient或全heap验收。所有错误与未知说明、检查和恢复通过键盘操作并核对焦点；业务响应来自真实App，不伪造JSON或policy。
+
+## 清理、门禁与开放边界
+
+HELD只释放原请求/响应，ARMED不得通过重复业务POST消耗；未命中或未解决gate令本例及后续serial失败。deadline须实际DROPPED，不为清理补决定。Profile没有放弃草稿/撤回Review/删除命令，失败DRAFT/PENDING留至隔离环境销毁，不能seed终态或用决定“清理”。finally关闭各case自己的页面/handler，释放已知HELD，不触碰既有账号/权限相位；未知准备不得假称通过。
+
+先新增准备相位/严格绑定/未知回执/并发/最小披露Node合成红绿测试，再普通回归、strict、官方固定pin生成漂移和Edge。冻结runtime/runner/spec后，每轮重新pull发布latest，先18项决定专项，再默认无参数106项完整门禁，以实际运行/失败/skip数为准。原25条Application错误缓存头保留，不代理补头、不编译后端/本地artifact替代，完整门禁红时不push。
+
+本包只补所列Profile交错。Profile加载后关系冲突、不同修订公开指针并发、策略退休/Scope/全部依赖故障与完整决定跨Session矩阵、UC001/fencing仍OPEN。新产品问题须终态清理后最小修复、重新冻结复验；不以18项通过关闭完整UC006/007或全部Console目标。
