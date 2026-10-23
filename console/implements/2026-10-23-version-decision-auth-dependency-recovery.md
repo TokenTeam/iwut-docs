@@ -54,7 +54,7 @@ Runner仅为Auth gRPC新增随机loopback发布和固定TCP relay；App连接指
 
 真实App在固定App→Auth断链后返回HTTP503及`ERROR_REASON_DEVELOPER_STATUS_UNAVAILABLE`，响应private/no-store均存在；不是代理业务JSON。实际断开的既存/拒绝的新连接计数大于零；Gateway→Auth仍直连，profileOnly经真实链路明确刷新非空队列成功。Version页面展示稳定reason且RESULT_UNCERTAIN聚焦，无自动决定/详情读取/Session DELETE；一次post-response Session校验按原路径完成，Session/carrier/钥匙与另一能力保持。
 
-恢复仅切换relay接纳新连接，再由用户明确GET同Review：PENDING/null decision、Version原revision/SUBMITTED、完整Review与snapshot未变，四检查未确认、必须重新评审。总决定POST1/详情GET1/Session校验2/DELETE0，无补第二决定。此终态读取证明业务未变化，不冒称再次批准或Auth内部数据库故障；恢复新TCP字节由单测分层证明，不把控制RESTORED本身当新批准成功。
+恢复仅切换relay接纳新连接，再由用户明确GET同Review：PENDING/null decision、Version原revision/SUBMITTED、完整Review与snapshot未变，四检查未确认、必须重新评审。自提交前开始的页面观测窗口累计决定POST1/恢复详情GET1/Session校验2/DELETE0；初始详情加载与独立driver的权威Session读不混入该窗口，无补第二决定。此终态读取证明业务未变化，不冒称再次批准或Auth内部数据库故障；恢复新TCP字节由单测分层证明，不把控制RESTORED本身当新批准成功。
 
 本轮30个实际决定响应仅原4个Gateway Session401缺private，其余26个200/403/409/新503全部private/no-store为真。原4失败保持，前包Application25条仍须默认全量重验，不能从专项宣称消除。
 
