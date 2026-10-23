@@ -27,3 +27,15 @@
 先交付精确Query失效helper、两能力组件与core先红后绿，统一测试/strict/固定pin生成检查；在真实矩阵接线完成后冻结产品/runtime/runner/spec，每轮pull published latest跑25项专项和默认全量113项。不能把仅新组件绿或原040冻结的19项当成改后生产UI已真实验收。中途提交明确为IN_PROGRESS，不push；不删除25条原Application缓存头断言、不编译相邻后端或以local-compat替代。
 
 完整UC、不同修订指针UI并发可达性、策略/Scope/依赖故障、其它角色/生命周期及UC001/fencing继续开放。本矩阵仅列明六种决定交错，不等于任意提交点或所有Session组合完成。
+
+## 第一阶段：已复现的等待清理缺口与局部修复
+
+产品修订已本地提交`238bc070f2bf9fc75615592007568a98a44e2f16`。两cap组件新增6项首轮2失败/4通过：明确失败是在原generation DELETE已经发出、回执仍deferred时，Version/Profile旧snapshot和决定表单仍在；不是准备/定位器问题。其它4项新Session同目标/另一能力对旧ACK的保护原本即绿，保留作回归。接入修复后6/6全部通过。
+
+核心新增16项先16失败/旧50通过，再66/66绿；之后额外在途读取测试先1失败/66通过，证明只setState清data仍会被忽略Abort的迟到读回填，补捕获对象级cancel后67/67绿。新增共17 core＋6组件，完整两文件156/156通过。仅对精确Session HTTP/reason设置捕获详情Query.error并同步清data，取消同对象在途读，不操作新Query/新generation；详情父页原恢复hook成为唯一清理者，等待中隐藏旧私有子树且禁用详情刷新。普通403利益冲突、能力撤销、其它错误与未知恢复的原断言未改。
+
+最终源码下统一`pnpm test`926项Vitest＋183项Node、`pnpm typecheck`、官方同pin`pnpm generate:check`、`pnpm build`、`pnpm edge:e2e`均exit0。fixture浏览器10通过/6既有非目标skip（4.8秒），不是业务服务E2E，也不覆盖新六项真实交错。仓库独立性288文件与diff检查通过；本轮测试资源已清理，本地legacy仍`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。
+
+**未完成项不缩减**：本次尚未新增固定Auth失效fault或六项真实spec，未重跑改后19/107，更未运行计划25/113；前040轮次不能挪作新产品证据。下一阶段须接入上述已接受六项，在同一最终源码冻结后重新pull latest，完成25专项与113无参数全量，原25缓存头仍为失败门禁，不以本阶段组件绿宣布完成。
+
+真实接线注意：首次外部失效前固定并正式读出C/Version目标，后续不调用依赖旧main Node Auth Session的准备观察（该账号旧Session会被fault失效）；不通过复制新浏览器token或暗中替换Node Session规避。原owner/governor及B两个单项Reviewer不作为失效目标，未知fault写不能重发。真实DOM/网络与组件Query对象证据继续分层。
