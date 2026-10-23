@@ -36,3 +36,13 @@
 已追加第27项独立Developer owner场景，保存原第3项两次真实决定的Review结果，对照管理概览、资料列表及两份详情的指针/审核事实与生产DOM；独立EMAIL/钥匙、不复制Admin凭据，业务请求只读、无跨origin或Session清理。概览过时Version占位文案先RED（1失败/30通过）后改为准确只读说明，同文件31项GREEN。实施索引已分开当前有界覆盖、有限开放项与历史，不再将首包待验收重复当作当前缺失。统一检查与本包27/115真实轮次仍待终态，不宣称跨端闭环已真实通过。
 
 本次冻结前`pnpm test`为954 Vitest＋221 Node全部通过，仓库独立性294文件通过；`pnpm typecheck`、从官方固定27c输入的`pnpm generate:check`、`pnpm edge:e2e`及`git diff --check`通过。Edge重拉Gateway latest仍为2953ae7f，六ADMIN路由隔离/失败关闭通过；legacy本地与本次远端均为e68851e、未变。以上不是本包真实跨端验收结果，下一步须冻结后执行27专项和115无参数全量。
+
+## published专项终态
+
+冻结Console `32e83da`，轮次`iwut-console-real-186885`，27项全部执行、无skip/retry：26通过/1失败（3.0分钟、exit1）。27项body功能断言全部完成，新跨端只读场景用时5.4秒；最后一项仅被afterAll原4条Gateway Session401缺private标红，四个安全坐标均`review-decisions.real.spec.ts:44:143`，没有新增功能失败。原缓存头断言未删除；不能把body完成称专项全绿，Application另25条仍须默认全量重验。
+
+真实独立owner在Developer origin正式EMAIL建立Session及一把non-extractable设备钥匙，没有Admin Cookie。生产概览实际读取replacement公开指针/无工作修订；列表两份均APPROVED、只有replacement当前公开。两个详情及各自latestReview/单条历史逐项对应原Admin实际Review ID、attempt、sourceRevision、提交/决定时间、策略版本、reason与APPROVED；旧批准修订不显示当前公开，两详情指针均保持replacement。原文与实际snapshot字段对照，不将Developer正文标成Reviewer snapshot；DOM不含未授权审核字段、写入口或外部媒体。业务GET均实际private/no-store，观测窗口零业务写/跨origin/Session DELETE，Session/carrier/设备钥匙保持。登录driver只证明正式协议链，不冒称新的完整React认证UI验收或全heap审计。
+
+本轮重新pull published latest且轮内固定：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`，App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`，Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。五ID与前09轮一致，API同pin、显式NSS fixture未改，runner strict/报告隐私/生产build前置通过。轮次容器（含退出）和network已核对为空，未编译后端、未改运行期产品/runtime/runner/spec、未push。
+
+同一32e83da冻结继续默认无参数115项全量，尚未有终态；专项不替代全量，不以此关闭完整UC/外部门禁或其它有限开放项。
