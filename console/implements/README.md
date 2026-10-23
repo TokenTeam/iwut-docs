@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+用户通知后已确认App/Gateway published latest更新：[缓存头修复复验](2026-10-23-published-cache-header-fix-verification.md)的35项专项全部通过（4.4分钟），原29条缓存头断言恢复、Console源码/断言未改。新Gateway Edge隔离通过；同冻结默认115项全量待终态。下文111/115和错误头仍红属于旧镜像轮次；不据专项宣布完整门禁已绿，其它设计开放项不变。
+
 [阶段收口与继续条件](2026-10-23-console-stage-closeout.md)已自行接受：当前不再扩大测试排列或新增业务UI，先等待App/Gateway错误响应头修复及跨系统设计边界处理。收口复拉三个published latest的ID仍与115项轮次相同，不重复启动相同全量；不是目标完成或门禁放宽。
 
 截至2026-10-23，最新实际验收为[Admin→Developer资料投影闭环](2026-10-23-profile-decision-developer-projection.md)，冻结`32e83da`：published专项27项26通过/1失败（3.0分钟），同冻结默认无参数115项111通过/4失败、无skip/retry（19.5分钟、exit1）。两轮27项body功能断言全部完成；29条失败逐项仅为原Application错误缓存头25条＋Gateway决定Session401缺private的4条，无新增功能失败。954项Vitest＋221项Node、strict、官方固定pin生成及Edge通过；五镜像每轮重拉published latest且ID不变，轮次资源已清理、legacy本地/远程未变、未push。**完整门禁仍`IN_PROGRESS`，不把body完成称为套件全绿或完整UC完成。**
