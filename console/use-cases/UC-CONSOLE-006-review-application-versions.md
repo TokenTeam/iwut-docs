@@ -54,9 +54,9 @@
 
 ## 依赖事实、缺口与实现选项
 
-UC030 详情与当前 Proto 已包含 `currentPolicy.version/requiredCheckIds`，因此策略版本与确认 ID 不是缺失 API；队列、详情与决定已有后端能力。客户端须固定生成输入，Gateway 须登记三个 ADMIN surface 路由。
+2026-10-23按已发布接入证据更新：固定API输入`27c9743d2d7476511932a83563e103aee5b4e28e`的UC030详情已包含`currentPolicy.version/requiredCheckIds/requiredCheckDefinitions`，Version v3四项正式定义由同次服务端详情提供。Console使用生成类型和该次定义，不从英文ID翻译、套其它版本文案或使用客户端包决定当前策略；缺失、未知或不一致定义仍按BR-CRV-002失败关闭。
 
-当前公开详情只返回 requiredCheckIds，未返回 `ReviewCheckDefinition` 正式定义/文本。首版不能从英文 ID 自动翻译或套另一策略文案。本提案建议由 App 所有者确认正式定义的可消费来源；选项为后端既有策略投影的后续正式扩展，或与每个不可变 policy version 严格绑定、经过 App 所有者核验的只读定义包。后者不能把客户端包当“当前策略”权威；只用于解释详情返回的精确版本，未知版本关闭决定表单。定义来源未核验前，允许只读队列/详情，不宣称完整审核交付；本 UC 不创建 App API。
+Gateway三条ADMIN查询/决定入口已在已发布镜像接入，真实Auth权限签发、逐项确认及决定链已验证，详见[决定接入及published记录](../implements/2026-10-16-admin-review-decisions.md)和[当前有界覆盖](../implements/README.md)。这些不是现存接入阻塞；最初“仅返回ID、定义待提供”的描述仅适用于首阶段旧输入。策略退休/Scope变化的正式准备能力及其它有限未覆盖项、Application/Gateway错误响应缓存头门禁仍开放，不因定义和surface就绪标记完整交付。本UC不另建App API或复制检查定义正文。
 
 ## 验收与完成标准
 
