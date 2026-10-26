@@ -28,3 +28,7 @@
 先验证签名Frame/有界状态和runtime配置，再跑普通测试、strict、官方生成漂移、Edge/docs。冻结产品/runtime/runner/spec后，每轮重新pull published latest并轮内固定ID；先3项专项，再默认124项全量，原121和缓存头/隐私断言全部保留。遇未接入或契约不符，保留实际失败，不编译相邻后端、不换local artifact、不主动消息外部agent。每轮核验退出码、容器（含停止项）/network清理及legacy本地/远端不变；只本地提交、不push。
 
 只关闭所列WITHDRAWN历史读取链；App政策发布回执/下一真实政策、33+carrier架构及完整UC/goal继续独立开放，不自动扩展无穷状态排列。
+
+## 实施与静态验证
+
+运行配置8项、签名Frame11项、runner source-wiring6项、typed相位16项及正式owner准备8项共49项新增Node回归通过；状态机先缺模块RED，再补齐实现，并由坏Close回执/重复密码消费回归再次RED→GREEN。静态接线检查不冒充运行时安全或真实业务结果；合成transport不冒充后端收敛证据。专用工厂Promise失败也保留；只读控制返回最小事实，不返回密码、Node凭据、Session或proof。普通954 Vitest＋344 Node、strict、官方固定API远程生成检查、Edge检查和docs72份brief/367行8退休编号检查通过。真实专项/默认124门禁待以下轮次记录，当前不宣称本链已通过。
