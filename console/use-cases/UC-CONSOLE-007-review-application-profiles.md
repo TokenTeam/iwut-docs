@@ -1,6 +1,8 @@
 # UC-CONSOLE-007：审核 Application 公开资料
 
-状态：`PROPOSED`
+状态：`ACCEPTED`
+
+2026-10-16按用户持续授权自行接受完整用例，按[首阶段实现记录](../implements/2026-10-16-admin-review-queries.md)先实施真实队列/详情与权限恢复。批准/拒绝及其全部验收保留；公开指针与决定surface后来已按[决定接入工作包](../implements/2026-10-16-admin-review-decisions.md)补齐并验证，不再作为当前接入阻塞，也不以局部通过替代完整验收。
 
 ## 用户目标、权限与范围
 
@@ -16,7 +18,7 @@
 2. 队列显示 Application、修订 sequence/displayName、attempt、提交时间和 decisionEligibility。冲突项保留并说明 CURRENT_ADMIN、REVISION_CREATOR、REVIEW_SUBMITTER；缺权限不是空队列。
 3. `GetApplicationProfileReview` 使用 `GET /app-center/v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}`。显示不可变 snapshot 的 displayName、description、icon 原始文本、sourceRevision、attempt、提交事实与 decision，以及独立的当前修订 revision、Application 上下文、currentPolicy 和 eligibility。
 4. 终态详情只读；当前修订与 Review snapshot 分区，绝不从 UC039 管理查询替换审核材料。原文纯文本显示，未知或不可信 icon 字符串不自动执行/内嵌；不新增外链探测或资产代理。
-5. APPROVE 前还须读取 Reviewer 被授权取得的当前公开资料指针及相应公开内容（如存在），明确本次批准将替换什么。该正式来源当前缺失，见依赖章节；不能用管理员查询或推测 null 代替。
+5. APPROVE 前还须读取 Reviewer 被授权取得的当前公开资料指针及相应公开内容（如存在），明确本次批准将替换什么。正式来源为同次Reviewer详情的`currentPublishedProfile`，见依赖章节；不能用管理员查询或推测 null 代替。
 
 ## 决定流程与前端规则
 
@@ -50,10 +52,10 @@ REJECT 提交有效非空纯文本理由、空 confirmedCheckIds，省略 expect
 | --- | --- | --- |
 | PENDING 队列、snapshot、当前修订 revision、eligibility、currentPolicy.version/requiredCheckIds | UC031 详情/当前 Proto | 可接入；不是缺失策略版本 API |
 | 正式检查定义 | UC016 BR-PRF-028 已定义 `app-profile-review-v1` 两项检查及含义；详情只返回 ID | 首版可按这个不可变精确版本制作经 App 所有者核验的只读解释包；icon 为空仍明确确认不适用，不省略该项。其他版本定义未核验时关闭决定；如未来需通用读取，交 App 所有者另行设计，不在本 UC 加 API |
-| Reviewer 当前公开指针及被替换公开资料 | UC031 的 Application context/Proto 当前没有指针；UC029/039 只授权当前管理员，不能借用 | **阻塞 APPROVE**。建议 App 所有者评估正式扩展 Reviewer 详情，提供当前公开指针及最小公开对照事实，并按其 UC/BR 审核、实现、更新 API；替代方案为经论证的既有 Reviewer 可读权威查询。不能从公共 Catalog 某项缺失推断 NONE，不能从此前自己的决定缓存推断当前值 |
-| 三个 ADMIN API surface、固定生成客户端及真实权限签发 | Gateway/Console/Auth 对应工程包 | 依赖对应 agent 验收；路由存在不代表权限或定义就绪 |
+| Reviewer 当前公开指针及被替换公开资料 | 固定API27c的UC031同次详情`currentPublishedProfile`，以显式NONE或published分支返回指针与最小公开对照 | 已接入并经真实首次批准/替换验证，不再阻塞APPROVE。UC029/039仍只授权当前管理员，不能借用；缺失/未知分支仍失败关闭，不能从Catalog缺项或此前决定缓存推断NONE/当前值 |
+| 三个 ADMIN API surface、固定生成客户端及真实权限签发 | 已发布Gateway及Console固定生成/Auth在线签发 | 已接入并经真实决定链验证，不仅是路由存在检查；范围和未覆盖项见实施记录，不推导其它组合已通过 |
 
-在公开指针依赖解除前，可实现经接受设计的队列/详情及 REJECT 分支；APPROVE 显示“批准前置读取尚未接入”并保持禁用，UC 整体继续未完成。是否接受分阶段交付由本提案审核确定，不借临时 DTO、DB 读取或 BFF 越权解除阻塞。
+2026-10-23依已发布接入证据更新本节。最初公开指针未交付时的阶段限制已解除，APPROVE/REJECT均已实现；不得继续把旧“批准前置读取尚未接入”当当前待办，也不能用临时DTO、DB读取或BFF越权替代正式来源。固定输入、真实证据及仍开放的策略/不同修订并发可达性/缓存头门禁见[决定接入](../implements/2026-10-16-admin-review-decisions.md)与[当前有界覆盖](../implements/README.md)；本次只校正依赖事实，不改变BR或以下完成标准，UC整体仍未完成。
 
 ## 验收与完成标准
 

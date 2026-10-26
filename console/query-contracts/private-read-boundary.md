@@ -1,0 +1,27 @@
+# Console 私有管理读取的失效边界
+
+状态：`ACCEPTED`，2026-10-16，按用户持续授权自行决定。落实UC002–005的BR-CMG-002/004/010，不定义服务端权限，也不改变Session v2或业务API。
+
+## 本次读取，而非永久权限缓存
+
+每个当前页面读取attempt绑定Session public binding/generation、Application（若有）、当前资源/路由及本次attempt。它只约束本页面异步结果是否还能消费，不证明或缓存服务端授权。用户换代、换目标、离开或明确重新读取时旧attempt失效，不能让旧回调修改新范围。
+
+单次请求的取消与页面attempt失效分别检查：开始、成功返回和解释拒绝前均核对原signal及捕获lifetime，关闭后重新激活不能复活旧lifetime。消费时已知本地Session换代、SIGNED_OUT或投影缺失应失败关闭；在线权威确认仍由原Session链路承担。取消或过时请求不作为新的权限观察，不清新Session/新Query。
+
+`SESSION_INVALID` / `CONSOLE_SESSION_CHANGED`优先沿用现有按代Session恢复。其它明确401/403/404终止本次读取：立即遮蔽当前页全部私有区块，冻结旧attempt，卸载/禁用读取子树，再同步取消并删除精确旧范围Query，不能等宽条件异步清理后误删新attempt。client读取在发出前/返回后核对attempt；即使底层忽略abort，旧成功也不能回填Query。普通fetch/生成ProtoJSON客户端和Gateway直达业务链不变，不加BFF正文代理或认证头。
+
+清理覆盖当前Session下该Application的详情、Version、Profile及Tester全部关联Query，并丢弃当前Session的owned-list旧分页/计数/token；不从旧列表局部删行后把余下页伪称完整投影。owned-list自身明确拒绝时可保守丢弃当前Session全部私有读取缓存，但不清Session。不得影响其它Session/新attempt的缓存。Query内存直接检查和真实DOM/网络证据分层。
+
+子Version/Profile的404只表示该资源不存在或不可访问；保守移除关联缓存不意味着整个Application永久失权。拒绝界面统一表达，不泄露资源是否存在，不出现旧正文/计数/指针/分页。仅明确“重新读取”或重新进入新页面建立新attempt并重置分页；焦点恢复、网络重连、筛选或兄弟成功都不自行解除拒绝。返回概览后仍可真实重读，不能建立持久权限黑名单。
+
+## 临时错误
+
+网络/5xx不是权限或Session失效证据，不清Cookie/设备。相同读取上下文内已经成功的数据可保留，但必须明确“上次读取/旧快照”及其服务端asOf；多页分别标时间，不合并成单一快照。新筛选/资源/页不能借旧上下文数据伪装成功；显式从头刷新可先丢旧分页，不能承诺该重置仍保留旧页。400坏token、413/畸形成功等依照各UC表达，不能把这些错误变成虚构的权限授予。
+
+允许保留的错误仅为真实TypeError、DOMException AbortError或ApiError HTTP500–599。其它非nullish错误不得猜作暂时网络故障：遮蔽并精确清当前投影，focus/reconnect不自动重试，后续暂时错误不能复活已退场正文；明确新成功可恢复。Session/权限拒绝仍优先走专门边界，未知错误不因此获得清Session或整App永久拒绝的含义。
+
+UC004的400、413或畸形成功响应必须立即隐藏该次查询的旧正文、指针和审核投影，并只回收捕获的当前Query data；不清Session、不扩大为整App永久拒绝。后续网络/5xx也不能把已经因此退场的旧投影复活，只有新的成功读取能恢复数据。明确错误不随focus/reconnect自动重试；用户明确从头读取/返回新上下文仍可访问。413不能自动重试同一超预算响应。成功响应的解码/形状校验统一包装为不含正文或原错误cause的专门协议错误，不能与真实fetch抛出的网络TypeError混淆；网络TypeError的旧asOf保留语义不变。
+
+UC005三个区域同样区分成功协议错误与真实网络错误；400坏token/其它明确非权限4xx/协议错误只退场对应区域且不随focus/reconnect自动重试，其它区域保留独立投影。已有region结果替换可以清除该区域旧data，不要求改成整页Query驱逐。后续503不能复活已退场的旧数据；明确从头读取或新的成功可恢复。权限拒绝仍先执行整页attempt边界，不能被区域恢复吞掉。
+
+共享fetch transport读取成功HTTP正文时，断流产生的TypeError归真实网络错误，不因JSON读取失败被转换为null协议响应；完整传输后的JSON语法错误仍归协议错误。非成功HTTP已确认的status优先保留，不能因错误正文断流把明确401/403/404降成可保留旧数据的网络故障。此分型不放宽Session或读取attempt检查。

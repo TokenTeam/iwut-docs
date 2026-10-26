@@ -1,0 +1,100 @@
+# UC006–007：决定响应的跨Session隔离与等待清理边界
+
+状态：`ACCEPTED / IN_PROGRESS`，2026-10-23，按用户持续授权自行接受。承接[Profile加载后关系变化](2026-10-23-profile-loaded-conflict-recovery.md)，补BR-CRV-003/004及UC007引用的决定Session边界，不以读取请求矩阵或组件mock代替真实决定验收，不扩大Developer写UI或新增退出/账号切换业务用例。
+
+## 当前实现缺口与最小修复决定
+
+静态检查发现`ReviewDecisionForm`独立保存决定ApiError并调用Session恢复，详情父页只消费query.error。决定得到SESSION_INVALID后，若按预期generation的DELETE回执仍在途，父页原snapshot和Query.data没有因此进入读取侧既有退场流程；仅禁用表单不足以证明已卸载私有内容。先新增两能力的合成延迟清理回归，必须先观察RED才能把此推断登记为已复现。
+
+最小方案：仅将当前决定的精确Session错误转交其已捕获的详情Query实例，使它进入既有详情Session恢复路径；同时清该实例data。必须验证仍是同一缓存对象、query key属原Session且QueryClient当前Session仍匹配，不得按宽泛key覆盖新Query或新身份。错误严格限定HTTP401/SESSION_INVALID及HTTP409/CONSOLE_SESSION_CHANGED；其它403（包括利益冲突）、404、网络/5xx与协议错误仍保持原恢复语义，不能伪装成Session失效。
+
+详情query error驱动原`useRecoverInvalidSession`：当前Session明确失效才发一次带原contextBinding/generation的DELETE；收到回执前隐藏原snapshot/理由/checks/预览并同步清捕获Query.data，不后台重发决定/读请求。迟到清理回执仍按当前Session保护，不能导航或清除新身份的同目标/其它能力内容。结果未知的同Review恢复要求不变；不能把本包局部内存证据称为全heap清理。
+
+## 真实矩阵设计
+
+原19项顺序保留，随后追加Version/Profile各旧401、旧DELETE204、旧成功200共6项，预期决定专项25项、默认全量113项，以实际终态为准。先401/204，最后才真实成功决定，复用原Version `resources[2].versions[2]`及第三份Profile C的正式PENDING，不创建新App/Profile/Review、改配额或seed决定终态。
+
+复用原main BrowserContext/设备钥匙为A；另用原Version-only及Profile-only账号，各在同一context通过正式EMAIL生成独立non-extractable钥匙一次。B始终是另一能力Reviewer，进入其真实非空队列，不用旧目标为空推断隔离。三EMAIL（含原main）＋六例各A/B DEVICE共15次签发，保留32上限，不复制storageState/私钥。真实邮件冷却/DEVICE节流仅用于准备，429/未知不自动重放。
+
+1. **迟到401**：A真实加载PENDING并预览REJECT；固定外部Auth Session失效fault后以独立同源读确认SESSION_INVALID。唯一决定POST的真实Gateway401被RESPONSE/HOLD；B登录后释放旧401，原页通过正式工作台入口进入B获权队列。旧错误不能导致DELETE B、恢复原snapshot/理由/结果，B权威Session/carrier及明确刷新保持。
+2. **迟到204**：A加载同一PENDING目标并预览，正式失效fault后唯一决定POST实际401；生产恢复的旧generation DELETE实际提交204但回执HELD。此时旧私有详情必须已经卸载。B登录，原SPA通过工作台建立B非空队列后释放旧ACK；同document、URL、投影/asOf、B权威Session/carrier保持，无额外决定、Session读取/DELETE或导航。只被动计原生fetch状态，不读认证材料或旧未消费正文。
+3. **迟到成功200**：A重新DEVICE并真实读原PENDING/重新确认REJECT，真实App已决定200后RESPONSE/HOLD；B登录，原SPA进入另一能力非空队列，在30秒deadline前释放原成功并确认传输完成。B页面不得出现旧结果、理由、snapshot或新自动读；只把原Review终态视为后端事实，不把B变成决定人。每例只一个明确POST、无自动重放，C/Version最后才被该项正式决定。
+
+透明代理不生成业务JSON或授权成功；B页面需真实权限链和非空投影。Session失效控制仅固定原main账号、loopback bearer、精确POST/无query/application-json空对象，有界4次外部失效fault；不接收subject/Session/DB/URL，未知fault写失败关闭而不自动重放。此fault不冒称正式撤销/禁用UI或Auth命令证明，也不改原权限/资格事实。该控制及6项浏览器实现尚待后续交付，不因本次组件修复而标通过。
+
+## 阶段与门禁
+
+先交付精确Query失效helper、两能力组件与core先红后绿，统一测试/strict/固定pin生成检查；在真实矩阵接线完成后冻结产品/runtime/runner/spec，每轮pull published latest跑25项专项和默认全量113项。不能把仅新组件绿或原040冻结的19项当成改后生产UI已真实验收。中途提交明确为IN_PROGRESS，不push；不删除25条原Application缓存头断言、不编译相邻后端或以local-compat替代。
+
+完整UC、不同修订指针UI并发可达性、策略/Scope/依赖故障、其它角色/生命周期及UC001/fencing继续开放。本矩阵仅列明六种决定交错，不等于任意提交点或所有Session组合完成。
+
+## 第一阶段：已复现的等待清理缺口与局部修复
+
+产品修订已本地提交`238bc070f2bf9fc75615592007568a98a44e2f16`。两cap组件新增6项首轮2失败/4通过：明确失败是在原generation DELETE已经发出、回执仍deferred时，Version/Profile旧snapshot和决定表单仍在；不是准备/定位器问题。其它4项新Session同目标/另一能力对旧ACK的保护原本即绿，保留作回归。接入修复后6/6全部通过。
+
+核心新增16项先16失败/旧50通过，再66/66绿；之后额外在途读取测试先1失败/66通过，证明只setState清data仍会被忽略Abort的迟到读回填，补捕获对象级cancel后67/67绿。新增共17 core＋6组件，完整两文件156/156通过。仅对精确Session HTTP/reason设置捕获详情Query.error并同步清data，取消同对象在途读，不操作新Query/新generation；详情父页原恢复hook成为唯一清理者，等待中隐藏旧私有子树且禁用详情刷新。普通403利益冲突、能力撤销、其它错误与未知恢复的原断言未改。
+
+最终源码下统一`pnpm test`926项Vitest＋183项Node、`pnpm typecheck`、官方同pin`pnpm generate:check`、`pnpm build`、`pnpm edge:e2e`均exit0。fixture浏览器10通过/6既有非目标skip（4.8秒），不是业务服务E2E，也不覆盖新六项真实交错。仓库独立性288文件与diff检查通过；本轮测试资源已清理，本地legacy仍`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。
+
+**未完成项不缩减**：本次尚未新增固定Auth失效fault或六项真实spec，未重跑改后19/107，更未运行计划25/113；前040轮次不能挪作新产品证据。下一阶段须接入上述已接受六项，在同一最终源码冻结后重新pull latest，完成25专项与113无参数全量，原25缓存头仍为失败门禁，不以本阶段组件绿宣布完成。
+
+真实接线注意：首次外部失效前固定并正式读出C/Version目标，后续不调用依赖旧main Node Auth Session的准备观察（该账号旧Session会被fault失效）；不通过复制新浏览器token或暗中替换Node Session规避。原owner/governor及B两个单项Reviewer不作为失效目标，未知fault写不能重发。真实DOM/网络与组件Query对象证据继续分层。
+
+## 第二阶段：固定控制与六项真实spec接线
+
+Console已本地提交并冻结`badf1f559983ab9e0da893bed0a563364ef17f40`，产品修复仍为前238，新增固定失效控制/runner/六项serial spec，不增业务资源。控制新增12项Node先12 RED后12 GREEN：精确空JSON/媒体/16KiB、固定Mongo集合和活跃Session filter、ready、4次上限、并发拒绝不占次数、未知或零修改冻结、静态错误及外层bearer均覆盖；未知写不重放。ready仅证明本轮决定fixture已正式准备，原19项与恢复完成顺序仍由真实serial验收，控制不冒称治理业务授权。
+
+统一926项Vitest＋195项Node、strict/官方同pin生成/Edge、Node语法/diff及独立性290文件通过。新增spec strict首轮暴露exactOptionalPropertyTypes的字段形状，已对齐真实driver返回；清理gate沿用既有精确method/path，另直接校验真实DELETE正文为原contextBinding/generation，不增加不存在的gate参数或伪造清理请求。旧401可能已触发产品正式Session重读/导航，工作台Link不强求重复GET；B非空队列仍经真实受Session绑定的API和独立权威Session/carrier验证。
+
+旧200回执可能被产品post-response Session fence取消正文，不将取消当失败或强读未消费DevTools JSON；以真实上游200/完整传输及现有另一Reviewer context的实际终态/决定人读回分层证明。主context三EMAIL＋六例12DEVICE合计15签发，不因终态读回追加登录。旧401/204/200、B投影精确asOf、同document和无额外Session/业务/DELETE/导航均保留明确断言；原全部决定缓存头检查未改。
+
+开始本冻结的published25项专项，每轮仍拉latest、轮内固定解析ID，运行期不改产品/runtime/runner/spec。真实专项与其后113项完整门禁均未达终态，不登记为通过、不push。
+
+## 第二阶段首轮失败与修订决定
+
+冻结`badf1f5`的published专项已终态exit1：21通过、1失败、3未执行（5.3分钟），轮次`iwut-console-real-109373`容器/网络已清空。原19与新增Version旧401/旧204均通过；Version旧200实际上游决定成功且浏览器已见200，但卡在`Response.finished()`，180秒测试到期。afterAll另外保留两条Version Session401缺`private`的失败（`no-store`存在），不得删除该断言，也不得把未执行的Profile三例登记通过。默认113全量尚未运行，先修正此轮暴露的问题再新冻结。
+
+修订已接受：本机真实Chromium、有限HTTP JSON、原生fetch收到200后经独立请求再cancel旧正文的最小实验，同样令Playwright finished持续未决。这是观测API与主动取消正文不兼容，不是后端未决定证据。对这两个跨Session旧200场景不再要求消费/下载旧正文，也不靠删除等待直接判通过；改为代理完整读取真实上游、原样发送后的ServerResponse finish布尔证据、浏览器实际200与30秒内到达，以及独立Reviewer正式GET终态/决定人。服务端finish只证明代理已交出完整字节，不冒称浏览器解析完整正文。旧同Session正常消费的既有finished断言保留。
+
+静态检查另发现bound fetch在页面attempt已close或本地Session换代后仍会先发Session校验，再被外层read拒绝。按原“B稳定后零额外Session读”契约增加每请求捕获lifetime断言：发请求前、收到响应且发Session校验前、Session校验完成后都验证原attempt/lifetime/本地Session/signal；过期时cancel旧body并原样抛Obsolete/Abort，不清新Session、不广播能力失效、不解析正文、不自动重放。存活请求仍保留真实Session校验，不能用本地状态替代权威校验；close再activate也不能复活旧请求。先用两能力各场景RED复现，再实现，组件真实client回归与完整门禁另记实际结果。
+
+代理只对RESPONSE/HOLD追加`downstreamFinished: true`，须由真实response finish事件触发；ARMED/HELD/REQUEST/DROP/TRUNCATE不能伪报，控制不暴露正文/头/认证材料，不伪造业务成功。此为测试传输证据，不改变产品、业务准备数量、15次签发预算或原全部缓存头断言。
+
+## 修订实现与冻结前检查
+
+Console新冻结`b4d8d1a`：每次fetch捕获attempt lifetime，原signal与本地Session在发送、响应后、Session校验后共同失败关闭。核心新增16项首轮14失败/2已绿：12项两cap×close/close后activate/本地换代×200/401均复现额外Session读，另两项真实校验已开始后close/activate再成功会消费旧正文；校验失败后的旧取消本来就绿，保留。修复后83 core全部通过。新增8项未mock生成client的StrictMode组件先8红（Session/Page更换×两cap×200/401）再8绿，真实hook接线后只有原决定请求、无额外Session/正文解码/新页变更。旧8项正常读取激活仍通过，合计99/99。
+
+代理finish证明先在现有原样响应测试增加明确断言而RED，再由真实finish事件驱动GREEN；全代理测试通过，DROP/TRUNCATE既有精确状态对象断言未改。跨Session旧200只被动观察原生fetch状态，不clone/读旧body，不改响应与请求；既有同Session的正常finished断言未动。
+
+本冻结统一950 Vitest＋195 Node、strict/真实spec类型、官方同pin生成、Edge、diff及独立性290文件均通过。published25项专项已启动，本轮仍pull latest，五镜像ID与前轮相同；运行期冻结产品/runtime/runner/spec。尚未登记本轮真实结果，也未启动其后无参数113全量，不以单元绿替代实际验收。
+
+冻结b4d8d1a首轮已终态exit1：17通过、1失败、7未执行（3.4分钟），轮次`iwut-console-real-121103`资源已清空。第18项既有同Session离页成功回执同样卡finished：新lifetime护栏正确取消已离开详情页的旧正文，它并非仍存活的“正常消费”响应，旧spec还强读receipt JSON也不再兼容。不能为保持这项旧断言而恢复消费失效详情/发Session读。
+
+接受将第18项也应用同一分层证据：实际200、原生fetch只记status、代理真实finish与30秒内到达；原“明确重开同Review”继续验证APPROVED及实际公开指针，不能删除。原队列同document/URL/投影保持、无结果回填/决定表单/第二POST或DELETE保持，增加释放后的零额外Session/私有读/导航计数。释放后立即清本地gate待清理引用，避免测试到期后finally控制请求覆盖原始失败坐标。此修订不扩大产品范围、也不改变原业务命令数或缓存头；上文“既有正常finished未动”仅描述上一冻结，不适用于已离页的第18项。新冻结须重新专项和全量，不借这轮17项算通过。
+
+dcb520a轮次在真实邮件冷却准备期间主动SIGINT结束（exit1，未开始25项业务测试），不是观察等待超时自动重跑，也不是业务失败：静态检查发现bound client构建时捕获fetch，页面加载后才包装window.fetch无法记录旧决定。独立本机Chromium有限HTTP实验确认cached fetch调用的观察计数为0。停止后进程终态及本轮全部容器/网络为空才修改spec；被动status观察器改为在open/page.goto之前addInitScript，使生产client捕获原样转发的包装fetch。仍返回原promise、不clone/读body或改signal、仅记静态status。此轮不能借作任何业务通过证据；新冻结另跑。
+
+## 修订后published专项终态
+
+最终源码冻结`c60dd59`（产品仍b4d8d1a，后两提交仅spec/元数据），轮次`iwut-console-real-131162`：25项无skip/retry，24通过/1失败（2.7分钟、exit1）。全部25项测试body的功能断言通过；第25项被afterAll的4条缓存头soft失败标红，安全坐标均`review-decisions.real.spec.ts:39:143`，没有新增功能失败。原19再次通过；新增两cap各旧401/旧DELETE204/旧200的六项均完成，包括等待清理期间私有内容退场、B另一能力非空队列/精确asOf/同document/URL、真实Session/carrier/设备钥匙保持、释放后零额外Session/私有API/DELETE/决定/导航及明确刷新。旧200通过实际200/原生status/真实代理finish/30秒内到达和独立Reviewer正式终态/决定人，不消费旧body。所列交错通过不等于完整UC或所有提交点/角色组合完成。
+
+29个实际决定响应观察中，4个Session401（Version旧401和旧204各一个、Profile同样两个）均`private=false, noStore=true`；其余25个200/403/409全部private/no-store为真。4条private失败全部保留，属于新暴露的Gateway Session错误响应门禁，不得临时代理补头或从afterAll排除。此前默认107全量的25条Application错误头是独立既有缺口，尚不能用本专项声称已重验/消除。
+
+每轮重新pull published latest，本轮解析ID：Auth `sha256:c2f06d8fe4ca2734a32e07e70f6ab7ba8c0207932336222c2c92986e073de8b9`，App `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`，Gateway `sha256:2953ae7fb81da7d06586b735340e4d3d320e523bb67f7700cc2571602e728303`，Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`，Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，均与前轮相同。报告隐私/strict/runner构建前置通过；未编译相邻后端或用本地artifact。显式NSS仍103.102.166.224，不作部署DNS证明。
+
+专项容器/网络已清空；legacy本地与本次远端只读核对均为`e68851e343bd0e077e5ccd0b680fe6813216ced0`，未push。已在同一c60dd59冻结启动默认无参数113项完整回归，运行期不改产品/runtime/runner/spec；本记录尚无其终态，不能把专项当完整门禁通过。整体仍IN_PROGRESS。
+
+## 同冻结无参数全量终态
+
+Console `c60dd59`，轮次`iwut-console-real-136597`，默认无参数113项全部执行，无skip/retry：109通过、4失败（19.0分钟、exit1）。审核决定25项body的全部功能断言再次完成，最后一项仍仅被afterAll四条Session401 private断言标红，29个实际决定响应与专项相同；其余Admin/Developer跨Session、生命周期、真实登录/恢复、双副本及Mongo故障等本轮所列测试完成，不能据此扩大为未列明角色/故障或完整UC。
+
+全部29个失败安全坐标已逐项核对，均为保留的缓存头检查，没有新增非缓存硬失败：
+
+- 原管理转让Application GET404缺no-store：`management-transfer.real.spec.ts:257:29`×3。
+- 原owned-list List400缺private/no-store：`owned-application-pagination.real.spec.ts:200:57`×4、`:201:58`×4、`:220:66`×1、`:221:67`×1，共10。
+- 原资格角色Application GET404缺private/no-store：`qualification-read-matrix.real.spec.ts:368:54`×6、`:368:116`×6，共12。
+- 新Gateway决定Session401缺private：`review-decisions.real.spec.ts:39:143`×4；Version/Profile各旧401及旧204前的实际决定401，no-store均存在。
+
+本轮重新pull latest后五个镜像解析ID与上述专项完全一致，official API pin不变、types/报告隐私及runner构建前置通过。产品/runtime/runner/spec在运行期未改；未编译后端、删断言、代理补头或push。专项及全量的容器/网络均已检查为空，本地legacy仍原SHA；整体门禁维持IN_PROGRESS，而非因功能断言收齐而标绿。
+
+下一增量[Version批准Auth依赖恢复](2026-10-23-version-decision-auth-dependency-recovery.md)仅已接受，当前尚未实现；它不消除上述缓存头缺口。策略退休、Scope变化、不同修订公开指针并发及其它完整UC/UC001/fencing缺口继续OPEN。
