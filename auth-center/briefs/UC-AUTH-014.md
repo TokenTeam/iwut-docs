@@ -12,7 +12,7 @@
 | Use Case | `UC-AUTH-014` 用户确认应用授权并签发授权码 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAU-001`–`BR-OAU-004`（4 条） |
-| 外部引用 BR | `BR-ACC-012`，`BR-OAU-021`，`BR-SCP-004`（来自 `UC-AUTH-001`、`UC-AUTH-015`、`UC-AUTH-025`） |
+| 外部引用 BR | `BR-ACC-012`，`BR-OAU-021`，`BR-SCP-004`、`BR-SCP-013`（来自 `UC-AUTH-001`、`UC-AUTH-015`、`UC-AUTH-025`、`UC-AUTH-036`） |
 | ADR | —（未在 spec 中声明） |
 | 平台共享 | `platform/contracts/app-oauth-client-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/oauth-delegation-v1.md`、`platform/contracts/oauth-oidc-v1.md` |
 
@@ -46,6 +46,8 @@
 标准 authorize 参数、门户 Session/确认命令及 HTTP 线格式见 [OAuth/OIDC v1](../../platform/contracts/oauth-oidc-v1.md)。服务端 interaction 记录 clientId、channel、rpcApiMajor、精确 redirectUri、state、nonce、PKCE、请求 scopes、用户绑定、包含 profileRevisionId 的 App 运行 tuple、展示时的 grant revision（不存在为 0）和到期时间。匿名创建交互时 authId 为空，门户完成有效登录后只能绑定一次；换账号必须创建新交互。
 
 输出为官方授权页或带 code/state/iss 的回调；拒绝返回 access_denied。服务端内部生成 grantId、revision，不在回调 URL 中公开内部 authId 或 Session。
+
+2026-10-26 随用户接受 UC036，同步接受 [BR-SCP-013](../use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-013)：每次 View 保存本请求 R 的完整 Scope 展示定义/摘要和新不可猜 presentation 标识，确认必须携带该页面标识。最终事务对比保存证据与当前请求定义；相关文案变化或旧标签页提交返回 interaction_changed，显式重读后再确认；无关目录变化不冲突。不将全局 catalog revision 当 consent 版本，不为旧 grant 补造历史展示。旧无证据交互需要重新 View。审计保留展示证据及显式确认/复用历史同意来源；具体证据规则唯一在 UC036。UC035 保持 DRAFT，不因此实现宿主交互。
 
 ### 主流程
 
@@ -178,6 +180,17 @@ Auth 内部的 ScopeDefinition 只使用 `enabled: bool` 表达启用状态，�
 - 其它展示、安全分类或数据投影元数据不在本 UC 中提前定义。
 
 本规则固定状态及其读投影，不增加目录写接口；生产持久化/部署装载另行交付，在线目录管理仍不在本用例范围内。
+
+### 来自 `UC-AUTH-036`
+
+<!-- 权威位置: use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-013 -->
+### BR-SCP-013：文案修正与同意展示一致性
+
+同义文案修正保存前后值/原因，不改 G/grant revision/epoch/token，不让所有用户重同意，不把不可解释旧文案修成更广权限。
+
+待提交 consent 绑定实际请求 R 的定义/文案摘要及展示凭证。View 生成新不可猜 presentation 标识并保存证据；Confirm 提交页面标识，最终事务同时校验保存标识、当前 R 定义摘要、Session/CSRF/App/grant。相关变化返回既有 interaction_changed，显式重读后确认；无关 Scope 变化不冲突。另一标签页 View 后旧表单不能借最新服务器快照通过。
+
+审计保存实际展示证据及明确确认/复用历史同意来源，不含资料值，不给旧 grant 批量补历史快照。UC014 同步接受；UC035 引用共享规则但仍 DRAFT、不实现宿主协议。旧无证据交互须重新 View；静默复用 G 仍按原 prompt 规则，不凭空新增权限。
 
 ## 平台共享契约（按 spec 显式抽取）
 
@@ -625,15 +638,17 @@ ApplicationUserStorage 对 PUBLIC client 复用同一当前 callback HTTPS origi
 - `UC-AUTH-025`（use-cases/UC-AUTH-025-close-own-account.md）：目标与范围、认证与资格、API 与确认过程、主流程、首版运行与协议固定值、错误、限额与验收、实现依赖与联动、变更记录
 - `UC-AUTH-015`（use-cases/UC-AUTH-015-exchange-authorization-code.md）：目标与范围、输入与输出、主流程、验收场景、依赖与实现边界、变更记录
 - `UC-AUTH-001`（use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md）：目标与范围、调用者与输入、输出、主流程、异常流程、API 契约、测试与验收、非目标、变更记录
+- `UC-AUTH-036`（use-cases/UC-AUTH-036-release-scope-enablement-changes.md）：目标与范围、参与者与依赖、输入与输出、API 契约、主流程、错误语义与运行约束、验收与交付边界、变更记录
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-014-authorize-application.md` | 87 | `6d3e9fdcda39` |
+| `use-cases/UC-AUTH-014-authorize-application.md` | 89 | `b854c65e519a` |
 | `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-015-exchange-authorization-code.md` | 81 | `cbaee4baf6fe` |
 | `use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md` | 126 | `7d34b0245dd1` |
+| `use-cases/UC-AUTH-036-release-scope-enablement-changes.md` | 169 | `832ac0def1ba` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |

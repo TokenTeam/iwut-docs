@@ -43,13 +43,21 @@ Developer 暂停/恢复、主动退出和本人注销已展开为 UC023–025（
 
 ## Scope Catalog 后续写侧
 
+### 定义与生命周期（2026-10-26，核心已交付）
+
+用户已接受 [UC036：管理 Scope 定义与生命周期](use-cases/UC-AUTH-036-release-scope-enablement-changes.md) 的简化管理员 API 方案并授权实现；ACCEPTED、脚本 brief 已生成，Auth/API/consent 核心已交付。完整 Wire 包及三轮新增 Mongo 专项 race 通过；全仓真实回归仍保留两个旧邮箱/身份用例失败，详见 [readiness](implements/UC-AUTH-036-readiness.md)。新语义新 name，不迁移旧授权，BR-SCP-006–015 唯一正文在 UC036。
+
+复用完整平台管理员在线身份，不扩权限、不建独立发布签名或双人审批；类型化登记/文案修正/启停、目录 CAS、原子审计和原 operationId 查询。首版记录不自动清理，不建永久墓碑系统；退役为长期 disabled。UC014 展示凭证修订同步接受；UC035 仍 DRAFT。尚未完成项以 implements 为准，不因设计接受宣称上线。
+
 ### Catalog 写入与初始装载
 
-UC-AUTH-001 只读取已经存在的权威目录。目录由部署种子、显式管理 UC 还是其它权威源产生仍未决定。生产实现不得把测试 fixture 或 App Center 的硬编码列表当成权威目录。
+2026-10-26 只读核实：OAuth 模式已通过部署 manifest 在启动时装载 Auth Mongo 权威目录；同值 no-op、变化递增 revision，UC001 与 OAuth 消费同一目录。此前“生产装载尚未决定”是旧阶段状态。没有在线启停 API，也没有完整的 expectedRevision/计划审批/审计/未知结果回执途径。
+
+UC036 实施将收窄为首次系统基线与后续提供方校验，重启不覆盖 live 文案/启停；管理 API 是已接受的真实业务入口，不是专用测试接口。UC001 不扩写。部署前撤除旧 writer、Gateway/Console 联合验收与生产启用仍独立跟踪。
 
 ### Scope 启用语义已明确
 
-2026-09-28：采用 enabled 单一权威状态，对 App 固定投影 requestable=enabled；不存在“禁止新申请但继续运行”的独立状态。规则见 [BR-SCP-004](use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)，OAuth 实际权限与历史同意恢复见 UC014–019。该设计决定已闭合；生产持久化、部署装载和相应验证仍待交付，不影响已完成的 UC-APP-018 client 管理。
+2026-09-28：采用 enabled 单一权威状态，对 App 固定投影 requestable=enabled；不存在“禁止新申请但继续运行”的独立状态。规则见 [BR-SCP-004](use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004)，OAuth 实际权限与历史同意恢复见 UC014–019。生产持久化/部署装载已随 OAuth 后端交付；本次新增的是待审核的受控变更与联合验收设计，不改变该状态模型或 UC-APP-018 client 管理。
 
 ### 完整 Scope 元数据
 

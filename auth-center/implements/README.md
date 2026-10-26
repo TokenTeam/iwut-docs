@@ -2,6 +2,14 @@
 
 状态：`ACTIVE`
 
+## 2026-10-26 UC036 管理员 Scope 管理（核心已交付）
+
+用户接受简化方案并授权实现，[UC036：管理 Scope 定义与生命周期](../use-cases/UC-AUTH-036-release-scope-enablement-changes.md) 已 ACCEPTED，并用脚本生成 brief。复用 UC021/029 完整管理员在线身份，不建设专用签名发布体系或双人审批。登记/文案/启停为严格类型化管理 API，CAS/原子审计/回执与原操作查询统一执行，首版记录不自动过期；长期 disabled 表示退役。
+
+已核对 Auth `8b803db`、API `27c9743`、App `d3f510e` 及 Console 专用 docs `534f02f`。现有生产启动装载将收窄为首次基线和后续提供方校验，不能覆盖 live 文案/启停。UC014 已接受 presentation 展示证据修订并生成 brief；UC035 仍 DRAFT，不扩展宿主 RPC。
+
+三个 subagent 分工交付 core/Mongo、API/transport/config、consent，父代理集成启动/Wire及验证。当前 CORE_COMPLETE / FULL_REGRESSION_PENDING；make check/普通全仓 race、72 briefs/30 工具测试及真实新增 Mongo 专项通过，完整生产 Wire 包独立 race 复验通过（189.170s）。一次全仓真实回归保留两个旧邮箱/身份用例失败，其中 Wire 日志有墙钟回拨证据；不掩盖全量门禁，不放松既有配额安全检查。完整证据见 [readiness](UC-AUTH-036-readiness.md)。用户随后授权本地 commit，不含 push；Gateway/Console UI及真实 App TTL/Reviewer 主链独立验收，不改 Console 专用 worktree，不部署或迁移。
+
 ## 2026-10-22 宿主 OAuth 与客户端续作中止
 
 用户提出无需独立网页登录，第三方在宿主内通过 RPC/自己的后端发起 OAuth。三个只读 subagent 与父任务复核后建立 [UC035 DRAFT](../use-cases/UC-AUTH-035-authorize-application-in-host.md)，受信宿主交互/code 交付尚无契约，按用户要求中止实现。第二项复用 UC-GW-002，不重复建 UC；账号 UI 需按当前 Console Session v2 与目标客户端划分。详见 [依赖与阻塞](UC-AUTH-035-readiness.md)。本轮未 ACCEPTED、未生成 UC035 brief、未改 API/服务代码。
@@ -111,6 +119,7 @@ UC012/013/017/025 的 COMPLETE/CORE_COMPLETE 记录仅指已交付基线；新�
 | [UC-AUTH-033](../use-cases/UC-AUTH-033-manage-password-and-recovery.md) | `ACCEPTED` | `COMPLETE` | 密码管理四方法、重置、通知 worker、共享额度/容量、最终版本与 Wire/Mongo race 已交付 | 后端完成；Gateway/客户端、正式策略来源与部署压测独立门禁 |
 | [UC-AUTH-034](../use-cases/UC-AUTH-034-login-with-password.md) | `ACCEPTED` | `COMPLETE` | 密码/设备证明、唯一登录角色、dummy/额度/容量、原子 Session/LRU、严格 Transport/Wire/Mongo race 已交付 | 后端完成；默认前台入口、Gateway/客户端和生产联合启用独立交付 |
 | [UC-AUTH-035](../use-cases/UC-AUTH-035-authorize-application-in-host.md) | `DRAFT` | `NOT_STARTED` | 目标、候选安全边界与三个 subagent 只读依赖检查 | 受信宿主/consent/code 交付未冻结，DESIGN_BLOCKED；未开工 |
+| [UC-AUTH-036](../use-cases/UC-AUTH-036-release-scope-enablement-changes.md) | `ACCEPTED` | `CORE_COMPLETE` | 管理员 API/CAS/审计/查询、启动防覆盖、UC014 展示绑定、真实 Mongo 专项与完整 Wire race | 全仓真实回归两个旧用例失败需稳定环境复验；Gateway/Console/生产独立交付 |
 
 此前基线：UC006/011/007/012 与协议/关联退役已同步代码/真实回归，UC031 永久事实基线接受后交付；最新密码/邮箱列表/当前校园依据修订见本页顶部，尚未实施。[次数方案](../design-notes/email-first-campus-entitlements.md)仅参考，不是 Auth 账本或开工依赖。
 

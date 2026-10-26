@@ -1,0 +1,11 @@
+{
+  "uc": "UC-AUTH-036",
+  "note": "User accepted administrator-managed Scope lifecycle APIs on 2026-10-26. Reuse current full platform administrator authorization, no independent publishing identities or two-person approval. Implement typed registration/text correction/enablement, CAS and immutable atomic audit/operation receipts, explicit complete canonical digests, first-only system baseline and no startup overwrite, deployment provider gates, and UC014 presentation binding. UC035, Gateway routes, Console UI and production enablement remain independent. No commit, push, deployment or legacy migration.",
+  "uc_sections": ["目标与范围", "参与者与依赖", "输入与输出", "API 契约", "主流程", "错误语义与运行约束", "验收与交付边界"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": ["目的与范围", "传输载体", "Claims", "时间与有效期", "校验顺序", "错误边界"],
+    "platform/contracts/auth-center-api-routing.md": ["路由边界", "JSON 与载体", "部署开关与验收"]
+  }
+}

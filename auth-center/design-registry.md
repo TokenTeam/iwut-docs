@@ -4,11 +4,13 @@
 
 本文件只索引 Auth Center bounded context 的权威 UC 与 BR，不复制规则正文。跨系统契约位于 `platform/`，不登记为 Auth UC 或 BR。
 
+<!-- retired: UC-AUTH-037 -->
+
 ## 下一个可分配编号
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-036` |
+| Use Case / Auth Center | `UC-AUTH-038` |
 | Business Rule / Password Lifecycle | `BR-PWD-009` |
 | Business Rule / Campus Certification | `BR-CMP-006` |
 | Business Rule / Account Lifecycle | `BR-ACC-015` |
@@ -17,7 +19,7 @@
 | Business Rule / Platform Administrator | `BR-ADM-009` |
 | Business Rule / OAuth Authorization | `BR-OAU-033` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
-| Business Rule / Scope Catalog | `BR-SCP-006` |
+| Business Rule / Scope Catalog | `BR-SCP-016` |
 | Business Rule / Developer Status | `BR-DEV-023` |
 | Business Rule / System Principal | `BR-SYS-005` |
 | Business Rule / Reviewer Permission | `BR-RVW-005` |
@@ -65,6 +67,7 @@
 | `UC-AUTH-033` | 管理密码与恢复账号 | `ACCEPTED` | [UC-AUTH-033](use-cases/UC-AUTH-033-manage-password-and-recovery.md) | — | Auth 后端公开改密/重置与通知已完成并验证；默认关闭，客户端与生产启用独立。 |
 | `UC-AUTH-034` | 使用登录邮箱与密码登录 | `ACCEPTED` | [UC-AUTH-034](use-cases/UC-AUTH-034-login-with-password.md) | — | Auth 后端密码/设备证明登录与真实回归完成；默认关闭，客户端与生产启用独立。 |
 | `UC-AUTH-035` | 在官方宿主内授权第三方应用 | `DRAFT` | [UC-AUTH-035](use-cases/UC-AUTH-035-authorize-application-in-host.md) | — | 宿主可信界面已确认；Auth 交互/code 协议待接受，RPC 与 Native 内部实现不是 Auth 开工前置。 |
+| `UC-AUTH-036` | 管理 Scope 定义与生命周期 | `ACCEPTED` | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md) | — | 管理员 API/CAS/审计/查询、启动防覆盖与展示绑定核心已交付；全量真实回归未全绿。 |
 
 ## Business Rules
 
@@ -157,6 +160,16 @@
 | `BR-SCP-003` | 单调 revision 与生成时间 | Versioning / Audit | [UC-AUTH-001](use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-003) | — | — |
 | `BR-SCP-004` | ScopeDefinition 投影 | Field / Projection | [UC-AUTH-001](use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) | — | enabled 单状态；requestable 兼容投影。 |
 | `BR-SCP-005` | 内部读取边界 | Authorization / Boundary | [UC-AUTH-001](use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-005) | — | 使用 trusted-service-identity-v1。 |
+| `BR-SCP-006` | 管理员管理与最小权限 | Operations / Authorization | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-006) | — | 当前完整平台管理员，无独立发布身份或权限扩容。 |
+| `BR-SCP-007` | 目录 CAS、no-op 与原子提交 | Atomicity / Consistency | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-007) | — | 目录/审计/回执同事务。 |
+| `BR-SCP-008` | 可核验审计与未知写结果 | Audit / Recovery | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-008) | — | 原操作查询；首版不自动清理。 |
+| `BR-SCP-009` | 启动旁路关闭与前向补偿 | Deployment / Safety | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-009) | — | 首次基线，重启不覆盖 live 文案/启停。 |
+| `BR-SCP-010` | 消费边界与既有授权规则引用 | Integration / Boundary | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-010) | — | 沿用 grant/ceiling/App cache。 |
+| `BR-SCP-011` | 已登记 Scope 的稳定权限契约 | Identity / Compatibility | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-011) | — | 新语义新名称，不原地扩权。 |
+| `BR-SCP-012` | 定义登记与启用门禁 | Definition / Delivery | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-012) | — | 真实提供方门禁。 |
+| `BR-SCP-013` | 文案修正与同意展示一致性 | Consent / Audit | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-013) | — | presentation 绑定请求定义，防旧页面/跨标签提交。 |
+| `BR-SCP-014` | 新语义替代与重新授权 | Evolution / Authorization | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-014) | — | 新声明/审核/同意，不复制旧授权。 |
+| `BR-SCP-015` | 停用、退役与删除边界 | Lifecycle / Retention | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md#br-scp-015) | — | 长期 disabled，保留名称与定义。 |
 
 ### Developer Status (`BR-DEV`)
 

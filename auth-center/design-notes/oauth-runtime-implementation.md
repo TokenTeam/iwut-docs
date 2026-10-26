@@ -14,7 +14,7 @@ App 注册服务调用方 `iwut-auth-center`，授权五项 provider 权限；Au
 
 初始目录使用 `configs/oauth-scopes.example.json` 的 openid/email/offline_access 文案。RESOURCE scope 不自动启用：必须有实际资源实现和 audience 映射，并显式声明 `resourceScopesReady`。offline_access 还受 refreshEnabled 控制。
 
-启动装载以完整文档在共享 Auth 事务内更新；同值幂等，变化递增 revision，generatedAt 与 revision 同存。停用项保留；既有名称不得删除后重建或改变 kind/audience。尚无在线目录编辑后台。未配置 OAuth manifest 的旧开发模式仍使用临时硬编码目录，不能当作生产 Catalog 交付。
+UC036 将启动装载收窄为首次系统基线：从未初始化时目录、基线审计与持久标记同事务 provision；以后只验证提供方 stable 映射和当前运行约束，不能用 manifest 覆盖 live 文案/启停，清单新增项不自动登记。初始化后缺失/损坏失败关闭，无旧状态自动修复。完整平台管理员通过 UC036 三项管理 API 登记、同义文案修正、启停及查询原操作，CAS、审计、契约与回执原子；入口默认关闭、Gateway/UI独立交付。规则唯一见 [UC036](../use-cases/UC-AUTH-036-release-scope-enablement-changes.md)，实施状态见 implements。未配置 OAuth manifest 的硬编码目录仅开发使用，不能管理或当作生产目录。
 
 Grant 使用 `(authId, applicationId, channel)` 复合唯一索引；用户列表按 applicationId/channel 排序。opaque 凭据仅保存用途隔离摘要。每个 family 最多一条未消费 refresh；重放记录保留至 family 最长期限之后，TTL 只负责清理，不替代运行到期检查。
 
@@ -26,7 +26,7 @@ sector host、Mongo 备份和已签发 OIDC 的旧公钥都需跨部署保留；
 
 Auth 提供同源 Session→Secure/HttpOnly cookie 桥、最小服务端 consent 页面与确认动作。登录页由 `portalLoginURL` 指定的同源官方客户端交付，调用 UC007/012 完成认证后，用 `POST <issuer>/portal/session`、JSON `{}` 与 `x-iwut-session` 建立 cookie，再返回 interaction 页面。Session 不得放入 URL。
 
-确认端点是 `POST <issuer>/portal/interactions/{interactionId}/confirm`。HTML 表单仅含 interaction、csrf、decision，以及每个所选 scope 的重复 `scope` 字段；重复 scope 值、重复其它字段均拒绝。OIDC 标准端点继续拒绝重复单值参数。这是官方门户表单编码，不改变 OAuth token endpoint 的空格分隔 scope 格式。
+确认端点是 `POST <issuer>/portal/interactions/{interactionId}/confirm`。HTML 表单仅含 interaction、csrf、presentation、decision，以及每个所选 scope 的重复 `scope` 字段；重复 scope 值、重复其它字段均拒绝。presentation 绑定本次 View 与请求 Scope 定义，相关文案变化或旧标签页提交要求重读；无关 Scope 变化不冲突。显式同意审计保留展示证据，静默复用标记历史同意来源，不伪造展示。OIDC 标准端点继续拒绝重复单值参数。这是官方门户表单编码，不改变 OAuth token endpoint 的空格分隔 scope 格式。
 
 UC018 的生成 Proto 同时提供 HTTP/原生 gRPC。列表/撤销只接受单个 `x-iwut-session`；Authorization、cookie、USER JWS 或 access token 不能替代。路径与错误 reason 见 UC018。
 
