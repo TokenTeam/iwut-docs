@@ -13,3 +13,7 @@
 先用Testing Library证明刷新按钮卸载后聚焦标题、下一Tab到重读、明确Enter后恢复；覆盖初次拒绝、同attempt重复通知和旧attempt不抢焦点。真实证据复用既有管理权转让代表链，不新增业务资源/写/登录/邮件/测试矩阵；保留原private/no-store、Session与设备钥匙、旧数据清理断言，追加实际失权标题焦点和键盘重读。组件不冒充全部页面真实焦点证明。
 
 冻结改后产品与spec，专项管理权转让及默认全量门禁均需通过；与独立CSP包同一冻结联合回归时保留两者各自断言。只本地提交、不push、不改后端、不移动legacy。该有限修复不关闭UC001 Cookie架构、政策发布或完整目标。
+
+## 当前验证
+
+组件14项首轮3失败/11通过，确认失权后focus为body；修复后14/14，相关boundary/core/activation共96/96。统一957 Vitest＋354 Node、strict/官方API生成/Edge/docs通过。联合冻结ebed897的published专项380677中，本包原一项正式转让在28.3秒内通过，含实际失权标题focus、迟到Tester回执后focus保持、Tab/Enter明确重读，原Session和头/数据断言未减；联合专项另两项CSP因其非parser插入负例错误失败，总1通过/2失败，不把本包单项绿替代完整门禁。修订CSP spec后的专项/默认126仍待执行，当前本包不标VERIFIED。
