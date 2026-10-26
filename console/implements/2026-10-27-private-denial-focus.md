@@ -1,6 +1,6 @@
 # Developer 私有读取拒绝后的焦点恢复
 
-状态：ACCEPTED / NOT_STARTED（2026-10-27，按持续目标授权自行决定并接受）。
+状态：ACCEPTED / IN_PROGRESS（2026-10-27，按持续目标授权自行决定并接受）。
 
 ## 依据与缺口
 
