@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-当前有限包[UC001浏览器凭据校验](2026-10-27-browser-credential-validation.md)为ACCEPTED / IN_PROGRESS：实际非法点/标量/记录签名缺口先RED后修，命名上下文与BOM回归、双origin原生IndexedDB适配器证据随后统一冻结验收。原126绿保持历史范围，不当本包结果；公开向量CI和其它外部/架构边界仍单列，不改协议、不push。
+当前有限包[UC001浏览器凭据校验](2026-10-27-browser-credential-validation.md)已VERIFIED：冻结ec34375，published-latest专项4/4、默认128/128通过（1.4/23.9分钟浏览器阶段，exit0，无skip/retry）；1056 Vitest＋359 Node、strict/官方生成/Edge/docs通过。非法点/标量/配对/快照/BOM及命名协议护栏先RED后修，双origin native IDB实际拒绝且保留坏记录，原126完整保留。旧Node合成UUIDv7误用于DEVICE的9项失败与修正过程保留，不弱化协议。两轮五镜像重拉且轮内固定，资源清理、legacy本地/远程未变、不push。下一[公开向量CI定义](2026-10-27-protocol-vector-ci.md)仅隔离候选，实际远端CI及外部/架构边界仍开放，不改后端或扩业务UI。
 
 2026-10-27最新[完成性审计](2026-10-27-completion-audit.md)发现的[拒绝后焦点](2026-10-27-private-denial-focus.md)与[双静态Strict CSP](2026-10-27-strict-static-csp.md)已VERIFIED：冻结29aa09b，published-latest专项3/3、默认126/126（31.6秒/23.9分钟浏览器阶段，exit0，无skip/retry），957 Vitest＋359 Node、strict/官方生成/Edge/docs通过。真实parser负例、handler/connect/base/object拒绝、正常生产认证/私有/决定与焦点键盘链均收齐；首轮非parser负例错误及拉取EOF保留。资源清理、legacy本地/远程未变，只本地提交不push。协议/损坏本地记录已有直接有限复现，公开向量CI证据仍需收齐；这是明确后续，不把126全绿当整体UC/goal完成。App政策发布和Cookie33+独立开放。
 
@@ -42,7 +42,7 @@
 
 | 类型 | 当前开放项与推进条件 | 依据 |
 | --- | --- | --- |
-| UC001协议与CI有限补齐 | 当前适配器接受合成非法点/零DER/损坏记录签名已直接复现，须按公开协议先回归再修；命名的重放/等到期/双重哈希验收及向量CI证据须收齐，不由成功登录或126全绿替代 | [完成性审计与直接复现](2026-10-27-completion-audit.md)、[UC001验收](../use-cases/UC-CONSOLE-001-establish-console-session.md#测试与验收) |
+| UC001协议已补齐，CI交付独立 | 合成非法点/零DER/损坏记录签名缺口与命名重放/等到期/单次哈希已由[凭据包](2026-10-27-browser-credential-validation.md)修复并通过4专项/128完整门禁；不再当全部未实施。向量CI定义及实际远端run须分别收齐，当前只隔离候选，不由本地绿替代远端证据 | [完成性审计](2026-10-27-completion-audit.md)、[CI包](2026-10-27-protocol-vector-ci.md)、[UC001验收](../use-cases/UC-CONSOLE-001-establish-console-session.md#测试与验收) |
 | 已完成的有限角色证据，范围不外推 | WITHDRAWN正式关闭→退出→CLOSED历史读取已由3专项/124全量验证，非SUSPEND或旧readseed替代；账号禁用/恢复所列代表链已通过3专项/121全量，并在124全量再次通过。不再登记为全部缺失，也不自动扩成全部角色×页面组合 | [WITHDRAWN证据](2026-10-27-withdrawn-closed-history.md)、[账号状态证据](2026-10-26-account-status-read-recovery.md)、[资格与角色边界](2026-10-16-qualification-and-role-read-boundaries.md) |
 | 正式变化准备与联合验收 | App已接受正式发布流程，原子回执/运维读回尚未实现，下一份真实政策另审；Auth UC036正式启停、Gateway接线、App真实TTL后目录revision消费与Console旧页恢复的有界链已由30/118门禁验证；Auth自身全量与生产启用仍按其所有者独立门禁，不由Console代验。错误expectedPolicyVersion、合成policy JSON或直接改库不是真实加载后变化证明 | [App发布流程](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[Profile兼容门槛](../../app-center/use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)、[Scope联合证据](2026-10-26-scope-review-change.md)、[Auth交付边界](../../auth-center/implements/UC-AUTH-036-readiness.md) |
 | 已接受的可达性分层，证据保持原范围 | UC007验收4已按用户接受的单工作位方案同步：同Review双决定、顺序替换、错误pointer409协议防御与组件恢复分别标记；不同修订同时PENDING不是当前可达业务要求，不seed平行PENDING。既有证据不改名，不因文字同步宣称新增真实链通过 | [UC007验收](../use-cases/UC-CONSOLE-007-review-application-profiles.md#验收与完成标准)、[单一工作修订](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006) |

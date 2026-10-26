@@ -1,6 +1,6 @@
 # UC001浏览器凭据与签名边界加固
 
-状态：ACCEPTED / IN_PROGRESS（2026-10-27，持续目标授权下自行接受；未宣称验收完成）。起点Console fe6666a，原126项真实门禁冻结29aa09b。
+状态：ACCEPTED / VERIFIED（2026-10-27，仅所列有限凭据/协议与联合验收，完整UC/goal不关闭）。起点Console fe6666a，原126项真实门禁冻结29aa09b。
 
 ## 范围与权威
 
@@ -33,3 +33,17 @@
 双origin原生IDB spec已接线：独立临时DB的真实non-extractable CryptoKey克隆/禁止导出、健康无credentialId的material/sign/verify；4种raw注入的合成坏记录，经生产material/list/sign/put拒绝且记录保留。只返回13个固定bool，临时DB精确删除；默认DB不改、零Auth mutation/App/外域请求。它是适配器验收，不冒充UI或真实注册链。预期专项为2 native＋原console2共4项，默认无参数128项（原126保留），实际结果仍待冻结后记录。
 
 统一普通检查实际通过：1056 Vitest（browser-auth 183，原84保留）＋359 Node；strict含构建helper及真实/privacy spec、官方远程固定API6fea生成检查、published Gateway/Traefik Edge接线、docs72 brief/367行8退休编号及diff检查均通过。尚无本冻结真实浏览器结果；开始先本地提交冻结，再重新pull镜像验证，不能以普通测试代替真实门禁。
+
+## published latest 专项
+
+产品/runtime/runner/spec冻结 `ec343754256f41b7df9b4c2f7b3a3dc771658cb6`。专项 `iwut-console-real-434706` 实际 **4/4通过，1.4分钟浏览器阶段，exit0，无skip/retry**：`pnpm test:real tests/real/credential-validation.real.spec.ts tests/real/console.real.spec.ts`。两origin原正常邮件/设备登录、独立Cookie与管理读取保留；两native项的13个固定bool均true，默认DB仍为空、Session仍SIGNED_OUT、零Auth mutation/App/外域请求，CSP保持、五个临时DB各自精确清理。坏记录material/list/sign/put均拒绝且保留，健康IDB结构化克隆/不可导出与签名验证实际通过。
+
+准备期间真实Auth密码限流按Retry-After等待，仅重试同一完成正文，不改额度/时钟；它不是跳过或浏览器retry。五镜像重新pull后轮内固定：Auth `sha256:518b0917ec8302f9f6cb28bd2e12aa59033cfe6db45c82a81a0afcb1bac5aa16`；App `sha256:68ee32b1e92145734bfa7fe61d003ee7e2ed2bb8b20fd944f861704a8f48ad01`；Gateway `sha256:444c75a71fc74fb14840718b259aeec14fbe2bbcda0a9832340c70b64ed099b0`；Mongo8.2.12 `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`；Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。专项容器（含停止项）/network已核验为空，代码冻结仍干净；不编译后端、不push。
+
+## 同冻结默认完整门禁
+
+`iwut-console-real-441036` 使用同冻结ec34375、默认无参数 `pnpm test:real`，实际 **128/128通过，23.9分钟浏览器阶段，exit0，无skip/retry**。原126完整保留，新native两项再次通过；正常邮件/设备、原EMAIL响应丢失后的fingerprint设备恢复、两origin 32次签发/明确重建、Session/权限/管理权/审核、正式Scope变化、WITHDRAWN和账号禁用恢复等原链全部通过。不把新的合成坏记录探针当真实注册或UI证明，也不扩成全浏览器/全heap保证。
+
+本轮五镜像均重新pull latest后固定ID，与上列专项完全相同；准备同样尊重真实Auth密码限流/邮件冷却，未改变时钟或额度。完整轮次容器（含停止项）/network及Edge烟测残留均为空；测试期间Console HEAD与工作区保持ec34375/干净，legacy本地和实际远端均仍 `e68851e343bd0e077e5ccd0b680fe6813216ced0`。未编译/修改后端、不向外部聊天发需求、不push。
+
+本包只关闭已列本地损坏凭据和命名协议护栏；[公开向量CI定义](2026-10-27-protocol-vector-ci.md)及真实远端run另列，不以128绿代替CI。App正式政策发布、Cookie33+新信任/部署边界和完整UC/goal仍开放，不自动扩业务UI或生成无穷矩阵。
