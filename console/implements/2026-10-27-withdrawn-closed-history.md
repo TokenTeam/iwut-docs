@@ -1,6 +1,6 @@
 # WITHDRAWN 与正式关闭后的历史读取
 
-状态：ACCEPTED / IN_PROGRESS（2026-10-27，依据持续目标授权自行决定、记录并接受）。
+状态：ACCEPTED / VERIFIED（2026-10-27，依据持续目标授权自行决定、记录并接受；仅所列有界链）。
 
 ## 目的与权威来源
 
@@ -31,4 +31,14 @@
 
 ## 实施与静态验证
 
-运行配置8项、签名Frame11项、runner source-wiring6项、typed相位16项及正式owner准备8项共49项新增Node回归通过；状态机先缺模块RED，再补齐实现，并由坏Close回执/重复密码消费回归再次RED→GREEN。静态接线检查不冒充运行时安全或真实业务结果；合成transport不冒充后端收敛证据。专用工厂Promise失败也保留；只读控制返回最小事实，不返回密码、Node凭据、Session或proof。普通954 Vitest＋344 Node、strict、官方固定API远程生成检查、Edge检查和docs72份brief/367行8退休编号检查通过。真实专项/默认124门禁待以下轮次记录，当前不宣称本链已通过。
+运行配置8项、签名Frame11项、runner source-wiring6项、typed相位16项及正式owner准备8项共49项新增Node回归通过；状态机先缺模块RED，再补齐实现，并由坏Close回执/重复密码消费回归再次RED→GREEN。静态接线检查不冒充运行时安全或真实业务结果；合成transport不冒充后端收敛证据。专用工厂Promise失败也保留；只读控制返回最小事实，不返回密码、Node凭据、Session或proof。普通954 Vitest＋344 Node、strict、官方固定API远程生成检查、Edge检查和docs72份brief/367行8退休编号检查通过。静态门禁本身不足以证明真实链；专项/默认124门禁以以下实际轮次记录为准。
+
+## Published latest 真实验收
+
+Console产品/runtime/runner/spec固定在 `ae46e5c7927e7d6ace90ff6dd9f24ceb01ceb249`；实际生产Web/BFF行为未改，本包仅测试基础、生成子集和元数据。专项轮 `iwut-console-real-344878`：`pnpm test:real tests/real/zy-developer-withdrawal.real.spec.ts`，**3/3通过、35.7秒浏览器阶段、exit0**。同冻结全量轮 `iwut-console-real-350177`：无参数 `pnpm test:real`，**124/124通过、23.8分钟浏览器阶段、exit0**，无skip/retry；原118基线、本包3项和账号状态3项均收齐。两轮均先通过实际随机私有输入的报告隐私检查，重新pull published latest后轮内固定镜像ID；没有用专项替代全量。
+
+两轮后端镜像相同：Auth `sha256:518b0917ec8302f9f6cb28bd2e12aa59033cfe6db45c82a81a0afcb1bac5aa16`；App `sha256:68ee32b1e92145734bfa7fe61d003ee7e2ed2bb8b20fd944f861704a8f48ad01`；Gateway `sha256:444c75a71fc74fb14840718b259aeec14fbe2bbcda0a9832340c70b64ed099b0`。Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。未编译后端、未换本地artifact、未向其它agent发需求或push。
+
+ACTIVE时正式Prepare观测BLOCKED/OWNED_APPLICATIONS；当前密码＋同一Node DEVICE凭据新签名正式Close，App固定closure收敛CLOSED/lifecycleRevision3；正式新Prepare READY与独立Confirm后Developer WITHDRAWN/revision2，accountRevision1、Reviewer权限及permissionRevision、永久handle保持。Version/Profile仍SUBMITTED、其Review仍PENDING，ACTIVE会员/容量保留，链接正式REVOKED/APPLICATION_CLOSURE、当前链接为空。默认列表不含CLOSED，显式筛选读回原App；九生成RPC和代表生产React视图在WITHDRAWN后对照真实CLOSED基线保持（仅各顶层asOf自然变化），原Developer Session/generation/不可导出钥匙未变，无浏览器App业务写/自动登录/DELETE。以上不是关闭/退出UI、全OAuth撤销矩阵或全部状态排列的交付。
+
+两轮结束后核验容器（含停止项）与network为空；工作树在全量期间干净、冻结未变。legacy本地/远程均保持 `e68851e343bd0e077e5ccd0b680fe6813216ced0`。全部结果仅本地提交；App政策发布回执/下一真实政策、33+carrier架构、完整UC和持续目标继续开放，不以本包全绿自动关闭。
