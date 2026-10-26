@@ -4,6 +4,8 @@
 
 ## 接受与权威收敛
 
+2026-10-26整合补记：下文草案过程与“不commit/push”等表述保留当时授权范围；用户后续已授权本地docs分支整合，Console UC006/007的已接受验收文字已在整合main落地，详见[交接状态](2026-10-26-console-review-acceptance-handoff.md)。其原始工作区与业务源码未改，未运行新增联合验收，未push。Auth UC036状态以独立接受的用例及交付记录为准。
+
 以下核对、选项和候选文字保留为提案过程记录，不是第二份权威定义；其原有“待审核/未修改”等描述表示草案阶段。当前业务规则已收敛到 [UC005](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[UC016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)、[UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)和 [ADR004](../adr/ADR-004-mongodb-transactions-and-schema-management.md#政策发布回执与恢复)，冲突时以这些权威正文为准。Console 对应文字见[已接受交接](2026-10-26-console-review-acceptance-handoff.md)，由其所有者落地；未修改 Console 工作区。
 
 ## 核对基线与结论
@@ -19,7 +21,7 @@
 | [UC016 BR-PRF-024/025/026](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-024) | 仅一次性决定 PENDING/SUBMITTED；修订与 snapshot 一致；决定才清空目标 working 指针并释放工作位 |
 | [UC016 BR-PRF-030](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030) | APPROVE 比较明确 expectedCurrentPublishedProfileRevisionId 并原子自动公开；保留旧 APPROVED 历史，无历史重新选择/回滚入口 |
 | [UC031 BR-PRF-043/046](../use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-043) | Reviewer 当前公开资料和指针来自同次详情；未知/损坏不能当 NONE |
-| [Console UC007 验收4](/home/lichx/source/GolandProjects/iwuts/iwut-docs-console-uc002/console/use-cases/UC-CONSOLE-007-review-application-profiles.md) | 仍写“两个 Reviewer 分别批准不同修订导致公开指针冲突” |
+| [Console UC007 验收4](../../console/use-cases/UC-CONSOLE-007-review-application-profiles.md) | 仍写“两个 Reviewer 分别批准不同修订导致公开指针冲突” |
 | [唯一索引实现](https://github.com/TokenTeam/iwut-app-center/blob/d3f510e9b5b6f332405c773e11dfe1aa6cd0d2ea/internal/adapter/mongo/profile_migration.go) | `uq_application_profile_revisions_working_application` 对 DRAFT/SUBMITTED 做 applicationId partial unique |
 | [决定事务实现](https://github.com/TokenTeam/iwut-app-center/blob/d3f510e9b5b6f332405c773e11dfe1aa6cd0d2ea/internal/adapter/mongo/decide_application_profile_review.go) | 复检 working 归属和唯一工作修订；先拒绝已决定 Review，再核对公开指针；批准/拒绝和释放工作位在同事务 |
 
@@ -90,6 +92,6 @@ App 的验收说明同时补充可达性分类，避免留下“完整 UC 必须
 
 ## 审核结论与落地边界
 
-用户已接受 A：保留单工作位与指针前置防御，按可达性分层验收。UC016 BR-PRF-030 已澄清，UC031 读取及验收说明已关联，不修改 UC013 的单工作位、不新增产品UC/ADR/API或历史重新发布能力。Console UC007 第4项已接受文字在交接文件中，等待其所有者落地；不把交接完成等同于已修改 Console 原文。
+用户已接受 A：保留单工作位与指针前置防御，按可达性分层验收。UC016 BR-PRF-030 已澄清，UC031 读取及验收说明已关联，不修改 UC013 的单工作位、不新增产品UC/ADR/API或历史重新发布能力。Console UC007第4项已接受文字已在本次整合main中落地，见交接状态；不把文档同步等同于新增实现或验收完成。
 
 本轮完成文档更新与派生 brief，不修改实现或运行环境、不执行联合验收、不 commit/push。策略/Scope 依赖仍遵循各自已接受来源；Cookie 恢复架构不在本次范围。

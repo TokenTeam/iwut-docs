@@ -55,12 +55,14 @@ REJECT 提交有效非空纯文本理由、空 confirmedCheckIds，省略 expect
 | Reviewer 当前公开指针及被替换公开资料 | 固定API27c的UC031同次详情`currentPublishedProfile`，以显式NONE或published分支返回指针与最小公开对照 | 已接入并经真实首次批准/替换验证，不再阻塞APPROVE。UC029/039仍只授权当前管理员，不能借用；缺失/未知分支仍失败关闭，不能从Catalog缺项或此前决定缓存推断NONE/当前值 |
 | 三个 ADMIN API surface、固定生成客户端及真实权限签发 | 已发布Gateway及Console固定生成/Auth在线签发 | 已接入并经真实决定链验证，不仅是路由存在检查；范围和未覆盖项见实施记录，不推导其它组合已通过 |
 
-2026-10-23依已发布接入证据更新本节。最初公开指针未交付时的阶段限制已解除，APPROVE/REJECT均已实现；不得继续把旧“批准前置读取尚未接入”当当前待办，也不能用临时DTO、DB读取或BFF越权替代正式来源。固定输入、真实证据及仍开放的策略/不同修订并发可达性/缓存头门禁见[决定接入](../implements/2026-10-16-admin-review-decisions.md)与[当前有界覆盖](../implements/README.md)；本次只校正依赖事实，不改变BR或以下完成标准，UC整体仍未完成。
+2026-10-23依已发布接入证据更新本节。最初公开指针未交付时的阶段限制已解除，APPROVE/REJECT均已实现；不得继续把旧“批准前置读取尚未接入”当当前待办，也不能用临时DTO、DB读取或BFF越权替代正式来源。固定输入与真实证据见[决定接入](../implements/2026-10-16-admin-review-decisions.md)，缓存头门禁已由[已发布复验](../implements/2026-10-23-published-cache-header-fix-verification.md)关闭。
+
+2026-10-26依用户已接受的[单工作位与指针防御说明](../../app-center/use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)同步第4项：分别记录同Review竞争、顺序替换、错误expected指针的协议负例及组件恢复，不再把不同修订同时PENDING作为真实业务准备要求；不新增第二工作位或历史重新发布。正式策略发布及[新Profile版本兼容门槛](../../app-center/use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)仍待实现或准备，详见[当前有界覆盖](../implements/README.md)。既有BR与实际断言保留，文档同步不代表新增验收已通过，UC整体仍未完成。
 
 ## 验收与完成标准
 
 1. 真实 `app.profile.review` grant/revoke、单持版本权限、无权限平台管理员和三类利益冲突均覆盖；版本/资料队列与权限互不替代。
 2. snapshot 与当前修订、终态详情与当前 policy 分开；两项正式检查逐项确认，icon 为空仍正确处理，未知版本失败关闭。
 3. REJECT 不需公开指针，空 checks/理由和原文保留正确；APPROVE 缺指针保持禁用，显式 null 与 UUID 由正式来源读取，不能猜值。
-4. 依赖补齐后，两个 Reviewer 分别批准不同修订导致公开指针冲突，须重读与重新确认；同一 Review 双决定、revision/策略变化、响应丢失和权限撤销走规定恢复。
+4. 同一 Review 的双 Reviewer 决定经真实链路验证最多一个成功，另一个按稳定冲突 reason 重读，不自动重放。按单工作位规则验证首次批准后顺序创建、提交并批准下一修订，以及当前公开指针与历史投影。公开指针前置冲突单列为协议防御验收：一条合法 PENDING 使用与正式当前指针不相符的 expected 值时真实返回409且无部分写；该负例不称为“不同修订并发”。前端对该 reason 的重读、展示替换目标、清空确认和重新评审由明确标注的组件/状态恢复证据验证，不伪造为当前可达的浏览器业务竞态。revision、策略变化、响应丢失与权限撤销仍按规定恢复；需要正式准备能力的项保持待验收。
 5. 批准显示自动公开且无第二 Publish；拒绝保持既有公开资料且无恢复入口。真实浏览器/Auth/Gateway/App、no-store、无敏感持久化和可访问性验收齐全后才记 COMPLETE。

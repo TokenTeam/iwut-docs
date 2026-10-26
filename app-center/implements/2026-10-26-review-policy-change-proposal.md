@@ -4,6 +4,8 @@
 
 ## 接受与权威收敛
 
+2026-10-26整合补记：下文草案过程与“不commit/push”等表述保留当时授权范围；用户后续已授权本地docs分支整合，Console UC006/007的已接受验收文字已在整合main落地，详见[交接状态](2026-10-26-console-review-acceptance-handoff.md)。其原始工作区与业务源码未改，未运行新增联合验收，未push。Auth UC036状态以独立接受的用例及交付记录为准。
+
 以下核对、选项和候选文字保留为提案过程记录，不是第二份权威定义；其原有“待审核/未修改”等描述表示草案阶段。当前业务规则已收敛到 [UC005](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[UC016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)、[UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)和 [ADR004](../adr/ADR-004-mongodb-transactions-and-schema-management.md#政策发布回执与恢复)，冲突时以这些权威正文为准。Console 对应文字见[已接受交接](2026-10-26-console-review-acceptance-handoff.md)，由其所有者落地；未修改 Console 工作区。
 
 ## 事实核对与来源
@@ -22,9 +24,9 @@
 
 这里的 ACTIVE/RETIRED 是正式迁移应形成的基线，不是本次对生产数据库状态的现场查询。没有读取生产数据库或执行部署。
 
-核对期间 Auth 所有者在主工作区新增了 [UC-AUTH-036：受控发布 Scope 启用状态草案](/home/lichx/source/GolandProjects/iwuts/docs/auth-center/use-cases/UC-AUTH-036-release-scope-enablement-changes.md)，状态 DRAFT、未实现、未提交。它建议复用已有 manifest/Mongo 目录机制，补正式受控写入、CAS、回执和启动旁路治理；本提案只把它作为**待用户审核的依赖候选**。UC001 仍是已接受的只读权威；不能据新草案声称已有可调用启停命令。本轮不修改 Auth 文件或接纳其草案。
+初次核对时，Auth UC036仍是受控发布草案。2026-10-26整合更新：Auth已在独立审核中接受[UC-AUTH-036：管理Scope定义与生命周期](../../auth-center/use-cases/UC-AUTH-036-release-scope-enablement-changes.md)，本地文档提交d3aa53f记录管理员管理API、目录CAS、回执及启动旁路治理；它替代早期候选路径。核心实现状态为CORE_COMPLETE / FULL_REGRESSION_PENDING，开关默认关闭，Gateway接线、App TTL刷新与Console真实联合链尚未验收，详见[Auth交付记录](../../auth-center/implements/UC-AUTH-036-readiness.md)。UC001仍为内部只读快照，App不新增Scope写模型；Auth的接受来自其独立审核，不由本提案代为接受。
 
-Console 基线以[已发布缓存头复验记录](/home/lichx/source/GolandProjects/iwuts/iwut-docs-console-uc002/console/implements/2026-10-23-published-cache-header-fix-verification.md)为准：API27c，App `8e499500…`、Gateway `509acf96…` 的专项35/35、默认完整115/115通过。缓存问题已经解决，本提案不重开该问题，也不把现有套件全绿等同于所有策略变化验收完成。[UC006 验收4](/home/lichx/source/GolandProjects/iwuts/iwut-docs-console-uc002/console/use-cases/UC-CONSOLE-006-review-application-versions.md)仍要求真实策略退休/Scope 失效后的恢复。
+Console 基线以[已发布缓存头复验记录](../../console/implements/2026-10-23-published-cache-header-fix-verification.md)为准：API27c，App `8e499500…`、Gateway `509acf96…` 的专项35/35、默认完整115/115通过。缓存问题已经解决，本提案不重开该问题，也不把现有套件全绿等同于所有策略变化验收完成。[UC006 验收4](../../console/use-cases/UC-CONSOLE-006-review-application-versions.md)仍要求真实策略退休/Scope 失效后的恢复。
 
 ## 需求判断与选项
 
@@ -99,7 +101,7 @@ Profile 当前 API 只给 version/IDs，Console `review-decisions.tsx` 只对 `a
 3. **合法变化**：获权部署主体执行已批准的正式发布 migration A→B。测试 runner 只调用发布入口，不直接写 Mongo；通过正式 policy-status 读回 A RETIRED/B ACTIVE/原子回执，再经 UC030/031 查询 B。重复 migration 不产生第二次变化。
 4. **真实旧请求**：在页面尚未重读时人工提交原 A 决定，取得既有409；重读后展示 B，清除旧确认集合、要求重新评审；无自动 POST、补勾、改 outcome 或复用旧确认。缺定义/未知版本/重读失败时只读，不能自行猜 B 的定义。
 5. **结果未知与竞态**：切换和决定在同一真实链路竞争，验证符合提交顺序的两种结果及终态只写一次；丢失响应后读同一 Review/发布回执恢复，不重新发决定。运维回执幂等和失败回滚另由真实事务层证据覆盖，不把故障注入的组件证据冒充浏览器业务路径。
-6. **Scope 独立门槛**：由 Auth 所有者设计并提供正式 enabled 变更/发布步骤及新 catalog revision；UC-AUTH-036 目前只是候选。App 只消费快照并按既有 BR-REV-018 复检。遵循 [ADR001 缓存边界](../adr/ADR-001-scope-catalog-cache.md#第一阶段缓存)，冻结实际 TTL 与实例输入，在旧缓存有效期和在途取样窗口后取得真实刷新/消费证据；不能只凭 Auth 新 revision 就声称所有 App 实例立即采用，也不能直接清缓存或伪造时钟。用正确策略与确认集合验证真实 Scope 错误，不把它误记为策略409。无合法 Auth 准备入口时该项继续待准备，不在 App 新增 Scope 写模型，也不把伪造 expectedPolicyVersion 当 Scope 失效。
+6. **Scope 独立门槛**：使用独立接受的[Auth UC036](../../auth-center/use-cases/UC-AUTH-036-release-scope-enablement-changes.md)管理员管理API与原操作回执取得新catalog revision；核心实现不等于全量回归或接入门禁闭合，正式联合环境准备仍依其交付记录。App 只消费快照并按既有 BR-REV-018 复检。遵循 [ADR001 缓存边界](../adr/ADR-001-scope-catalog-cache.md#第一阶段缓存)，冻结实际 TTL 与实例输入，在旧缓存有效期和在途取样窗口后取得真实刷新/消费证据；不能只凭 Auth 新 revision 就声称所有 App 实例立即采用，也不能直接清缓存或伪造时钟。用正确策略与确认集合验证真实 Scope 错误，不把它误记为策略409。无合法 Auth 准备入口时该项继续待准备，不在 App 新增 Scope 写模型，也不把伪造 expectedPolicyVersion 当 Scope 失效。
 
 建议提交用户审核的 UC006 验收4细化文字（**仅候选文字，未修改 Console UC**）：
 
@@ -118,6 +120,6 @@ Profile 当前 API 只给 version/IDs，Console `review-decisions.tsx` 只对 `a
 
 ## 审核结论与尚未实施的范围
 
-用户已接受 A：正式发布治理、原子回执和运维读回，不增加在线策略管理 API；新 Profile 版本先满足正式定义兼容门槛。两项草案不自动接受下一份真实政策正文，也不接受 Auth 的独立 Scope 草案。发布身份/批准凭据、回执具体格式/保留策略等实施参数仍需在工作包冻结，尚未实现。
+用户已接受 A：正式发布治理、原子回执和运维读回，不增加在线策略管理 API；新 Profile 版本先满足正式定义兼容门槛。两项草案不自动接受下一份真实政策正文；Auth UC036的接受与实现以其独立审核及交付记录为准。发布身份/批准凭据、回执具体格式/保留策略等实施参数仍需在工作包冻结，尚未实现。
 
-App 对应用例、ADR与索引已更新；Console 验收文字交接其所有者，业务代码、Proto、迁移和运行环境未改。
+App对应用例、ADR与索引已更新；Console验收文字后续已在本次整合main落地，业务代码、Proto、迁移和运行环境未改。

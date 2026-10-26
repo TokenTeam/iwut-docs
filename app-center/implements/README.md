@@ -26,11 +26,11 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 用户已接受[策略发布设计](2026-10-26-review-policy-change-proposal.md)与[资料并发设计](2026-10-26-profile-review-concurrency-proposal.md)，要求落实 UC 文档。已更新 UC005/016/030/031、ADR004 和查询导航；未启动实现、迁移、Proto 或部署。本节优先于下列历史“38项全部COMPLETE”结论：UC005/016/031 为既有基线完成、新增设计未实现，当前标为 PARTIAL；新增正式发布回执、运维读回和 Profile 唯一策略验证待实施，新 Profile 正式定义投影在真实政策获批前不得激活。
 
-UC016 的单工作位/指针防御及分层验收说明已收敛；Console UC006/007 的已接受文字见[文档交接](2026-10-26-console-review-acceptance-handoff.md)，待其所有者落地。本轮不改 Console 工作区，不给其它聊天发消息，不 commit/push。缓存头已发布35/35、115/115的证据不重开，也不替代新增设计验收。
+UC016的单工作位/指针防御及分层验收说明已收敛；Console UC006/007的已接受文字在本次docs main整合中落地，见[文档交接](2026-10-26-console-review-acceptance-handoff.md)。Auth UC036已独立接受，核心实现完成但全量回归与接入/联合链仍待闭合，见[Auth交付记录](../../auth-center/implements/UC-AUTH-036-readiness.md)。本轮仅本地文档整合，不修改Console专用工作区或业务源码，不发送跨聊天消息，不push。缓存头已发布35/35、115/115的证据不重开，也不替代新增设计验收。
 
 ### 2026-10-23 UC029 错误响应缓存头回归
 
-Console 联调反馈揭示 UC029 已交付查询的错误响应缺少私有缓存头。App 本地提交 `d3f510e` 已在 App 直连和真实 Gateway 链路先复现后修复；生成 HTTP/native gRPC、22 个真实链路对照响应及完整 `check-full` **24/24 PASS**，`changed_sources=[]`。原 400/404、reason、统一隐藏和游标绑定保持。镜像未发布，Console 原 25 条 App 断言仍待新镜像复验；另 4 条 Gateway Session401 由其独立处理。详见[修复范围、责任层与验证记录](2026-10-23-management-error-cache.md)。以下 COMPLETE/28 项验收记录保留对应历史输入，不代替 Console 发布验收。
+Console 联调反馈揭示 UC029 已交付查询的错误响应缺少私有缓存头。App 本地提交 `d3f510e` 已在 App 直连和真实 Gateway 链路先复现后修复；生成 HTTP/native gRPC、22 个真实链路对照响应及完整 `check-full` **24/24 PASS**，`changed_sources=[]`。原 400/404、reason、统一隐藏和游标绑定保持。该修复记录的原阶段为镜像待发布；后续[Console已发布复验](../../console/implements/2026-10-23-published-cache-header-fix-verification.md)已关闭原25条App及4条Gateway Session401缓存头失败，专项35/35、完整115/115通过，不再作为当前阻塞。详见[修复范围、责任层与验证记录](2026-10-23-management-error-cache.md)。以下 COMPLETE/28 项验收记录保留对应历史输入，不代替 Console 发布验收。
 
 历史基线（2026-10-22）：当时38个 ACCEPTED UC 的既定后端范围均为COMPLETE；2026-10-26新增设计的当前未实现范围见本页上节，不能沿用旧结论关闭。最新完整验收仍是 2026-10-20 的固定输入 28/28 PASS，以下覆盖表按当前能力汇总，后续带日期的工作记录保留当轮证据。剩余暂缓与未来方向集中见[概述](../README.md#current-delivery-and-followups)，不把 Console/客户端或上线状态混记为后端缺口。
 
@@ -78,7 +78,7 @@ App/API 已完成，服务 `52ea87a`（含决定响应缓存头修复）、API `
 | [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | Domain/UseCase、严格 NFC、0011 migration、事务/指针/序号、HTTP/gRPC/Wire 与完整 backend 验收；服务 `d121d4e`、API `219419b` | —（当前后端范围） |
 | [UC-APP-014](../use-cases/UC-APP-014-update-draft-application-profile-revision.md) | `ACCEPTED` | `COMPLETE` | 完整替换、NFC no-op、OCC/If-Match、事务栅栏与状态竞争、HTTP/gRPC及生成HTTP客户端、完整backend验收；服务 `a712456`、API `94347df` | —（015已闭合真实编辑/提交双命令竞争） |
 | [UC-APP-015](../use-cases/UC-APP-015-submit-application-profile-revision-review.md) | `ACCEPTED` | `COMPLETE` | PENDING不可变快照、0012 migration、原子提交/OCC/attempt、指针保留、重复/回滚/双命令竞争、HTTP/gRPC与生成客户端、完整backend验收；服务 `3a87a0f`、API `a0c158c` | —（审核决定 UC016、管理查询 UC039 已完成；前端分别验收） |
-| [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `PARTIAL` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | 2026-10-26增量未实现：Profile正式策略发布及唯一 ACTIVE；并发可达性文档已澄清，Console落地见交接 |
+| [UC-APP-016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md) | `ACCEPTED` | `PARTIAL` | 一次性审核/自动公开、独立权限与策略、0013 migration、事务写栅栏/指针CAS、REJECT原文保留、双协议与生成客户端、完整cross-service验收；服务 `a844f08`、API `bc05993` | 2026-10-26增量未实现：Profile正式策略发布及唯一 ACTIVE；并发可达性文档已澄清，Console验收文字已在整合main落地 |
 | [UC-APP-018](../use-cases/UC-APP-018-manage-oauth-client.md) | `ACCEPTED` | `COMPLETE` | 独立OAuth Client Domain/UseCase、TEST渠道稳定PUBLIC/CONFIDENTIAL UUIDv4 identity、一次性secret与独立credential revision、状态epoch、0014 migration、管理员事务栅栏、HTTP/gRPC/Wire及完整cross-service验收；服务 `041a929`、API `51e6572` | —（当前 App 后端范围；STABLE/GREY 与 Version/provider 配置已由后续 UC 补齐，Auth 拥有授权/token 实现） |
 | [UC-APP-019](../use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | `ACCEPTED` | `COMPLETE` | 五个 Auth-only 原生 gRPC Provider 方法、本地 service caller registry 与逐方法权限、secret revision 验证、TEST exact-major/批准 Version/Review/Profile/Tester 单 Mongo snapshot、5秒 runtime tuple、sector 回调事实并集及完整 cross-service 验收；服务 `657eccd`、API `310fc10` | —（TEST/STABLE/GREY provider 已由 UC020/021 补齐并联验；Auth 拥有 grant/code/token 与 sector/sub） |
 | [UC-APP-020](../use-cases/UC-APP-020-manage-stable-publication-slot.md) | `ACCEPTED` | `COMPLETE` | exact-major stable set/replace/clear、共享 Publication OCC、EMPTY 保留与 History、0016 migration、HTTP/gRPC、STABLE OAuth 管理及五个 Auth-only Provider 方法、完整 cross-service 验收；服务 `531f077`、API `90519af` | —（Grey、Test clear、Catalog 已由 UC021/036/024 完成；Auth 拥有 grant/code/token） |

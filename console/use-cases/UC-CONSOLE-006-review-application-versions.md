@@ -56,12 +56,14 @@
 
 2026-10-23按已发布接入证据更新：固定API输入`27c9743d2d7476511932a83563e103aee5b4e28e`的UC030详情已包含`currentPolicy.version/requiredCheckIds/requiredCheckDefinitions`，Version v3四项正式定义由同次服务端详情提供。Console使用生成类型和该次定义，不从英文ID翻译、套其它版本文案或使用客户端包决定当前策略；缺失、未知或不一致定义仍按BR-CRV-002失败关闭。
 
-Gateway三条ADMIN查询/决定入口已在已发布镜像接入，真实Auth权限签发、逐项确认及决定链已验证，详见[决定接入及published记录](../implements/2026-10-16-admin-review-decisions.md)和[当前有界覆盖](../implements/README.md)。这些不是现存接入阻塞；最初“仅返回ID、定义待提供”的描述仅适用于首阶段旧输入。策略退休/Scope变化的正式准备能力及其它有限未覆盖项、Application/Gateway错误响应缓存头门禁仍开放，不因定义和surface就绪标记完整交付。本UC不另建App API或复制检查定义正文。
+Gateway三条ADMIN查询/决定入口已在已发布镜像接入，真实Auth权限签发、逐项确认及决定链已验证，详见[决定接入及published记录](../implements/2026-10-16-admin-review-decisions.md)和[当前有界覆盖](../implements/README.md)。这些不是现存接入阻塞；最初“仅返回ID、定义待提供”的描述仅适用于首阶段旧输入。Application/Gateway错误响应缓存头门禁已由[已发布复验](../implements/2026-10-23-published-cache-header-fix-verification.md)关闭。本UC不另建App API或复制检查定义正文。
+
+2026-10-26按用户已接受的[App正式发布流程](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)及独立接受的[Auth UC036](../../auth-center/use-cases/UC-AUTH-036-release-scope-enablement-changes.md)同步验收口径：App正式发布回执与运维读回尚未实现；Auth管理API核心实现完成，但全量回归、Gateway接线及真实联合链仍待闭合，见[交付边界](../../auth-center/implements/UC-AUTH-036-readiness.md)。Scope验收遵循[App ADR001](../../app-center/adr/ADR-001-scope-catalog-cache.md#第一阶段缓存)的真实TTL、实例与在途窗口，不直接清缓存或伪造时钟；Scope错误和策略409分别取证。没有下一份获批真实政策时保持待准备，不制造同义版本或重新激活退休策略。文档同步不代表新增验收已通过，UC整体仍未完成。
 
 ## 验收与完成标准
 
 1. 真实 grant 后访问、revoke 后新请求拒绝，两类 Reviewer 交叉、无权限管理员和 Developer 均按精确授权；冲突三种原因可读不可决定，最终写仍拒绝。
 2. 真实 PENDING 队列/详情、终态深链接、snapshot 与当前 Version 分离；过滤、keyset、空队列与损坏失败关闭有覆盖。
 3. 正式策略逐项确认、未知定义、版本变化、缺/重复 checks、REJECT 理由与空 checks、非预期系统拒绝、批准不自动发布均通过。
-4. 两个 Reviewer 并发、策略退休、Scope 失效、依赖故障、响应丢失/断网、PENDING 重读与终态重读通过真实后端；不自动重放，迟到响应不覆盖新目标。
+4. 两个 Reviewer 并发、依赖故障、响应丢失/断网及 PENDING/终态重读经真实后端验证。策略变化使用获批的 App 正式发布变更，Scope 失效使用 Auth 所有者的正式变更入口；页面加载旧事实后，真实旧请求被拒绝，重读并清空确认，禁止自动重放。组件恢复测试与事务并发测试分别标记层级，不能替代上述真实变更链；正式变更准备条件未具备的项继续待验收，不以错误版本输入或直接改库关闭。
 5. 私有缓存、Header/Cookie 清理、权限撤销、SESSION_INVALID、5xx 保会话及键盘/焦点通过浏览器联合验收。定义来源、固定版本、真实服务证据齐全才可标记完整实现；接受首阶段不代表完整决定流程已实现。

@@ -4,7 +4,7 @@
 
 截至2026-10-23，最新[缓存头修复复验](2026-10-23-published-cache-header-fix-verification.md)已完成：Console冻结6b8834e，published专项35/35（4.4分钟）、默认无参数115/115（19.5分钟）全部通过，均exit0、无skip/retry。原29条缓存头断言全部保留且两轮恢复，无新增功能失败；App latest更新为8e499500、Gateway为509acf96，Auth不变。954 Vitest＋221 Node、strict/官方同pin生成/新Gateway Edge通过；生成检查首次GitHub网络超时及同源重试成功均如实记录。
 
-[阶段收口与继续条件](2026-10-23-console-stage-closeout.md)中的缓存头阻塞已解除，不再要求修复同一组错误或重复无变化全量；仍不自动扩大测试排列/未接受UI。策略/Scope正式变更、不同修订并发可达性和33+carrier架构边界继续开放，门禁全绿不等于整体目标或完整UC已完成。
+[阶段收口与继续条件](2026-10-23-console-stage-closeout.md)中的缓存头阻塞已解除，不再要求修复同一组错误或重复无变化全量；仍不自动扩大测试排列/未接受UI。策略/Scope真实变化验收和33+carrier架构边界继续开放；2026-10-26不同修订并发可达性已按用户接受的单工作位设计分层，见UC007验收，门禁全绿不等于整体目标或完整UC已完成。
 
 本轮产品/runtime/runner/spec与32e83da相同，仅更换已发布镜像；五latest每轮重拉并轮内固定，轮次资源已清理、legacy本地/远程未变、未push。旧32e83da镜像组合的111/115及29条失败保留在[原记录](2026-10-23-profile-decision-developer-projection.md)，不能再把旧红门禁当当前状态。
 
@@ -19,7 +19,7 @@
 | Console工程初始化 | UC001 `ACCEPTED`；工程范围`IMPLEMENTED` | pnpm workspace、严格TypeScript、固定统一API生成和校验；双应用/BFF及独立surface真实链已接入 | 不再把“尚未建立真实E2E”作为工程待办；UC001整体仍未关闭 |
 | 共享浏览器Session | UC001 `ACCEPTED / IN_PROGRESS`；设备/邮箱码与Session v2基线已实现 | 双origin真实邮件/设备登录、原Begin恢复、提交/恢复等待取消、旧carrier/清理回执、双生产副本/提交点故障，以及两个origin实际32次签发后的显式重建，见[Session v2接线](2026-10-16-session-v2-wiring.md)和[context恢复](2026-10-16-context-exhaustion-recovery.md) | 任意33+迟到carrier的无损Cookie自助恢复仍需独立架构处理；不以此关闭完整UC001/fencing |
 | Developer Console功能 | UC001–005 `ACCEPTED`；认证入口与四类只读页面已实现，整体`IN_PROGRESS` | 真实成功读取、25项[跨Session读取矩阵](2026-10-16-developer-private-session-matrix.md)、正式管理权转让退场、SUSPEND/RESTORE资格读取与保留生命周期历史投影；Admin→Developer资料闭环专项/全量完成，缓存头门禁已恢复 | WITHDRAWN/账号禁用读取未列为已覆盖 |
-| Admin Console功能 | UC001/006/007 `ACCEPTED`；双队列/详情、批准/拒绝、独立权限/Session恢复已实现，整体`IN_PROGRESS` | [查询及权限读取](2026-10-16-admin-review-queries.md)、12项[读取跨Session矩阵](2026-10-16-admin-private-session-fencing.md)，以及26项决定功能：双Reviewer、真实期限/结果未知、撤重授、加载后利益冲突、六项决定跨Session交错和真实App→Auth断链/恢复；原4条401缓存头已恢复 | 策略/Scope真实变化和不同修订公开指针并发仍未覆盖，原因见下表；不再把决定surface/正式定义/Reviewer公开指针接入列为当前缺失 |
+| Admin Console功能 | UC001/006/007 `ACCEPTED`；双队列/详情、批准/拒绝、独立权限/Session恢复已实现，整体`IN_PROGRESS` | [查询及权限读取](2026-10-16-admin-review-queries.md)、12项[读取跨Session矩阵](2026-10-16-admin-private-session-fencing.md)，以及26项决定功能：双Reviewer、真实期限/结果未知、撤重授、加载后利益冲突、六项决定跨Session交错和真实App→Auth断链/恢复；原4条401缓存头已恢复 | 策略/Scope真实变化仍待准备；资料并发按已接受的单工作位与指针防御分层核对，文档修正不新增实际覆盖，见下表；不再把决定surface/正式定义/Reviewer公开指针接入列为当前缺失 |
 | Developer Application概览 | UC002 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [25个正式Create的20+5累计分页](2026-10-16-owned-application-pagination-and-recovery.md)、筛选/游标/空态、正式转让后的管理权回收、跨Session及SUSPEND/RESTORE、ACTIVE/CLOSING/CLOSED保留历史读取，错误缓存头门禁恢复 | WITHDRAWN/账号禁用的有界验收未覆盖，不表示列表/详情或真实浏览器主链尚未实现 |
 | Developer Application Version | UC003 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [四状态/恢复DRAFT、20+5、正式错误码与断流恢复](2026-10-16-version-pagination-and-recovery.md)，当前内容与latestReview分区、bigint/惰性文本、管理权/Session及上述保留历史读取 | WITHDRAWN/账号禁用未覆盖；不新增完整审核历史或发布管理，APPROVED不解释为已发布 |
 | Developer Application资料修订 | UC004 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [四状态、20+5列表及独立历史、页外指针、原文/隐私与真实413](2026-10-16-profile-pagination-and-budget.md)，管理权/Session、SUSPEND/RESTORE及保留历史读取；[Admin→Developer实际批准投影](2026-10-23-profile-decision-developer-projection.md)专项/全量完成 | WITHDRAWN/账号禁用未覆盖，不把已有读取重新登记为未验收 |
@@ -30,8 +30,8 @@
 | 类型 | 当前开放项与推进条件 | 依据 |
 | --- | --- | --- |
 | 有界角色验收未覆盖 | WITHDRAWN及账号禁用后的管理读取，不能由已有SUSPEND/RESTORE或CLOSED历史readseed外推；本页不据此宣称产品缺失，也不自动扩成全部角色×页面组合 | [资格与角色边界](2026-10-16-qualification-and-role-read-boundaries.md)、[保留生命周期历史](2026-10-16-retained-lifecycle-read-matrix.md) |
-| 缺正式变更API | 策略发布/退休及Scope启停不能通过当前只读事实查询制造；错误expectedPolicyVersion、合成policy JSON或直接改库不是真实加载后变化证明 | [Version策略](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016)、[Profile策略](../../app-center/use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)、[Scope快照范围](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md) |
-| 契约可达性需外部决定 | UC007不同修订并发批准的准备受同一App单一DRAFT/SUBMITTED工作位约束；现有错误pointer409不替代该证据，不seed平行PENDING。须由App/Console权威设计明确可达准备或验收处理 | [UC007验收](../use-cases/UC-CONSOLE-007-review-application-profiles.md#验收与完成标准)、[单一工作修订](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006) |
+| 正式变化准备与联合验收 | App已接受正式发布流程，原子回执/运维读回尚未实现，下一份真实政策另审；Auth UC036已接受且核心实现完成，全量回归、Gateway接线、App真实TTL刷新与Console联合链仍待闭合。错误expectedPolicyVersion、合成policy JSON或直接改库不是真实加载后变化证明 | [App发布流程](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[Profile兼容门槛](../../app-center/use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)、[Auth交付边界](../../auth-center/implements/UC-AUTH-036-readiness.md) |
+| 已接受的可达性分层，证据保持原范围 | UC007验收4已按用户接受的单工作位方案同步：同Review双决定、顺序替换、错误pointer409协议防御与组件恢复分别标记；不同修订同时PENDING不是当前可达业务要求，不seed平行PENDING。既有证据不改名，不因文字同步宣称新增真实链通过 | [UC007验收](../use-cases/UC-CONSOLE-007-review-application-profiles.md#验收与完成标准)、[单一工作修订](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006) |
 | 架构问题 | 任意33+迟到carrier后的无损Cookie自助恢复未交付；实际32次context签发后的显式重建已覆盖，不把两者混作同一待办。有限诊断已证明浏览器可发送应用handler到达前被HTTP解析器拒绝的Cookie头，单加BFF清理路由不足以覆盖完整问题 | [传输边界分析](2026-10-23-cookie-recovery-transport-boundary-analysis.md)、[context恢复边界](2026-10-16-context-exhaustion-recovery.md)、[fencing记录](../query-contracts/login-flow-fencing.md) |
 | 已登记、未确认修复的观察 | 早期fixture偶发缺数据经多轮未再现，因果仍OPEN；不是本次真实全量新增功能失败，也不能以重复绿宣称已修复 | [读取消费边界](2026-10-16-developer-read-consumption.md)、[Admin读取恢复](2026-10-16-admin-read-recovery-and-late-responses.md) |
 

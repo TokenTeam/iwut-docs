@@ -1,6 +1,6 @@
 # UC029 管理查询错误响应缓存头修复
 
-状态：`COMPLETE`（后端修复与验收；镜像待发布），2026-10-23。用户通过 Console 联调反馈授权核查并修复 App 错误响应缓存头；本包不变更 UC、BR、授权、分页或 API 契约。App 提交 `d3f510e`。
+状态：`COMPLETE`（后端修复与验收；后续published联合复验已通过），2026-10-23。用户通过 Console 联调反馈授权核查并修复 App 错误响应缓存头；本包不变更 UC、BR、授权、分页或 API 契约。App 提交 `d3f510e`。
 
 ## 缺口与责任层
 
@@ -34,3 +34,7 @@ Docs 固定 `06f849e4bc0108456d7eae800fdea0e810e47b20`，指纹 `1250c767f2d6516
 ## 发布与联合复验
 
 实现验收阶段仅授权本地修复、回归和提交；2026-10-23 用户随后明确授权 commit + push。本次推送仅包含 App 修复及对应 App 文档，不带入独立 Auth 文档提交，也不扩展为产品镜像构建或部署授权。Console 记录的 App published 输入仍是 `sha256:2af4af71e8eb8f1ea46e92bfdaa3e8e14944cb0bc4ca46b95c9a05db6c46340a`；没有据本地 GREEN 将其宣称为已修复。后续需发布包含本包提交的新 App 镜像，再由 Console 保留全部断言、拉取并固定新输入，执行对应专项及完整 published 门禁。Gateway 的 4 条 Session401 修复和其它设计开放项分别处理。
+
+## 后续发布复验同步（2026-10-26）
+
+以上发布待办保留为当轮事实；后续[Console已发布复验](../../console/implements/2026-10-23-published-cache-header-fix-verification.md)已固定App `8e499500…`、Gateway `509acf96…`等输入，保留原29条缓存头断言，专项35/35及完整115/115通过。此缓存问题已闭合，不再要求重复修复；新增政策/Scope变化验收仍按各自接受设计与交付门禁准备。
