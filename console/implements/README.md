@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+当前有限包[UC001浏览器凭据校验](2026-10-27-browser-credential-validation.md)为ACCEPTED / IN_PROGRESS：实际非法点/标量/记录签名缺口先RED后修，命名上下文与BOM回归、双origin原生IndexedDB适配器证据随后统一冻结验收。原126绿保持历史范围，不当本包结果；公开向量CI和其它外部/架构边界仍单列，不改协议、不push。
+
 2026-10-27最新[完成性审计](2026-10-27-completion-audit.md)发现的[拒绝后焦点](2026-10-27-private-denial-focus.md)与[双静态Strict CSP](2026-10-27-strict-static-csp.md)已VERIFIED：冻结29aa09b，published-latest专项3/3、默认126/126（31.6秒/23.9分钟浏览器阶段，exit0，无skip/retry），957 Vitest＋359 Node、strict/官方生成/Edge/docs通过。真实parser负例、handler/connect/base/object拒绝、正常生产认证/私有/决定与焦点键盘链均收齐；首轮非parser负例错误及拉取EOF保留。资源清理、legacy本地/远程未变，只本地提交不push。协议/损坏本地记录已有直接有限复现，公开向量CI证据仍需收齐；这是明确后续，不把126全绿当整体UC/goal完成。App政策发布和Cookie33+独立开放。
 
 2026-10-27当前增量：[WITHDRAWN 与正式关闭后的历史读取](2026-10-27-withdrawn-closed-history.md)有界链已VERIFIED。Console冻结ae46e5c，published-latest专项3/3、默认无参数124/124通过（35.7秒/23.8分钟浏览器阶段，exit0、无skip/retry），954 Vitest＋344 Node、strict/官方API6fea生成/Edge/docs门禁通过。专用普通owner正式准备一个App及已提交Version/Profile、Link/Tester；ACTIVE先BLOCKED，正式关闭到CLOSED后Prepare/Confirm退出，原Session/钥匙、九RPC和代表React历史视图保持。未增关闭/退出UI、不seed本链、不编译后端、不push；两轮资源清理、legacy本地/远程未变，旧121全保留。App政策发布及Cookie架构仍独立开放，不关闭完整UC/goal。

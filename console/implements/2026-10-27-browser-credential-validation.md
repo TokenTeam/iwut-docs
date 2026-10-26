@@ -26,4 +26,10 @@
 
 ## 实际结果
 
-尚未实施或验收；本节后续追加真实结果，不提前登记通过数。
+已实现keys/内部native-key验证、store快照/曲线/fingerprint/配对probe、DER标量范围及protocol精确上下文。keys首轮6 RED/1 GREEN后7/7；store首批62 RED/3 GREEN，修复后加5项异步快照共70/70；协议新增14项中6 RED（含device/email BOM及同畸形expectation）后19/19，原有有效比较与其它命名负例保持通过。另8项ProtoJSON Base64别名测试验证现有拒绝，不冒称新增缺陷。
+
+全仓初次普通检查在account-owner的5项旧合成用例失败，独立withdrawal-owner另有4项失败：它们把App UUIDv7生成器用于Auth DEVICE credentialId/operationId。按平台契约仅修7个合成fixture的这两种ID为v4；App目标v7、opaque authId、原断言及次数不变，不放宽产品校验，也不改变application-close-reauth独立协议。account46/withdrawal49及其它5文件70项定向复验通过；首轮失败保留，不把测试资料错误当后端故障。
+
+双origin原生IDB spec已接线：独立临时DB的真实non-extractable CryptoKey克隆/禁止导出、健康无credentialId的material/sign/verify；4种raw注入的合成坏记录，经生产material/list/sign/put拒绝且记录保留。只返回13个固定bool，临时DB精确删除；默认DB不改、零Auth mutation/App/外域请求。它是适配器验收，不冒充UI或真实注册链。预期专项为2 native＋原console2共4项，默认无参数128项（原126保留），实际结果仍待冻结后记录。
+
+统一普通检查实际通过：1056 Vitest（browser-auth 183，原84保留）＋359 Node；strict含构建helper及真实/privacy spec、官方远程固定API6fea生成检查、published Gateway/Traefik Edge接线、docs72 brief/367行8退休编号及diff检查均通过。尚无本冻结真实浏览器结果；开始先本地提交冻结，再重新pull镜像验证，不能以普通测试代替真实门禁。
