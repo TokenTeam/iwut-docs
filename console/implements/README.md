@@ -2,7 +2,9 @@
 
 ## 当前状态
 
-2026-10-27当前增量：[账号禁用与恢复后的读取](2026-10-26-account-status-read-recovery.md)有界链已验证，冻结b60fcb6的published-latest专项3/3、默认无参数121/121通过（1.3/21.1分钟、exit0、无skip/retry）。正式专用owner账号1→2→3、Developer实际401退场、恢复后旧Admin/普通Auth Session不复活、两origin原不可导出钥匙显式DEVICE新代读取原App/Review及peer保持通过。954 Vitest＋295 Node、strict/官方API6fea生成/Edge/docs门禁通过，资源清理、legacy未变、未push。初始空时间错误与旧冻结复用owner第6封邮件429（原118通过/1失败/2未执行）均保留；接受专用owner正式准备后邮箱仅注册＋两EMAIL共3次，不放宽限额。只关闭所列代表链，不自动扩成全部状态×页面；WITHDRAWN正式关闭/退出、App策略发布与Cookie架构边界仍开放。
+2026-10-27当前增量：[WITHDRAWN 与正式关闭后的历史读取](2026-10-27-withdrawn-closed-history.md)已自行接受并进入实现，尚未真实验收。专用普通owner正式准备一个App及已提交Version/Profile、Link/Tester；正式关闭到CLOSED后才退出开发者，并以原浏览器Session/钥匙比较九个管理读取与代表React视图。不增加关闭/退出UI，不seed本链，保留账号状态包和旧121项门禁。App政策发布及Cookie架构仍独立开放。
+
+2026-10-27此前增量：[账号禁用与恢复后的读取](2026-10-26-account-status-read-recovery.md)有界链已验证，冻结b60fcb6的published-latest专项3/3、默认无参数121/121通过（1.3/21.1分钟、exit0、无skip/retry）。正式专用owner账号1→2→3、Developer实际401退场、恢复后旧Admin/普通Auth Session不复活、两origin原不可导出钥匙显式DEVICE新代读取原App/Review及peer保持通过。954 Vitest＋295 Node、strict/官方API6fea生成/Edge/docs门禁通过，资源清理、legacy未变、未push。初始空时间错误与旧冻结复用owner第6封邮件429（原118通过/1失败/2未执行）均保留；接受专用owner正式准备后邮箱仅注册＋两EMAIL共3次，不放宽限额。只关闭所列代表链，不自动扩成全部状态×页面；WITHDRAWN正式关闭/退出、App策略发布与Cookie架构边界仍开放。
 
 2026-10-26当前增量：[正式Scope启停与旧审核页面恢复](2026-10-26-scope-review-change.md)有界链已验证，内容冻结ba1e1706，published-latest专项30/30、默认全量118/118通过（3.1/19.8分钟浏览器阶段、exit0、无skip/retry）。正式管理员启停/原编号回执、非空openid见证目录revision、旧email APPROVE422后PENDING/清确认/不重放、停用期间REJECT和前向恢复后明确APPROVE均完成。954 Vitest＋249 Node、strict/官方API6fea生成/Edge/docs静态门禁通过，测试资源已清理、legacy未变、未push。两次新增测试预期错误及首轮27/1/2、第二轮29/1保留；App策略发布、角色剩余有界验收和Cookie架构边界仍开放，完整UC/goal未完成。
 
