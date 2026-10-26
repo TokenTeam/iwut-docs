@@ -1,6 +1,6 @@
 # 双 Console 静态文档的 Strict CSP
 
-状态：ACCEPTED / IN_PROGRESS（2026-10-27，按持续目标授权自行决定并接受）。
+状态：ACCEPTED / VERIFIED（2026-10-27，按持续目标授权自行决定并接受；仅本包部署与有限联合验收）。
 
 ## 依据与当前事实
 
@@ -32,3 +32,15 @@ published-latest专项轮 `iwut-console-real-380677`：3项中**1通过/2失败�
 首轮容器（含停止项）/network已清空。Auth518b0917/App68ee32b1/Gateway444c75a7、Mongo e0ce8c35/Traefik24841fe2与124基线相同，均重新pull后轮内固定ID；legacy不移动，不push。
 
 修订后的准备边界：允许真实runner仅在固定无query GET `/__real-csp-parser-probe.html` 返回本轮实际built index.html的派生文档，唯一差异是在closing head前插入固定合成无hash script marker；不得接受任意HTML/marker/URL参数。meta与全部原脚本/样式/SRI字节保持，响应no-store，仅供匿名parser负例，不作为正常生产页面或业务准备。正常首页及同源成功读取仍独立验证；在导航前仅安装不改变CSP的事件观察器，收集固定directive/enforce，不记样本。loaded页面document.write会清DOM/监听器或使已求值module不能重挂React，不采用该替代。探针HTTP确实交给浏览器parser，需与真实拒绝事件和marker未执行联合证明，不以DOM惰性或脚本惯性不执行计绿。
+
+## 最终 published latest 联合验收
+
+修订只增加受限parser探针与修正浏览器负例，不改生产CSP或焦点产品代码；最终产品/runtime/runner/spec冻结 `29aa09b0da1d094fd14773a260aa075336a56aac`。新增探针5项先缺模块RED后5/5，与构建10项合计15项Node；统一 **957 Vitest＋359 Node**、strict（含构建helper/两个Vite配置）、官方固定API6fea远程生成、实际Edge和docs72份brief/367行8退休编号检查通过。
+
+修订后首次尝试（exec会话66206）在Docker Hub拉取Mongo8.2.12授权token时EOF，CLI明确exit1，尚未建立业务环境或进入浏览器，资源为空；不计3项功能结果，也不跳pull/回退缓存。随后同冻结重新pull成功：专项 `iwut-console-real-393153` 使用 `pnpm test:real tests/real/csp.real.spec.ts tests/real/management-transfer.real.spec.ts`，**3/3通过、31.6秒浏览器阶段、exit0**；同冻结默认轮 `iwut-console-real-398407` 无参数 `pnpm test:real`，**126/126通过、23.9分钟浏览器阶段、exit0**，均无skip/retry。两CSP项和焦点代表链均在全量再次通过；原124全部保留，没有把匿名CSP或单项焦点替代正常认证/私有读取/审核/恢复门禁。
+
+双surface正常生产React首页、同源capabilities/session、实际JS字节SHA256→SRI→policy绑定、meta先于资源及frame-ancestors/XFO头均通过。正常home保留handler/connect/base/object真实拒绝；独立同源HTTP派生探针保留原meta/SRI，确认固定parser脚本确在文档中但marker不执行，收到script-src-elem/enforce。两页面只记录固定directive/disposition和CDP requestId计数；外域实际header dispatch交集/响应均0，无Auth mutation/App请求、无nonce/脚本特赦/route/MSW。该探针只证明parser负例，不冒充正常生产HTML；strict-dynamic允许受信动态依赖的边界不被隐藏。
+
+成功专项与全量五镜像相同，均每轮重新pull后固定ID：Auth `sha256:518b0917ec8302f9f6cb28bd2e12aa59033cfe6db45c82a81a0afcb1bac5aa16`；App `sha256:68ee32b1e92145734bfa7fe61d003ee7e2ed2bb8b20fd944f861704a8f48ad01`；Gateway `sha256:444c75a71fc74fb14840718b259aeec14fbe2bbcda0a9832340c70b64ed099b0`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`；Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。两轮容器（含停止项）与network为空，Edge烟测容器亦无残留；全量期间工作区干净、冻结未变，legacy本地/远程仍为e68851e343bd0e077e5ccd0b680fe6813216ced0。无后端编译/改动、无外部聊天需求、无push，元数据与证据仅本地保存。
+
+仅关闭本包Strict CSP和所列联合证据；不证明生产EO已配置、所有浏览器完全相同或同源受信代码无法使用密钥。UC001协议护栏/损坏记录与CI证据已由[独立审计](2026-10-27-completion-audit.md)列为下一有限工作；App政策发布、Cookie33+及完整UC/goal仍开放，不因126全绿关闭。

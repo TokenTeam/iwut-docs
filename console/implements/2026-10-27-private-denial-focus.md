@@ -1,6 +1,6 @@
 # Developer 私有读取拒绝后的焦点恢复
 
-状态：ACCEPTED / IN_PROGRESS（2026-10-27，按持续目标授权自行决定并接受）。
+状态：ACCEPTED / VERIFIED（2026-10-27，按持续目标授权自行决定并接受；仅本包有限焦点链）。
 
 ## 依据与缺口
 
@@ -17,3 +17,5 @@
 ## 当前验证
 
 组件14项首轮3失败/11通过，确认失权后focus为body；修复后14/14，相关boundary/core/activation共96/96。统一957 Vitest＋354 Node、strict/官方API生成/Edge/docs通过。联合冻结ebed897的published专项380677中，本包原一项正式转让在28.3秒内通过，含实际失权标题focus、迟到Tester回执后focus保持、Tab/Enter明确重读，原Session和头/数据断言未减；联合专项另两项CSP因其非parser插入负例错误失败，总1通过/2失败，不把本包单项绿替代完整门禁。修订CSP spec后的专项/默认126仍待执行，当前本包不标VERIFIED。
+
+最终联合冻结 `29aa09b0da1d094fd14773a260aa075336a56aac`（本包产品焦点代码仍a9a7080）：published-latest专项393153 **3/3通过，31.6秒浏览器阶段**，本包原一项27.5秒；无参数全量398407 **126/126通过，23.9分钟浏览器阶段**，本包原一项26.9秒，两轮exit0、无skip/retry。957 Vitest＋359 Node、strict/官方同pin生成/Edge/docs门禁通过，正常登录/私有读取/决定、WITHDRAWN及账号状态均在新CSP下再次通过。镜像、此前拉取EOF与首轮失败边界见[联合CSP记录](2026-10-27-strict-static-csp.md#最终-published-latest-联合验收)，没有用单项绿替代全量。两轮资源清空、legacy本地/远端未变，仅本地提交、不push；不外推全部页面真实焦点或完整UC。
