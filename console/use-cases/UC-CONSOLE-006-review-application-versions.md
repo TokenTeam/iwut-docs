@@ -62,6 +62,8 @@ Gateway三条ADMIN查询/决定入口已在已发布镜像接入，真实Auth权
 
 ## 验收与完成标准
 
+同日实现补充：[正式Scope变化链](../implements/2026-10-26-scope-review-change.md)已以固定API6fea和发布镜像验证，专项30/30、默认全量118/118通过。真实email停用后原批准422、PENDING无部分写、明确重读清确认、不自动重放；停用期间独立REJECT、前向恢复后新目录revision见证及重新确认APPROVE均完成。此有界项不再列为缺准备；上段Gateway/Scope待接线描述属于本次增量前状态。App真实策略发布仍待准备，完整UC不因本项关闭。
+
 1. 真实 grant 后访问、revoke 后新请求拒绝，两类 Reviewer 交叉、无权限管理员和 Developer 均按精确授权；冲突三种原因可读不可决定，最终写仍拒绝。
 2. 真实 PENDING 队列/详情、终态深链接、snapshot 与当前 Version 分离；过滤、keyset、空队列与损坏失败关闭有覆盖。
 3. 正式策略逐项确认、未知定义、版本变化、缺/重复 checks、REJECT 理由与空 checks、非预期系统拒绝、批准不自动发布均通过。
