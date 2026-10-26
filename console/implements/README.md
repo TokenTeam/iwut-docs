@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-10-26下一有界增量：[账号禁用与恢复后的读取](2026-10-26-account-status-read-recovery.md)已自行接受并开始实施，正式ACTIVE1→DISABLED2→ACTIVE3，两个origin独立原钥匙重新登录与旧Session不可复活；计划末尾三项专项及默认121项全量，尚无本包真实结果，不借下文118项关闭。WITHDRAWN必须另走正式关闭/撤回链，不以seed或转让替代。
+
 2026-10-26当前增量：[正式Scope启停与旧审核页面恢复](2026-10-26-scope-review-change.md)有界链已验证，内容冻结ba1e1706，published-latest专项30/30、默认全量118/118通过（3.1/19.8分钟浏览器阶段、exit0、无skip/retry）。正式管理员启停/原编号回执、非空openid见证目录revision、旧email APPROVE422后PENDING/清确认/不重放、停用期间REJECT和前向恢复后明确APPROVE均完成。954 Vitest＋249 Node、strict/官方API6fea生成/Edge/docs静态门禁通过，测试资源已清理、legacy未变、未push。两次新增测试预期错误及首轮27/1/2、第二轮29/1保留；App策略发布、角色剩余有界验收和Cookie架构边界仍开放，完整UC/goal未完成。
 
 2026-10-26：[新发布契约组合基线复验](2026-10-26-published-scope-contract-baseline.md)完成，Console冻结e1db0af，Auth518b0917/App68ee32b1/Gateway444c75a7的published-latest审核专项27/27、默认完整115/115通过（2.9/19.2分钟浏览器阶段，exit0、无skip/retry）。普通954 Vitest＋221 Node、strict/官方固定API生成/Edge通过，容器与network清理、legacy未变。Gateway新增三条Scope管理SESSION路由已在发布镜像确认，不开放Console surface符合设计；持久目录配置、正式Scope启停与App真实TTL/Console旧页面恢复的新增准备尚未接入，不能用115项基线关闭。App本次只更新API依赖，政策发布回执/运维读回仍未实现。以下2026-10-23结果保留为历史基线，不是本轮待重跑项。
