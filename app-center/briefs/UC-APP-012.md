@@ -688,7 +688,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：后续用例、变更记录
 - `UC-APP-007`（use-cases/UC-APP-007-place-approved-version-in-test-slot.md）：目标与范围、发布边界、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、实现依赖与交付边界、后续用例、迁移说明、变更记录
 - `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：目标与范围、提交结果、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、后续用例、迁移说明、变更记录
-- `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：目标与范围、参与者、决定结果、旧实现观察、输入、主流程、异常流程、最小领域行为、用例端口、数据模型变化、API 草图、测试与验收、已确认的实现边界、后续用例、迁移说明、变更记录
+- `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：目标与范围、参与者、决定结果、旧实现观察、输入、主流程、异常流程、最小领域行为、用例端口、数据模型变化、策略正式发布与运维读回、API 草图、测试与验收、已确认的实现边界、后续用例、迁移说明、变更记录
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
@@ -701,7 +701,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 631 | `e65c1ead652e` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 678 | `a548d21c99ed` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

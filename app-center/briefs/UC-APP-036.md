@@ -705,7 +705,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、变更记录
 - `UC-APP-023`（use-cases/UC-APP-023-resolve-unified-launch-target.md）：目标与范围、已有依赖与扩展边界、输入与身份、统一选择算法、回退与损坏状态、主流程、结果、异常流程、最小查询模型、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
-- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、考虑过的替代方案、结果、关联文档
+- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
@@ -725,7 +725,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `use-cases/UC-APP-023-resolve-unified-launch-target.md` | 305 | `30ae34bdccb2` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

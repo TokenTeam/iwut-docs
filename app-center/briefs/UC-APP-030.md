@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-030` 查询 ApplicationVersion 审核队列与审核详情 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-REV-029`–`BR-REV-034`（6 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-REV-016`（来自 `UC-APP-005`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -92,6 +92,8 @@ currentPolicy 的定义来自 [UC005 正式策略](../use-cases/UC-APP-005-decid
 
 终态详情的 currentPolicy 不解释历史 decision：历史 v1/v2 只显示已记录版本及 ID，不能套用 v3 文本。新字段为 ReviewPolicyContext.required_check_definitions = 3；原字段编号保持不变。Console 逐项展示纯文本且不预勾选；缺少完整定义只读。成功和错误响应 private, no-store。
 
+正式策略变化及运维读回由 [UC005 BR-REV-016](../use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016)和[正式发布流程](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)拥有。Reviewer 仍从本次详情观察当前唯一 ACTIVE 的策略，不通过运维入口取得审核权；加载旧策略后真实冲突、重读与清确认不得用错误版本负例冒充实际发布。此次设计补充不新增本查询 Proto 字段或改写旧决定。
+
 详情不返回管理员管理页的其他 Version、OAuth secret、Tester 或用户资料。
 
 ### 一致性、分页与错误
@@ -161,6 +163,36 @@ Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，当�
 ### BR-REV-034：审核查询一致性与失败关闭
 
 单页和详情必须内部一致；损坏引用、快照或当前策略定义导致整次查询 INTERNAL，不能静默跳过或补齐部分定义。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-005`
+
+<!-- 权威位置: use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016 -->
+### BR-REV-016：版本化审核策略
+
+reviewer 作决定时必须提交自己实际阅读的 expectedPolicyVersion。App Center 拥有不可变、可按版本读取的 VersionReviewPolicy；历史策略定义必须保留，不能让同一个版本标识指向不同内容。
+
+```text
+VersionReviewPolicy {
+  version: ReviewPolicyVersion
+  requiredChecks: []ReviewCheckDefinition // v3: id/title/description
+  status: ACTIVE | RETIRED
+}
+```
+
+策略版本为 1–50 个 ASCII 字符，只允许 `[A-Za-z0-9._-]`。`RETIRED` 策略可用于解释历史决定，但不能用于新决定。
+
+本用例定义机制，不在领域实体中硬编码学校政策文本。首版由 App Center
+拥有并持久化正式策略及历史版本，`ReviewPolicyProvider` 从 App Center 自己的
+不可变版本仓库读取；同一 version 不得被覆盖，历史版本不得删除。未来如果出现
+独立的政策发布团队、审批生命周期或多个 bounded context 共同消费同一政策，再通过
+新的 ADR 与跨服务契约评估提取策略发布能力；当前 UC 不依赖 ConfCenter。在真实
+adapter 提供正式且不可变的策略版本前，不能将审核能力标记为生产可用。
+
+每类策略分别保持唯一 ACTIVE。正式切换遵循[策略正式发布与运维读回](#策略正式发布与运维读回)，不得通过通用在线 CRUD、直接改库或为测试制造同义版本绕过。历史策略、版本绑定的检查含义和既有 decision 保留；策略版本与技术 coordinationRevision 不混为一个业务前置值。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -477,8 +509,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-030`（use-cases/UC-APP-030-query-application-version-reviews.md）：变更记录
+- `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：目标与范围、参与者、决定结果、旧实现观察、输入、主流程、异常流程、最小领域行为、用例端口、数据模型变化、策略正式发布与运维读回、API 草图、测试与验收、已确认的实现边界、后续用例、迁移说明、变更记录
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
-- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、考虑过的替代方案、结果、关联文档
+- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
@@ -488,9 +521,10 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-030-query-application-version-reviews.md` | 135 | `c73790fdc05b` |
+| `use-cases/UC-APP-030-query-application-version-reviews.md` | 138 | `40c5c05b6603` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 678 | `a548d21c99ed` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

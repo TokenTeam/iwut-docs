@@ -299,7 +299,7 @@ ProfileRevision.reviewStatus = APPROVED
 ApplicationProfile.currentPublishedProfileRevisionId = profileRevisionId
 ```
 
-管理员不需要第二次 Publish 操作。指针前置值使两个针对不同 ProfileRevision 的并发批准不会静默相互覆盖；后一个 Reviewer 必须重新读取已改变的公开资料后再决定。旧的当前公开 Revision 保留 APPROVED 状态和审核历史，但首版不提供重新选择它或回滚资料的命令。
+管理员不需要第二次 Publish 操作。公开指针前置值防止错误或过期客户端预期静默覆盖当前公开资料；不匹配时不写入决定或公开指针。按 [BR-PRF-006](../use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006)和 BR-PRF-026，同一 Application 当前仅有一个 DRAFT/SUBMITTED 工作修订，批准或拒绝并释放工作位后才能创建下一份；当前不将不同修订同时待审并发批准列为可达用户场景。此说明不放宽指针前置校验、一次性决定或原子写入。未来若开放并行工作修订，应另行接受业务设计并补真实并发验收。旧公开 Revision 保留 APPROVED 状态和审核历史，首版不提供重新选择或回滚资料的命令。
 
 资料自动公开不创建 stable Version。没有兼容 stable 槽位时，Application 仍不进入普通用户候选目录。
 
@@ -744,11 +744,11 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-028`（use-cases/UC-APP-028-suspend-and-restore-application.md）：目标与范围、参与者与依赖、输入、输出与 API 草图、正交状态模型、暂停流程、恢复流程、暂停期间的行为、OAuth 在线检查与残余窗口、领域与数据模型、错误语义、并发与验收场景、实现依赖与启用边界、变更记录
 - `UC-APP-033`（use-cases/UC-APP-033-archive-and-unarchive-application.md）：设计结论、目标与范围、参与者与授权、输入、输出与 API 草图、正交状态模型、归档流程、取消归档流程、ARCHIVED 期间的行为、OAuth 在线检查与残余窗口、领域与数据模型、错误语义、并发与验收场景、实现依赖与交付边界、变更记录
 - `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：目标与范围、已有依赖与组合边界、输入与身份、普通公开候选资格、目标解析与 Filter 组合、公开结果模型、列表、排序与分页、列表主流程、详情主流程、错误与部分结果、最小查询模型与持久化影响、API 草图、验收场景、依赖检查与待确认设计选择、后续设计顺序、变更记录
-- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约
+- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `UC-APP-036`（use-cases/UC-APP-036-clear-test-publication-slot.md）：设计结论、目标与范围、参与者与授权、输入与 API 草图、主流程与 no-op、清空前检查的边界、PublicationHistory 与迁移、在线效果与 OAuth 边界、并发与错误、引用规则与实现输入、验收与交付边界、变更记录
 - `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、变更记录
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
-- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、考虑过的替代方案、结果、关联文档
+- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
@@ -763,11 +763,11 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-028-suspend-and-restore-application.md` | 269 | `155e654469e7` |
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
 | `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 314 | `d0275995ea8b` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
 | `use-cases/UC-APP-036-clear-test-publication-slot.md` | 180 | `e0aa209d3e5f` |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

@@ -16,6 +16,7 @@
 - 批准前检查当前 admin 与 submittedBy 的暂停状态，并在任一人已暂停时由系统自动拒绝。
 - 一次性写入不可修改的审核决定。
 - 原子同步 ApplicationReview.status 与 ApplicationVersion.reviewStatus。
+- 约束审核策略的正式发布与退休，见[策略正式发布与运维读回](#策略正式发布与运维读回)；这是部署治理流程，不增加 Reviewer 在线策略管理权。
 
 本用例不负责：
 
@@ -291,6 +292,8 @@ VersionReviewPolicy {
 新的 ADR 与跨服务契约评估提取策略发布能力；当前 UC 不依赖 ConfCenter。在真实
 adapter 提供正式且不可变的策略版本前，不能将审核能力标记为生产可用。
 
+每类策略分别保持唯一 ACTIVE。正式切换遵循[策略正式发布与运维读回](#策略正式发布与运维读回)，不得通过通用在线 CRUD、直接改库或为测试制造同义版本绕过。历史策略、版本绑定的检查含义和既有 decision 保留；策略版本与技术 coordinationRevision 不混为一个业务前置值。
+
 <a id="br-rev-017"></a>
 ### BR-REV-017：批准检查确认
 
@@ -476,7 +479,51 @@ Reviewer 不能预勾选、用“全选”代替逐项确认，或在无法观�
 
 API/Console 升级和页面刷新应先于 App 输出新字段；严格 JSON decoder 的旧页面并不天然兼容新增字段。新客户端可在旧响应缺少定义时只读，但不能开放批准。
 
+## 策略正式发布与运维读回
+
+本节于2026-10-26获用户接受，是 BR-REV-016 的正式发布约束；Profile 策略由 [BR-PRF-028](UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)引用同一流程，并保持独立的 policyKind。只定义低频发布治理，不新增在线策略管理 API、Console 页面或独立政策服务。
+
+### 主体与发布输入
+
+政策责任人提出真实政策内容，经用户或指定治理责任人审核后，获目标环境部署授权的发布主体执行已批准发布包。Reviewer 的审核权限、Application admin 或平台治理身份不隐式授予策略写权限；读取当前策略的权限也不授予发布权。部署身份及批准记录由可信发布控制面验证并绑定操作，不能只信任任意输入 actor 字符串、Git author 或网络位置。
+
+发布包来自受审代码和固定 release，以专用 migration 承载，不提供接收任意 JSON 的通用 policy 写工具。逻辑输入包括：唯一 changeId/migrationId、目标环境、policyKind（VERSION/PROFILE）、fromVersion、旧不可变内容预期、全新 toVersion 及完整定义、批准依据引用、release commit/digest、完整发布清单摘要。摘要覆盖清单原始字节；策略内容以正式字段精确核对，status/coordinationRevision 不属于不可变政策正文。
+
+真实新政策内容须另行审核；本用例不自动批准 Version v4 或 Profile v2。没有真实变化时不制造同义版本、不重新执行已应用迁移伪装策略变化。
+
+### 原子切换与并发前置
+
+每个 policyKind 正常对外服务时恰有一个 ACTIVE；VERSION 与 PROFILE 分别判断，不能共用一个当前策略。切换事务验证唯一当前策略 A、A 的版本/内容符合发布预期、全新 B 未被其它内容或历史版本占用，再同事务完成 A ACTIVE→RETIRED、B 插入为 ACTIVE，以及 ADR004 要求的发布回执。对外不能观察到切换中间的零 ACTIVE 或多 ACTIVE。正常流程不提供单独退休最后一个 ACTIVE 的操作。
+
+不原地更改同 version 的检查项或文本，不删除历史策略，不重写旧 decision、Review snapshot 或 PENDING attempt。RETIRED 不能重新激活；发布故障通过暂停决定入口、修复兼容性或另审全新政策前向处理，不恢复旧库快照或旧状态。重复同一发布按原回执恢复，不构成重新激活。
+
+数据库约束保证每类最多一个 ACTIVE，事务保证切换后至少一个。查询与最终决定均验证唯一当前版本；不从多个 ACTIVE 中随意选一条。策略退休与决定在同一 policy 文档上进行真实条件写，迫使事务冲突后重读。coordinationRevision 是事务内部技术栅栏，正常决定可增加它，不要求操作人员持有长期不变的该计数；业务前置仍为 fromVersion、内容预期与批准清单。
+
+并发 A→B 与 A→C 最多一个成功；失败方报告基线已变，不自动改成 B→C。决定先提交时保留 A 的合法历史决定；切换先提交时，旧 A 的新决定按 ApplicationReviewPolicyChanged 拒绝，保持该待审记录原状态，无部分写入。已终态的请求仍按一次性决定规则返回既有冲突，不统一伪装为策略冲突。
+
+### 重复、未知提交与审计读回
+
+发布回执与策略切换同事务，格式、恢复和 ledger 衔接以 [ADR004 政策发布回执与恢复](../adr/ADR-004-mongodb-transactions-and-schema-management.md#政策发布回执与恢复)为唯一工程约束。同 changeId/同清单读回原结果，不产生第二事件；同 ID/不同清单失败关闭。未知结果先恢复原事务提交，再按同一 changeId 读取回执及当前事实；未确定不等于已回滚，不换 ID重放。
+
+若 A→B 早已成功而后续 B→C 也成功，恢复 A→B 返回历史回执并显示当前 C，绝不重新激活 B。回执、清单和策略事实不一致时停止操作，报告一致性失败并保留审计，不自动修复。
+
+发布包提供受目标环境访问控制的内部只读运维读回（逻辑名 policy-status；不是新增公网或 Gateway API）：返回 kind、唯一当前版本、历史 ACTIVE/RETIRED 摘要、不可变内容摘要、指定 changeId 回执及观察时间。不能只凭 exit0、启动成功或未绑定清单的日志认定变更成功。可信发布审计以 changeId 关联获权部署主体和批准依据，不泄露数据库凭据或私有审核正文。
+
+运维拒绝分类为 BASE_CHANGED、IMMUTABLE_CONFLICT、CHANGE_ID_CONFLICT、UNAVAILABLE、UNKNOWN，供发布流程稳定判断；不是新增 HTTP/gRPC 枚举。身份/批准/环境不符时拒绝执行且不写策略。具体 CLI 载体、签名信任根、退出码、回执保留/访问参数在实施前冻结，不由实现者自行扩展业务权限。
+
+### Reviewer 读回与真实变化验收
+
+UC030 继续在同次详情返回正式 currentPolicy，历史 decision 只按其原版本解释；新的版本定义不可套用于旧决定。页面加载 A 后，正式发布 A→B，再提交原 A 的请求应通过真实链路取得既有409；重读展示 B、清空旧确认集合并要求人工重审，不自动选策略、补勾、改 outcome 或重放。
+
+未知/缺失定义、零/多 ACTIVE 或定义损坏按 UC030 一致性规则失败关闭；合法策略退休使用既有 APPLICATION_REVIEW_POLICY_CHANGED，不新增替代 reason。Profile 发布前还须满足 [UC031 策略版本兼容门槛](UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，其旧策略拒绝沿用 PROFILE_REVIEW_POLICY_UNAVAILABLE。
+
+联合验收使用正式发布入口、回执与正式查询，不直接写库 seed 策略；覆盖切换/决定两种提交顺序、同一清单重复、异参拒绝、未知结果恢复、历史保留及失败无部分写。没有真实新政策及正式准备能力的项标为待准备，不用错误 expectedPolicyVersion 或组件合成响应替代真实变化证据。重复已应用0033不会制造新变化；当前 Console 无正式 v2 定义，不能倒退到 v2 来凑加载后切换验收。
+
+Scope enabled/revision 仍由 Auth 独占，不在 App 建写模型。Scope 真实失效验收另依 Auth 获批的正式入口，遵循 ADR001 的实际 TTL、实例与在途窗口，取得刷新/消费证据后使用正确策略发真实决定；不直接清缓存或伪造时钟，不把 Scope 错误记作策略409。缺少正式准备条件时保留待验收状态。
+
 ## API 草图
+
+以下 v2 片段保留历史线格式示例，不代表当前可用于新决定的版本。当前 ACTIVE 基线为 v3；实际命令从 UC030 本次详情取得版本和完整检查定义，按 BR-REV-016/017 确认，不能直接复用已退休示例的 expectedPolicyVersion 或把当前文字套入历史 decision。
 
 ```text
 POST /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}/decision
@@ -598,8 +645,7 @@ API 测试：
   权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer Status、
   内部服务身份/allowlist 与 System principal resolve 均已有平台契约；App Center 不读取
   Auth 数据库，也不配置固定 SYSTEM Auth ID。
-- ReviewPolicyProvider 首版由 App Center 本地 adapter 提供正式策略与历史版本；
-  当前核心只实现了 port 契约和 fake 验证，生产启用前必须补齐不可变持久化实现。
+- ReviewPolicyProvider 的 App 本地不可变持久化和 v3 迁移已交付；2026-10-26新增的正式发布回执、运维读回和发布治理约束是已接受、未实现增量，不由既有验收自动关闭。
 - reviewer 访问未知自托管页面的 iframe/隔离浏览环境属于后续前端与安全运行环境，不属于本后端核心工作包，也不在当前注入 rpc-bridge。
 - 批准时若当前 admin 或 submittedBy 已暂停，使用注入的 System Auth ID 和固定 reason 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
 
@@ -619,6 +665,7 @@ UC-APP-006：将被拒绝的 ApplicationVersion 恢复为 DRAFT
 
 ## 变更记录
 
+- 2026-10-26：用户接受正式发布治理方向；补发布主体、唯一 ACTIVE 原子切换、不可变历史、审计回执/未知恢复、正式读回与联合验收；不新增在线策略管理或虚构下一版政策。
 - 2026-09-15：建立 UC-APP-005；引入专用 reviewer 权限、利益冲突、版本化审核策略、一次性决定和批准时的 scope/URL 复检。
 - 2026-09-15：UC-APP-006 明确拒绝后通过独立行为恢复 DRAFT，不由审核决定或普通编辑隐式迁移。
 - 2026-09-20：确认 Auth/ConfCenter 通过 port 隔离并在核心测试中使用 fake；隔离浏览环境不属于后端核心；admin 或 submittedBy 暂停时由 System 永久自动拒绝。设计进入 `ACCEPTED`。

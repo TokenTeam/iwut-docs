@@ -1,6 +1,6 @@
 {
   "uc": "UC-APP-016",
-  "note": "Decide PENDING profile reviews with independent reviewer permission and immutable local policy; atomically approve/publish or reject/release working slot. App Center consumer scope; production Auth profile permission issuance and management queries remain independent.",
+  "note": "2026-10-26 accepted design delta for UC-APP-016; preserve delivered baseline, formal policy release and fail-closed compatibility; documentation only, implementation not started. See implements/README.md for current coverage and Console handoff.",
   "uc_sections": [
     "目标与边界",
     "参与者与输入",
@@ -19,6 +19,9 @@
       "决定",
       "协议演进",
       "子模块与构建"
+    ],
+    "ADR-004": [
+      "政策发布回执与恢复"
     ]
   },
   "shared_sections": {

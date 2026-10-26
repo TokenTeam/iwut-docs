@@ -12,8 +12,8 @@
 | Use Case | `UC-APP-005` 审核应用版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-REV-010`–`BR-REV-020`（11 条） |
-| 外部引用 BR | `BR-APP-011`，`BR-VER-018`（来自 `UC-APP-002`、`UC-APP-025`） |
-| ADR | `ADR-001`、`ADR-006` |
+| 外部引用 BR | `BR-APP-011`，`BR-PRF-028`，`BR-VER-018`（来自 `UC-APP-002`、`UC-APP-016`、`UC-APP-025`） |
+| ADR | `ADR-001`、`ADR-004`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-developer-status-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/auth-system-principal-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
 ## 遇到 brief 未覆盖的问题
@@ -49,6 +49,7 @@
 - 批准前检查当前 admin 与 submittedBy 的暂停状态，并在任一人已暂停时由系统自动拒绝。
 - 一次性写入不可修改的审核决定。
 - 原子同步 ApplicationReview.status 与 ApplicationVersion.reviewStatus。
+- 约束审核策略的正式发布与退休，见[策略正式发布与运维读回](#策略正式发布与运维读回)；这是部署治理流程，不增加 Reviewer 在线策略管理权。
 
 本用例不负责：
 
@@ -340,7 +341,51 @@ Reviewer 不能预勾选、用“全选”代替逐项确认，或在无法观�
 
 API/Console 升级和页面刷新应先于 App 输出新字段；严格 JSON decoder 的旧页面并不天然兼容新增字段。新客户端可在旧响应缺少定义时只读，但不能开放批准。
 
+### 策略正式发布与运维读回
+
+本节于2026-10-26获用户接受，是 BR-REV-016 的正式发布约束；Profile 策略由 [BR-PRF-028](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)引用同一流程，并保持独立的 policyKind。只定义低频发布治理，不新增在线策略管理 API、Console 页面或独立政策服务。
+
+#### 主体与发布输入
+
+政策责任人提出真实政策内容，经用户或指定治理责任人审核后，获目标环境部署授权的发布主体执行已批准发布包。Reviewer 的审核权限、Application admin 或平台治理身份不隐式授予策略写权限；读取当前策略的权限也不授予发布权。部署身份及批准记录由可信发布控制面验证并绑定操作，不能只信任任意输入 actor 字符串、Git author 或网络位置。
+
+发布包来自受审代码和固定 release，以专用 migration 承载，不提供接收任意 JSON 的通用 policy 写工具。逻辑输入包括：唯一 changeId/migrationId、目标环境、policyKind（VERSION/PROFILE）、fromVersion、旧不可变内容预期、全新 toVersion 及完整定义、批准依据引用、release commit/digest、完整发布清单摘要。摘要覆盖清单原始字节；策略内容以正式字段精确核对，status/coordinationRevision 不属于不可变政策正文。
+
+真实新政策内容须另行审核；本用例不自动批准 Version v4 或 Profile v2。没有真实变化时不制造同义版本、不重新执行已应用迁移伪装策略变化。
+
+#### 原子切换与并发前置
+
+每个 policyKind 正常对外服务时恰有一个 ACTIVE；VERSION 与 PROFILE 分别判断，不能共用一个当前策略。切换事务验证唯一当前策略 A、A 的版本/内容符合发布预期、全新 B 未被其它内容或历史版本占用，再同事务完成 A ACTIVE→RETIRED、B 插入为 ACTIVE，以及 ADR004 要求的发布回执。对外不能观察到切换中间的零 ACTIVE 或多 ACTIVE。正常流程不提供单独退休最后一个 ACTIVE 的操作。
+
+不原地更改同 version 的检查项或文本，不删除历史策略，不重写旧 decision、Review snapshot 或 PENDING attempt。RETIRED 不能重新激活；发布故障通过暂停决定入口、修复兼容性或另审全新政策前向处理，不恢复旧库快照或旧状态。重复同一发布按原回执恢复，不构成重新激活。
+
+数据库约束保证每类最多一个 ACTIVE，事务保证切换后至少一个。查询与最终决定均验证唯一当前版本；不从多个 ACTIVE 中随意选一条。策略退休与决定在同一 policy 文档上进行真实条件写，迫使事务冲突后重读。coordinationRevision 是事务内部技术栅栏，正常决定可增加它，不要求操作人员持有长期不变的该计数；业务前置仍为 fromVersion、内容预期与批准清单。
+
+并发 A→B 与 A→C 最多一个成功；失败方报告基线已变，不自动改成 B→C。决定先提交时保留 A 的合法历史决定；切换先提交时，旧 A 的新决定按 ApplicationReviewPolicyChanged 拒绝，保持该待审记录原状态，无部分写入。已终态的请求仍按一次性决定规则返回既有冲突，不统一伪装为策略冲突。
+
+#### 重复、未知提交与审计读回
+
+发布回执与策略切换同事务，格式、恢复和 ledger 衔接以 [ADR004 政策发布回执与恢复](../adr/ADR-004-mongodb-transactions-and-schema-management.md#政策发布回执与恢复)为唯一工程约束。同 changeId/同清单读回原结果，不产生第二事件；同 ID/不同清单失败关闭。未知结果先恢复原事务提交，再按同一 changeId 读取回执及当前事实；未确定不等于已回滚，不换 ID重放。
+
+若 A→B 早已成功而后续 B→C 也成功，恢复 A→B 返回历史回执并显示当前 C，绝不重新激活 B。回执、清单和策略事实不一致时停止操作，报告一致性失败并保留审计，不自动修复。
+
+发布包提供受目标环境访问控制的内部只读运维读回（逻辑名 policy-status；不是新增公网或 Gateway API）：返回 kind、唯一当前版本、历史 ACTIVE/RETIRED 摘要、不可变内容摘要、指定 changeId 回执及观察时间。不能只凭 exit0、启动成功或未绑定清单的日志认定变更成功。可信发布审计以 changeId 关联获权部署主体和批准依据，不泄露数据库凭据或私有审核正文。
+
+运维拒绝分类为 BASE_CHANGED、IMMUTABLE_CONFLICT、CHANGE_ID_CONFLICT、UNAVAILABLE、UNKNOWN，供发布流程稳定判断；不是新增 HTTP/gRPC 枚举。身份/批准/环境不符时拒绝执行且不写策略。具体 CLI 载体、签名信任根、退出码、回执保留/访问参数在实施前冻结，不由实现者自行扩展业务权限。
+
+#### Reviewer 读回与真实变化验收
+
+UC030 继续在同次详情返回正式 currentPolicy，历史 decision 只按其原版本解释；新的版本定义不可套用于旧决定。页面加载 A 后，正式发布 A→B，再提交原 A 的请求应通过真实链路取得既有409；重读展示 B、清空旧确认集合并要求人工重审，不自动选策略、补勾、改 outcome 或重放。
+
+未知/缺失定义、零/多 ACTIVE 或定义损坏按 UC030 一致性规则失败关闭；合法策略退休使用既有 APPLICATION_REVIEW_POLICY_CHANGED，不新增替代 reason。Profile 发布前还须满足 [UC031 策略版本兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，其旧策略拒绝沿用 PROFILE_REVIEW_POLICY_UNAVAILABLE。
+
+联合验收使用正式发布入口、回执与正式查询，不直接写库 seed 策略；覆盖切换/决定两种提交顺序、同一清单重复、异参拒绝、未知结果恢复、历史保留及失败无部分写。没有真实新政策及正式准备能力的项标为待准备，不用错误 expectedPolicyVersion 或组件合成响应替代真实变化证据。重复已应用0033不会制造新变化；当前 Console 无正式 v2 定义，不能倒退到 v2 来凑加载后切换验收。
+
+Scope enabled/revision 仍由 Auth 独占，不在 App 建写模型。Scope 真实失效验收另依 Auth 获批的正式入口，遵循 ADR001 的实际 TTL、实例与在途窗口，取得刷新/消费证据后使用正确策略发真实决定；不直接清缓存或伪造时钟，不把 Scope 错误记作策略409。缺少正式准备条件时保留待验收状态。
+
 ### API 草图
+
+以下 v2 片段保留历史线格式示例，不代表当前可用于新决定的版本。当前 ACTIVE 基线为 v3；实际命令从 UC030 本次详情取得版本和完整检查定义，按 BR-REV-016/017 确认，不能直接复用已退休示例的 expectedPolicyVersion 或把当前文字套入历史 decision。
 
 ```text
 POST /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}/decision
@@ -462,8 +507,7 @@ API 测试：
   权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer Status、
   内部服务身份/allowlist 与 System principal resolve 均已有平台契约；App Center 不读取
   Auth 数据库，也不配置固定 SYSTEM Auth ID。
-- ReviewPolicyProvider 首版由 App Center 本地 adapter 提供正式策略与历史版本；
-  当前核心只实现了 port 契约和 fake 验证，生产启用前必须补齐不可变持久化实现。
+- ReviewPolicyProvider 的 App 本地不可变持久化和 v3 迁移已交付；2026-10-26新增的正式发布回执、运维读回和发布治理约束是已接受、未实现增量，不由既有验收自动关闭。
 - reviewer 访问未知自托管页面的 iframe/隔离浏览环境属于后续前端与安全运行环境，不属于本后端核心工作包，也不在当前注入 rpc-bridge。
 - 批准时若当前 admin 或 submittedBy 已暂停，使用注入的 System Auth ID 和固定 reason 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
 
@@ -556,6 +600,8 @@ VersionReviewPolicy {
 新的 ADR 与跨服务契约评估提取策略发布能力；当前 UC 不依赖 ConfCenter。在真实
 adapter 提供正式且不可变的策略版本前，不能将审核能力标记为生产可用。
 
+每类策略分别保持唯一 ACTIVE。正式切换遵循[策略正式发布与运维读回](#策略正式发布与运维读回)，不得通过通用在线 CRUD、直接改库或为测试制造同义版本绕过。历史策略、版本绑定的检查含义和既有 decision 保留；策略版本与技术 coordinationRevision 不混为一个业务前置值。
+
 <!-- 权威位置: use-cases/UC-APP-005-decide-application-version-review.md#br-rev-017 -->
 ### BR-REV-017：批准检查确认
 
@@ -614,6 +660,34 @@ USER JWS 的 WITHDRAWN 是合法身份状态：开发者写入口仍仅允许 AP
 Auth UC002 增加账号状态投影。版本审核批准检查明确区分角色：当前 admin 必须 accountStatus=ACTIVE 且 developerStatus=APPROVED；历史 submittedBy 为 WITHDRAWN 或 CLOSED 不因主动退出本身否定不可变提交，历史提交者 SUSPENDED 或 DISABLED 仍阻止批准。同一人兼任 owner/submitter 时取更严格的 owner 条件。任何未知、损坏或查询故障保持 PENDING，不能作为自动拒绝的证据。
 
 权威状态明确不满足门禁时，沿 UC005 SYSTEM 自动 REJECT 流程，固定文本“当前应用管理员或审核提交者不满足账号与开发者资格要求，待处理审核已由系统自动拒绝。”；不改变已完成的决定。UC005 port 改为显式传入 currentAdminId/submittedBy 的批准资格检查，不能靠数组顺序猜角色。
+
+### 来自 `UC-APP-016`
+
+<!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028 -->
+### BR-PRF-028：版本化资料审核策略
+
+Reviewer 提交自己实际阅读的 expectedPolicyVersion。App Center 拥有不可变、可按版本读取的 ProfileReviewPolicy：
+
+```text
+ProfileReviewPolicy {
+  version
+  requiredChecks
+  status: ACTIVE | RETIRED
+}
+```
+
+APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snapshot 要求的检查；REJECT 时 confirmedCheckIds 为空。历史 policy 保留用于解释既有 decision，RETIRED policy 不用于新决定。
+
+首版策略由 App Center migration 写入：version=`app-profile-review-v1`、status=`ACTIVE`，固定要求以下两项：
+
+- `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
+- `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
+
+策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 当前策略由 UC031 正式详情读取，不将本条“首版无独立查询”解释为禁止已交付的 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
+Profile 以独立 policyKind=PROFILE 遵循 [UC005 策略正式发布与运维读回](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)和 ADR004 的发布回执协议；不复制第二套发布状态机。每类唯一 ACTIVE，事务内退休旧版/激活全新版本并记录回执；最终决定与退休写同一策略文档串行化。零/多 ACTIVE 或当前定义损坏失败关闭，不任意选一条策略。
+
+新 Profile 版本激活前须满足 [UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，先审真实政策正文、提供版本绑定正式定义并部署可失败关闭的消费者；不为测试制造 v2，不从旧 ID 猜新含义。旧 expectedPolicyVersion 不再可用时保留 `ProfileReviewPolicyUnavailable` / HTTP409/gRPC ABORTED，不改 Review/Revision/working/public 指针。历史决定不重写，退休版本不重新激活。
 
 ### 来自 `UC-APP-002`
 
@@ -686,6 +760,22 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 Scope 启用状态和兼容投影按 [UC-AUTH-001 / BR-SCP-004](../../auth-center/use-cases/UC-AUTH-001-get-scope-catalog-snapshot.md#br-scp-004) 执行：App 继续消费 requestable，Auth 自己在 OAuth 运行阶段检查当前 enabled。缓存仍可能在 TTL 内使管理操作按旧目录通过；这些结果不保证后续 OAuth 可用，也不阻止 Auth 排除已停用 scope。App 不新增独立 runtimeEnabled 状态或同步修改已批准 snapshot。
 
 因此短暂缓存不构成实际用户授权依据。
+
+### ADR-004：MongoDB 事务与 Schema 管理（`ACCEPTED`）
+
+#### 政策发布回执与恢复
+
+2026-10-26用户接受的正式政策发布沿用本 ADR 与 UC005 BR-REV-016、UC016 BR-PRF-028，不引入第二政策服务。后续实现应满足：
+
+- 每类策略的唯一 ACTIVE 约束、旧版退休、新版激活与对应发布回执在同一事务提交。退休和决定均对同一 policy 文档作真实条件写；coordinationRevision 是内部栅栏，不是操作人员长期持有的业务版本。
+- 复用 migration ledger，为新政策 migration 的记录增加不可变发布元数据：changeId/migrationId、kind、from/toVersion、清单摘要、批准依据、release、appliedAt；与可信发布控制面的部署身份审计以 changeId 关联。旧 ledger 记录保留，不伪造或回填旧审计事实。
+- 新回执在政策切换事务内写入，通用 apply/记账/重入流程需兼容它；不能继续把“apply返回后另记 ledger”当作该政策的原子成功证明。重复同 ID/同清单读原回执，同 ID/异参拒绝；缺记录或未知提交不等于已回滚。
+- unknown commit 按原事务身份恢复提交，再读同一回执；更晚发布已改变当前策略时，只报告原操作结果与最新事实，不重新执行历史激活，不回拨版本状态。
+- 读回来自受环境访问控制的正式只读运维入口，核对回执、当前唯一 ACTIVE 与不可变历史；不以 exit0 或无清单绑定的日志替代。记录不一致时停止并告警，不修复业务事实。
+- 回执元数据格式/限制、发布身份及批准凭据可信来源、保留/访问策略、退出码和唯一索引定义须在实施 brief 冻结并经文档复核；未经授权不扩展为任意 policy CRUD。
+- 集成验收覆盖幂等/异参、两个发布竞争、发布与决定的两种提交顺序、事务回滚、未知提交恢复、历史保留，以及多/零 ACTIVE 失败关闭。正式联合验收不直接改库制造 policy 切换。
+
+这是一项已接受、未实现的工程增量；现有 migration ledger 只有 ID/appliedAt 且通用记账在 apply 之后，不满足本节完整协议。实现开始前若不能证明复用兼容性，应报告具体 gap，不自行新建政策服务或绕开原子回执。
 
 ### ADR-006：Proto v1 与独立 API 仓库协作（`ACCEPTED`）
 
@@ -1116,10 +1206,12 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：旧实现观察、数据模型变化/v3 正式人工检查定义、数据模型变化/v3 迁移与切换、后续用例、迁移说明、变更记录
+- `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：旧实现观察、数据模型变化/v3 正式人工检查定义、数据模型变化/v3 迁移与切换、策略正式发布与运维读回/主体与发布输入、策略正式发布与运维读回/原子切换与并发前置、策略正式发布与运维读回/重复、未知提交与审计读回、策略正式发布与运维读回/Reviewer 读回与真实变化验收、后续用例、迁移说明、变更记录
 - `UC-APP-025`（use-cases/UC-APP-025-coordinate-account-owner-exit.md）：目标与范围、主流程与 API、数据与验收、交付依赖
+- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
+- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、决定、Schema 与索引、测试环境、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/auth-developer-status-v1.md`（docs 根级共享文档）：目的与所有权、兼容性
@@ -1131,10 +1223,12 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 631 | `e65c1ead652e` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 678 | `a548d21c99ed` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-developer-status-v1.md` | 97 | `65d986d93af1` |

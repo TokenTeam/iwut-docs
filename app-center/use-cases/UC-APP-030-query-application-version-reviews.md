@@ -59,6 +59,8 @@ currentPolicy 的定义来自 [UC005 正式策略](UC-APP-005-decide-application
 
 终态详情的 currentPolicy 不解释历史 decision：历史 v1/v2 只显示已记录版本及 ID，不能套用 v3 文本。新字段为 ReviewPolicyContext.required_check_definitions = 3；原字段编号保持不变。Console 逐项展示纯文本且不预勾选；缺少完整定义只读。成功和错误响应 private, no-store。
 
+正式策略变化及运维读回由 [UC005 BR-REV-016](UC-APP-005-decide-application-version-review.md#br-rev-016)和[正式发布流程](UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)拥有。Reviewer 仍从本次详情观察当前唯一 ACTIVE 的策略，不通过运维入口取得审核权；加载旧策略后真实冲突、重读与清确认不得用错误版本负例冒充实际发布。此次设计补充不新增本查询 Proto 字段或改写旧决定。
+
 详情不返回管理员管理页的其他 Version、OAuth secret、Tester 或用户资料。
 
 ## 一致性、分页与错误
@@ -131,5 +133,6 @@ Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，当�
 
 ## 变更记录
 
+- 2026-10-26：关联用户接受的正式策略发布与真实变化验收；保持现有正式定义读模型和字段不变。
 - 2026-10-16：用户接受 v3 正式检查定义及详情输出扩展，保持历史策略语义。
 - 2026-10-07：补足 UC004/005 未交付的 Reviewer 读取面，设计进入 `ACCEPTED`。

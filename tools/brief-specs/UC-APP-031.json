@@ -1,11 +1,12 @@
 {
   "uc": "UC-APP-031",
-  "note": "Implement exact-permission ApplicationProfile review queue and detail reads from immutable snapshots with lifecycle filtering, conflict hints, fixed policy metadata, stable pagination and fail-closed consistency.",
+  "note": "2026-10-26 accepted design delta for UC-APP-031; preserve delivered baseline, formal policy release and fail-closed compatibility; documentation only, implementation not started. See implements/README.md for current coverage and Console handoff.",
   "uc_sections": [
     "目标与范围",
     "身份与精确权限",
     "待处理队列",
     "审核详情",
+    "策略版本兼容门槛",
     "一致性与错误",
     "当前公开资料投影",
     "授权与一致性",
@@ -32,7 +33,8 @@
     ],
     "ADR-004": [
       "决定",
-      "测试环境"
+      "测试环境",
+      "政策发布回执与恢复"
     ],
     "ADR-005": [
       "决定",

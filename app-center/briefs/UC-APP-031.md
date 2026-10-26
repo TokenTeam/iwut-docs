@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-031` 查询 ApplicationProfileRevision 审核队列与审核详情 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-PRF-041`–`BR-PRF-046`（6 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-PRF-006`、`BR-PRF-028`、`BR-PRF-030`（来自 `UC-APP-013`、`UC-APP-016`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 | 配套查询 | `app-center/query-contracts/profile-management.md` |
@@ -93,6 +93,16 @@ ApplicationProfileReviewDetail {
 
 内容必须取不可变 Review snapshot。终态 Review 可按 ID 读取。当前 policy 第一版为 `app-profile-review-v1` 及其固定检查项，但查询结果不替代 UC016 在写入时对 expected policy 和 confirmed checks 的复查。
 
+### 策略版本兼容门槛
+
+[BR-PRF-028](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)拥有政策正文与发布边界。本查询按同次 snapshot 读取恰好一个 ACTIVE ProfileReviewPolicy；零个、多个或损坏定义均整次失败关闭，不以 FindOne 任意一条作为唯一性证明。
+
+当前 API27c 只有 version/requiredCheckIds，已知 v1 使用其已接受的正式解释；不能硬编码“永远当前v1”，也不能把 v1 文案套用于未知新版本。未知/缺少完整正式定义时消费者仅只读，不确认或决定。
+
+首次真实 Profile 政策新版本激活前，必须先接受新正文及版本绑定的正式定义投影契约、完成 API/严格 decoder/客户端兼容发布，并验证同次 version、IDs 与定义完整对应。定义的 ID、纯文本标题/说明及排序、界限和线格式需在实际新政策工作包中审定；本次不分配 Proto 字段或编造 v2 文本，不将尚未交付扩展写成现有 API 字段。版本不得原地改义，历史 decision 不用当前文本重解释。
+
+本门槛属于已接受设计增量；正式唯一性校验和未来定义投影尚未由本次文档修改实现。未满足门槛时禁止发布新 Profile 策略，仍保留已交付 v1 的既定行为。
+
 ### 一致性与错误
 
 单页和详情在 MongoDB majority snapshot 中构造。Application、ProfileRevision、Review 的引用、sourceRevision 或 snapshot 不一致时返回 `ApplicationProfileReviewStateInconsistent` / INTERNAL；不能省略坏项或回退到当前 ProfileRevision 内容。
@@ -172,6 +182,8 @@ Console 批准确认页展示“当前公开资料”和“本次拟公开资料
 
 APPROVE 提供的指针与最终事务中的当前指针不同时，由现有指针 CAS 返回 `ApplicationProfilePublicationConflict`（HTTP 409 / gRPC ABORTED）。Console 重新读取并让 Reviewer 重新确认；不替换成最新指针后自动重发。同一 Review 已被其他 Reviewer 决定时，继续返回既有 already-decided 等错误，不强行将所有竞争映射为指针冲突。未知提交结果沿用决定结果回读流程，不假定失败并自动重复执行。
 
+可达性遵循 UC013 BR-PRF-006 与 UC016 BR-PRF-030：同一 Application 的不同修订不同时占据待审工作位。真实同 Review 竞争、顺序替换、错误前置值协议负例及组件409恢复应分别取证；不以此查询的 snapshot 能力暗示存在不同修订同时可决定的路径。
+
 ### 大小、缓存和兼容
 
 资料沿用现有界限：displayName 80、description 1000、icon 512 个 Unicode scalar values。单个新增内容投影即使使用 JSON Unicode 转义也应小于 32 KiB；实际编码测试同时覆盖 JSON 与 protobuf。该数值是新增投影的验证界限，不新设更宽的输入界限或放宽 transport 配置；详情整体仍受现有 transport 上限约束，不截断正文或返回只有 pointer 的“成功”。
@@ -207,6 +219,8 @@ rpc GetApplicationProfileReview(...)
 7. 路径不匹配统一 NOT_FOUND；无权限先失败。
 8. sourceRevision/snapshot/引用损坏返回 INTERNAL，不产生部分结果。
 9. HTTP 与原生 gRPC 一致，真实 MongoDB 验证索引与 snapshot 行为。
+10. 当前策略零/多 ACTIVE、损坏或定义不可解释时失败关闭；新 Profile 版本未完成正式定义及消费者兼容前不能激活，不以未知 ID 猜文案。
+11. 指针前置负例和前端恢复证据标注层级，不 seed 不同修订同时 PENDING；同 Review 终态与顺序替换保持真实读回。
 
 ### 实现依赖与交付边界
 
@@ -243,6 +257,67 @@ ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。�
 ### BR-PRF-046：资料审核查询失败关闭
 
 引用、sourceRevision、snapshot 或当前公开资料/批准事实损坏导致整次查询 INTERNAL；不能跳项、降级、伪造 NONE 或返回部分详情。
+
+当前 Profile 策略必须恰好一个 ACTIVE，零/多 ACTIVE 或不可解释的策略定义同样整次失败关闭；正式定义与新版本兼容按本 UC 的[策略版本兼容门槛](#策略版本兼容门槛)执行。该查询不授予策略发布权限，不替代 UC016 最终策略写栅栏。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-013`
+
+<!-- 权威位置: use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006 -->
+### BR-PRF-006：初始生命周期与单一工作修订
+
+- 新 ProfileRevision 的 reviewStatus 固定为 `DRAFT`；调用者不能指定其他状态。
+- 每个 Application 同时最多存在一条 reviewStatus 为 DRAFT 或 SUBMITTED 的工作修订。
+- DRAFT 不属于公开目录，不改变已发布资料，也不会让 Application 自动公开。
+- DRAFT 迁移为 SUBMITTED 后继续占用该工作位；在 PENDING ProfileReview 得到 APPROVED 或 REJECTED 决定前，不创建下一份 DRAFT。
+- APPROVED 或 REJECTED 决定产生后释放工作位；它们不阻止后续创建新 DRAFT。
+
+### 来自 `UC-APP-016`
+
+<!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028 -->
+### BR-PRF-028：版本化资料审核策略
+
+Reviewer 提交自己实际阅读的 expectedPolicyVersion。App Center 拥有不可变、可按版本读取的 ProfileReviewPolicy：
+
+```text
+ProfileReviewPolicy {
+  version
+  requiredChecks
+  status: ACTIVE | RETIRED
+}
+```
+
+APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snapshot 要求的检查；REJECT 时 confirmedCheckIds 为空。历史 policy 保留用于解释既有 decision，RETIRED policy 不用于新决定。
+
+首版策略由 App Center migration 写入：version=`app-profile-review-v1`、status=`ACTIVE`，固定要求以下两项：
+
+- `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
+- `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
+
+策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 当前策略由 UC031 正式详情读取，不将本条“首版无独立查询”解释为禁止已交付的 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
+Profile 以独立 policyKind=PROFILE 遵循 [UC005 策略正式发布与运维读回](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)和 ADR004 的发布回执协议；不复制第二套发布状态机。每类唯一 ACTIVE，事务内退休旧版/激活全新版本并记录回执；最终决定与退休写同一策略文档串行化。零/多 ACTIVE 或当前定义损坏失败关闭，不任意选一条策略。
+
+新 Profile 版本激活前须满足 [UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，先审真实政策正文、提供版本绑定正式定义并部署可失败关闭的消费者；不为测试制造 v2，不从旧 ID 猜新含义。旧 expectedPolicyVersion 不再可用时保留 `ProfileReviewPolicyUnavailable` / HTTP409/gRPC ABORTED，不改 Review/Revision/working/public 指针。历史决定不重写，退休版本不重新激活。
+
+<!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030 -->
+### BR-PRF-030：批准后自动公开
+
+Reviewer 从 [UC031 当前公开资料投影](../use-cases/UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 读取替换对象与明确 NONE。
+
+APPROVE 必须提供 Reviewer 作出决定时观察到的 `expectedCurrentPublishedProfileRevisionId`，其值是某个 ProfileRevision ID 或明确的 `NONE`。它必须与当前指针匹配，再与以下变化处于同一原子边界：
+
+```text
+ProfileRevision.reviewStatus = APPROVED
+ApplicationProfile.currentPublishedProfileRevisionId = profileRevisionId
+```
+
+管理员不需要第二次 Publish 操作。公开指针前置值防止错误或过期客户端预期静默覆盖当前公开资料；不匹配时不写入决定或公开指针。按 [BR-PRF-006](../use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006)和 BR-PRF-026，同一 Application 当前仅有一个 DRAFT/SUBMITTED 工作修订，批准或拒绝并释放工作位后才能创建下一份；当前不将不同修订同时待审并发批准列为可达用户场景。此说明不放宽指针前置校验、一次性决定或原子写入。未来若开放并行工作修订，应另行接受业务设计并补真实并发验收。旧公开 Revision 保留 APPROVED 状态和审核历史，首版不提供重新选择或回滚资料的命令。
+
+资料自动公开不创建 stable Version。没有兼容 stable 槽位时，Application 仍不进入普通用户候选目录。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -344,6 +419,20 @@ MongoDB 集成测试使用真实、支持事务的隔离数据库。测试环境
 - 在测试结束时只清理本套件拥有的资源。
 
 内存 fake 只用于 Domain/UseCase 单元测试，不能证明事务或索引语义。
+
+#### 政策发布回执与恢复
+
+2026-10-26用户接受的正式政策发布沿用本 ADR 与 UC005 BR-REV-016、UC016 BR-PRF-028，不引入第二政策服务。后续实现应满足：
+
+- 每类策略的唯一 ACTIVE 约束、旧版退休、新版激活与对应发布回执在同一事务提交。退休和决定均对同一 policy 文档作真实条件写；coordinationRevision 是内部栅栏，不是操作人员长期持有的业务版本。
+- 复用 migration ledger，为新政策 migration 的记录增加不可变发布元数据：changeId/migrationId、kind、from/toVersion、清单摘要、批准依据、release、appliedAt；与可信发布控制面的部署身份审计以 changeId 关联。旧 ledger 记录保留，不伪造或回填旧审计事实。
+- 新回执在政策切换事务内写入，通用 apply/记账/重入流程需兼容它；不能继续把“apply返回后另记 ledger”当作该政策的原子成功证明。重复同 ID/同清单读原回执，同 ID/异参拒绝；缺记录或未知提交不等于已回滚。
+- unknown commit 按原事务身份恢复提交，再读同一回执；更晚发布已改变当前策略时，只报告原操作结果与最新事实，不重新执行历史激活，不回拨版本状态。
+- 读回来自受环境访问控制的正式只读运维入口，核对回执、当前唯一 ACTIVE 与不可变历史；不以 exit0 或无清单绑定的日志替代。记录不一致时停止并告警，不修复业务事实。
+- 回执元数据格式/限制、发布身份及批准凭据可信来源、保留/访问策略、退出码和唯一索引定义须在实施 brief 冻结并经文档复核；未经授权不扩展为任意 policy CRUD。
+- 集成验收覆盖幂等/异参、两个发布竞争、发布与决定的两种提交顺序、事务回滚、未知提交恢复、历史保留，以及多/零 ACTIVE 失败关闭。正式联合验收不直接改库制造 policy 切换。
+
+这是一项已接受、未实现的工程增量；现有 migration ledger 只有 ID/appliedAt 且通用记账在 apply 之后，不满足本节完整协议。实现开始前若不能证明复用兼容性，应报告具体 gap，不自行新建政策服务或绕开原子回执。
 
 ### ADR-005：领域错误与 Transport 映射（`ACCEPTED`）
 
@@ -715,6 +804,8 @@ ReviewerProfileReviewDetail {
 
 `currentPolicy` 来自查询时唯一 ACTIVE 的不可变 ProfileReviewPolicy。Reviewer 将实际阅读的 version 作为 `expectedPolicyVersion` 传给 UC-APP-016。如果在查询后发生策略、Revision、管理员或当前公开指针变化，UC-APP-016 通过自己的前置条件拒绝过期决定。
 
+唯一 ACTIVE、未知策略和新版本正式定义的兼容门槛统一引用 [UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)；本契约不另维护版本文案，也不把尚未交付的新定义字段当作当前 API。资料并发的可达性和分层证据引用 [BR-PRF-030](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)，不从 snapshot 读取能力推导出不同修订能同时待审。
+
 当前公开资料投影的 presence、授权、snapshot、失败关闭与指针 CAS 交互以 [UC031 当前公开资料投影](../use-cases/UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 为准。`none` 必须显式返回；不能把缺字段或 Catalog 不可见当作 NONE。
 
 已决定 Review 保留 decision 供审计查看。查询本身不领取、锁定、分配或标记审核任务。
@@ -724,6 +815,8 @@ ReviewerProfileReviewDetail {
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-031`（use-cases/UC-APP-031-query-application-profile-reviews.md）：变更记录
+- `UC-APP-013`（use-cases/UC-APP-013-create-application-profile-revision.md）：目标与范围、业务边界、输入与身份、网页端重新编辑被拒绝资料、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、尚未决定但不阻塞文档、后续用例、迁移说明、变更记录、实现依赖与交付边界
+- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -736,11 +829,13 @@ ReviewerProfileReviewDetail {
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-031-query-application-profile-reviews.md` | 217 | `5661de03f1af` |
+| `use-cases/UC-APP-031-query-application-profile-reviews.md` | 234 | `e679320f51ab` |
+| `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
-| `app-center/query-contracts/profile-management.md` | 203 | `f54db409c9b2` |
+| `app-center/query-contracts/profile-management.md` | 205 | `67dd6eebf244` |

@@ -204,7 +204,7 @@ App Center 建立以下首版基线：
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
-- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、考虑过的替代方案、结果、关联文档
+- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-007`（adr/ADR-007-observability-baseline.md）：背景、性能与可靠性、结果、验证、关联文档
 
@@ -213,6 +213,6 @@ App Center 建立以下首版基线：
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-007-observability-baseline.md` | 57 | `99db94b4d6b1` |

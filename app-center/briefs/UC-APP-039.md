@@ -438,7 +438,11 @@ APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snap
 - `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
 - `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
 
-策略内容不可原地修改；变更检查项使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。首版不提供策略管理或查询接口。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 当前策略由 UC031 正式详情读取，不将本条“首版无独立查询”解释为禁止已交付的 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
+Profile 以独立 policyKind=PROFILE 遵循 [UC005 策略正式发布与运维读回](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)和 ADR004 的发布回执协议；不复制第二套发布状态机。每类唯一 ACTIVE，事务内退休旧版/激活全新版本并记录回执；最终决定与退休写同一策略文档串行化。零/多 ACTIVE 或当前定义损坏失败关闭，不任意选一条策略。
+
+新 Profile 版本激活前须满足 [UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，先审真实政策正文、提供版本绑定正式定义并部署可失败关闭的消费者；不为测试制造 v2，不从旧 ID 猜新含义。旧 expectedPolicyVersion 不再可用时保留 `ProfileReviewPolicyUnavailable` / HTTP409/gRPC ABORTED，不改 Review/Revision/working/public 指针。历史决定不重写，退休版本不重新激活。
 
 <!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030 -->
 ### BR-PRF-030：批准后自动公开
@@ -452,7 +456,7 @@ ProfileRevision.reviewStatus = APPROVED
 ApplicationProfile.currentPublishedProfileRevisionId = profileRevisionId
 ```
 
-管理员不需要第二次 Publish 操作。指针前置值使两个针对不同 ProfileRevision 的并发批准不会静默相互覆盖；后一个 Reviewer 必须重新读取已改变的公开资料后再决定。旧的当前公开 Revision 保留 APPROVED 状态和审核历史，但首版不提供重新选择它或回滚资料的命令。
+管理员不需要第二次 Publish 操作。公开指针前置值防止错误或过期客户端预期静默覆盖当前公开资料；不匹配时不写入决定或公开指针。按 [BR-PRF-006](../use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006)和 BR-PRF-026，同一 Application 当前仅有一个 DRAFT/SUBMITTED 工作修订，批准或拒绝并释放工作位后才能创建下一份；当前不将不同修订同时待审并发批准列为可达用户场景。此说明不放宽指针前置校验、一次性决定或原子写入。未来若开放并行工作修订，应另行接受业务设计并补真实并发验收。旧公开 Revision 保留 APPROVED 状态和审核历史，首版不提供重新选择或回滚资料的命令。
 
 资料自动公开不创建 stable Version。没有兼容 stable 槽位时，Application 仍不进入普通用户候选目录。
 
@@ -623,7 +627,7 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 - `UC-APP-013`（use-cases/UC-APP-013-create-application-profile-revision.md）：目标与范围、业务边界、输入与身份、网页端重新编辑被拒绝资料、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、尚未决定但不阻塞文档、后续用例、迁移说明、变更记录、实现依赖与交付边界
 - `UC-APP-014`（use-cases/UC-APP-014-update-draft-application-profile-revision.md）：目标与范围、可编辑与不可编辑字段、输入与身份、主流程、异常流程、最小领域行为、用例端口、数据模型变化、API 草图、测试与验收、后续用例、迁移说明、变更记录、实现依赖与交付边界
 - `UC-APP-015`（use-cases/UC-APP-015-submit-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约
-- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约
+- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、Claims、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
@@ -636,7 +640,7 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
 | `use-cases/UC-APP-014-update-draft-application-profile-revision.md` | 336 | `fde28528679f` |
 | `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 254 | `726a36ab708e` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 314 | `d0275995ea8b` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

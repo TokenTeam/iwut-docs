@@ -59,6 +59,16 @@ ApplicationProfileReviewDetail {
 
 内容必须取不可变 Review snapshot。终态 Review 可按 ID 读取。当前 policy 第一版为 `app-profile-review-v1` 及其固定检查项，但查询结果不替代 UC016 在写入时对 expected policy 和 confirmed checks 的复查。
 
+## 策略版本兼容门槛
+
+[BR-PRF-028](UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)拥有政策正文与发布边界。本查询按同次 snapshot 读取恰好一个 ACTIVE ProfileReviewPolicy；零个、多个或损坏定义均整次失败关闭，不以 FindOne 任意一条作为唯一性证明。
+
+当前 API27c 只有 version/requiredCheckIds，已知 v1 使用其已接受的正式解释；不能硬编码“永远当前v1”，也不能把 v1 文案套用于未知新版本。未知/缺少完整正式定义时消费者仅只读，不确认或决定。
+
+首次真实 Profile 政策新版本激活前，必须先接受新正文及版本绑定的正式定义投影契约、完成 API/严格 decoder/客户端兼容发布，并验证同次 version、IDs 与定义完整对应。定义的 ID、纯文本标题/说明及排序、界限和线格式需在实际新政策工作包中审定；本次不分配 Proto 字段或编造 v2 文本，不将尚未交付扩展写成现有 API 字段。版本不得原地改义，历史 decision 不用当前文本重解释。
+
+本门槛属于已接受设计增量；正式唯一性校验和未来定义投影尚未由本次文档修改实现。未满足门槛时禁止发布新 Profile 策略，仍保留已交付 v1 的既定行为。
+
 ## 一致性与错误
 
 单页和详情在 MongoDB majority snapshot 中构造。Application、ProfileRevision、Review 的引用、sourceRevision 或 snapshot 不一致时返回 `ApplicationProfileReviewStateInconsistent` / INTERNAL；不能省略坏项或回退到当前 ProfileRevision 内容。
@@ -138,6 +148,8 @@ Console 批准确认页展示“当前公开资料”和“本次拟公开资料
 
 APPROVE 提供的指针与最终事务中的当前指针不同时，由现有指针 CAS 返回 `ApplicationProfilePublicationConflict`（HTTP 409 / gRPC ABORTED）。Console 重新读取并让 Reviewer 重新确认；不替换成最新指针后自动重发。同一 Review 已被其他 Reviewer 决定时，继续返回既有 already-decided 等错误，不强行将所有竞争映射为指针冲突。未知提交结果沿用决定结果回读流程，不假定失败并自动重复执行。
 
+可达性遵循 UC013 BR-PRF-006 与 UC016 BR-PRF-030：同一 Application 的不同修订不同时占据待审工作位。真实同 Review 竞争、顺序替换、错误前置值协议负例及组件409恢复应分别取证；不以此查询的 snapshot 能力暗示存在不同修订同时可决定的路径。
+
 ## 大小、缓存和兼容
 
 资料沿用现有界限：displayName 80、description 1000、icon 512 个 Unicode scalar values。单个新增内容投影即使使用 JSON Unicode 转义也应小于 32 KiB；实际编码测试同时覆盖 JSON 与 protobuf。该数值是新增投影的验证界限，不新设更宽的输入界限或放宽 transport 配置；详情整体仍受现有 transport 上限约束，不截断正文或返回只有 pointer 的“成功”。
@@ -174,6 +186,8 @@ rpc GetApplicationProfileReview(...)
 7. 路径不匹配统一 NOT_FOUND；无权限先失败。
 8. sourceRevision/snapshot/引用损坏返回 INTERNAL，不产生部分结果。
 9. HTTP 与原生 gRPC 一致，真实 MongoDB 验证索引与 snapshot 行为。
+10. 当前策略零/多 ACTIVE、损坏或定义不可解释时失败关闭；新 Profile 版本未完成正式定义及消费者兼容前不能激活，不以未知 ID 猜文案。
+11. 指针前置负例和前端恢复证据标注层级，不 seed 不同修订同时 PENDING；同 Review 终态与顺序替换保持真实读回。
 
 ## 实现依赖与交付边界
 
@@ -211,7 +225,10 @@ ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。�
 
 引用、sourceRevision、snapshot 或当前公开资料/批准事实损坏导致整次查询 INTERNAL；不能跳项、降级、伪造 NONE 或返回部分详情。
 
+当前 Profile 策略必须恰好一个 ACTIVE，零/多 ACTIVE 或不可解释的策略定义同样整次失败关闭；正式定义与新版本兼容按本 UC 的[策略版本兼容门槛](#策略版本兼容门槛)执行。该查询不授予策略发布权限，不替代 UC016 最终策略写栅栏。
+
 ## 变更记录
 
+- 2026-10-26：用户接受唯一 ACTIVE 严格读取、新 Profile 版本的正式定义兼容门槛，以及当前单工作位下的并发证据分层；未新增 Proto 或启动实现。
 - 2026-10-16：用户接受 Reviewer 当前公开资料最小投影，沿用精确权限和 UC016 指针 CAS。
 - 2026-10-07：将既有 PROPOSED Reviewer 查询语义收敛为正式工作包，设计进入 `ACCEPTED`。

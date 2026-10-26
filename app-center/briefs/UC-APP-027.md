@@ -896,7 +896,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 - `UC-APP-027`（use-cases/UC-APP-027-close-application.md）：变更记录
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
-- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、考虑过的替代方案、结果、关联文档
+- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/account-owner-exit-v1.md`（docs 根级共享文档）：内部接口、固定线格式与方法授权、交付门禁
@@ -912,7 +912,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | --- | --- | --- |
 | `use-cases/UC-APP-027-close-application.md` | 275 | `c56d7c62e94e` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 85 | `c2915d5ec05e` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |

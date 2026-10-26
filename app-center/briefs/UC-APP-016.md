@@ -12,8 +12,8 @@
 | Use Case | `UC-APP-016` 审核应用公开资料修订 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-PRF-023`–`BR-PRF-032`（10 条） |
-| 外部引用 BR | `BR-PRF-003`–`BR-PRF-005`（3 条）（来自 `UC-APP-013`） |
-| ADR | `ADR-006` |
+| 外部引用 BR | `BR-PRF-003`–`BR-PRF-006`（4 条）（来自 `UC-APP-013`） |
+| ADR | `ADR-004`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
 ## 遇到 brief 未覆盖的问题
@@ -167,6 +167,10 @@ ApplicationProfileReview、ApplicationProfileRevision 和 ApplicationProfile 仍
 - 两个并发决定最多一个成功，decision 不可覆盖。
 - stale ProfileRevision revision、snapshot 漂移或状态不一致均不会产生部分决定。
 - APPROVE 的公开指针前置值过期时不会覆盖其他已批准资料。
+- 验收分层：同一 Review 的真实双 Reviewer 竞争证明一次性决定；错误 expected pointer 的真实409证明协议防御；组件恢复证明重读/清确认/禁止自动重放；三者不冒充不同修订并发批准。
+- 经正式命令验证工作位占用时不能创建第二修订，首次决定释放后可顺序创建、提交和批准下一修订，并核对 Admin→Developer 公开指针与保留历史；不 seed 平行 PENDING。
+- 指针协议负例使用正式顺序批准形成历史 P0、当前 P1，再创建/提交唯一工作 R2；仅在 R2 命令故意传 P0，验证409和无部分写，不称为浏览器读到有效前置后发生真实不同修订竞态。
+- 一条迟到旧 Review 请求在后续修订可创建时已是终态，应按 AlreadyDecided 恢复，不强行改报 PublicationConflict。不同 Application 的批准不竞争同一公开指针。
 - 批准不会创建或修改 Test/Grey/Stable，也不会产生资料回滚入口。
 
 ### 实现依赖与交付边界
@@ -184,6 +188,8 @@ REJECT 的候选重建必须保持原始内容，先验证 BSON 字段存在/类
 完整验收执行 `make check-auth-app`（包含 backend 与现有真实 Auth 回归），覆盖 BR、双协议及实际生成 HTTP 客户端、真实副本集 validators/indexes、回滚、并发决定、管理员转让和策略退休、公开指针前置冲突、revision 溢出、REJECT 坏内容与后续创建新 DRAFT。跨服务回归不代表尚未实现的 Auth 资料审核权限签发已验收。冻结 service/API/docs/涉及的 Auth 来源后验收，API 先本地提交再提交服务 gitlink；不得 push。
 
 ### API 实现契约
+
+2026-10-26设计增量：正式策略发布遵循 BR-PRF-028 引用流程，仍待实施；指针验收分层只澄清可达性，不更改下列决定 Proto、reason/status、单工作位或已交付指针契约。本次未启动实现。
 
 内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision`；外部只加 `/app-center`。原生 gRPC 为 `app_center.v1.application_profile_review.ApplicationProfileReview/DecideApplicationProfileRevisionReview`。
 
@@ -283,7 +289,11 @@ APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snap
 - `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
 - `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
 
-策略内容不可原地修改；变更检查项使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。首版不提供策略管理或查询接口。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 当前策略由 UC031 正式详情读取，不将本条“首版无独立查询”解释为禁止已交付的 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
+Profile 以独立 policyKind=PROFILE 遵循 [UC005 策略正式发布与运维读回](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)和 ADR004 的发布回执协议；不复制第二套发布状态机。每类唯一 ACTIVE，事务内退休旧版/激活全新版本并记录回执；最终决定与退休写同一策略文档串行化。零/多 ACTIVE 或当前定义损坏失败关闭，不任意选一条策略。
+
+新 Profile 版本激活前须满足 [UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，先审真实政策正文、提供版本绑定正式定义并部署可失败关闭的消费者；不为测试制造 v2，不从旧 ID 猜新含义。旧 expectedPolicyVersion 不再可用时保留 `ProfileReviewPolicyUnavailable` / HTTP409/gRPC ABORTED，不改 Review/Revision/working/public 指针。历史决定不重写，退休版本不重新激活。
 
 <!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-029 -->
 ### BR-PRF-029：批准时资料复检
@@ -304,7 +314,7 @@ ProfileRevision.reviewStatus = APPROVED
 ApplicationProfile.currentPublishedProfileRevisionId = profileRevisionId
 ```
 
-管理员不需要第二次 Publish 操作。指针前置值使两个针对不同 ProfileRevision 的并发批准不会静默相互覆盖；后一个 Reviewer 必须重新读取已改变的公开资料后再决定。旧的当前公开 Revision 保留 APPROVED 状态和审核历史，但首版不提供重新选择它或回滚资料的命令。
+管理员不需要第二次 Publish 操作。公开指针前置值防止错误或过期客户端预期静默覆盖当前公开资料；不匹配时不写入决定或公开指针。按 [BR-PRF-006](../use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006)和 BR-PRF-026，同一 Application 当前仅有一个 DRAFT/SUBMITTED 工作修订，批准或拒绝并释放工作位后才能创建下一份；当前不将不同修订同时待审并发批准列为可达用户场景。此说明不放宽指针前置校验、一次性决定或原子写入。未来若开放并行工作修订，应另行接受业务设计并补真实并发验收。旧公开 Revision 保留 APPROVED 状态和审核历史，首版不提供重新选择或回滚资料的命令。
 
 资料自动公开不创建 stable Version。没有兼容 stable 槽位时，Application 仍不进入普通用户候选目录。
 
@@ -372,7 +382,32 @@ REJECTED 是该 ProfileRevision 的终态：服务端不提供 `REJECTED -> DRAF
 - icon 是不透明纯字符串；App Center 不解析 scheme、不验证资产存在性、不请求指向内容，也不把它宣称为受控或不可变资产。
 - 未来把 icon 收紧为受控资产引用时，通过新用例、新字段语义和显式迁移完成，不在当前字符串上隐式增加强保证。
 
+<!-- 权威位置: use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006 -->
+### BR-PRF-006：初始生命周期与单一工作修订
+
+- 新 ProfileRevision 的 reviewStatus 固定为 `DRAFT`；调用者不能指定其他状态。
+- 每个 Application 同时最多存在一条 reviewStatus 为 DRAFT 或 SUBMITTED 的工作修订。
+- DRAFT 不属于公开目录，不改变已发布资料，也不会让 Application 自动公开。
+- DRAFT 迁移为 SUBMITTED 后继续占用该工作位；在 PENDING ProfileReview 得到 APPROVED 或 REJECTED 决定前，不创建下一份 DRAFT。
+- APPROVED 或 REJECTED 决定产生后释放工作位；它们不阻止后续创建新 DRAFT。
+
 ## 架构决定（仅本次需要的章节）
+
+### ADR-004：MongoDB 事务与 Schema 管理（`ACCEPTED`）
+
+#### 政策发布回执与恢复
+
+2026-10-26用户接受的正式政策发布沿用本 ADR 与 UC005 BR-REV-016、UC016 BR-PRF-028，不引入第二政策服务。后续实现应满足：
+
+- 每类策略的唯一 ACTIVE 约束、旧版退休、新版激活与对应发布回执在同一事务提交。退休和决定均对同一 policy 文档作真实条件写；coordinationRevision 是内部栅栏，不是操作人员长期持有的业务版本。
+- 复用 migration ledger，为新政策 migration 的记录增加不可变发布元数据：changeId/migrationId、kind、from/toVersion、清单摘要、批准依据、release、appliedAt；与可信发布控制面的部署身份审计以 changeId 关联。旧 ledger 记录保留，不伪造或回填旧审计事实。
+- 新回执在政策切换事务内写入，通用 apply/记账/重入流程需兼容它；不能继续把“apply返回后另记 ledger”当作该政策的原子成功证明。重复同 ID/同清单读原回执，同 ID/异参拒绝；缺记录或未知提交不等于已回滚。
+- unknown commit 按原事务身份恢复提交，再读同一回执；更晚发布已改变当前策略时，只报告原操作结果与最新事实，不重新执行历史激活，不回拨版本状态。
+- 读回来自受环境访问控制的正式只读运维入口，核对回执、当前唯一 ACTIVE 与不可变历史；不以 exit0 或无清单绑定的日志替代。记录不一致时停止并告警，不修复业务事实。
+- 回执元数据格式/限制、发布身份及批准凭据可信来源、保留/访问策略、退出码和唯一索引定义须在实施 brief 冻结并经文档复核；未经授权不扩展为任意 policy CRUD。
+- 集成验收覆盖幂等/异参、两个发布竞争、发布与决定的两种提交顺序、事务回滚、未知提交恢复、历史保留，以及多/零 ACTIVE 失败关闭。正式联合验收不直接改库制造 policy 切换。
+
+这是一项已接受、未实现的工程增量；现有 migration ledger 只有 ID/appliedAt 且通用记账在 apply 之后，不满足本节完整协议。实现开始前若不能证明复用兼容性，应报告具体 gap，不自行新建政策服务或绕开原子回执。
 
 ### ADR-006：Proto v1 与独立 API 仓库协作（`ACCEPTED`）
 
@@ -543,8 +578,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：后续方向
+- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：后续方向、变更记录
 - `UC-APP-013`（use-cases/UC-APP-013-create-application-profile-revision.md）：目标与范围、业务边界、输入与身份、网页端重新编辑被拒绝资料、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、尚未决定但不阻塞文档、后续用例、迁移说明、变更记录、实现依赖与交付边界
+- `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、决定、Schema 与索引、测试环境、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
@@ -553,8 +589,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 314 | `d0275995ea8b` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

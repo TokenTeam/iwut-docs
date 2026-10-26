@@ -192,7 +192,11 @@ APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snap
 - `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
 - `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
 
-策略内容不可原地修改；变更检查项使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。首版不提供策略管理或查询接口。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 当前策略由 UC031 正式详情读取，不将本条“首版无独立查询”解释为禁止已交付的 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
+Profile 以独立 policyKind=PROFILE 遵循 [UC005 策略正式发布与运维读回](UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)和 ADR004 的发布回执协议；不复制第二套发布状态机。每类唯一 ACTIVE，事务内退休旧版/激活全新版本并记录回执；最终决定与退休写同一策略文档串行化。零/多 ACTIVE 或当前定义损坏失败关闭，不任意选一条策略。
+
+新 Profile 版本激活前须满足 [UC031 兼容门槛](UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，先审真实政策正文、提供版本绑定正式定义并部署可失败关闭的消费者；不为测试制造 v2，不从旧 ID 猜新含义。旧 expectedPolicyVersion 不再可用时保留 `ProfileReviewPolicyUnavailable` / HTTP409/gRPC ABORTED，不改 Review/Revision/working/public 指针。历史决定不重写，退休版本不重新激活。
 
 <a id="br-prf-029"></a>
 
@@ -215,7 +219,7 @@ ProfileRevision.reviewStatus = APPROVED
 ApplicationProfile.currentPublishedProfileRevisionId = profileRevisionId
 ```
 
-管理员不需要第二次 Publish 操作。指针前置值使两个针对不同 ProfileRevision 的并发批准不会静默相互覆盖；后一个 Reviewer 必须重新读取已改变的公开资料后再决定。旧的当前公开 Revision 保留 APPROVED 状态和审核历史，但首版不提供重新选择它或回滚资料的命令。
+管理员不需要第二次 Publish 操作。公开指针前置值防止错误或过期客户端预期静默覆盖当前公开资料；不匹配时不写入决定或公开指针。按 [BR-PRF-006](UC-APP-013-create-application-profile-revision.md#br-prf-006)和 BR-PRF-026，同一 Application 当前仅有一个 DRAFT/SUBMITTED 工作修订，批准或拒绝并释放工作位后才能创建下一份；当前不将不同修订同时待审并发批准列为可达用户场景。此说明不放宽指针前置校验、一次性决定或原子写入。未来若开放并行工作修订，应另行接受业务设计并补真实并发验收。旧公开 Revision 保留 APPROVED 状态和审核历史，首版不提供重新选择或回滚资料的命令。
 
 资料自动公开不创建 stable Version。没有兼容 stable 槽位时，Application 仍不进入普通用户候选目录。
 
@@ -270,6 +274,10 @@ ApplicationProfileReview、ApplicationProfileRevision 和 ApplicationProfile 仍
 - 两个并发决定最多一个成功，decision 不可覆盖。
 - stale ProfileRevision revision、snapshot 漂移或状态不一致均不会产生部分决定。
 - APPROVE 的公开指针前置值过期时不会覆盖其他已批准资料。
+- 验收分层：同一 Review 的真实双 Reviewer 竞争证明一次性决定；错误 expected pointer 的真实409证明协议防御；组件恢复证明重读/清确认/禁止自动重放；三者不冒充不同修订并发批准。
+- 经正式命令验证工作位占用时不能创建第二修订，首次决定释放后可顺序创建、提交和批准下一修订，并核对 Admin→Developer 公开指针与保留历史；不 seed 平行 PENDING。
+- 指针协议负例使用正式顺序批准形成历史 P0、当前 P1，再创建/提交唯一工作 R2；仅在 R2 命令故意传 P0，验证409和无部分写，不称为浏览器读到有效前置后发生真实不同修订竞态。
+- 一条迟到旧 Review 请求在后续修订可创建时已是终态，应按 AlreadyDecided 恢复，不强行改报 PublicationConflict。不同 Application 的批准不竞争同一公开指针。
 - 批准不会创建或修改 Test/Grey/Stable，也不会产生资料回滚入口。
 
 ## 后续方向
@@ -293,6 +301,8 @@ REJECT 的候选重建必须保持原始内容，先验证 BSON 字段存在/类
 
 ## API 实现契约
 
+2026-10-26设计增量：正式策略发布遵循 BR-PRF-028 引用流程，仍待实施；指针验收分层只澄清可达性，不更改下列决定 Proto、reason/status、单工作位或已交付指针契约。本次未启动实现。
+
 内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision`；外部只加 `/app-center`。原生 gRPC 为 `app_center.v1.application_profile_review.ApplicationProfileReview/DecideApplicationProfileRevisionReview`。
 
 Proto Request 使用匹配路径模板的显式 json_name，正文 annotation 为 `body: "command"`；HTTP 正文仅为 command 字段，不接受身份、快照、归属、decision 或审计注入，不允许 query 覆盖。命令字段如下：
@@ -312,3 +322,7 @@ expectedProfileRevisionRevision 是正 int64（ProtoJSON 表达），不使用 I
 HTTP200 返回 `{ "profileRevision": <完整决定后修订>, "review": <完整审核记录>, "currentPublishedProfileRevisionId": <string|null> }`，ETag 是决定后 ProfileRevision.revision。保留已提交的 ReviewRecord.decision 的 field 10 与 `google.protobuf.Value` 类型；PENDING 输出 null，终态输出对象：outcome（APPROVED/REJECTED）、policyVersion、confirmedCheckIds（排序）、reason（string/null）、decidedBy、decidedAt（UTC RFC3339）。其它已提交字段编号/类型不改。
 
 错误映射：身份401/UNAUTHENTICATED；缺权限或利益冲突403/PERMISSION_DENIED；不存在或路径归属不匹配404/NOT_FOUND；非法输入、reason、checks或批准内容400/INVALID_ARGUMENT；已决定、状态/revision/公开指针冲突或策略不可用409/ABORTED；内部不变量或基础设施失败500/INTERNAL。错误码稳定且不泄漏存储细节。响应丢失后的管理查询仍单独交付，不在本 UC 添加 GET。
+
+## 变更记录
+
+- 2026-10-26：用户接受正式策略发布流程和资料并发可达性澄清；保留单工作位、指针前置与原子公开，补验收分层，不新增历史重新发布能力。
