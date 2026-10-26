@@ -448,6 +448,8 @@ UC025 的 DISABLED 本人专用途径仍可用：在该专用设备操作解析�
 
 #### JSON 与载体
 
+UC036 的 `auth_center.v1.scope_management.ScopeManagementService` 提供三个 SESSION 管理方法：POST `/v1/scope-catalog:get`、POST `/v1/scope-catalog:change`、POST `/v1/scope-catalog/operations:get`，分别为 GetManagedScopeCatalog、ChangeScopeCatalog、GetScopeCatalogOperation。独立 `AUTH_SCOPE_MANAGEMENT_ENABLED` 缺省关闭，在线复核当前完整平台管理员，不增加权限或 service 写权。正文上限 128 KiB；严格解码/no-store/原生 gRPC；精确语义唯一引用 [UC036](../use-cases/UC-AUTH-036-release-scope-enablement-changes.md#api-契约)。UC001 内部 ScopeCatalog 只读方法不变，Gateway 实际路由清单另行交付，不因本文登记自动开放。
+
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
 - 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。学年时间表 PUT 只接受 nextRolloverAt、expectedRevision 和 reason，不接受客户端提交 currentAcademicYear。
@@ -674,11 +676,11 @@ Switch/Remove 幂等 24 小时，按 `(authId,purpose,requestId)` 固定目标/�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
-| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
-| `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
+| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/auth-email-account-v3.md` | 126 | `b13b360d803f` |

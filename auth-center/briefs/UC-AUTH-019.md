@@ -631,8 +631,8 @@ Auth 启用非空业务路由时，部署须明确声明资源委托验证已就
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-019-issue-delegation-context.md` | 62 | `5da867514791` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
-| `use-cases/UC-AUTH-014-authorize-application.md` | 87 | `6d3e9fdcda39` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
+| `use-cases/UC-AUTH-014-authorize-application.md` | 89 | `b854c65e519a` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |

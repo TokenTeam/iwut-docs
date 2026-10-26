@@ -14,6 +14,8 @@
 
 输出为官方授权页或带 code/state/iss 的回调；拒绝返回 access_denied。服务端内部生成 grantId、revision，不在回调 URL 中公开内部 authId 或 Session。
 
+2026-10-26 随用户接受 UC036，同步接受 [BR-SCP-013](UC-AUTH-036-release-scope-enablement-changes.md#br-scp-013)：每次 View 保存本请求 R 的完整 Scope 展示定义/摘要和新不可猜 presentation 标识，确认必须携带该页面标识。最终事务对比保存证据与当前请求定义；相关文案变化或旧标签页提交返回 interaction_changed，显式重读后再确认；无关目录变化不冲突。不将全局 catalog revision 当 consent 版本，不为旧 grant 补造历史展示。旧无证据交互需要重新 View。审计保留展示证据及显式确认/复用历史同意来源；具体证据规则唯一在 UC036。UC035 保持 DRAFT，不因此实现宿主交互。
+
 ## 主流程
 
 1. 读取稳定 client 元数据，以请求中的 channel/rpcApiMajor 调用 App 的 `ResolveClientRuntimeConfiguration`，取得当前批准 Version 的 redirect URIs、scopes 和 runtime tuple；先对 redirect_uri 做完整字符串精确匹配，再校验其余协议参数并建立限时 interaction。未知或非法回调只显示 Auth 本地错误，不得重定向。准备静态 OIDC 注册元数据时复用 UC015/BR-OAU-021 的 Auth sector 模块确认该 Application 的稳定 sector，并按共享协议验证批准回调清单；不要求 App 保存 sector。

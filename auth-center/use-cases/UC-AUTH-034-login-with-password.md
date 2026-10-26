@@ -13,7 +13,7 @@
 - ACTIVE USER 已有 UC033 安全密码材料及 UC011 当前唯一已验证登录角色。
 - 客户端准备系统安全存储的 P-256 新密钥，或使用原账号当前仍有效密钥；Auth 不接收私钥/自报 authId。
 - 两个匿名入口明确不带 Session，不以已有身份决定目标，不能认证失败后创建账号。
-- 硬依赖 UC033 策略/hash/统一代际与凭据下界、UC011 登录角色查询、UC007 Session/LRU 及所有消费路径；当前尚无实现。
+- 硬依赖 UC033 策略/hash/统一代际与凭据下界、UC011 登录角色查询、UC007 Session/LRU 及所有消费路径；2026-10-15 复核后串行实现，Auth 后端及真实回归完成，生产与客户端门禁仍独立。
 
 ## 输入与输出及 API 提案
 
@@ -76,6 +76,8 @@ Session 方法固定 `PASSWORD_AND_DEVICE`，必需 credentialId、passwordRevis
 验收必须含两种前台登录、默认/备用明确 UI、非登录地址拒绝、dummy 验证、NFC、挑战/版本/部署/用途串用、5 次失败、幂等/未知提交、同公钥并发和退休拒绝、与改密/重置/换邮箱/禁用/注销竞争，以及所有认证方法 HTTP/native gRPC/Wire/Mongo race/Console/Gateway 回归。
 
 ## 依赖与变更记录
+
+- 2026-10-15：在 UC033 验收后串行交付本 UC Auth 后端，默认关闭；详细实现边界与真实验证见 readiness。Gateway/客户端、正式策略与部署压测独立，不改变上述业务规则或旧签名字节。
 
 [UC033/034 readiness](../implements/UC-AUTH-033-034-readiness.md)记录真实代码缺口，2026-10-13 用户授权实现，生成 UC034 brief 后开工；Proto/vector/consumer 完整检查是启用门禁，不迁移旧数据。
 

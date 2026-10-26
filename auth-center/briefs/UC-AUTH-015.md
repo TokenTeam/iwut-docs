@@ -593,7 +593,7 @@ ApplicationUserStorage 对 PUBLIC client 复用同一当前 callback HTTPS origi
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-015-exchange-authorization-code.md` | 81 | `cbaee4baf6fe` |
-| `use-cases/UC-AUTH-025-close-own-account.md` | 166 | `0865734652a9` |
+| `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |
 | `platform/contracts/oauth-delegation-v1.md` | 97 | `1f431b468864` |

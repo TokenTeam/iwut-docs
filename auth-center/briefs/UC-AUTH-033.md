@@ -48,11 +48,11 @@
 - 正常改密：当前有效 ACTIVE USER Session，当前平台密码；调用者 owner/credentialId 来自 Auth，不能指定 authId。
 - 忘记密码：无 Session 的匿名恢复入口，仅当前唯一登录邮箱码授权，不要求旧密码/旧私钥，不支持非登录/历史/仅用于校园认证的邮箱。
 - 危险动作由所属 UC 完成业务授权，本 UC 只验证密码、固定用途/目标/版本；密码正确不授予管理员或应用归属权限。
-- Auth 已有邮箱额度/SMTP、Mongo 认证事务栅栏、accountRevision、凭据归属、Session/LRU 和 OAuth 代际检查；没有密码存储、密码登录或恢复，详见[依赖检查](../implements/UC-AUTH-033-034-readiness.md)。
+- Auth 已有邮箱目录/额度/SMTP、共享密码策略/存储/计算、Mongo 认证事务栅栏、accountRevision/凭据下界、Session/LRU 和 OAuth 代际检查；公开改密/重置/通知的续作现状见[依赖检查](../implements/UC-AUTH-033-034-readiness.md)。普通密码登录仍由 UC034 独立交付。
 
 ### 输入与输出
 
-逻辑消息与载体见[密码协议草案](../../platform/contracts/auth-password-v1.md)。具体 Proto 字段号、入口和配置待接受时同步独立 API；不复用旧无密码注册路径。
+逻辑消息与载体见[已接受的密码协议](../../platform/contracts/auth-password-v1.md)。Proto 字段号与入口已同步独立 API；公开管理入口由默认关闭的 AUTH_PASSWORD_MANAGEMENT_ENABLED 独立控制，不复用旧无密码注册路径。
 
 ```text
 ChangeOwnPassword { requestId, currentPassword, newPassword }
@@ -95,11 +95,11 @@ Change 和 Get 要求唯一有效 `x-iwut-session`；Reset 两入口要求 Sessi
 - 恢复：未知提交、24 小时同键/异参、一次性 token 丢失经当前钥登录查询、完成结果只恢复原状态；通知不重复变更。
 - 所有 Session/USER JWS/OAuth/LRU/列表/复用入口闭合版本和 credentialRevision；真实 HTTP/native gRPC/Wire/SMTP/Mongo race，App 短期离线窗口明确。
 
-字段/reason/HMAC 与容量约定已写入密码契约/本 UC；2026-10-13 公开向量及 API 生成物已交付，正常改密核心分批验证，公开服务与注册/邮箱/重置依赖尚未交付，不假称已有可用入口。
+字段/reason/HMAC 与容量约定已写入密码契约/本 UC；公开向量及 API 已交付，注册/邮箱与全部认证消费者的直接依赖已具备。2026-10-15 串行续作补公开改密/重置及通知；代码、真实验收和启用状态分别见 readiness，不以协议存在代替上线验证。
 
 ### 交付依赖与变更记录
 
-硬依赖/实施顺序见 readiness；正式实现必须同步 UC006/007/009/011/012/014–020/022/025/026/032、可信身份和密码协议。2026-10-13 授权开工，限额/字段/存储按上述约定实现，公开向量及压测属于启用验收。UC033 与 UC034、注册/邮箱改造先闭合，再开 UC032，避免用仅 UI 密码保护留下旧入口。
+硬依赖/实施顺序见 readiness；正式实现必须同步 UC006/007/009/011/012/014–020/022/025/026/032、可信身份和密码协议。2026-10-13 授权开工，限额/字段/存储按上述约定实现，公开向量及压测属于启用验收。最新直接依赖及 UC032 已交付；本轮按用户要求先完成 UC033 验收，再实现 UC034，保持全部旧入口无旁路。
 
 - 2026-10-12：建立密码管理/恢复 DRAFT；收录用户已接受产品建议，固定单一 accountRevision＋设备失效下界提案、正常保留当前设备/重置全部清退、目标密码验证、OAuth 失效及历史离线窗口；未实施。
 
@@ -212,7 +212,7 @@ Session、登录/绑定/重置挑战、OAuth interaction/code/access/family/refr
 
 #### 权威与兼容边界
 
-业务规则唯一见 [UC033 密码管理/恢复](../use-cases/UC-AUTH-033-manage-password-and-recovery.md)、[UC034 密码登录](../use-cases/UC-AUTH-034-login-with-password.md)，邮箱角色见 UC011、密码注册见 UC006。本文只固定客户端/Auth/Gateway 的消息与安全载体提案，不是可执行 Proto，也未提供已验收的公开向量。
+业务规则唯一见 [UC033 密码管理/恢复](../use-cases/UC-AUTH-033-manage-password-and-recovery.md)、[UC034 密码登录](../use-cases/UC-AUTH-034-login-with-password.md)，邮箱角色见 UC011、密码注册见 UC006。本文固定客户端/Auth/Gateway 的消息与安全载体；可执行 Proto 与独立公开向量已交付，运行验收分别记录，不以协议存在宣称生产启用。
 
 2026-10-13 用户授权开始实现，本文字段号、编码和默认参数随 UC033/034 接受。既有设备 LOGIN、邮箱码 LOGIN_WITH_EMAIL 和无密码邮箱注册 v2 字节不被改写；新密码字段/入口必须显式版本化，不通过向旧消息追加秘密、复用退役字段或自动降级实现。公开向量、可执行 API 和启用验证独立跟踪，接受不表示交付完成。
 
@@ -262,7 +262,7 @@ PasswordChangeStatus：UNSPECIFIED=0（不允许成功）、NOT_FOUND=1、COMPLE
 
 注册还需单独受版本保护的“邮箱验证＋密码设置＋设备证明”完成请求（UC011），不能让旧无密码 REGISTER 绕过新模型。添加非登录邮箱与切换登录角色须区分：Session＋新邮箱码不足以切换。危险动作采用所属 UC 的 Complete 带当前密码，在 Auth 最终提交边界复核；不签发通用解锁 token。
 
-2026-10-13 六个消息/RPC 已进入独立 API Proto 并生成 Go/gRPC/HTTP 客户端；Auth 公开服务仍未注册。新注册/邮箱目录方案见[已接受的邮箱账号 v3 契约](../../platform/contracts/auth-email-account-v3.md)，已实施邮箱核心，但不属于已交付的普通密码登录/重置 API。
+2026-10-15 六个消息/RPC 已进入独立 API Proto 并生成 Go/gRPC/HTTP 客户端；UC033 四方法、UC034 两方法已接入 Auth 并通过真实 Wire/Mongo/race。新注册/邮箱目录方案见[已接受的邮箱账号 v3 契约](../../platform/contracts/auth-email-account-v3.md)；[后端验收记录](../implements/UC-AUTH-033-034-readiness.md)不表示生产启用或 Gateway/客户端已交付。
 
 #### 密码验证与幂等记录
 
@@ -325,5 +325,5 @@ keyId = SHA256(Frame(UTF8("iwut-password-operation-key-id-v1"), K_operation))
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
-| `platform/contracts/auth-password-v1.md` | 124 | `0ac9cd7021d3` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
+| `platform/contracts/auth-password-v1.md` | 124 | `67353f39572a` |

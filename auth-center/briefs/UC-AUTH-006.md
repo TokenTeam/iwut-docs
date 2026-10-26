@@ -512,7 +512,7 @@ Switch/Remove 幂等 24 小时，按 `(authId,purpose,requestId)` 固定目标/�
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
-| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
 | `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 340 | `a2e87a33efad` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/auth-email-account-v3.md` | 126 | `b13b360d803f` |

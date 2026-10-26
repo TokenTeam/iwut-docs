@@ -322,5 +322,5 @@ UC009 当前凭据撤销后旧 Session 重试 SESSION_INVALID；其他有效 Ses
 | `use-cases/UC-AUTH-020-manage-own-sessions.md` | 181 | `55131ae2468d` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
-| `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
+| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

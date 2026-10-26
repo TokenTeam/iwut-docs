@@ -586,7 +586,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-026-apply-application-closure.md` | 171 | `6b728c3da094` |
-| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `12caeedc7b93` |
+| `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
 | `platform/contracts/application-close-reauth-proof-v1.md` | 153 | `4fa7c9ec5eb5` |
 | `platform/contracts/application-closure-v1.md` | 135 | `05e04ba6d669` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

@@ -296,6 +296,8 @@ Scope Catalog、UC002 内部批量 Developer 状态查询、SYSTEM principal 查
 
 #### JSON 与载体
 
+UC036 的 `auth_center.v1.scope_management.ScopeManagementService` 提供三个 SESSION 管理方法：POST `/v1/scope-catalog:get`、POST `/v1/scope-catalog:change`、POST `/v1/scope-catalog/operations:get`，分别为 GetManagedScopeCatalog、ChangeScopeCatalog、GetScopeCatalogOperation。独立 `AUTH_SCOPE_MANAGEMENT_ENABLED` 缺省关闭，在线复核当前完整平台管理员，不增加权限或 service 写权。正文上限 128 KiB；严格解码/no-store/原生 gRPC；精确语义唯一引用 [UC036](../use-cases/UC-AUTH-036-release-scope-enablement-changes.md#api-契约)。UC001 内部 ScopeCatalog 只读方法不变，Gateway 实际路由清单另行交付，不因本文登记自动开放。
+
 - POST/PUT/PATCH 使用 `Content-Type: application/json`，消息遵循标准 ProtoJSON；`bytes` 为 Base64，
   `int64` 响应为十进制字符串，Timestamp 为 RFC3339；JSON 字段推荐 lowerCamelCase。
 - 审核与应用运维权限管理的 subject_auth_id 由路径绑定，写方法还绑定 permission，覆盖消息体中同名值。旧 reviewer 方法不接受新增 permission 字段；各自 allowlist 和错误规则见 UC004 与 UC027。学年时间表 PUT 只接受 nextRolloverAt、expectedRevision 和 reason，不接受客户端提交 currentAcademicYear。
@@ -424,5 +426,5 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | --- | --- | --- |
 | `use-cases/UC-AUTH-029-manage-academic-year-rollover.md` | 170 | `e45e42899d0c` |
 | `use-cases/UC-AUTH-005-edit-own-user-profile.md` | 340 | `a2e87a33efad` |
-| `platform/contracts/auth-center-api-routing.md` | 142 | `c300b311eaac` |
+| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

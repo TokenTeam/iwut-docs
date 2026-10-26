@@ -46,7 +46,7 @@
 - ACTIVE USER 已有 UC033 安全密码材料及 UC011 当前唯一已验证登录角色。
 - 客户端准备系统安全存储的 P-256 新密钥，或使用原账号当前仍有效密钥；Auth 不接收私钥/自报 authId。
 - 两个匿名入口明确不带 Session，不以已有身份决定目标，不能认证失败后创建账号。
-- 硬依赖 UC033 策略/hash/统一代际与凭据下界、UC011 登录角色查询、UC007 Session/LRU 及所有消费路径；当前尚无实现。
+- 硬依赖 UC033 策略/hash/统一代际与凭据下界、UC011 登录角色查询、UC007 Session/LRU 及所有消费路径；2026-10-15 复核后串行实现，Auth 后端及真实回归完成，生产与客户端门禁仍独立。
 
 ### 输入与输出及 API 提案
 
@@ -71,6 +71,8 @@ Begin 不带密码，以避免把明文秘密存入挑战；Complete 经 TLS 带
 6. 以后自动登录用 UC007；忘记密码可选择 UC012 备用登录或 UC033 明确重置，不把失败自动变成注册。
 
 ### 依赖与变更记录
+
+- 2026-10-15：在 UC033 验收后串行交付本 UC Auth 后端，默认关闭；详细实现边界与真实验证见 readiness。Gateway/客户端、正式策略与部署压测独立，不改变上述业务规则或旧签名字节。
 
 [UC033/034 readiness](../implements/UC-AUTH-033-034-readiness.md)记录真实代码缺口，2026-10-13 用户授权实现，生成 UC034 brief 后开工；Proto/vector/consumer 完整检查是启用门禁，不迁移旧数据。
 
@@ -167,7 +169,7 @@ PasswordChangeStatus：UNSPECIFIED=0（不允许成功）、NOT_FOUND=1、COMPLE
 
 注册还需单独受版本保护的“邮箱验证＋密码设置＋设备证明”完成请求（UC011），不能让旧无密码 REGISTER 绕过新模型。添加非登录邮箱与切换登录角色须区分：Session＋新邮箱码不足以切换。危险动作采用所属 UC 的 Complete 带当前密码，在 Auth 最终提交边界复核；不签发通用解锁 token。
 
-2026-10-13 六个消息/RPC 已进入独立 API Proto 并生成 Go/gRPC/HTTP 客户端；Auth 公开服务仍未注册。新注册/邮箱目录方案见[已接受的邮箱账号 v3 契约](../../platform/contracts/auth-email-account-v3.md)，已实施邮箱核心，但不属于已交付的普通密码登录/重置 API。
+2026-10-15 六个消息/RPC 已进入独立 API Proto 并生成 Go/gRPC/HTTP 客户端；UC033 四方法、UC034 两方法已接入 Auth 并通过真实 Wire/Mongo/race。新注册/邮箱目录方案见[已接受的邮箱账号 v3 契约](../../platform/contracts/auth-email-account-v3.md)；[后端验收记录](../implements/UC-AUTH-033-034-readiness.md)不表示生产启用或 Gateway/客户端已交付。
 
 #### 密码登录签名字节
 
@@ -212,5 +214,5 @@ challenge32 CSPRNG、5 分钟，payload 最多 1024 字节；operationId/邮箱/
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-034-login-with-password.md` | 82 | `c2c660ad9c52` |
-| `platform/contracts/auth-password-v1.md` | 124 | `0ac9cd7021d3` |
+| `use-cases/UC-AUTH-034-login-with-password.md` | 84 | `30cbb252cf61` |
+| `platform/contracts/auth-password-v1.md` | 124 | `67353f39572a` |
