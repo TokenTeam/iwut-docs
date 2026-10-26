@@ -10,8 +10,8 @@
 | UC002–005只读产品与角色链 | 现有列表/详情/分页/错误恢复、正式管理权转让、SUSPEND/RESTORE、账号状态和WITHDRAWN链均有已记录真实证据；最后124项门禁通过 | 不重新登记为全部缺失，不自动扩成全部状态×页面 |
 | Developer拒绝后的键盘焦点 | 审计起点PrivateReadBoundary卸载原子树后没有聚焦。随后有限修复已由组件与正式转让代表链完成 | [焦点修复包](2026-10-27-private-denial-focus.md)已VERIFIED：3专项/126全量，不外推全部页面 |
 | UC001文档CSP | 审计起点缺文档policy；随后加入真实构建hash/SRI/meta和静态Edge防嵌入头，双surface实际强制拒绝及正常认证/私有链通过。不是对生产EO配置的验证 | [Strict CSP包](2026-10-27-strict-static-csp.md)已VERIFIED：3专项/126全量，首轮错误负例和Docker拉取EOF保留 |
-| UC001协议/损坏记录 | 当前protocol比较代码已有上下文与到期护栏，但protocol.test的5项不足以逐项证明验收3点名的跨purpose/application/operation/locator、等于到期、双重哈希等。store.assertRecord只看长度/04和私钥type/extractable，keys.signPayload未核对namedCurve；不能以真实成功登录证明损坏输入在协议签名前失败 | 下一有限包须先直接复现，再加固现有适配器并验证公开向量；不能重新定义平台协议、导出/修复私钥或把全部缺证认定为产品漏洞 |
-| UC001公开向量CI | 向量已在pnpm test；当前仓库没有workflow/CNB配置，124轮是本地证据，尚无可核实的CI run交付 | 另补可复现CI定义/证据；不由“没找到文件”断言外配CI不存在，不未经授权push或触发远端作业 |
+| UC001协议/损坏记录 | 审计起点已有比较，但曲线/标量/损坏记录签名缺口经直接复现；随后原生校验、配对probe、快照、BOM与命名协议回归已修。所列验收由ec34375专项4/4、默认128/128证明，不扩大为全部浏览器或完整UC | [凭据包](2026-10-27-browser-credential-validation.md)已VERIFIED，不再登记为全部待实施；仍不导出/修复/换钥匙或重定义平台协议 |
+| UC001公开向量CI | 审计起点没有仓内配置；随后只读GitHub API确认workflows/runs均0。定义7b32305已集成并通过本地1056 Vitest＋376 Node/全普通门禁，6静态产物与真实128冻结逐字一致；首轮旧stub失败及恢复保留，仍无远端run | [CI包](2026-10-27-protocol-vector-ci.md)IMPLEMENTED / LOCAL_VERIFIED / REMOTE_UNVERIFIED；不能以本机或128绿替代远端证据，不未经授权push/触发作业 |
 | UC006/007审核 | 精确能力、正式决定定义、批准/拒绝/System拒绝、并发/未知/权限/关系/Session变化、App→Auth断链、Scope正式变化均有实际证据。UC007验收4已按单工作位正式分层，既有真实错误pointer409/顺序替换及组件清确认分别存在 | 不重列决定surface/指针来源/不可达平行PENDING为缺口；正式政策变化仍见下项 |
 
 ## 不可由本包越过的外部和架构边界
@@ -20,7 +20,7 @@ App工作区干净、本地HEAD及实际远端master同为 `4f62badc199139c73fad
 
 Cookie33+保持[已接受传输边界结论](2026-10-23-cookie-recovery-transport-boundary-analysis.md)。普通网页冷启动可能在第一HTTP parser之前无法取得恢复代码；仅应用层cleanup、扩大有限阈值、Service Worker已安装前提或Cookie-free API改造本身，均不足以证明原origin必达、遗留HttpOnly精确清理和无限迟到响应的身份不变式。受管浏览器guardian或新的入口/PoP协议会新增客户端/部署/跨系统信任边界，不是当前公网React小修；本轮不接受或安装扩展、不买迁域、不变更Gateway契约。该研究没有提供可上线实现，不能宣布不可能或已修复。
 
-本次只推进已有UC内确定的可访问性与CSP缺口；协议/CI作为有限明确后续，不以外部问题掩盖本地可做工作，也不借审计增加未接受业务UI。密码入口、退出/设备治理、Developer写UI及Tester本人入口仍非范围。完整UC/goal不标完成；本页不是新的永久待办生成器。
+审计后已有UC内的可访问性/CSP及凭据/命名协议缺口均由对应有限包完成；CI定义已本地验证，实际远端证据仍须授权推送/运行后取得。剩余App正式政策与Cookie新信任/部署边界不能通过重复相同绿门禁、直接改后端或未经授权外部协调处理；不借审计增加未接受业务UI或制造新矩阵。密码入口、退出/设备治理、Developer写UI及Tester本人入口仍非范围，完整UC/goal不标完成；本页不是新的永久待办生成器。
 
 ## 本地凭据缺口的有限直接复现
 

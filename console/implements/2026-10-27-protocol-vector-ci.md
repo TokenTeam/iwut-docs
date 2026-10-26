@@ -1,6 +1,6 @@
 # 公开协议向量的可复现CI定义
 
-状态：ACCEPTED / IN_PROGRESS（2026-10-27，持续目标授权下自行接受；仅隔离临时候选已实现，当前凭据包ec34375真实全量期间不修改Console冻结）。
+状态：ACCEPTED / IMPLEMENTED / LOCAL_VERIFIED / REMOTE_UNVERIFIED（2026-10-27，无远端run）。持续目标授权下自行接受；ec34375完整真实128项结束前只准备临时候选，结束后才集成Console。
 
 ## 依据与事实
 
@@ -27,3 +27,23 @@ YAML和本地测试只能证明定义已建立。当前未获本轮push/远端�
 ec34375完整真实轮次运行期间，候选只写独立mktemp目录，不修改Console源码、依赖或node_modules。安装器12项先因文件缺失RED，再12/12 GREEN；workflow的4项同样先因文件缺失RED，再解析/结构/精确Action及完整命令16项合计全绿，不把bootstrap RED当作产品漏洞。bash语法通过。真正从固定官方URL下载、校验归档、安装并执行实际得到 `libprotoc 3.21.12`，无-I编译timestamp descriptor也通过，确认完整include默认发现；该本地安装随后精确清理，不是远端runner证据。
 
 候选定义验证使用显式固定开发依赖yaml2.9.1解析YAML（包括重复key拒绝），不写临时自制YAML解析器、不把它发进Web/BFF构建。待当前真实轮次结束后，再通过apply_patch集成候选、根普通test接线和锁文件，运行最终本地门禁并记录实际commit；此前不登记Console已交付CI配置。
+
+## 已集成定义，仍待本地统一终态
+
+ec34375的默认128/128完成且资源清空后，才把候选通过apply_patch集成为Console `7b32305da131967dfad2e108f3e4b116a68925eb`。workflow、安装器和回归已入库；root test新增 `test:ci-policy` 为不可省略前置。根接线护栏先1 RED/4 GREEN，修复后安装/定义共17/17 GREEN。yaml2.9.1显式开发依赖及完整锁已更新；原包直接版本不变，仅新增yaml和相关可选peer绑定，未改Web/BFF/协议或real spec。
+
+当前正在以集成后的实际安装器重新下载/校验protoc，并重演frozen install、独立性、官方生成、strict、原pnpm test、build和git无漂移检查。还会以与真实轮次相同的公开serviceId另构建两前端，比较先前保存的实际静态产物hash，不以“仅开发依赖”推断运行产物必然相同。本地统一结果尚未到达；不能把17项或候选安装当作完整门禁，更不是GitHub run。
+
+只读GitHub元数据补充确认：Console是main默认分支的private仓库；固定输入API仓库为public/master，因此官方API生成无需新增跨私库token。没有读取或改写平台secret/权限，也未push/dispatch。
+
+集成7b32305首轮本地重演明确exit1：真实固定protoc安装、frozen install、独立性、官方生成、strict、1056 Vitest＋376 Node均完成，但build的两个Vite命令命中旧app/node_modules/.bin/vite脚本，仍指向已移除的无yaml peer目录；根vite stub已指向新目录。故未到达无漂移/同配置产物比较，不登记整个本地门禁通过。先按当前pnpm10本机help提供的force reinstall＋frozen lockfile重新连接托管依赖，不改源代码/原断言或使用其它构建版本；该安装状态诊断不当作GitHub实际失败，也不提前认定干净安装必然成功。
+
+## 最终本地门禁与边界
+
+force＋frozen安装实际exit0（2分23秒，锁不变；非当前平台optional包的低速/ECONNRESET由包管理器有界重试，未改registry/版本/校验），但没有清理两个孤立app级vite stub。确认它们引用旧peer目录、当前app不声明该直接工具且根声明的vite为同版本8.3.3后，仅把这两个生成文件移入本轮临时备份，不改任何源文件。随后按根已声明CLI构建成功；最终重演仍保留workflow的普通frozen install，不把force或手工清理塞进CI，也不新增依赖自动修复逻辑。
+
+Console产品/CI源码冻结仍为 `7b32305da131967dfad2e108f3e4b116a68925eb`（产品/runtime/real spec仍ec34375）。使用集成安装器实际下载并校验的protoc3.21.12，确认Node24.22.0/pnpm10.28.1，重新完整执行frozen install、独立性、官方固定API6fea生成、strict、**1056 Vitest＋376 Node**、两前端/两BFF等全workspace build及git无漂移检查，最后明确 **exit0**。同公开serviceId另构建两前端后，实际6份HTML/JS/CSS文件名和SHA256与128项真实验收前保存的冻结产物逐字一致；不是仅凭依赖分类推断兼容。未把该比较扩大为BFF二进制逐字证明。
+
+既有Vite未来native config loader、大chunk及pnpm未批准esbuild build scripts提醒保持，不靠屏蔽warning或批准任意安装脚本计绿。源码/锁无漂移；平台不允许rm-f式删除，且本机gio不支持该临时挂载的回收站，故未绕过限制强删。候选、实际工具安装目录和两个已无效的生成stub精确归档到新建的隔离临时恢复目录，原两工作目录已移出，内容保留可恢复；均为可再生成工具/缓存，非用户私钥或源文件。真实轮次容器（含停止项）/network仍为空，legacy本地/远程不变，不sudo、不编译后端、不push/dispatch。
+
+只读确认GitHub Actions当前enabled且allowed_actions=all；仍未触发任何run，不能由平台开关或本机exit0推断远端执行成功。CI定义已交付本地，实际远端run继续REMOTE_UNVERIFIED；取得push/运行授权后才可收齐该证据，不借本包关闭UC001、App政策发布、Cookie33+或完整goal。
