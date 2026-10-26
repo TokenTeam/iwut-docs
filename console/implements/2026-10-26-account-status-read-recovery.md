@@ -1,6 +1,8 @@
 # 账号禁用与恢复后的私有读取
 
-状态：ACCEPTED / IN_PROGRESS（2026-10-26，自行接受；依据持续目标授权）。
+状态：ACCEPTED / VERIFIED（2026-10-26自行接受；2026-10-27收齐所列有界证据，依据持续目标授权）。
+
+当前结论：专用owner冻结 `b60fcb6` 的published-latest专项3/3、默认无参数全量121/121通过（1.3/21.1分钟浏览器阶段、均exit0、无skip/retry）。原全部断言保持；初始空时间与复用邮箱额度两次准备错误如实保留。本文只关闭列出的账号状态代表读取链，不提升完整UC或goal为完成。下文IN_PROGRESS/待121是各历史冻结的过程记录。
 
 ## 目的与权威输入
 
@@ -40,3 +42,16 @@ WITHDRAWN 另包：必须先正式关闭 App、得到持久关闭回执，再撤
 依据 [UC012共享限额](../../auth-center/use-cases/UC-AUTH-012-login-with-email.md#br-lgn-014)，同邮箱一小时最多5次发送且至少60秒间隔。原owner的注册＋Admin查询owner＋审核利益冲突owner＋资料投影owner已用4次；本包Developer登录是第5次，Admin登录是第6次。等完60秒并不恢复小时额度，不能据此要求Auth修复或放宽限额，也不应延长到一小时盲重试。
 
 现自行接受取代第1项“复用owner、不增加账号/App”的准备安排：仅新增一个专用普通owner，经正式注册、Apply、两项Reviewer grant、Create一个App和Create/Submit一个Version；复用原G及peer，不增加quota上限、不seed。专用邮箱仅注册＋两个origin EMAIL共3次，仍遵守真实冷却；公开fixture只给该owner合成邮箱/authId，不提供秘密。账号相位与旧Session闭包独立，不再依赖原决定fixture准备，也不改变原118的账号/业务数据。新目标当前为正式PENDING，仍冻结实际读回而不硬编码终态。移除测试中无必要的自动Begin重试，任何未知或失败保留失败。两次账号写、原钥匙/会话边界、原断言和121项完整门禁均保持。此为测试预算修正，不是新增前端写UI或后端规则变更。
+
+专用owner冻结 Console `b60fcb68657893645abc71b022f4a1dc17ef06e8`：新增8项正式准备器合成检查（真实P256签名、无EMAIL API、精确两grant读回、Create/Submit及未知写不重放），普通954 Vitest＋295 Node、strict、官方生成/Edge/docs静态检查通过。published轮次 `iwut-console-real-298463` 专项3/3通过（1.3分钟，exit0，无skip/retry），原全部断言保持；容器及network已清空。此时新冻结默认121全量已启动，仍待终态，不借旧118/1/2或专项绿关闭门禁。
+
+## 最终默认完整门禁（2026-10-27，UTC+8）
+
+- 同一 `b60fcb6` 冻结的 `iwut-console-real-304216`：默认无参数 `pnpm test:real` **121/121通过**，21.1分钟浏览器阶段，exit0，无skip/retry；新增三项账号状态专项与原118全部在此轮再次执行。不是从两个不同冻结拼成全量绿。产品/runtime/runner/spec在两轮间未改，结束后只更新实施状态文字。
+- 正式准备、账号1→2→3、禁用后的Developer实际401/私有视图退场、恢复后尚未访问的旧Admin实际401及普通Auth旧Session精确拒绝、各origin保留不可导出钥匙且显式DEVICE新generation/同authId、原App/Review投影读回，以及独立peer会话/钥匙/真实队列保持均通过。DISABLED时G的权限查询是精确404，恢复后才读回与初始相同的权限和revision，不复制旧权限冒充当前读成功。
+- 专用邮箱本轮只注册＋两origin EMAIL共3次；未放宽小时5次和真实冷却，不自动重放Begin，不修改原118的数据。管理只允许固定subject两次CAS，零额外审核决定/转让/资格变更。PUBLIC OAuth保持关闭。
+- 普通954 Vitest＋295 Node、strict、官方固定API生成漂移、Edge、72 brief与registry检查均通过。新增准备器与相位的46项Node不替代真实后端成功链。
+- 每轮重新pull published latest并轮内固定，专项及最终全量五ID一致：Auth `sha256:518b0917ec8302f9f6cb28bd2e12aa59033cfe6db45c82a81a0afcb1bac5aa16`；App `sha256:68ee32b1e92145734bfa7fe61d003ee7e2ed2bb8b20fd944f861704a8f48ad01`；Gateway `sha256:444c75a71fc74fb14840718b259aeec14fbe2bbcda0a9832340c70b64ed099b0`；Mongo `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`；Traefik `sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`。无相邻源码编译、无local artifact替代。
+- 结束后容器（包含停止项）及network为空；legacy本地与远端均为 `e68851e343bd0e077e5ccd0b680fe6813216ced0`，未改指针、未push。提交只包含本地Console测试/生成子集及文档，不改生产Web/BFF行为。
+
+下一有限开放项仍为WITHDRAWN：需专用subject正式关闭/密码＋同Session新设备证明、App正式CLOSED读回，再新Prepare/Confirm退出并验证历史读取；当前只做了只读准备研究，尚无实现或真实结果。App政策发布回执/下一真实政策与33+carrier架构问题仍开放，不以121项绿关闭。
