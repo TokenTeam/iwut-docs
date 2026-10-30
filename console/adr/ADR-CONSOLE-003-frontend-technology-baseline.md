@@ -22,7 +22,7 @@
 | 服务端状态 | TanStack Query |
 | 表单与输入校验 | React Hook Form + Zod |
 | 样式 | Tailwind CSS v4 |
-| 组件基础 | shadcn/ui + Radix primitives |
+| 组件基础 | HeroUI v3，由共享 `@iwut/ui` 收口 |
 | 数据表格 | TanStack Table |
 | 图标 | Lucide |
 | BFF | Hono |
@@ -31,6 +31,8 @@
 | 测试 | Vitest + Testing Library + Playwright |
 
 具体 patch 版本由首个工程工作包的 lockfile 固定；本 ADR 不允许生产或 CI 使用未锁定依赖解析结果。
+
+2026-10-27 用户接受改用 HeroUI 并先引入组件。原 shadcn/ui + Radix 选型未形成完整组件体系，现由 HeroUI 替代；不同时维护两套基础组件。HeroUI v3 与本项目 React 19、Tailwind v4 基线一致，按[官方接入说明](https://heroui.com/en/docs/react/getting-started/quick-start)在 Tailwind 后加载样式。`@iwut/ui` 只封装项目约定和兼容边界，不复制 HeroUI 实现，不负责业务权限。颜色、布局等视觉定稿仍不属于本 ADR。
 
 ## 状态所有权
 

@@ -4,6 +4,8 @@
 
 接受日期：2026-10-15
 
+2026-10-27 增量：本用例的当前内容/审核事实及读取护栏继续适用；原只读首包范围由 [UC008](UC-CONSOLE-008-version-workspace.md)扩展为版本工作台与整页编辑。下文只读操作限制和实现登记描述 UC003 首包，不禁止已接受的 UC008，也不代表新命令已经接通。
+
 ## 用户目标与范围
 
 当前管理员从 Application 管理概览进入 Version 列表，查看一个版本的当前声明和最新审核摘要，并理解其审核状态。后端权威为 [UC-APP-034](../../app-center/use-cases/UC-APP-034-query-owned-application-versions.md) BR-VER-019–025。前端共用已接受的 [UC-CONSOLE-002](UC-CONSOLE-002-query-owned-applications.md#前端业务规则) BR-CMG-001–004。

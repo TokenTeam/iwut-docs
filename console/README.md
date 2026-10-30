@@ -11,9 +11,11 @@
 - **吾理开放平台**：面向 Developer 的应用管理入口。
 - **吾理平台管理**：面向平台管理员与 Reviewer 的治理入口。
 
-代码位于独立的 `iwut-console` 仓库。pnpm workspace、两个独立应用/BFF 与共享认证基线已经初始化；UC-CONSOLE-001 的登录业务编排仍在实现中。
+代码位于独立的 `iwut-console` 仓库。pnpm workspace、两个独立应用/BFF、设备/邮箱登录与共享私有读取已建立；整体 UC001 仍保留独立架构边界，实际覆盖见 [实施索引](implements/README.md)。
 
 ## 权威边界
+
+2026-10-30 [Developer 页面结构](page-architecture.md)继续按接受的全局与平级应用工作区迭代：版本和发布合并、接入配置与展示规则独立。Gateway普通路由已补齐，应用/版本/资料写入与测试/OAuth/Filter管理已有[代表性真实页面证据](implements/2026-10-30-developer-management-writes.md)；归档/转让和Admin治理另包推进。文档描述结构与作用，不固定布局；组件基础见 [HeroUI 工作包](implements/2026-10-27-heroui-foundation.md)。
 
 Console 文档定义：
 
@@ -46,11 +48,14 @@ Console 文档不重新定义 Auth Center、App Center 或 Gateway 的业务规�
 
 ## 当前用例
 
-- [UC-CONSOLE-001](use-cases/UC-CONSOLE-001-establish-console-session.md)：建立浏览器 Console Session，当前为 `ACCEPTED / IN_PROGRESS`；工程、生成类型、BFF Session 边界与浏览器设备协议基线已实现，正在接入设备/邮箱 Begin、Complete、恢复与真实 E2E。
-- [UC-CONSOLE-002](use-cases/UC-CONSOLE-002-query-owned-applications.md)：查询本人管理的 Application 列表与只读概览，当前为 `ACCEPTED / IMPLEMENTED`；真实浏览器联合验收待补。
-- [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md)：只读管理 Application Version，当前为 `ACCEPTED / IMPLEMENTED`；当前内容与最新审核摘要分区，真实浏览器联合验收待补。
-- [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md)：只读管理 Application 资料修订，当前为 `ACCEPTED / IMPLEMENTED`；权威指针、原文内容和独立审核历史分页已实现，真实浏览器联合验收待补。
-- [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md)：只读查询 Application Tester 管理，当前为 `ACCEPTED / IMPLEMENTED`；容量、ACTIVE Membership 与 JoinLink 历史三个独立区域已实现，真实浏览器联合验收待补。
+完整编号、状态与权威位置见 [设计注册表](design-registry.md)，实际验证范围见 [实施索引](implements/README.md)，不在入口页重复维护另一份阶段状态表。
+
+- UC001：双端浏览器Session、设备/邮箱登录与恢复。
+- UC002–005：开发者应用、版本、资料和测试管理读取；UC006–007：两类独立审核任务。
+- UC008–010：版本与发布工作区、应用创建、公开资料草稿与送审。
+- UC011–014：测试成员/邀请、OAuth客户端、展示规则、归档和管理权交接。
+- UC015：人员资格/权限治理与应用可用状态，保留独立运维权限发现的明确缺口。
+- UC016：本人账号资料全页编辑，目录驱动且明确提交，尚未实施。
 
 ## 开工规则
 

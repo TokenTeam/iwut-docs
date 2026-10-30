@@ -2,6 +2,26 @@
 
 ## 当前状态
 
+2026-10-30 [本批集中普通门禁](2026-10-30-console-integration-gates.md)已通过：1595项Vitest＋392项Node、完整strict/build、固定官方API生成、Edge与文档一致性均exit0。前两轮单测失败及修复保留；下一步冻结提交后执行无spec筛选真实回归，当前未宣布全量成功。UC015和P0新增放弃草稿将在该轮实际验证。
+
+2026-10-30 [归档与管理权交接](2026-10-30-application-ownership-writes.md)首轮真实专项114910为**1/1、exit0，无skip/retry**；归档/恢复、取消/拒绝/KEEP/ROTATE及原管理员失权、链接撤销/成员保留均通过。UC010拒绝后新建预填已补齐，49组件与7client定向通过；[UC015治理](2026-10-30-platform-governance.md)已实现并定向验证，真实spec已准备。当前[集中验收](2026-10-30-console-integration-gates.md)进行中，不借单项绿宣称全仓完成。UC016本人账号资料仅接受设计，后续实施。
+
+2026-10-30 [Developer测试、OAuth与展示规则](2026-10-30-developer-management-writes.md)代表性真实写链已通过：轮次100874同跑P1与P0，**2/2、exit0，无skip/retry**。生产React完成P1的11次写与P0的七次写，types/privacy前置通过；Auth/App重新pull latest，Gateway显式本地9d6a27f。资源清空、原预览保留。归档/转让和Admin治理另包推进；这不是旧128项全量复验。下方“P1尚未验证/正在验证”等为历史阶段，不重新列为当前全缺失。
+
+2026-10-30 [P0真实写入成功链](2026-10-30-developer-write-workspace.md)已通过1/1：生产React正式创建App、Version创建/自动保存/送审、Profile创建/自动保存/送审，精确HTTP201/200与If-Match/ETag、后续GET/review、七次写/零外域/Session保持均核对。本地Gateway90cf10f0、Auth/App published latest，测试资源清理；预览开启版本写入并保留原数据。前两轮测试误期望200的失败保留。恢复/放弃、审核后发布、P1及完整回归仍未由此证明，整体goal保持进行中。
+
+2026-10-30 goal恢复后，[Developer 写入工作区](2026-10-30-developer-write-workspace.md)已实现 UC009应用创建、UC008版本写入/送审动作、UC010资料创建/保存/送审；Gateway本地9d6a27f镜像已接入且数据保留。集中组件/类型检查通过，独立真实P0链正在验证；[本地镜像 runner](2026-10-30-local-gateway-runner.md)已允许显式不pull Gateway。以下旧“版本命令未开放/写入未实现”为各阶段历史，不再当作当前源码缺口；本轮仍不能借过去128项绿宣称真实写入已成功。
+
+2026-10-30 用户要求整理 [Gateway Console 能力缺口与本地构建交接](2026-10-30-gateway-console-capability-gaps.md)：先补创建/编辑/送审 P0，再补显式管理 surface；账号安全/BFF 与 IP 加端口部署边界单列。本次允许 gateway 自仓构建显式本地镜像加速联调，默认发布 `latest` 验证保留；当前为请求，不表示路由、镜像或页面已经补齐。
+
+2026-10-27 用户要求补齐[Developer 应用配置页面](2026-10-27-application-configuration-pages.md)：接入配置、展示规则与应用设置三个只读首版，六模块导航补齐；复用 UC002 管理摘要与私有读取边界，不新增业务命令。完整规则、OAuth/归档/转让/关闭专用操作仍未接通，视觉与真实浏览器验收独立开放。
+
+2026-10-27 根据用户试用反馈实现[平台导航与应用切换](2026-10-27-application-rail.md)：平台栏目与持续应用切换分层、局部应用导航、悬浮锚定展开与延迟收起；爬虫栏目仅规划说明，无新业务 API/写入。视觉与动画待实际试用，不借此前真实套件记录宣称本轮浏览器验收完成。
+
+2026-10-27 用户接受的 [Developer 版本工作区初版](2026-10-27-version-workspace.md)已实现应用平级导航、版本与发布主页及复用整页表单，按 [UC008](../use-cases/UC-CONSOLE-008-version-workspace.md)迭代。网络写入因 Gateway 创建/更新缺少 DEVELOPER surface 默认关闭；提交、发布等命令仍未接入，视觉验收待补。下文 HeroUI、128 项真实全量和其他历史结果不代表本包已通过实链。
+
+2026-10-27 用户授权的 [HeroUI 组件基础接入](2026-10-27-heroui-foundation.md)已VERIFIED：1068项Vitest＋377项Node、strict/固定API生成/生产构建与published-latest样式键盘专项2/2通过；双端真实邮箱登录和私有读取抽查通过，CSP不放宽。原预览后端数据保留、宿主服务恢复，需重新登录；[页面结构规划](../page-architecture.md)为待审阅草案，未改路由或新增业务命令。以下128项真实全量属于此前冻结，不挪作本包验收；用户已确认此前提交的远端普通CI通过，本包仍未commit/push。
+
 当前有限包[UC001浏览器凭据校验](2026-10-27-browser-credential-validation.md)已VERIFIED：冻结ec34375，published-latest专项4/4、默认128/128通过（1.4/23.9分钟浏览器阶段，exit0，无skip/retry）；1056 Vitest＋359 Node、strict/官方生成/Edge/docs通过。非法点/标量/配对/快照/BOM及命名协议护栏先RED后修，双origin native IDB实际拒绝且保留坏记录，原126完整保留。旧Node合成UUIDv7误用于DEVICE的9项失败与修正过程保留，不弱化协议。两轮五镜像重拉且轮内固定，资源清理、legacy本地/远程未变、不push。[公开向量CI定义](2026-10-27-protocol-vector-ci.md)已LOCAL_VERIFIED（1056 Vitest＋376 Node及全普通门禁、6静态产物逐字一致），实际远端run未获授权执行；外部/架构边界仍开放，不改后端或扩业务UI。
 
 2026-10-27最新[完成性审计](2026-10-27-completion-audit.md)发现的[拒绝后焦点](2026-10-27-private-denial-focus.md)与[双静态Strict CSP](2026-10-27-strict-static-csp.md)已VERIFIED：冻结29aa09b，published-latest专项3/3、默认126/126（31.6秒/23.9分钟浏览器阶段，exit0，无skip/retry），957 Vitest＋359 Node、strict/官方生成/Edge/docs通过。真实parser负例、handler/connect/base/object拒绝、正常生产认证/私有/决定与焦点键盘链均收齐；首轮非parser负例错误及拉取EOF保留。资源清理、legacy本地/远程未变，只本地提交不push。协议/损坏本地记录已有直接有限复现，公开向量CI证据仍需收齐；这是明确后续，不把126全绿当整体UC/goal完成。App政策发布和Cookie33+独立开放。
