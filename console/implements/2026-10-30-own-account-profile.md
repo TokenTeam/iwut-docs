@@ -1,6 +1,6 @@
 # 本人账号资料编辑接入
 
-状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_PENDING`，2026-10-30。依据持续goal授权实现[UC016](../use-cases/UC-CONSOLE-016-edit-own-account-profile.md)。Auth业务权威仍为[UC005](../../auth-center/use-cases/UC-AUTH-005-edit-own-user-profile.md)和[查询契约](../../auth-center/query-contracts/user-profile-editing.md)，不把应用公开资料编辑器改名充当本人资料。
+状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_PARTIAL`，2026-10-30。依据持续goal授权实现[UC016](../use-cases/UC-CONSOLE-016-edit-own-account-profile.md)。Auth业务权威仍为[UC005](../../auth-center/use-cases/UC-AUTH-005-edit-own-user-profile.md)和[查询契约](../../auth-center/query-contracts/user-profile-editing.md)，不把应用公开资料编辑器改名充当本人资料。
 
 ## 自主实施决定
 
@@ -40,3 +40,9 @@
 前一完整轮139312固定候选Console61dd9b3，不含UC016，已终态78通过/16失败/40未执行，详情见[集中门禁](2026-10-30-console-integration-gates.md)。它不能证明本包成功，也未被新普通绿结果替换。下一步接专用ordinary USER、固定测试目录及真实专项，同时有界诊断UC015和旧会话隔离试验；完整goal保持进行中。
 
 本包产品与普通测试已本地提交 **`31d0e38`**（`:sparkles: feat: add shared account profile editing`），没有push，原legacy保持e68851e。真实spec、测试目录与runner接线将以独立候选记录，不能把尚未执行的准备计入成功证据。
+
+## 首次真实诊断
+
+真实接线冻结 `cbe165d`，轮次35230两端各一条set/remove专项：Admin普通USER通过，五类型设置、明确删除、未涉及字段保持、权威读回、原Session与零App请求均通过。Developer在直接访问 `/account/profile` 的匿名登录入口失败，未执行资料命令；已定位到产品边界只给返回首页链接，正在增加本页就地登录，不能借Admin成功声称双端都通过。完整结果、固定静态hash和清理见[集中门禁](2026-10-30-console-integration-gates.md#恢复后的四项诊断35230)。AcademicGrade不在本次真实覆盖中，五类型测试目录也不代表生产字段目录已交付。
+
+就地登录修正已本地提交 `a9bee4b`：复用DeviceLoginPanel，只更新当前Session Query；账号页仍不挂载Rail、不跳应用首页，应用页面原登录边界不变。六文件集中组件79/79与Developer strict通过（本人资料Host8项），初次strict的新测试误传Testing Library不支持的exact选项已修正。UC016补充匿名直入语义，产品未改任何登录协议；真实双端复验仍待结果。

@@ -82,3 +82,18 @@ Console改动文档的26个文件相对链接全部存在；brief72份与App注�
 后续兼容修订只发生在真实spec与专用fixture诊断：保留原HTTP响应、缓存、Session、私有持久化与业务写次数断言；POST `:search`仅作为正式读取豁免，不允许其他自动POST/PUT/PATCH/DELETE。UC015新增安全诊断只允许固定阶段、数值HTTP状态和白名单reason，拒绝额外字段；不返回原始响应、目标、凭据、URL或异常cause。修订后的真实专项尚未执行，不能改写本轮exit1。
 
 本轮全部容器（含停止项）和network均清理为0，预览36959的五个容器继续运行；运行材料在仓库外，没有验证码、Session、私钥、加入URL或一次Secret进入文档。trace/截图/video关闭，失败报告继续使用 `./test` 隐私包装。UC016在静态冻结后属于另一批源码工作，不扩大139312的实际成功范围。
+
+## 恢复后的四项诊断：35230
+
+测试兼容、固定阶段诊断、显式筛选和UC016独立普通账号接线已提交为 `cbe165d`，没有push。启动前CI policy为41项Node＋6项Vitest通过，真实类型与隐私门禁exit0。默认无参数仍完整发现；本轮显式选择三个spec并使用title grep，只发现四项，不能当完整门禁。
+
+使用与139312相同的Auth/App latest和显式本地Gateway，重新pull与inspect后确认image ID未变。终态 **2通过、2失败、exit1**，浏览器阶段27.7秒，无skip/retry：
+
+- Developer旧owned 200在新身份建立后不可投影旧内容、不可清新Session，实际通过（5.0秒）。Rail在同document预热后主列表才接收gate，原oldSeen、Session、Cookie与零业务写断言保留；不由此推定其余401场景已通过。
+- Admin普通用户本人资料五类型set及单字段remove、正式读回与Session保持通过（3.2秒）。没有Developer/治理授权或App请求。
+- Developer本人资料失败在匿名页查找“使用邮箱登录”，尚未发资料命令。产品SessionBoundary仅提供返回首页链接，无法在账号路由就地登录；下一修订增加本页登录并保留路径，不把spec改为经App首页绕行。
+- UC015准备在 `operator-state-read` 收到404，诊断reason为HTTP_ERROR，没有页面治理操作。检查发现隔离runner漏开 `AUTH_PLATFORM_ADMIN_ENDPOINTS_ENABLED`，并同时缺少后续运维授权与App运维的两个显式开关；这三项配置已修订待复验，不归咎Gateway缺路由，也不预称真实治理成功。
+
+当轮静态字节保持到终态：Developer `index-8CjIfp2Y.js` SHA256 `455fa73517ad72d0df147d96a5c0faeb96e03ba8b0d9cb3bfa07aa44e1a2ffc3`；Admin `index-xR2iIKAh.js` SHA256 `76e2427002221b7d1ef58b128ee479c3877e65003554385dd415bfc014a1ce7e`。35230全部容器（含停止项）与network已清理为0。恢复时原预览容器已不在运行，本轮没有重建或删除其私有持久目录；不能沿用139312时“预览仍运行”的历史描述。
+
+后续修订 `5cbd03d` 补齐三个端点开关，并让其余初始401在同document预热真实Rail后经SPA导航进入目标；Version列表用现有两请求batch暂扣其额外Application GET，Tester仍用原三请求batch。详情先真实打开列表，均保留Session/oldSeen/零业务写与零DELETE，新增document marker证明没有hard reload；真实types通过，不扩proxy能力。产品 `a9bee4b` 修复本人资料登录，79项集中组件与Developer strict通过。下一验证选择完整Developer隔离文件25项＋治理1项＋双端资料2项，不是全仓完整门禁。
