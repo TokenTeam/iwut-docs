@@ -109,3 +109,13 @@ Console改动文档的26个文件相对链接全部存在；brief72份与App注�
 治理已越过原404准备阶段，但在等待页面响应时超时，原隐私包装仅定位到共用observe行，尚不足以确定哪个动作或原因。`5d48798` 仅增加固定枚举阶段与固定RPC名称/写次数诊断，不输出目标、URL、正文或原因材料；不据此声明后端写成功，也不自动重放未知写入。下一轮有界诊断聚焦此场景及旧清理/剩余401的顺序。
 
 静态冻结至终态一致：Developer `index-DHUbemp8.js` SHA256 `94cfdb81363ffb74a2d1610d8e48ede4a7d42f4a936a3a43762696a64d4fc986`；Admin `index-xR2iIKAh.js` SHA256 `76e2427002221b7d1ef58b128ee479c3877e65003554385dd415bfc014a1ce7e`。51965全部容器（含停止项）与network清理为0；未启动或修改原持久预览数据。
+
+## 顺序诊断：95759
+
+冻结 `5d48798`，显式两个spec＋title筛选，发现7项，终态 **1通过、5失败、1未执行，exit1**，浏览器阶段1.5分钟，retry0。旧owned DELETE204同document非空B页面实际通过（6.8秒）；前轮品牌同路径无动作的测试准备问题得到这条实证，原Session、marker、oldSeen和写入保护保留。
+
+治理固定诊断明确为 `administrator-list` 等待，实际仅观测 `get-admin,list-admin`，写次数0；没有发生页面治理命令。修订让明确刷新前先等待初次名单数据真正显示，避免刷新合并初始请求的观察竞态；仍需真实复验，不以源码推断替代运行结论。
+
+Version401失败在 `arm-initial-old-read`：底层支持2–3条，但控制入口仍只验证完整Tester三条，新的Version两条请求在控制校验就被400拒绝，尚未暂扣任何请求。`ccaf196` 只为固定A的Version列表POST＋Application GET增加完整组合分派；原Tester规则不变，不开放任意双请求/目标或修改底层proxy。新增正负例后17项Node fixture、real types和diff通过。其余组前置失败及未执行不算产品结论；下一轮才验证这些修订。
+
+本轮Auth/App/Gateway固定ID和两个静态hash与51965相同，终态再次核对无字节变化。全部95759容器（含停止项）与network清理为0。UC017后来新增源码不属于本轮：其普通检查和真实Mongo证据独立记录，不能挪作本轮通过结果。
