@@ -119,3 +119,15 @@ Console改动文档的26个文件相对链接全部存在；brief72份与App注�
 Version401失败在 `arm-initial-old-read`：底层支持2–3条，但控制入口仍只验证完整Tester三条，新的Version两条请求在控制校验就被400拒绝，尚未暂扣任何请求。`ccaf196` 只为固定A的Version列表POST＋Application GET增加完整组合分派；原Tester规则不变，不开放任意双请求/目标或修改底层proxy。新增正负例后17项Node fixture、real types和diff通过。其余组前置失败及未执行不算产品结论；下一轮才验证这些修订。
 
 本轮Auth/App/Gateway固定ID和两个静态hash与51965相同，终态再次核对无字节变化。全部95759容器（含停止项）与network清理为0。UC017后来新增源码不属于本轮：其普通检查和真实Mongo证据独立记录，不能挪作本轮通过结果。
+
+## 四文件专项：119394
+
+冻结 `5a6e723`，四个完整spec、无title筛选，实际30项；终态 **28通过、2失败、exit1**，浏览器阶段6.7分钟，retry0、没有skip或未执行项。Auth/App重新pull latest仍为518b0917/68ee32b1，Gateway显式本地90cf10f0。默认完整无参数门禁仍待，不用本轮专项代替。
+
+双端UC017真实退出均通过（各1.1分钟，包含真实邮件冷却）：固定Node闭包在原Auth token撤销前GET200、原正式DELETE一次、撤销后GET401/SESSION_INVALID；同时只读Mongo核对同一EMAIL Session行已撤销、peer及两设备凭据有效。浏览器仅发送原binding/generation，当前Console变为SIGNED_OUT，另一origin原Session与在线读取保持。两端原不可导出钥匙/指纹保持，没有自动DEVICE；用户明确返回再选本机凭据后，同credential建立不同generation且原peer不变。浏览器无App/Auth直连命令、`DELETE /api/session`、token header或外域请求；退出写经专用BFF完成。此两条证明正常退出代表链，不扩为所有失败与迟到矩阵。
+
+UC016两端五类型set/remove再次通过（3.4/3.5秒）。Developer隔离25项中24通过：Application六项、Version六项、Profile六项及Tester旧200/401六项全部通过；原Session/Cookie、oldSeen、非空B、document marker与零业务写保护保留。
+
+两条失败均保留：治理在App Suspend ACK及随后GET完成后，spec159的全资源JSON相等断言失败；此前已完成14条Auth治理命令及其读回，实际页面请求写15次，尚未执行App Restore。当前只有差异存在的证据，后续增加只输出固定字段名/时间相等布尔的诊断，不提前归因镜像。Tester旧overview DELETE204在clear回执HELD后，absent辅助函数对已卸载的区域调用单节点evaluate并超时；修订为evaluateAll，空区域自然表示无旧内容，原exact-text和oldSeen断言均保留。该修订尚待实链复验，不写成当前轮通过。
+
+当轮静态hash保持到终态：Developer `index-BN-ovSVj.js` SHA256 `aeaf719980d0211c55583703de16b0a99dbd0ac71af17f042b8795dc1081af11`；Admin `index-WOdw1UdI.js` SHA256 `ce20163411847382cee89a3b5ae6ef071385775d82ba129083da193ab6f5681e`。全部119394容器（含停止项）和network清理为0，未改原预览私有数据。

@@ -1,6 +1,6 @@
 # 当前 Console 会话的显式退出接入
 
-状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_AUTH_PENDING`，2026-10-30。依据持续 goal 自主设计、接受并实现 [UC017](../use-cases/UC-CONSOLE-017-sign-out-current-console.md)。共享 BFF、精确 Edge 入口、浏览器客户端和双端退出已接通；普通检查与独立真实 Mongo 交错通过，真实 Auth/Gateway 撤销链仍待验证，不借已有 Session 清理或合成 Auth 回执宣称完整交付。
+状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_REPRESENTATIVE_VERIFIED`，2026-10-30。依据持续 goal 自主设计、接受并实现 [UC017](../use-cases/UC-CONSOLE-017-sign-out-current-console.md)。共享 BFF、精确 Edge 入口、浏览器客户端和双端退出已接通；普通检查、独立真实 Mongo 交错与两端真实 Auth/Gateway 代表链通过。验收范围与失败历史分开记录，不以正常退出代表链宣称全部未知/迟到矩阵或完整goal已完成。
 
 ## 设计核对基线
 
@@ -55,6 +55,8 @@ root 完整普通 `pnpm test` **exit0：1866项 Vitest＋404项 Node**，full ty
 新增 `test:logout` 使用独立 owned Mongo runner，两条独立连接与生产 Authority/logout handler 的 **3/3真实 Mongo 交错通过**：A 上游等待期间 B 提交；clear 实际提交但 ACK 丢失后只读确认；clear 未提交仍为 A 时503，只有用户明确重试才发生第二次外呼。独立 runner 已确认清理其 Mongo 容器和卷。这里只控制 Auth HTTP 回执，不能称为真实 Auth/Gateway 成功或双端实际退出通过。
 
 ## 真实链与当前完成边界
+
+最新119394固定 `5a6e723` 的四文件30项专项已终态28通过/2失败，**双端本包真实退出各1.1分钟通过**，没有skip/retry。原token在线200→正式DELETE→在线401/SESSION_INVALID、Mongo同一Session撤销、peer原代和在线200、两端原钥匙不可导出且指纹保留、明确DEVICE同credential新generation均实际核对。页面没有自动登录或直接发送Auth token。完整镜像/静态hash及资源清理见[集中记录](2026-10-30-console-integration-gates.md#四文件专项119394)。两条失败在其它治理/隔离场景；不借本包通过改写整轮exit1，也不把组件/真实Mongo的故障组合冒称逐一在Auth镜像上复现。下方“待验证”保留当时接线阶段，已由本段正常链结果推进。
 
 产品已本地提交 `8dd231e`；真实接线另提交 `5a6e723`，新增两个独立普通账号与实际页面spec。测试专用固定relay只在捕获的正式DELETE请求闭包使用token，固定GET撤销前200、原DELETE一次、固定GET撤销后401；Mongo只读锚定同一账号/公开credential对应的唯一EMAIL Session，控制端仅返回固定布尔/计数，不使用mongosh命令传秘密。目标/peer两origin邮箱各一次，含注册共三封，按真实返回的冷却等待。
 

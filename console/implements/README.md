@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-10-30[119394四文件实链](2026-10-30-console-integration-gates.md#四文件专项119394)已终态**28通过/2失败、无skip/retry**：UC017双端退出与UC016双端资料通过；Developer25项隔离中24通过。治理App暂停ACK/GET全资源差异正在增加安全诊断，Tester旧clear的缺失区域检测已修订待复验。UC017已取得真实Auth在线撤销、peer保持及设备保留/明确重登代表证据，不能继续当“只准备未执行”；完整无参数门禁仍待。UC008拒绝/恢复/批准/发布按[已接受的有限工作包](2026-10-30-version-review-publication-loop.md)准备，尚未实施。
+
 2026-10-30 [UC017退出](2026-10-30-current-console-sign-out.md)已实现并本地提交 `8dd231e`：专用BFF/Edge、共享client/面板与按代Query实例宿主接线，旧clear不增加Auth副作用。集中普通1866项Vitest＋404项Node、full strict/build、独立owned Mongo3项与Edge通过；最后结果变化后的入口小修订另32项/strict通过。真实Auth relay/spec接线另行进行，不能把这些绿结果写为实际退出成功。治理/隔离顺序诊断95759为1通过/5失败/1未执行，原失败与后续有限修订见[集中记录](2026-10-30-console-integration-gates.md)。
 
 2026-10-30恢复后的[真实诊断](2026-10-30-console-integration-gates.md)已记录35230的2通过/2失败、51965的6通过/6失败/16未执行。UC016修正匿名直入登录后，双端普通USER五类型set/remove代表链通过；Application旧owned/application的200/401隔离通过，旧clear回执入口和治理响应等待继续修正。旧完整139312失败仍保留，没有借专项绿关闭全仓门禁。[UC017显式退出](2026-10-30-current-console-sign-out.md)已自主接受，待实现专用BFF、Edge和双端入口；不把既有clear当作已撤销Auth。
