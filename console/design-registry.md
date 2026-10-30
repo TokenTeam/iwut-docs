@@ -23,7 +23,7 @@
 | `UC-CONSOLE-013` | 编排应用展示规则 | `ACCEPTED` | [UC-CONSOLE-013](use-cases/UC-CONSOLE-013-compose-application-display-filter.md) | 完整树与目录独立读取，设置/清空代表实链通过；本地结构编排补强 |
 | `UC-CONSOLE-014` | 管理应用归档与管理权交接 | `ACCEPTED` | [UC-CONSOLE-014](use-cases/UC-CONSOLE-014-manage-application-ownership.md) | 专用读取/参与者全局页已实现；归档与KEEP/ROTATE代表实链通过 |
 | `UC-CONSOLE-015` | 管理平台人员资格与可用状态 | `ACCEPTED` | [UC-CONSOLE-015](use-cases/UC-CONSOLE-015-manage-platform-governance.md) | 已实现并定向验证，真实spec已准备；独立运维精确权限发现缺口保留 |
-| `UC-CONSOLE-016` | 查看与编辑本人账号资料 | `ACCEPTED` | [UC-CONSOLE-016](use-cases/UC-CONSOLE-016-edit-own-account-profile.md) | 2026-10-30自行接受；全页、目录驱动六类型、明确set/remove，尚未实施 |
+| `UC-CONSOLE-016` | 查看与编辑本人账号资料 | `ACCEPTED` | [UC-CONSOLE-016](use-cases/UC-CONSOLE-016-edit-own-account-profile.md) | 共享全页/六类型/明确set-remove已实现并普通验证，独立真实spec准备中 |
 
 ## Business Rules
 
