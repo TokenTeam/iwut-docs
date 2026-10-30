@@ -23,7 +23,7 @@
 | 请求类别 | 路径所有者 | 流量路径 |
 | --- | --- | --- |
 | Console 静态资源与前端导航 | 对应 Console Web 构建 | Browser → 共享 Traefik → Web artifact |
-| 登录 Begin/Complete、Session query/clear、结果不确定恢复 | 对应 Console BFF | Browser → 共享 Traefik → BFF → Gateway/Auth |
+| 登录 Begin/Complete、Session query/clear、显式退出、结果不确定恢复 | 对应 Console BFF | Browser → 共享 Traefik → BFF → Gateway/Auth |
 | 明确登记的聚合或服务端组合请求 | 对应 Console BFF | Browser → 共享 Traefik → BFF → Gateway/Auth/App |
 | 明确允许该 Console surface 使用的普通 HTTP/JSON API | Gateway 路由目录 | Browser → 共享 Traefik → Console Session ForwardAuth → 现有 Gateway ForwardAuth → Auth/App |
 

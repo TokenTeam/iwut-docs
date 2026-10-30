@@ -56,6 +56,10 @@ root 完整普通 `pnpm test` **exit0：1866项 Vitest＋404项 Node**，full ty
 
 ## 真实链与当前完成边界
 
+产品已本地提交 `8dd231e`；真实接线另提交 `5a6e723`，新增两个独立普通账号与实际页面spec。测试专用固定relay只在捕获的正式DELETE请求闭包使用token，固定GET撤销前200、原DELETE一次、固定GET撤销后401；Mongo只读锚定同一账号/公开credential对应的唯一EMAIL Session，控制端仅返回固定布尔/计数，不使用mongosh命令传秘密。目标/peer两origin邮箱各一次，含注册共三封，按真实返回的冷却等待。
+
+新模块7项Node边界回归已纳入默认CI policy，该入口48项Node＋6项诊断Vitest通过，real types/privacy通过；没有把这些合成观察冒称实际Auth成功。下一轮选择四个完整spec，预计30项，包含退出、本人资料、Developer隔离与治理；不是无筛选完整门禁，结果另行记录。
+
 专用 relay 与浏览器退出 spec 正在准备，用于在真实 Auth/Gateway 下核对当前 token 后续在线拒绝、另一独立 Session/另一端保持、原设备钥匙保留与用户明确设备重新登录。尚无本包真实 Auth 退出成功证据，状态保持 `REAL_AUTH_PENDING`，不以普通绿或 Mongo3项代替。
 
 本次产品和文档等待 root 统一记录候选并提交，没有自行 push。原设计阶段仅文档、未实施的记录已由上述实际增量推进；完整 UC/goal 不因本包普通验证通过而关闭。

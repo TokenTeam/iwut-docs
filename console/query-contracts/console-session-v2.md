@@ -33,6 +33,7 @@ SessionSummary   { state: ESTABLISHED, authId, credentialId,
 | POST `/api/auth/{device|email}-login/complete` | `{flow: FlowTicket, operationId, proof, code?}` | 真实 Auth 成功且当前 claim 提交成功后签发新代 carrier，返回六字段 SessionSummary。 |
 | GET `/api/session` | 无 | 只有 context+当前 carrier 双重校验后返回 SessionSummary，否则 SIGNED_OUT。依赖不可用返回503，不转换成已登录或确定无效。 |
 | DELETE `/api/session` | `{contextBinding, generation}` | 只失效该 generation，并只删除请求已观察到的对应载体；不匹配返回204 no-op。没有版本条件的 clear 拒绝。 |
+| POST `/api/auth/logout` | 见[UC017](../use-cases/UC-CONSOLE-017-sign-out-current-console.md#专用-bff-编排) | 显式退出的专用组合流程，精确Auth撤销与Console按代清理分别确认；不改变原clear的语义。 |
 
 同一 Cookie 的跨标签页竞争由 Mongo 原子 revision 决定。`CONSOLE_CONTEXT_CHANGED`、`LOGIN_FLOW_INVALID` 返回409，客户端停止旧流程，不自动采纳其它标签页的操作。`LOGIN_RESULT_UNCERTAIN` / `LOGIN_REQUEST_IN_PROGRESS` 返回409及合法等待秒数，不伪造成功。Mongo/加密/意外外呼错误返回不含材料的503。BEGIN/COMPLETE 本轮一次性执行 claim 的截止为60秒，长于40秒 Gateway 外呼预算与存储余量；过期只进入未知恢复，不证明上游未提交。
 
