@@ -1,6 +1,6 @@
 # 本人账号资料编辑接入
 
-状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_PARTIAL`，2026-10-30。依据持续goal授权实现[UC016](../use-cases/UC-CONSOLE-016-edit-own-account-profile.md)。Auth业务权威仍为[UC005](../../auth-center/use-cases/UC-AUTH-005-edit-own-user-profile.md)和[查询契约](../../auth-center/query-contracts/user-profile-editing.md)，不把应用公开资料编辑器改名充当本人资料。
+状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_REPRESENTATIVE_VERIFIED`，2026-10-30。依据持续goal授权实现[UC016](../use-cases/UC-CONSOLE-016-edit-own-account-profile.md)。Auth业务权威仍为[UC005](../../auth-center/use-cases/UC-AUTH-005-edit-own-user-profile.md)和[查询契约](../../auth-center/query-contracts/user-profile-editing.md)，不把应用公开资料编辑器改名充当本人资料。
 
 ## 自主实施决定
 
@@ -46,3 +46,5 @@
 真实接线冻结 `cbe165d`，轮次35230两端各一条set/remove专项：Admin普通USER通过，五类型设置、明确删除、未涉及字段保持、权威读回、原Session与零App请求均通过。Developer在直接访问 `/account/profile` 的匿名登录入口失败，未执行资料命令；已定位到产品边界只给返回首页链接，正在增加本页就地登录，不能借Admin成功声称双端都通过。完整结果、固定静态hash和清理见[集中门禁](2026-10-30-console-integration-gates.md#恢复后的四项诊断35230)。AcademicGrade不在本次真实覆盖中，五类型测试目录也不代表生产字段目录已交付。
 
 就地登录修正已本地提交 `a9bee4b`：复用DeviceLoginPanel，只更新当前Session Query；账号页仍不挂载Rail、不跳应用首页，应用页面原登录边界不变。六文件集中组件79/79与Developer strict通过（本人资料Host8项），初次strict的新测试误传Testing Library不支持的exact选项已修正。UC016补充匿名直入语义，产品未改任何登录协议；真实双端复验仍待结果。
+
+后续51965在同一冻结 `a9bee4b` 的三文件28项专项中，**两端本人资料代表链均通过**（各3.0秒）：独立普通USER实际EMAIL登录、五类型明确set及单字段remove、正式GET完整读回与未涉及字段保持，原Session不变，零App/资格请求。AcademicGrade仍仅有普通模型/组件证据，未借测试目录伪造真实学年。该轮整体6通过/6失败/16未执行，失败属于其它所列治理/隔离场景；不把本包两项绿冒称完整门禁通过。静态hash、镜像与清理见[集中记录](2026-10-30-console-integration-gates.md#三文件完整专项51965)。

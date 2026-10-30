@@ -97,3 +97,15 @@ Console改动文档的26个文件相对链接全部存在；brief72份与App注�
 当轮静态字节保持到终态：Developer `index-8CjIfp2Y.js` SHA256 `455fa73517ad72d0df147d96a5c0faeb96e03ba8b0d9cb3bfa07aa44e1a2ffc3`；Admin `index-xR2iIKAh.js` SHA256 `76e2427002221b7d1ef58b128ee479c3877e65003554385dd415bfc014a1ce7e`。35230全部容器（含停止项）与network已清理为0。恢复时原预览容器已不在运行，本轮没有重建或删除其私有持久目录；不能沿用139312时“预览仍运行”的历史描述。
 
 后续修订 `5cbd03d` 补齐三个端点开关，并让其余初始401在同document预热真实Rail后经SPA导航进入目标；Version列表用现有两请求batch暂扣其额外Application GET，Tester仍用原三请求batch。详情先真实打开列表，均保留Session/oldSeen/零业务写与零DELETE，新增document marker证明没有hard reload；真实types通过，不扩proxy能力。产品 `a9bee4b` 修复本人资料登录，79项集中组件与Developer strict通过。下一验证选择完整Developer隔离文件25项＋治理1项＋双端资料2项，不是全仓完整门禁。
+
+## 三文件完整专项：51965
+
+冻结 `a9bee4b`，显式选择上述三个完整spec，实际发现28项，retry0。终态 **6通过、6失败、16未执行、exit1**，浏览器阶段1.2分钟。Auth/App重新pull latest后仍为518b0917/68ee32b1，Gateway显式本地90cf10f0。不是全仓门禁，也不把16项前置失败后的未执行计作成功。
+
+双端本人资料五类型set/remove全部通过（各3.0秒），从匿名直接访问实际账号页，正式EMAIL建立Session，不经过App首页；正式读回、未涉及字段保持、原Session、零App请求均验证。Application组的旧owned200/401、旧application200/401均通过（5.6/5.3/5.2/5.3秒）。这些是新增实证，不推定Version/Profile/Tester组通过。
+
+首个隔离失败位于旧owned DELETE204的同document再次进入：旧spec仍点击品牌“返回开发者工作台”并等待Session读取；品牌现已按用户结构要求指向 `/applications`，在owned路径上是同路由无动作。随后worker重建导致若干组EMAIL准备失败，不能视为这些组的产品隔离结论。修订 `5d48798` 使用实际Rail“创建新应用”空页面进入，必须收到真实GET `/api/session` 的完整B会话，再经平台应用栏目进入非空B列表；document marker、oldSeen、旧204及零业务写断言保持。
+
+治理已越过原404准备阶段，但在等待页面响应时超时，原隐私包装仅定位到共用observe行，尚不足以确定哪个动作或原因。`5d48798` 仅增加固定枚举阶段与固定RPC名称/写次数诊断，不输出目标、URL、正文或原因材料；不据此声明后端写成功，也不自动重放未知写入。下一轮有界诊断聚焦此场景及旧清理/剩余401的顺序。
+
+静态冻结至终态一致：Developer `index-DHUbemp8.js` SHA256 `94cfdb81363ffb74a2d1610d8e48ede4a7d42f4a936a3a43762696a64d4fc986`；Admin `index-xR2iIKAh.js` SHA256 `76e2427002221b7d1ef58b128ee479c3877e65003554385dd415bfc014a1ce7e`。51965全部容器（含停止项）与network清理为0；未启动或修改原持久预览数据。
