@@ -760,7 +760,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | --- | --- | --- |
 | `use-cases/UC-APP-038-query-my-test-applications.md` | 217 | `e3db8b35da72` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
-| `use-cases/UC-APP-028-suspend-and-restore-application.md` | 269 | `155e654469e7` |
+| `use-cases/UC-APP-028-suspend-and-restore-application.md` | 273 | `1ada06422863` |
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
 | `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
 | `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |

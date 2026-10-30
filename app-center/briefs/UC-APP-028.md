@@ -233,6 +233,7 @@ Catalog、runtime 和 OAuth 公网错误继续沿用各自 UC 的存在性隐藏
 10. 成功操作只产生一条审计和一条可去重 outbox；普通暂停访问不触发告警风暴，损坏状态和门禁绕过触发安全告警。
 11. 服务重启不自动恢复；权限随后被撤销、Application 管理员变化或时间流逝都不改变 SUSPENDED。
 12. migration 对既有 ACTIVE/CLOSING/CLOSED Application 回填一致；未知/缺失状态拒绝启动或读写，不在请求路径修复。
+13. 注入非零亚毫秒 Clock，分别完成 suspend/restore；命令回执与同 event/revision 的 Get 完整一致，状态、事件和 outbox 使用同一毫秒时刻，恢复保留上次暂停时间；stale 命令不改变状态，也不新增事件/outbox。
 
 ### 实现依赖与启用边界
 
@@ -288,6 +289,8 @@ Application 使用正数 `platformAvailabilityRevision` 保护 suspend/restore O
 ### BR-APP-036：原子审计、告警和隐私
 
 每次真实 suspend/restore 与 append-only `ApplicationPlatformOperationEvent`、durable alert outbox 同事务提交。事件保存 eventId、applicationId、action、actorAuthId、reason、before/after status、before/after revision 和 occurredAt；不保存 USER JWS、token、secret、Tester 身份或配置正文。状态查询与 OAuth 错误不披露 actor 或 reason。
+
+操作时间在 MongoDB 写入边界按 BSON Date 的毫秒精度一次确定，舍去 Clock 的亚毫秒部分；事务重试复用该值。应用的本次 suspendedAt/restoredAt、事件 occurredAt、outbox createdAt 和成功命令回执必须使用同一时刻。同一 lastOperationEventId 和 platformAvailabilityRevision 的权威读回与命令回执时间完全一致，不以客户端容差消除差异；不得通过事务后无版本读取拼装回执。恢复保留原 suspendedAt。
 
 成功暂停产生一条可去重的高信号 `WARNING` 运维事件，恢复产生关联该 Application 与新 revision 的 `INFO` 事件；通知系统是否分页由外部值班策略决定。被暂停应用的普通访问只计有界 metric，不逐请求分页或打印 reason；状态损坏、revision 回退、审计缺失或门禁绕过检测属于 `ERROR/CRITICAL` 安全告警。
 
@@ -693,7 +696,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-028-suspend-and-restore-application.md` | 269 | `155e654469e7` |
+| `use-cases/UC-APP-028-suspend-and-restore-application.md` | 273 | `1ada06422863` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
