@@ -22,6 +22,10 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 ## 当前实现覆盖
 
+### 2026-11-01 UC028 运维时间一致性回归复验
+
+App 本地提交 `5b42ed7`：Suspend/Restore 在 Mongo 写入边界统一毫秒时间，状态、审计、outbox、命令回执与同 event/revision 的读回保持一致。含非零亚毫秒 Clock 的真实 Mongo 回归先复现后通过；2026-10-30 和 2026-11-01 两轮完整 `check-full` 均 **24/24 PASS**，输入指纹一致且 `changed_sources=[]`。当前本地后端修复完成，未 push、发布镜像或执行本轮 Console 已发布链复验；详见[根因、回归与完整门禁记录](2026-10-30-operation-time-readback.md)。
+
 ### 2026-10-26 已接受的审核验收边界设计增量
 
 用户已接受[策略发布设计](2026-10-26-review-policy-change-proposal.md)与[资料并发设计](2026-10-26-profile-review-concurrency-proposal.md)，要求落实 UC 文档。已更新 UC005/016/030/031、ADR004 和查询导航；未启动实现、迁移、Proto 或部署。本节优先于下列历史“38项全部COMPLETE”结论：UC005/016/031 为既有基线完成、新增设计未实现，当前标为 PARTIAL；新增正式发布回执、运维读回和 Profile 唯一策略验证待实施，新 Profile 正式定义投影在真实政策获批前不得激活。
@@ -32,7 +36,7 @@ UC016的单工作位/指针防御及分层验收说明已收敛；Console UC006/
 
 Console 联调反馈揭示 UC029 已交付查询的错误响应缺少私有缓存头。App 本地提交 `d3f510e` 已在 App 直连和真实 Gateway 链路先复现后修复；生成 HTTP/native gRPC、22 个真实链路对照响应及完整 `check-full` **24/24 PASS**，`changed_sources=[]`。原 400/404、reason、统一隐藏和游标绑定保持。该修复记录的原阶段为镜像待发布；后续[Console已发布复验](../../console/implements/2026-10-23-published-cache-header-fix-verification.md)已关闭原25条App及4条Gateway Session401缓存头失败，专项35/35、完整115/115通过，不再作为当前阻塞。详见[修复范围、责任层与验证记录](2026-10-23-management-error-cache.md)。以下 COMPLETE/28 项验收记录保留对应历史输入，不代替 Console 发布验收。
 
-历史基线（2026-10-22）：当时38个 ACCEPTED UC 的既定后端范围均为COMPLETE；2026-10-26新增设计的当前未实现范围见本页上节，不能沿用旧结论关闭。最新完整验收仍是 2026-10-20 的固定输入 28/28 PASS，以下覆盖表按当前能力汇总，后续带日期的工作记录保留当轮证据。剩余暂缓与未来方向集中见[概述](../README.md#current-delivery-and-followups)，不把 Console/客户端或上线状态混记为后端缺口。
+历史基线（2026-10-22）：当时38个 ACCEPTED UC 的既定后端范围均为COMPLETE；2026-10-26新增设计的当前未实现范围见本页上节，不能沿用旧结论关闭。最新后端 tier 为 2026-11-01 的固定输入 24/24 PASS；完整跨服务 tier 仍保留 2026-10-20 的固定输入 28/28 PASS，两者不混用。以下覆盖表按当前能力汇总，后续带日期的工作记录保留当轮证据。剩余暂缓与未来方向集中见[概述](../README.md#current-delivery-and-followups)，不把 Console/客户端或上线状态混记为后端缺口。
 
 ### 2026-10-20 UC033/036 夹具适配与完整验收通过
 
@@ -89,7 +93,7 @@ App/API 已完成，服务 `52ea87a`（含决定响应缓存头修复）、API `
 | [UC-APP-025](../use-cases/UC-APP-025-coordinate-account-owner-exit.md) | `ACCEPTED` | `COMPLETE` | App b346cfa/API 1d7b87b；App 归属屏障、持久终局/个人清理、认证回查、0020 迁移、状态消费者、真实 Mongo 与 Auth＋App 验收 | 默认关闭；不含应用转让/关闭与生产部署 |
 | [UC-APP-026](../use-cases/UC-APP-026-transfer-application-administration.md) | `ACCEPTED` | `COMPLETE` | Domain/API、0021 migration、共享 fence、配额/名称原子移动、KEEP/ROTATE、Tester link 撤销和真实 Auth/App 验收已交付；服务 `8f6159b`、API `f6841f2` | —（关闭已由 UC027 完成；平台强制接管、通知等后续治理能力独立设计） |
 | [UC-APP-027](../use-cases/UC-APP-027-close-application.md) | `ACCEPTED` | `COMPLETE` | 不可逆 CLOSING/CLOSED、0022 migration、高风险 proof 消费、原子本地隔离、全部 ACTIVE gate、持久 Auth Apply/Get 收敛及真实双服务验收；服务 `90142d6`、API `b00b8e0` | —（当前后端范围；公网/Gateway 入口默认关闭） |
-| [UC-APP-028](../use-cases/UC-APP-028-suspend-and-restore-application.md) | `ACCEPTED` | `COMPLETE` | 正交 AVAILABLE/SUSPENDED 状态、0023 migration、双 revision OCC、原子审计/告警 outbox、精确运维权限、UC009/012/023/024 及五个 UC019 provider 门禁、HTTP/gRPC 和真实 Auth/App 验收已交付；服务 `cab3749`、API `a1bf6dd` | —（当前后端范围；可靠通知、自动恢复和批量运维仍不在本 UC 范围） |
+| [UC-APP-028](../use-cases/UC-APP-028-suspend-and-restore-application.md) | `ACCEPTED` | `COMPLETE` | 正交 AVAILABLE/SUSPENDED 状态、0023 migration、双 revision OCC、原子审计/告警 outbox、精确运维权限、UC009/012/023/024 及五个 UC019 provider 门禁、HTTP/gRPC 和真实 Auth/App 验收已交付；基线服务 `cab3749`、API `a1bf6dd`；本地时间读回修复 `5b42ed7`，两轮 backend 24/24 | 时间修复待发布后 Console 复验；可靠通知、自动恢复和批量运维仍不在本 UC 范围 |
 | [UC-APP-029](../use-cases/UC-APP-029-query-owned-application-management.md) | `ACCEPTED` | `COMPLETE` | 当前管理员私有 Application 列表与组合管理详情、生命周期/平台状态过滤、降序绑定 keyset、批量计数、Mongo snapshot、0024 索引、HTTP/gRPC 与 no-store；服务 `155e122`、API `1cea981` | —（Version/Profile 历史与 Tester 明细分别由 UC034/039/037 完成） |
 | [UC-APP-030](../use-cases/UC-APP-030-query-application-version-reviews.md) | `ACCEPTED` | `COMPLETE` | 精确 `app.version.review`、PENDING/ACTIVE 队列、SUSPENDED 保留、CLOSING/CLOSED 排除、不可变 snapshot、当前策略、利益冲突提示、升序 keyset、HTTP/gRPC；服务 `7cf1fc2`、API `0217177` | —（当前队列/详情后端已完成；正式 v3 检查定义已补齐，分配/锁单/SLA/通知独立设计） |
 | [UC-APP-031](../use-cases/UC-APP-031-query-application-profile-reviews.md) | `ACCEPTED` | `PARTIAL` | 精确 `app.profile.review`、队列/终态详情、不可变 snapshot/当前策略、同快照当前公开 Profile/指针与显式 NONE、完整冲突提示、索引、HTTP/gRPC 与真实 Mongo 验收；服务 `52ea87a`、API `27c9743` | 2026-10-26增量未实现：严格唯一 ACTIVE 校验；新Profile正式定义兼容在真实政策工作包冻结；现有指针投影保留 |
