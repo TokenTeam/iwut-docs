@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-11-01 [UC018新用户资格→首个App](2026-11-01-developer-application.md#真实首次开通与创建497011)与完整private-view联合专项**4/4通过、exit0**；原Session/Cookie/不可导出钥匙保持，普通用户资格未由fixture预先授予。完整普通2031 Vitest＋411 Node/full strict已通过，当前1326562的无参数完整回归进行中。未宣称全部用例或完整Goal已完成，legacy保持、未push。
+
 2026-11-01 [UC018本人Developer资格](2026-11-01-developer-application.md)已集成main1e9e6af，完整普通**2031 Vitest＋411 Node**、full strict/隐私通过；真实新用户明确申请后沿原Session创建App的联合专项进行中。旧clear480853已1/1通过，补齐此前未执行的同document迟到204边界；仍不拼接为完整138项全绿。新默认真实套件将包含139项，实际无参数终态另记，Goal active、legacy不变、未push。
 
 2026-11-01 三项实链适配已提交 `e6566d7`，real types/隐私与观察器7项检查通过；[四文件专项](2026-10-30-console-integration-gates.md#有界适配候选-e6566d7)正在复验独立Rail刷新、B前既存文本与新旧响应区分、并发拒绝正文取消，并补跑上轮未完成的账号状态。产品仍为92d3516的实现，尚无本候选专项或完整138项全绿声明，Goal继续active。

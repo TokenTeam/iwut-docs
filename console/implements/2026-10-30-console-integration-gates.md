@@ -218,3 +218,5 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 ## UC018集成候选
 
 新增已接受的本人Developer自助资格由隔离分支实现并以1e9e6af集成，f3c690b记录检查点，见[实施证据](2026-11-01-developer-application.md)。完整普通2031 Vitest＋411 Node、full strict/隐私通过；默认真实发现将增加一个未Apply普通用户的自助开通→同Session创建链。当前冻结f3c690b进行该新链与完整private-view三项的联合专项，终态未有；旧失败、中断和已通过边界均保留，Goal保持active。
+
+497011联合专项已正常 **4/4通过，exit0，24.2秒，无skip/retry**；新普通用户首次Apply→同Session创建代表链4.6秒、private-view三项5.2/5.7/6.2秒。源码指纹/静态hash保持，owned资源清空，完整输入及首次用户边界见UC018实施记录，不把它与旧130项拼成无参数全绿。随后冻结1326562（仅工作检查点）启动新的无参数完整门禁；使用后台monitor及预存源码指纹，Auth/App继续latest，无新后端编译或配置放宽。实际发现数及终态待记录，Goal保持active。

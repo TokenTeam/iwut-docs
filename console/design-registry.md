@@ -25,7 +25,7 @@
 | `UC-CONSOLE-015` | 管理平台人员资格与可用状态 | `ACCEPTED` | [UC-CONSOLE-015](use-cases/UC-CONSOLE-015-manage-platform-governance.md) | 16条正式治理命令与专用读回代表实链通过；独立运维精确权限发现缺口保留 |
 | `UC-CONSOLE-016` | 查看与编辑本人账号资料 | `ACCEPTED` | [UC-CONSOLE-016](use-cases/UC-CONSOLE-016-edit-own-account-profile.md) | 共享六类型/明确set-remove已实现；双端普通USER五类型代表实链通过，AcademicGrade实链未覆盖 |
 | `UC-CONSOLE-017` | 显式退出当前 Console 会话 | `ACCEPTED` | [UC-CONSOLE-017](use-cases/UC-CONSOLE-017-sign-out-current-console.md) | 专用BFF/Edge/共享面板已实现，普通、Mongo与双端真实Auth退出代表链通过 |
-| `UC-CONSOLE-018` | 查看并申请本人 Developer 资格 | `ACCEPTED` | [UC-CONSOLE-018](use-cases/UC-CONSOLE-018-apply-for-developer.md) | 2026-11-01自主接受；闭合已有账号首次资格开通入口，精确BFF复用既有DIRECT路由 |
+| `UC-CONSOLE-018` | 查看并申请本人 Developer 资格 | `ACCEPTED` | [UC-CONSOLE-018](use-cases/UC-CONSOLE-018-apply-for-developer.md) | 已实现，普通用户生产页面开通后沿原Session创建首个App代表链通过；精确BFF复用既有DIRECT路由 |
 
 ## Business Rules
 

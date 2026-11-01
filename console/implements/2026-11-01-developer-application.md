@@ -1,6 +1,6 @@
 # 本人 Developer 资格与首次开通入口
 
-状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_PENDING`，2026-11-01。依据持续goal授权建立并自主接受 [UC018](../use-cases/UC-CONSOLE-018-apply-for-developer.md)，没有新增后端规则或外发消息。本页只记录交付边界，不把文档接受或fixture开通当产品实链成功。
+状态：`IMPLEMENTED / ORDINARY_VERIFIED / REAL_REPRESENTATIVE_VERIFIED`，2026-11-01。依据持续goal授权建立并自主接受 [UC018](../use-cases/UC-CONSOLE-018-apply-for-developer.md)，没有新增后端规则或外发消息。首次用户开通与创建的生产页面代表链已通过，完整默认门禁仍独立记录。
 
 ## 已确认的断点与可用输入
 
@@ -37,3 +37,15 @@ BFF严格验证同源、Fetch Metadata、JSON、无query、有界正文及公开
 runner新增独立普通注册账号，不保留Node凭据、不Apply、不授Reviewer或平台权限、不seed资格。注册加一次生产EMAIL登录共2封，真实resendAfter加入统一冷却。真实spec将从匿名account/developer原地登录，读取正式null资格/canApply，明确不可改名确认后申请并读回，再由用户明确进入既有创建页并提交首个App。精确两次业务命令（BFF申请、App创建）、原Session/cookie/不可导出钥匙及指纹保持、无直接Auth头/外站/自动登录/clear均核对。
 
 已冻结 `f3c690b` 启动新资格链与完整private-view文件的联合专项；构建、实际发现数和终态待补。旧clear480853已独立通过且资源清空；旧439913中断与465078/473794的失败记录仍保留。此专项不替代后续新默认139项无参数完整门禁，未push。
+
+## 真实首次开通与创建：497011
+
+冻结 `f3c690b`，正常终态 **4/4通过、exit0、24.2秒浏览器阶段，无skip/retry**。新资格代表链4.6秒通过，完整private-view三项均再次通过。Auth/App重新拉取latest，输入仍518b0917/18eacd03，Gateway显式本地90cf10f0。
+
+独立未Apply普通用户从匿名 `/account/developer` 原地完成EMAIL登录，正式读取状态/handle/开通时间均absent且canApply=true；此前无App请求或写入。填写公开ID并明确确认后，BFF申请返回正式APPROVED、规范handle和正Unix毫秒；随后正式本人读回一致，canApply=false及唯一ALREADY_DEVELOPER blocker。捕获的两份请求只含公开目标及handle，没有目标authId、角色或原始Session。
+
+用户再明确进入创建页，正式App创建201与后续管理摘要GET通过，App管理员为同一账号。全链精确两次业务命令、一次EMAIL登录；原公开Session/HttpOnly Cookie值、设备credential与指纹保持、私钥导出拒绝，无自动登录/clear、浏览器Auth直调或token header、外站请求。BFF成功响应无Set-Cookie。这证明现有普通账号能在真实产品完成资格开通到首个应用，不借Node准备器代申请。
+
+源码指纹及双静态hash到终态保持：Developer `index-Df6Dc_n_.js` SHA256 `bf85cad173d47c66bc853c99644d6b94f364a4a8a57894d5322e26dd917fd83f`；Admin `index-DbE4NfEN.js` SHA256 `84ad30191adf62cb41c94268c213669a62272fe136599199aeb0638f9ed578d1`。全部owned容器/network清空，未改原预览数据。该代表链不扩大为所有状态/失败矩阵的实链验证。
+
+`1326562` 仅追加源检查点后，已启动新的无参数完整回归，实际发现/终态待补。Goal active，legacy保持、未push；注册、邮箱管理、正式App政策发布及Cookie传输边界没有因本包被宣称完成。
