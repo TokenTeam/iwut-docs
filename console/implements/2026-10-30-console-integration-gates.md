@@ -194,3 +194,13 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 外部终止后逐一核对owned标签，清理5个残留容器（含停止项）、独立network及该轮临时运行目录，其他容器未动。外部终态记录核对HEAD保持92d3516、tracked diff为空，双静态SHA256保持：Developer `index-DJBQLy6e.js` 为 `5e4886d0ca58cc66a29634461b9bba19b4c5fc5c339e3b33a205545690bb65fa`，Admin继续 `ce201634…`。原wrapper未能生成正常terminal文件，明确保留外部143而非补写正常退出。
 
 后续私有运行包装预存源码指纹，长轮次采用独立session的后台monitor并持续写终态材料，避免依赖单次工具会话一直存活；不改变仓库默认runner、镜像策略或业务超时。下一候选先集中复验上述3项相关完整spec及末段未完成的账号状态，不静默重新运行已终态进程；完整门禁仍未关闭。Goal依用户恢复为active，继续推进，未push。
+
+### 有界适配候选 e6566d7
+
+三份真实spec的最小适配已提交 `e6566d734ea84e317135d9a0a9c72a9ba9d196ed`，没有更改产品源码或后端：
+
+- 转让后的源列表依原交互分别刷新主列表和Rail，Rail请求严格为默认pageSize20、正式空读回；保留全page旧名0、原六详情退场、两Session和零clear/业务写断言。
+- 旧响应观察在B权威确认后、释放旧响应前启动，既存合法A Text节点只作为内存WeakSet基线。新增/变更A文本立即记为复活；包括同task插入后删除、字符A→空，不靠最终paint推定从未出现。B身份首次可见即检查整body并进入持续全body模式，最终wholepage无A和原sticky seen保护均保留，没有缩到main或访问产品缓存。直接AST提取当前install函数的仓库外jsdom检查7/7通过，覆盖静态/移除基线不误报、瞬时插入与adopt前后边界，日志仅布尔和计数。
+- 角色版本页预挂两个精确HTTP响应，各自严格404/private/no-store；仅对首个requestfinished完成的响应解码并继续原reason/minimal断言。原native各RPC、UI退场、角色/Session/设备和零补查/写入保护保留，不对取消的兄弟正文伪造结果或吞掉状态错误。
+
+集中real types、隐私1/1和diff检查通过。已启动四份完整spec：management-transfer、private-view、qualification-read-matrix及zz-account-status，暂无实际终态；这是专项，不替代138项无参数门禁。使用独立后台monitor，源码指纹已预存，Auth/App仍重新pull latest、Gateway显式本地；不因上轮143固定旧镜像或修改业务超时。Goal保持active，无新后端改动要求、未push。
