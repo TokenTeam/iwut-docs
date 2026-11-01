@@ -174,3 +174,23 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 新增确定顺序回归：旧显式GET5先返回仍不得提升replacement的下界，随后replacement实际GET4可以成功，保持同一新实例与observer、零写入；对替换实例和同实例较新data分别验证旧503/403无副作用，并保留当前有效403退场。设置、转让、配置三文件最终 **59/59**、Developer strict、diff检查通过，没有靠移除断言或改变服务限额修复。完整ordinary与工作区strict集中重跑，终态另补；未build或改写已中止轮次的输入。
 
 修复已本地提交 `92d35164b30fd28e6ee2426e62813922ad272fa5`。集中最终 `pnpm test` **exit0，1899项Vitest＋411项Node**，`pnpm typecheck` **exit0**；之前完整普通exit1仍保留。新候选已启动无参数真实门禁，等待实际完整终态，未宣称138项全部通过。未push。
+
+## 439913 无参数回归：外部143中断
+
+冻结 `92d3516`、Auth/App重新pull latest为518b0917/18eacd03、显式本地Gateway90cf10f0，无spec/title筛选，实际发现138项。运行末段被外部以143终止，runner和Playwright均已退出，没有最终Playwright汇总；不能记录为完整通过或正常完成。
+
+停止前可逐项核验 **130通过、3失败、2项因serial前置失败未执行**；最后3项没有完成证据。双端本人资料/退出、全部25项Developer跨代隔离、新版版本恢复与审核/TEST发布及四次摘要GET、UC015治理与App严格时间读回、P1和UC014写链、Scope真实变化/审核决定、正式关闭与WITHDRAWN历史读取均有该轮完成的通过项。不能把已完成项扩大到最后3项账号状态场景。
+
+3项失败的精确边界如下：
+
+| 场景 | 失败处与已知事实 | 后续核对 |
+| --- | --- | --- |
+| management-transfer | `source-list-after-transfer`，spec157全page旧名count0；主列表实际空读回及空态此前均通过，六详情退场已完成 | 主列表与持续Rail是独立默认范围/读取时间；按已有入口明确刷新Rail，再保留全page无旧名断言，不假造跨document失权广播 |
+| private-view旧200 | spec70 sticky `oldSeen`；B身份及正式空列表均已通过 | observer在B建立前安装，任意mutation扫描body可能匹配合法旧Rail静态文本；应区分新插入/变更A内容与既存A，B采用后仍全body禁止A，不简单缩main |
+| qualification角色版本页 | `governor-production-hidden-versions`，spec202在DevTools response.json失败，尚未到隐藏内容/UI断言 | Version查询与PublicationPanel独立App GET共享拒绝边界，先完成的404可取消同级正文；保留两实际HTTP404/缓存头及首个完整响应reason/minimal，原native各RPC负例不变 |
+
+这三项的脱敏artifact均无私有DOM/ARIA/HTML；只有固定源代码框，不能据此宣称已直接观察到某个Rail节点或新的后端故障。文档依据为页面结构中Rail独立范围/读取时间，以及UC002按当次投影读取的规则；未要求主列表刷新所有组件。已接受最小测试适配，不为旧测试前提新增全页刷新协议、削弱wholepage/Session/zero-clear保护或改后端。
+
+外部终止后逐一核对owned标签，清理5个残留容器（含停止项）、独立network及该轮临时运行目录，其他容器未动。外部终态记录核对HEAD保持92d3516、tracked diff为空，双静态SHA256保持：Developer `index-DJBQLy6e.js` 为 `5e4886d0ca58cc66a29634461b9bba19b4c5fc5c339e3b33a205545690bb65fa`，Admin继续 `ce201634…`。原wrapper未能生成正常terminal文件，明确保留外部143而非补写正常退出。
+
+后续私有运行包装预存源码指纹，长轮次采用独立session的后台monitor并持续写终态材料，避免依赖单次工具会话一直存活；不改变仓库默认runner、镜像策略或业务超时。下一候选先集中复验上述3项相关完整spec及末段未完成的账号状态，不静默重新运行已终态进程；完整门禁仍未关闭。Goal依用户恢复为active，继续推进，未push。
