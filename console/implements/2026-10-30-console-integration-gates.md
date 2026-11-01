@@ -154,3 +154,23 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 候选 Console `e7cdabb34a893ba7e00c9a47e642493d71f58225` 已本地提交：送审/恢复后的Version＋Application摘要同边界读回、错误与迟到保护、真实闭环的四个摘要GET证据，以及隔离B页面对既有PublicationPanel正式GET/成功渲染的等待。完整页面投影与零额外流量断言保留。
 
 必要前置最终组件15/15、Developer strict、real types、隐私1/1通过。无参数真实轮次422340已启动，默认完整发现与终态待补；本段不是全绿声明。普通完整单测/工作区strict同时集中运行，不改dist或正在冻结的业务源码。来源仍是发布Auth/App latest＋显式本地Gateway，不写成发布Gateway全链成功。
+
+### 422340 主动中止与已确认的设置读取副作用
+
+集中工作区 strict 已通过。完整普通 `pnpm test` exit1：Node411项通过；Developer564通过/1失败，Admin递归未完整执行，不能记为全部普通通过。失败是已有 `application-settings.test.tsx` 的“迟到显式读取不覆盖替换Query”用例，新实例的synthetic sentinel变为undefined。单独现有文件9/9通过未覆盖该全量失败。
+
+仓库外可控顺序实验确认了产品原因，排除了正常GC：replacement始终有observer，gcTime300000。旧显式读GET挂起后替换Query；旧返回revision5虽被setData的对象/data身份检查拒绝，但 `useSettingsResource.refresh` 先执行remember，仍将共享下界从4抬到5；replacement observer的正常GET4随后被拒绝，projection清除数据。实验1/1确认当前缺陷，不记为修复测试通过。
+
+根据既有UC014安全读取职责接受修正：显式读取在处理成功或错误、提升下界和改写本地状态前，必须核对捕获的Query实例与原data身份；过期结果完全不消费，不让旧成功/失败干扰替换实例。保留正常ACK下界与同Query更新保护，增加控制返回先后的回归。此项不改变后端契约、业务修订规则或缓存容量。
+
+发现确定产品缺陷后，主动SIGTERM中止旧候选422340，浏览器已发现138项但未完成；观察到14条完成通过，正在执行的一项在停止过程中被中断，后续没有完整终态报告，不将其计为业务断言失败/成功或全量完成。wrapper exit1，源码指纹与静态产物保持；Developer `index-CTguEGFF.js` SHA256 `8993614e01548bc24680134a774afe589a4278adc0b8da521c2c9c3a175ec084`，Admin沿用119394 hash。全部owned容器（含停止项）和network已清理为0。
+
+该中止用于修复已确认的候选问题，不借重复重跑掩盖失败。修复后集中普通门禁和新的无参数真实门禁另记，legacy不变、未push。
+
+### 设置读取修正
+
+已将身份核对提前到 `remember`、缓存和readError消费之前；过期错误在进入runtime共享attempt拒绝处理前转换为AbortError，防旧403先让新视图退场。当前有效403仍保留原拒绝处理，正常命令ACK下界不变。同步busy锁保证同一显式操作结束前不重入，finally仅释放自己的reading。
+
+新增确定顺序回归：旧显式GET5先返回仍不得提升replacement的下界，随后replacement实际GET4可以成功，保持同一新实例与observer、零写入；对替换实例和同实例较新data分别验证旧503/403无副作用，并保留当前有效403退场。设置、转让、配置三文件最终 **59/59**、Developer strict、diff检查通过，没有靠移除断言或改变服务限额修复。完整ordinary与工作区strict集中重跑，终态另补；未build或改写已中止轮次的输入。
+
+修复已本地提交 `92d35164b30fd28e6ee2426e62813922ad272fa5`。集中最终 `pnpm test` **exit0，1899项Vitest＋411项Node**，`pnpm typecheck` **exit0**；之前完整普通exit1仍保留。新候选已启动无参数真实门禁，等待实际完整终态，未宣称138项全部通过。未push。
