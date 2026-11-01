@@ -1,6 +1,6 @@
 # Console 新管理能力集中验收
 
-状态：`ORDINARY_VERIFIED / FIRST_FULL_REAL_FAILED / FIXES_IN_PROGRESS`，2026-10-30。用户要求集中必要验证、避免每次UI修改后跑整套；本页登记UC008–015这一批接入的整体验证，不代替各用例或历史门禁。下方普通轮次与首次冻结保留当时状态，真实终态见末章；当前不是仍在运行或等待首跑。
+状态：`ORDINARY_VERIFIED / FULL_REAL_FAILED / TARGETED_FIXES_PENDING`，2026-11-01。用户要求集中必要验证、避免每次UI修改后跑整套；本页登记UC008–015及后续账号工作包的整体验证，不代替各用例或历史门禁。最新无参数510774为138通过/1失败，修正及集中实链复验待完成；下方各冻结保留当时状态，真实终态见末章。
 
 ## 输入与范围
 
@@ -226,3 +226,15 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 当前正实现[基础设施显式缓存模式](2026-10-30-local-gateway-runner.md#2026-11-01基础镜像的显式缓存模式)，只对已inspect核对的不可变Mongo/Traefik生效，默认pull、Auth/App latest和Gateway原规则保持。完成相应Node门禁后再冻结新候选重启完整回归，记录实际来源；Goal仍active。
 
 87901b4已实现显式基础设施模式，CI policy57 Node＋21 Vitest通过。已冻结该候选重新启动无参数完整轮次，基础设施来源明确为explicit-cached-infrastructure，Mongo/Traefik分别强制inspect既有e0ce8c35/24841fe2，Gateway仍显式local90cf10f0；Auth/App继续pull latest并核对实际ID。此轮不是默认全发布来源，也没有以pull失败自动改旧后端。实际发现数、源码/产物冻结和终态待补；不要重启仍live的后台runner。Goal保持active，未push。
+
+## 无参数完整轮次510774
+
+Console 冻结 `87901b46e7253ed0e0f0ac57059270d7041052cd`，不带 spec 参数，实际发现139项，单worker、retry0。正常终态 **138通过、1失败、exit1，浏览器阶段25.9分钟，零skip和未执行**。后台monitor确认源码及静态hash均保持，五个本轮容器（含停止项）及本轮network均已清空；没有把观察超时当进程终止或重新启动。
+
+实际来源分别为 explicit-local-gateway 与 explicit-cached-infrastructure。Auth/App每轮重新pull latest，实际ID分别为 `sha256:518b0917ec8302f9f6cb28bd2e12aa59033cfe6db45c82a81a0afcb1bac5aa16`、`sha256:18eacd03c1f0cd9b4841bd9b141b61c0d5dde89f6d0045f00322a056541b4027`；Gateway为 `sha256:90cf10f0ea832812ee756e686362e0114d493e090b2286aef76dd9304007fdd7`。固定Mongo/Traefik缓存实际ID分别为 `sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、`sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`，不是全发布来源的默认拉取成功声明。
+
+Developer生产JS的SHA256为 `bf85cad173d47c66bc853c99644d6b94f364a4a8a57894d5322e26dd917fd83f`，Admin为 `84ad30191adf62cb41c94268c213669a62272fe136599199aeb0638f9ed578d1`，终态保持。治理严格暂停/恢复时间、审核拒绝→恢复→再提交→批准→TEST发布、UC018首次申请→原Session首个App、旧clear/private-view/全部Developer隔离以及最终账号恢复链均通过；不能以这些138项覆盖本轮唯一失败。
+
+唯一失败是 `qualification-read-matrix.real.spec.ts:165` 的角色边界场景，固定阶段 `reviewer-production-hidden-versions`，脱敏失败坐标 **389:33**，即 completedVersionDenial 对两类并发读取逐一 waitForResponse 的位置。产品第一次完整拒绝后会取消同App捕获的查询，兄弟读取不保证已经产生响应头；要求两份响应头都出现不是有效的产品前提。坐标确认本轮在响应等待处失败，没有原始网络事件证据，不把具体取消时点或正文解析失败写成已证实事实。
+
+接受有界 spec 修正：仍要求至少一个实际完成的拒绝并检查正式reason/最小正文，同时核验统一退场前所有实际收到的匹配响应均404/private/no-store；原生各RPC的精确拒绝、完整页面隐私、Session和零副作用断言全部保留。随后对该文件及版本审核发布闭环集中实链复验，不机械重跑全部139项。另一个由隔离组件直接证实的[发布迟到读回缺陷](2026-10-30-version-review-publication-loop.md#发布浮窗的迟到读回覆盖)已通过整合普通检查，修复 `f4952f2` 在本轮终态后fast-forward进入main；本轮冻结不含此修复，后续生产实链证据须单独记录。Goal继续active，legacy/checkpoint不变，未push。
