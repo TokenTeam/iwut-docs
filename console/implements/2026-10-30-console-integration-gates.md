@@ -204,3 +204,11 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 - 角色版本页预挂两个精确HTTP响应，各自严格404/private/no-store；仅对首个requestfinished完成的响应解码并继续原reason/minimal断言。原native各RPC、UI退场、角色/Session/设备和零补查/写入保护保留，不对取消的兄弟正文伪造结果或吞掉状态错误。
 
 集中real types、隐私1/1和diff检查通过。已启动四份完整spec：management-transfer、private-view、qualification-read-matrix及zz-account-status，暂无实际终态；这是专项，不替代138项无参数门禁。使用独立后台monitor，源码指纹已预存，Auth/App仍重新pull latest、Gateway显式本地；不因上轮143固定旧镜像或修改业务超时。Goal保持active，无新后端改动要求、未push。
+
+### 四文件465078及旧clear导航的后续诊断
+
+465078正常终态 **11项中10通过/1失败，exit1，3.0分钟，无skip/retry**；源码指纹和双静态hash到终态不变，全部owned容器/network清理为0。原439913的三项失败均在这轮通过：管理转让的独立Rail正式刷新及全page旧名0、旧200响应与B隔离、角色版本页两HTTP404与首个完整拒绝。角色四场景、账号DISABLE/RESTORE/两端原钥匙明确DEVICE恢复三场景也全部完成，补上了439913末段的缺证据。
+
+唯一失败是此前因private-view serial前置失败未执行的旧clear第三项，固定阶段entry-read：旧“返回开发者工作台”链接仍指向相同applications路由，没有触发新的Session读取。沿已在25项矩阵证明的方案，改用同document的真实空创建页读取B，不填/提交表单，先等待其独立Rail正式空读取，再转主列表；原document marker/held204/零额外流量不变。提交8344af8后，473794三项诊断2通过/1失败，exit1、33.2秒：新Session和Rail读回已过，失败推进至B-view，因为私有创建页按现有UI不显示entry页的raw authId标签。
+
+后续e24b98d只修这条测试的采用前提：entry分支继续原可见身份断言；空创建页分支使用已经精确核对的B Session和按B代读取的Rail，再核对实际空创建表单/路径后执行全body observer adopt；不要求产品额外展示内部ID。原Session/旧响应/全page无A/零clear、业务写及同document断言保留。real types通过，已启动该旧clear单项实链，终态待补。上述两次exit1均保留，不将导航前提失败当作已确认后端或产品fencing故障。

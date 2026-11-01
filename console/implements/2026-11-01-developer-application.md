@@ -1,6 +1,6 @@
 # 本人 Developer 资格与首次开通入口
 
-状态：`DESIGN_ACCEPTED / IMPLEMENTATION_PENDING`，2026-11-01。依据持续goal授权建立并自主接受 [UC018](../use-cases/UC-CONSOLE-018-apply-for-developer.md)，没有新增后端规则或外发消息。本页只记录交付边界，不把文档接受或fixture开通当产品实现。
+状态：`DESIGN_ACCEPTED / IMPLEMENTATION_IN_PROGRESS`，2026-11-01。依据持续goal授权建立并自主接受 [UC018](../use-cases/UC-CONSOLE-018-apply-for-developer.md)，没有新增后端规则或外发消息。本页只记录交付边界，不把文档接受或fixture开通当产品实现。
 
 ## 已确认的断点与可用输入
 
@@ -21,3 +21,5 @@ Auth UC013与固定API6fea已经提供本人GET资格/POST申请、规范公开h
 先完成当前冻结8344af8的旧clear同document专项终态，再集成产品，避免改变正在实测的源码/dist。可以在隔离前端工作区准备UC018实现；普通测试集中运行，真实链使用新的未Apply普通账号，不能挪用旧P0 owner或提高邮件/Session限额。Auth/App继续拉取latest，Gateway保留显式本地artifact，不从相邻仓编译后端。
 
 实施应覆盖BFF/验证/Edge、Web完整状态及入口，之后在生产React自助开通并用同Session创建App，分别记录类型、组件、固定上游协议与真实证据。旧130项通过/3失败/143中断仍见[集中验收](2026-10-30-console-integration-gates.md)，不因接受本包而关闭旧门禁。
+
+已创建隔离前端分支并离线按锁文件安装依赖。BFF/验证/Edge与Web/客户端分别实现，职责目录分开，普通检测集中；主工作区保持旧clear实链候选e24b98d冻结。业务payload统一复用API包的官方生成类型解码器，避免BFF与Web各写一套资格规则。此阶段尚无产品集成、构建或真实申请成功的声明，未push。
