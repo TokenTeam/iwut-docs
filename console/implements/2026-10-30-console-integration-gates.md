@@ -212,3 +212,9 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 唯一失败是此前因private-view serial前置失败未执行的旧clear第三项，固定阶段entry-read：旧“返回开发者工作台”链接仍指向相同applications路由，没有触发新的Session读取。沿已在25项矩阵证明的方案，改用同document的真实空创建页读取B，不填/提交表单，先等待其独立Rail正式空读取，再转主列表；原document marker/held204/零额外流量不变。提交8344af8后，473794三项诊断2通过/1失败，exit1、33.2秒：新Session和Rail读回已过，失败推进至B-view，因为私有创建页按现有UI不显示entry页的raw authId标签。
 
 后续e24b98d只修这条测试的采用前提：entry分支继续原可见身份断言；空创建页分支使用已经精确核对的B Session和按B代读取的Rail，再核对实际空创建表单/路径后执行全body observer adopt；不要求产品额外展示内部ID。原Session/旧响应/全page无A/零clear、业务写及同document断言保留。real types通过，已启动该旧clear单项实链，终态待补。上述两次exit1均保留，不将导航前提失败当作已确认后端或产品fencing故障。
+
+480853已正常终态 **1/1通过，exit0，9.1秒浏览器阶段（场景6.5秒），无skip/retry**。同document空创建页读取B、独立Rail空读回、再入B列表、旧clear204释放与零额外读取/clear/navigation、原Session/Cookie和钥匙保护均执行通过。源码指纹和静态hash保持，owned容器/network清理为0。这补齐该旧clear的有界证据，不拼接成同一候选138项完整通过。
+
+## UC018集成候选
+
+新增已接受的本人Developer自助资格由隔离分支实现并以1e9e6af集成，f3c690b记录检查点，见[实施证据](2026-11-01-developer-application.md)。完整普通2031 Vitest＋411 Node、full strict/隐私通过；默认真实发现将增加一个未Apply普通用户的自助开通→同Session创建链。当前冻结f3c690b进行该新链与完整private-view三项的联合专项，终态未有；旧失败、中断和已通过边界均保留，Goal保持active。
