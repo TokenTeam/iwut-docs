@@ -15,16 +15,17 @@
 | `UC-CONSOLE-005` | 只读查询 Application Tester 管理 | `ACCEPTED` | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md) | 2026-10-16 接受并实现；真实镜像成功读取及失效回收基线通过，完整验收矩阵继续实施 |
 | `UC-CONSOLE-006` | 审核 Application Version | `ACCEPTED` | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md) | 双权限/决定与恢复已有实链；策略发布等外部边界见 implements |
 | `UC-CONSOLE-007` | 审核 Application 公开资料 | `ACCEPTED` | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md) | 决定/公开指针/开发者投影已有实链；并发按接受的单工作位方案分层 |
-| `UC-CONSOLE-008` | 版本与发布工作台及版本编辑 | `ACCEPTED` | [UC-CONSOLE-008](use-cases/UC-CONSOLE-008-version-workspace.md) | 版本创建/保存/送审实链通过；恢复/放弃与完整发布链分别验收 |
+| `UC-CONSOLE-008` | 版本与发布工作台及版本编辑 | `ACCEPTED` | [UC-CONSOLE-008](use-cases/UC-CONSOLE-008-version-workspace.md) | 创建/保存/送审/放弃及拒绝恢复、再审核、首次TEST发布代表实链通过；不外推全部发布矩阵 |
 | `UC-CONSOLE-009` | 创建应用 | `ACCEPTED` | [UC-CONSOLE-009](use-cases/UC-CONSOLE-009-create-application.md) | 2026-10-30自主接受；页面/客户端与真实创建链已通过 |
 | `UC-CONSOLE-010` | 创建、编辑与提交应用公开资料 | `ACCEPTED` | [UC-CONSOLE-010](use-cases/UC-CONSOLE-010-edit-application-profile.md) | 草稿/保存/送审实链通过，拒绝后预填新修订已实现并定向验证 |
 | `UC-CONSOLE-011` | 管理应用测试邀请与成员 | `ACCEPTED` | [UC-CONSOLE-011](use-cases/UC-CONSOLE-011-manage-application-testers.md) | 2026-10-30页面已实现；首次创建/轮换/撤销/成员移除代表实链通过 |
 | `UC-CONSOLE-012` | 管理应用 OAuth 客户端 | `ACCEPTED` | [UC-CONSOLE-012](use-cases/UC-CONSOLE-012-manage-oauth-clients.md) | 三渠道组件已实现；登记/启停/轮换与一次secret披露代表链通过 |
 | `UC-CONSOLE-013` | 编排应用展示规则 | `ACCEPTED` | [UC-CONSOLE-013](use-cases/UC-CONSOLE-013-compose-application-display-filter.md) | 完整树与目录独立读取，设置/清空代表实链通过；本地结构编排补强 |
 | `UC-CONSOLE-014` | 管理应用归档与管理权交接 | `ACCEPTED` | [UC-CONSOLE-014](use-cases/UC-CONSOLE-014-manage-application-ownership.md) | 专用读取/参与者全局页已实现；归档与KEEP/ROTATE代表实链通过 |
-| `UC-CONSOLE-015` | 管理平台人员资格与可用状态 | `ACCEPTED` | [UC-CONSOLE-015](use-cases/UC-CONSOLE-015-manage-platform-governance.md) | 已实现并定向验证，真实spec已准备；独立运维精确权限发现缺口保留 |
+| `UC-CONSOLE-015` | 管理平台人员资格与可用状态 | `ACCEPTED` | [UC-CONSOLE-015](use-cases/UC-CONSOLE-015-manage-platform-governance.md) | 16条正式治理命令与专用读回代表实链通过；独立运维精确权限发现缺口保留 |
 | `UC-CONSOLE-016` | 查看与编辑本人账号资料 | `ACCEPTED` | [UC-CONSOLE-016](use-cases/UC-CONSOLE-016-edit-own-account-profile.md) | 共享六类型/明确set-remove已实现；双端普通USER五类型代表实链通过，AcademicGrade实链未覆盖 |
 | `UC-CONSOLE-017` | 显式退出当前 Console 会话 | `ACCEPTED` | [UC-CONSOLE-017](use-cases/UC-CONSOLE-017-sign-out-current-console.md) | 专用BFF/Edge/共享面板已实现，普通、Mongo与双端真实Auth退出代表链通过 |
+| `UC-CONSOLE-018` | 查看并申请本人 Developer 资格 | `ACCEPTED` | [UC-CONSOLE-018](use-cases/UC-CONSOLE-018-apply-for-developer.md) | 2026-11-01自主接受；闭合已有账号首次资格开通入口，精确BFF复用既有DIRECT路由 |
 
 ## Business Rules
 
@@ -59,6 +60,11 @@
 | `BR-CRV-006` | 资料批准的公开指针前置值 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-006) | `ACCEPTED`，随所属完整UC分阶段实施 |
 | `BR-CRV-007` | 资料拒绝与实际终态 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-007) | `ACCEPTED`，随所属完整UC分阶段实施 |
 | `BR-CRV-008` | 资料决定确认与恢复 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-008) | `ACCEPTED`，随所属完整UC分阶段实施 |
+| `BR-CDA-001` | 本人资格与业务边界 | Console Developer Application | [UC018](use-cases/UC-CONSOLE-018-apply-for-developer.md#br-cda-001) | 只取本人正式资格与blockers |
+| `BR-CDA-002` | 明确 ID 与申请确认 | Console Developer Application | [UC018](use-cases/UC-CONSOLE-018-apply-for-developer.md#br-cda-002) | 公开且不可改名，单次确认 |
+| `BR-CDA-003` | 回执、读回与未知结果 | Console Developer Application | [UC018](use-cases/UC-CONSOLE-018-apply-for-developer.md#br-cda-003) | 未知先读、同名明确重试 |
+| `BR-CDA-004` | 会话隔离与私有内存 | Console Developer Application | [UC018](use-cases/UC-CONSOLE-018-apply-for-developer.md#br-cda-004) | 原代和Query实例保护 |
+| `BR-CDA-005` | 完整可达路径与验收 | Console Developer Application | [UC018](use-cases/UC-CONSOLE-018-apply-for-developer.md#br-cda-005) | 不依赖App/角色，普通账号真实开通 |
 
 ## Architecture Decisions
 
@@ -74,9 +80,10 @@
 
 | 空间 | 下一个编号 |
 | --- | --- |
-| Console UC | `UC-CONSOLE-018` |
+| Console UC | `UC-CONSOLE-019` |
 | Console BR-CVW | `BR-CVW-004` |
 | Console BR-CSE | `BR-CSE-009` |
 | Console BR-CMG | `BR-CMG-011` |
 | Console BR-CRV | `BR-CRV-009` |
+| Console BR-CDA | `BR-CDA-006` |
 | Console ADR | `ADR-CONSOLE-006` |
