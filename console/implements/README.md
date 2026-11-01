@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-11-01 只读核实[公开向量远端CI](2026-10-27-protocol-vector-ci.md#2026-11-01-远端工作流核实)：GitHub run40429054771及全部步骤成功，实际日志确认正式协议测试19项通过。关闭该工作包的远端运行证据缺口，不外推当前139项实链或整体Goal。
+
 2026-11-01 UC018及private-view联合实链4/4通过后，默认全量503436在DockerHub Mongo拉取EOF前置阶段退出，未开始浏览器；手动重拉同失败。已实现87901b4的[显式固定基础镜像模式](2026-10-30-local-gateway-runner.md#2026-11-01基础镜像的显式缓存模式)，CI policy57 Node＋21 Vitest通过；新无参数完整回归正在运行，Auth/App仍每轮pull latest，固定Mongo/Traefik与本地Gateway来源分别记录。完整门禁尚未关闭，Goal active、未push。
 
 2026-11-01 [UC018新用户资格→首个App](2026-11-01-developer-application.md#真实首次开通与创建497011)与完整private-view联合专项**4/4通过、exit0**；原Session/Cookie/不可导出钥匙保持，普通用户资格未由fixture预先授予。完整普通2031 Vitest＋411 Node/full strict已通过，当前1326562的无参数完整回归进行中。未宣称全部用例或完整Goal已完成，legacy保持、未push。
@@ -72,7 +74,7 @@
 | --- | --- | --- | --- |
 | Console工程初始化 | UC001 `ACCEPTED`；工程范围`IMPLEMENTED` | pnpm workspace、严格TypeScript、固定统一API生成和校验；双应用/BFF及独立surface真实链已接入 | 不再把“尚未建立真实E2E”作为工程待办；UC001整体仍未关闭 |
 | 共享浏览器Session | UC001 `ACCEPTED / IN_PROGRESS`；设备/邮箱码与Session v2基线已实现 | 双origin真实邮件/设备登录、原Begin恢复、提交/恢复等待取消、旧carrier/清理回执、双生产副本/提交点故障，以及两个origin实际32次签发后的显式重建，见[Session v2接线](2026-10-16-session-v2-wiring.md)和[context恢复](2026-10-16-context-exhaustion-recovery.md) | 任意33+迟到carrier的无损Cookie自助恢复仍需独立架构处理；不以此关闭完整UC001/fencing |
-| 前端安全与可访问性增量 | [Strict CSP](2026-10-27-strict-static-csp.md)、[拒绝后焦点](2026-10-27-private-denial-focus.md)及[浏览器凭据校验](2026-10-27-browser-credential-validation.md)所列范围`VERIFIED` | CSP/焦点3专项/126全量通过；凭据/协议原生拒绝与正常链兼容4专项/128全量通过，曲线/fingerprint/配对/快照、严格标量和精确上下文均落实 | [CI定义](2026-10-27-protocol-vector-ci.md)已集成但实际远端run仍未获得；不宣称防已受信同源脚本、生产EO已验证或完整UC关闭 |
+| 前端安全与可访问性增量 | [Strict CSP](2026-10-27-strict-static-csp.md)、[拒绝后焦点](2026-10-27-private-denial-focus.md)及[浏览器凭据校验](2026-10-27-browser-credential-validation.md)所列范围`VERIFIED` | CSP/焦点3专项/126全量通过；凭据/协议原生拒绝与正常链兼容4专项/128全量通过，曲线/fingerprint/配对/快照、严格标量和精确上下文均落实 | [CI定义及远端运行](2026-10-27-protocol-vector-ci.md)已核实；不宣称防已受信同源脚本、生产EO已验证或完整UC关闭 |
 | Developer Console功能 | UC001–005 `ACCEPTED`；认证入口与四类只读页面已实现，整体`IN_PROGRESS` | 真实成功读取、25项[跨Session读取矩阵](2026-10-16-developer-private-session-matrix.md)、正式管理权转让退场、SUSPEND/RESTORE资格读取与保留生命周期历史投影；Admin→Developer资料闭环、账号禁用/恢复代表链，以及[正式关闭后WITHDRAWN历史读取](2026-10-27-withdrawn-closed-history.md)完成，缓存头门禁已恢复 | 账号状态与WITHDRAWN只声明所列有限链，不外推全部页面×状态；UC001架构边界另列 |
 | Admin Console功能 | UC001/006/007 `ACCEPTED`；双队列/详情、批准/拒绝、独立权限/Session恢复已实现，整体`IN_PROGRESS` | [查询及权限读取](2026-10-16-admin-review-queries.md)、12项[读取跨Session矩阵](2026-10-16-admin-private-session-fencing.md)，以及原26项决定功能：双Reviewer、真实期限/结果未知、撤重授、加载后利益冲突、六项决定跨Session交错和真实App→Auth断链/恢复；原4条401缓存头已恢复；追加3项Scope变化/恢复及账号恢复后旧审核Session拒绝/原钥匙重登已在121全量通过 | Scope及账号状态所列有界链已验证，真实策略变化仍待准备；资料并发按已接受的单工作位与指针防御分层核对，文档修正不新增实际覆盖，见下表；不再把决定surface/正式定义/Reviewer公开指针接入列为当前缺失 |
 | Developer Application概览 | UC002 `ACCEPTED`；只读产品范围`IMPLEMENTED` | [25个正式Create的20+5累计分页](2026-10-16-owned-application-pagination-and-recovery.md)、筛选/游标/空态、正式转让后的管理权回收、跨Session及SUSPEND/RESTORE、ACTIVE/CLOSING/CLOSED保留历史读取，错误缓存头门禁恢复；[账号禁用/恢复](2026-10-26-account-status-read-recovery.md)和[WITHDRAWN正式关闭历史](2026-10-27-withdrawn-closed-history.md)代表链通过 | 不把有限链扩大为全部页面×状态；不新增Developer写入口 |
@@ -84,7 +86,7 @@
 
 | 类型 | 当前开放项与推进条件 | 依据 |
 | --- | --- | --- |
-| UC001协议已补齐，CI远端交付独立 | 合成非法点/零DER/损坏记录签名缺口与命名重放/等到期/单次哈希已由[凭据包](2026-10-27-browser-credential-validation.md)修复并通过4专项/128完整门禁；不再当全部未实施。CI定义7b32305已通过本地1056 Vitest＋376 Node及全普通门禁，同配置6静态产物逐字一致；旧stub首轮失败与恢复保留。实际远端run仍未获得，不由本机绿替代 | [完成性审计](2026-10-27-completion-audit.md)、[CI包](2026-10-27-protocol-vector-ci.md)、[UC001验收](../use-cases/UC-CONSOLE-001-establish-console-session.md#测试与验收) |
+| UC001协议已补齐，CI远端交付独立 | 合成非法点/零DER/损坏记录签名缺口与命名重放/等到期/单次哈希已由[凭据包](2026-10-27-browser-credential-validation.md)修复并通过4专项/128完整门禁；不再当全部未实施。CI定义7b32305已通过本地1056 Vitest＋376 Node及全普通门禁，同配置6静态产物逐字一致；旧stub首轮失败与恢复保留。远端run40429054771及协议测试日志已核实，关闭此项远端证据缺口，不扩大为当前完整候选已远端验证 | [完成性审计](2026-10-27-completion-audit.md)、[CI包](2026-10-27-protocol-vector-ci.md)、[UC001验收](../use-cases/UC-CONSOLE-001-establish-console-session.md#测试与验收) |
 | 已完成的有限角色证据，范围不外推 | WITHDRAWN正式关闭→退出→CLOSED历史读取已由3专项/124全量验证，非SUSPEND或旧readseed替代；账号禁用/恢复所列代表链已通过3专项/121全量，并在124全量再次通过。不再登记为全部缺失，也不自动扩成全部角色×页面组合 | [WITHDRAWN证据](2026-10-27-withdrawn-closed-history.md)、[账号状态证据](2026-10-26-account-status-read-recovery.md)、[资格与角色边界](2026-10-16-qualification-and-role-read-boundaries.md) |
 | 正式变化准备与联合验收 | App已接受正式发布流程，原子回执/运维读回尚未实现，下一份真实政策另审；Auth UC036正式启停、Gateway接线、App真实TTL后目录revision消费与Console旧页恢复的有界链已由30/118门禁验证；Auth自身全量与生产启用仍按其所有者独立门禁，不由Console代验。错误expectedPolicyVersion、合成policy JSON或直接改库不是真实加载后变化证明 | [App发布流程](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[Profile兼容门槛](../../app-center/use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)、[Scope联合证据](2026-10-26-scope-review-change.md)、[Auth交付边界](../../auth-center/implements/UC-AUTH-036-readiness.md) |
 | 已接受的可达性分层，证据保持原范围 | UC007验收4已按用户接受的单工作位方案同步：同Review双决定、顺序替换、错误pointer409协议防御与组件恢复分别标记；不同修订同时PENDING不是当前可达业务要求，不seed平行PENDING。既有证据不改名，不因文字同步宣称新增真实链通过 | [UC007验收](../use-cases/UC-CONSOLE-007-review-application-profiles.md#验收与完成标准)、[单一工作修订](../../app-center/use-cases/UC-APP-013-create-application-profile-revision.md#br-prf-006) |

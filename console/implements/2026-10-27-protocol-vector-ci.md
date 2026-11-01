@@ -1,6 +1,6 @@
 # 公开协议向量的可复现CI定义
 
-状态：ACCEPTED / IMPLEMENTED / LOCAL_VERIFIED / REMOTE_UNVERIFIED（2026-10-27，无远端run）。持续目标授权下自行接受；ec34375完整真实128项结束前只准备临时候选，结束后才集成Console。
+状态：ACCEPTED / IMPLEMENTED / LOCAL_VERIFIED / REMOTE_WORKFLOW_VERIFIED（2026-11-01）。持续目标授权下自行接受；ec34375完整真实128项结束前只准备临时候选，结束后才集成Console。初次交付时无远端run；后续远端工作流证据见文末。
 
 ## 依据与事实
 
@@ -47,3 +47,9 @@ Console产品/CI源码冻结仍为 `7b32305da131967dfad2e108f3e4b116a68925eb`（
 既有Vite未来native config loader、大chunk及pnpm未批准esbuild build scripts提醒保持，不靠屏蔽warning或批准任意安装脚本计绿。源码/锁无漂移；平台不允许rm-f式删除，且本机gio不支持该临时挂载的回收站，故未绕过限制强删。候选、实际工具安装目录和两个已无效的生成stub精确归档到新建的隔离临时恢复目录，原两工作目录已移出，内容保留可恢复；均为可再生成工具/缓存，非用户私钥或源文件。真实轮次容器（含停止项）/network仍为空，legacy本地/远程不变，不sudo、不编译后端、不push/dispatch。
 
 只读确认GitHub Actions当前enabled且allowed_actions=all；仍未触发任何run，不能由平台开关或本机exit0推断远端执行成功。CI定义已交付本地，实际远端run继续REMOTE_UNVERIFIED；取得push/运行授权后才可收齐该证据，不借本包关闭UC001、App政策发布、Cookie33+或完整goal。
+
+## 2026-11-01 远端工作流核实
+
+只读查询 GitHub Actions，已取得 [Console checks 成功运行 40429054771](https://github.com/TokenTeam/iwut-console/actions/runs/40429054771)，提交为 `53160543919c5e5eadd821c59fd4f5dc9dd5fba1`，唯一 `checks` job 及其全部步骤均为 success。包括锁定依赖安装、仓库独立性、固定官方 API 生成、严格类型、`Test including public protocol vectors`、双端与 BFF 构建以及无漂移检查。
+
+核对该提交实际 workflow 的测试命令为 `pnpm test`，根脚本包含工作区测试，browser-auth 的正式协议测试包含公开向量。随后从同一 run 的日志归档核实 `packages/browser-auth test` 中 `src/protocol.test.ts` 的 19 项实际通过。该 workflow、browser-auth 测试脚本和协议测试与当前 `87901b4` 相同，足以关闭本工作包的公开向量远端运行证据缺口；不声称当前新增 UC018 或完整139项实链已经在远端通过。此次只读核实没有 push 或触发新作业；App 政策、Cookie33+及完整 UC/goal 边界仍独立开放。上文 REMOTE_UNVERIFIED 为初次交付时的历史事实。
