@@ -49,3 +49,5 @@ runner新增独立普通注册账号，不保留Node凭据、不Apply、不授Re
 源码指纹及双静态hash到终态保持：Developer `index-Df6Dc_n_.js` SHA256 `bf85cad173d47c66bc853c99644d6b94f364a4a8a57894d5322e26dd917fd83f`；Admin `index-DbE4NfEN.js` SHA256 `84ad30191adf62cb41c94268c213669a62272fe136599199aeb0638f9ed578d1`。全部owned容器/network清空，未改原预览数据。该代表链不扩大为所有状态/失败矩阵的实链验证。
 
 `1326562` 仅追加源检查点后，已启动新的无参数完整回归，实际发现/终态待补。Goal active，legacy保持、未push；注册、邮箱管理、正式App政策发布及Cookie传输边界没有因本包被宣称完成。
+
+后续完整门禁已取得：冻结1b3650e的[551006无参数139项](2026-10-30-console-integration-gates.md#修正候选的完整门禁551006)实际**139/139通过、exit0，25.5分钟**，包括本页未Apply普通用户的首次申请→原Session首个App代表链。源码/静态hash保持，本轮资源清空，已保存精确已验收checkpoint；此前503436前置失败、510774的138通过/1失败与其它历史终态不改写。本页正常代表范围已有同一候选完整门禁证据，仍不外推未列出的资料、资格或Cookie架构能力。
