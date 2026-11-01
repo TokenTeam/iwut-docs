@@ -43,3 +43,15 @@ E2E_GATEWAY_IMAGE=iwut-gateway:console-local-9d6a27f E2E_GATEWAY_PULL=false pnpm
 新增七项 Node 回归实际 spawn 薄 CLI 和隔离的假 Docker executable，覆盖默认 pull、local 仅 inspect、旧 override、缺失镜像、非法 flag/参数、损坏 metadata、stdout/日志隔离与 Edge 使用解析后 ID。它们不访问 Docker daemon、网络或容器，也不运行 renderer；不能当作真实 Edge 通过证据。已追加到 `test:ci-policy`，并更新 workflow 测试的精确命令断言，原 installer、CI 和 artifact policy 断言全部保留。
 
 本次集中定向批次为原 **25 项 + 新 7 项，共 32/32**、exit0；CLI `node --check`、Edge `bash -n`、`scripts/build/tsconfig.json` 的 TypeScript 检查通过。本次没有运行实际 `edge:e2e` 或创建/停止容器，没有改 Web/BFF、API 生成物或真实业务 runner；真实 Edge 验证由后续集中门禁登记。
+
+## 2026-11-01：基础镜像的显式缓存模式
+
+UC018联合专项4/4通过后，完整503436在拉取固定Mongo8.2.12时遇DockerHub referrers EOF；同一版本手动重拉又在manifest HEAD出现EOF。该轮已terminal exit1、没有进入构建/浏览器，也没有遗留容器/network；不是测试观察超时或业务断言失败。Auth/App镜像的latest策略没有失效证据，不能因此改为旧后端镜像或源码编译。
+
+据持续自主工程授权接受一个独立、显式的基础设施缓存模式：默认仍对五类输入按原规则pull；仅当操作者设置`E2E_INFRASTRUCTURE_PULL=false`并同时提供`E2E_MONGO_IMAGE`与`E2E_TRAEFIK_IMAGE`的不可变引用时，跳过这两项pull。引用必须是完整sha256:imageID或无tag的repo@sha256:digest，不接受latest/版本tag/模糊前缀；必须inspect成功并严格核对ID或RepoDigest。不会在pull失败后自动回退，不混入历史review兼容模式，不构建镜像。
+
+Auth/App保持原始pull策略；Gateway继续本页既有显式local规则。新模式单独输出基础设施来源，不能将这一轮写成默认全发布来源。它只使用已经完成实链的同一基础镜像：Mongo`sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3`、Traefik`sha256:24841fe2de7304c149343d877d2923b4c8800a38ba015dea9174c23b20e344a0`；业务状态/协议、SMTP与业务超时不改变。
+
+实现与定向Node门禁进行中；完整真实门禁必须分别记录业务镜像latest重拉后的ID、显式本地Gateway及缓存基础设施来源。此决定不改变后端latest联调意图，也不自行更新系统Docker代理或重启daemon。
+
+实现已提交 `87901b4`，只改artifact policy、其Node回归、runner两个基础image env接线及检查点。相关backend/resolver Node24/24、两个脚本语法和diff检查通过；完整CI policy **57 Node＋21 Vitest** exit0。默认对象形状与五类pull、Gateway原规则保持，Auth/App不因新flag而跳过pull；非法/缺少/可变ref、metadata不匹配、与兼容模式冲突均失败，不build或自动回退。后续完整无参数轮次使用明确缓存的同一两基础ID，真实终态尚待，不将Node假Docker实验当作实链通过。

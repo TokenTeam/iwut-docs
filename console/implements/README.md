@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-11-01 UC018及private-view联合实链4/4通过后，默认全量503436在DockerHub Mongo拉取EOF前置阶段退出，未开始浏览器；手动重拉同失败。已实现87901b4的[显式固定基础镜像模式](2026-10-30-local-gateway-runner.md#2026-11-01基础镜像的显式缓存模式)，CI policy57 Node＋21 Vitest通过；新无参数完整回归正在运行，Auth/App仍每轮pull latest，固定Mongo/Traefik与本地Gateway来源分别记录。完整门禁尚未关闭，Goal active、未push。
+
 2026-11-01 [UC018新用户资格→首个App](2026-11-01-developer-application.md#真实首次开通与创建497011)与完整private-view联合专项**4/4通过、exit0**；原Session/Cookie/不可导出钥匙保持，普通用户资格未由fixture预先授予。完整普通2031 Vitest＋411 Node/full strict已通过，当前1326562的无参数完整回归进行中。未宣称全部用例或完整Goal已完成，legacy保持、未push。
 
 2026-11-01 [UC018本人Developer资格](2026-11-01-developer-application.md)已集成main1e9e6af，完整普通**2031 Vitest＋411 Node**、full strict/隐私通过；真实新用户明确申请后沿原Session创建App的联合专项进行中。旧clear480853已1/1通过，补齐此前未执行的同document迟到204边界；仍不拼接为完整138项全绿。新默认真实套件将包含139项，实际无参数终态另记，Goal active、legacy不变、未push。

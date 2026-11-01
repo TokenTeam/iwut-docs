@@ -220,3 +220,9 @@ Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unch
 新增已接受的本人Developer自助资格由隔离分支实现并以1e9e6af集成，f3c690b记录检查点，见[实施证据](2026-11-01-developer-application.md)。完整普通2031 Vitest＋411 Node、full strict/隐私通过；默认真实发现将增加一个未Apply普通用户的自助开通→同Session创建链。当前冻结f3c690b进行该新链与完整private-view三项的联合专项，终态未有；旧失败、中断和已通过边界均保留，Goal保持active。
 
 497011联合专项已正常 **4/4通过，exit0，24.2秒，无skip/retry**；新普通用户首次Apply→同Session创建代表链4.6秒、private-view三项5.2/5.7/6.2秒。源码指纹/静态hash保持，owned资源清空，完整输入及首次用户边界见UC018实施记录，不把它与旧130项拼成无参数全绿。随后冻结1326562（仅工作检查点）启动新的无参数完整门禁；使用后台monitor及预存源码指纹，Auth/App继续latest，无新后端编译或配置放宽。实际发现数及终态待记录，Goal保持active。
+
+503436已terminal exit1，源码指纹保持；在DockerHub拉取固定Mongo镜像时referrers请求EOF，未到构建/静态ready或浏览器发现阶段。随后直接重拉mongo8.2.12在manifest HEAD同样EOF。正常terminal材料已保留，0 owned容器/network；staticUnchanged=false表示没有ready基准，不记为产物漂移。没有静默重启进程或将本轮记作业务测试失败。
+
+当前正实现[基础设施显式缓存模式](2026-10-30-local-gateway-runner.md#2026-11-01基础镜像的显式缓存模式)，只对已inspect核对的不可变Mongo/Traefik生效，默认pull、Auth/App latest和Gateway原规则保持。完成相应Node门禁后再冻结新候选重启完整回归，记录实际来源；Goal仍active。
+
+87901b4已实现显式基础设施模式，CI policy57 Node＋21 Vitest通过。已冻结该候选重新启动无参数完整轮次，基础设施来源明确为explicit-cached-infrastructure，Mongo/Traefik分别强制inspect既有e0ce8c35/24841fe2，Gateway仍显式local90cf10f0；Auth/App继续pull latest并核对实际ID。此轮不是默认全发布来源，也没有以pull失败自动改旧后端。实际发现数、源码/产物冻结和终态待补；不要重启仍live的后台runner。Goal保持active，未push。
