@@ -131,3 +131,26 @@ UC016两端五类型set/remove再次通过（3.4/3.5秒）。Developer隔离25�
 两条失败均保留：治理在App Suspend ACK及随后GET完成后，spec159的全资源JSON相等断言失败；此前已完成14条Auth治理命令及其读回，实际页面请求写15次，尚未执行App Restore。当前只有差异存在的证据，后续增加只输出固定字段名/时间相等布尔的诊断，不提前归因镜像。Tester旧overview DELETE204在clear回执HELD后，absent辅助函数对已卸载的区域调用单节点evaluate并超时；修订为evaluateAll，空区域自然表示无旧内容，原exact-text和oldSeen断言均保留。该修订尚待实链复验，不写成当前轮通过。
 
 当轮静态hash保持到终态：Developer `index-BN-ovSVj.js` SHA256 `aeaf719980d0211c55583703de16b0a99dbd0ac71af17f042b8795dc1081af11`；Admin `index-WOdw1UdI.js` SHA256 `ce20163411847382cee89a3b5ae6ef071385775d82ba129083da193ab6f5681e`。全部119394容器（含停止项）和network清理为0，未改原预览私有数据。
+
+## 新 App 镜像后的专项412805
+
+2026-11-01 用户反馈 App 已 push，重新拉取 `latest`，实际 App image ID 更新为 `sha256:18eacd03c1f0cd9b4841bd9b141b61c0d5dde89f6d0045f00322a056541b4027`；Auth 仍为 `518b0917…`，Gateway 显式本地 `90cf10f0…`。Console 冻结 `d5cc071ad72bd71a5e2588bad7e91ccd7c0e182d`，三份完整 spec：治理、Developer 隔离、版本写入/审核/发布，没有 title 筛选。
+
+首轮409215因私有包装继承 umask0077，使容器挂载文件实际0600，Auth/App startup失败，浏览器未开始，exit1。合成Node文件验证后，仅修私有包装的子进程umask0022；日志仍私有，候选源码未改。该轮资源已清理，不计为业务场景发现或通过。
+
+412805 实际发现27项，终态 **12通过、4失败、11未执行，exit1，2.6分钟**，retry0，没有主动skip。两条新增代表业务链均通过：
+
+- UC015治理 **26.6秒**：真实React完成14条Auth治理命令及App暂停/恢复，共16条，专用读回和双App修订通过。App ACK/GET全资源严格比较通过，确认 [已交接时间差异](2026-10-30-app-operation-time-readback-gap.md) 在新发布镜像上修复，没有增加毫秒容差。
+- UC008版本闭环 **30.8秒**：保留原九次前缀，完成真实Reviewer拒绝、owner恢复/保存/再送审、Version与Profile批准、首次TEST发布与读回。精确13次owner＋3次Reviewer命令、历史审核/快照、Session/设备与零自动登录/clear/外域断言通过，详见 [本包](2026-10-30-version-review-publication-loop.md)。
+
+Developer隔离10项通过。首个失败为Version列表旧DELETE204，在`unchanged-B-document`阶段完整main投影严格相等断言失败；此前实际业务/Session/clear/navigation额外流量均为0。其后三项失败在worker重启后的group EMAIL准备，另11项未执行，不当作已通过或已确认产品故障。源代码检查发现B列表读取完成不代表独立PublicationPanel摘要已完成，现为enterB追加该正式GET及成功内容等待，再开始原完整main比较和零额外流量窗口；没有删除完整投影、document marker、oldSeen、Cookie或原Session断言。修订待新候选实测，不将推测当终态。
+
+双静态hash与119394完全相同，wrapper记录源码指纹和静态hash到终态均未变。全部409215/412805容器（含停止项）与network已清理为0，原私有预览数据未动，legacy保持。集中前置CI policy48 Node＋21 Vitest、real types通过；不以此代替完整普通或无参数真实门禁。
+
+同时有限核对UC008发现送审/恢复仅重读Version而遗漏管理摘要，已按既有UC接受修正并待本轮终态后实施。放弃后由列表及PublicationPanel读取，真实spec将补该摘要证据。下一候选合并该实现与独立摘要等待后，集中执行必要前置和完整无参数真实回归，不重复已终态进程或覆盖失败记录。未push。
+
+## 摘要读回修正与完整复验候选
+
+候选 Console `e7cdabb34a893ba7e00c9a47e642493d71f58225` 已本地提交：送审/恢复后的Version＋Application摘要同边界读回、错误与迟到保护、真实闭环的四个摘要GET证据，以及隔离B页面对既有PublicationPanel正式GET/成功渲染的等待。完整页面投影与零额外流量断言保留。
+
+必要前置最终组件15/15、Developer strict、real types、隐私1/1通过。无参数真实轮次422340已启动，默认完整发现与终态待补；本段不是全绿声明。普通完整单测/工作区strict同时集中运行，不改dist或正在冻结的业务源码。来源仍是发布Auth/App latest＋显式本地Gateway，不写成发布Gateway全链成功。

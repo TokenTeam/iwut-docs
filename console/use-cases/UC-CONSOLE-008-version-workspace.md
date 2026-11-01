@@ -47,7 +47,7 @@ Publication 与 Version 使用各自正式读取及 asOf；不把 APPROVED 等�
 - DRAFT 工作页提供明确“提交审核”，等待有效内容保存完成且以实际读取/保存的 revision 作为前置。送审不是自动保存的一部分，至少一次明确确认，提交期间停止编辑；不能把尚未保存表单当已提交 snapshot。引用 App [UC004](../../app-center/use-cases/UC-APP-004-submit-application-version-review.md)。
 - REJECTED 可以明确恢复为 DRAFT，再进入同一编辑页；SUBMITTED/APPROVED 保持内容只读。恢复引用 App [UC006](../../app-center/use-cases/UC-APP-006-restore-rejected-version-to-draft.md)，不构造本地状态跳转。
 - 放弃未提交草稿需独立确认，成功回到版本列表并重新读取；不将放弃解释为任意删除、撤回审核或回滚发布。引用 App [UC035](../../app-center/use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md)。
-- 送审/恢复/放弃 ACK 后重读真实版本与管理摘要；未知或冲突只允许明确读取核对，不自动重放。新会话、访问拒绝、应用切换、迟到ACK与私有表单清理沿用原边界，安全退场优先于普通离页提示。
+- 送审/恢复 ACK 后重读真实版本与管理摘要，两份读取均成功后才提供使用当前状态重新打开工作页的入口。放弃成功后返回版本列表并重读列表与管理摘要，不再要求已放弃版本的详情成功。未知或冲突只允许明确读取核对，不自动重放；ACK 已确认而读回失败须分别表达。新会话、访问拒绝、应用切换、迟到ACK与私有表单清理沿用原边界，安全退场优先于普通离页提示。
 
 新入口在本地镜像接入、实际路由验证后开启；UI/合成验证与真实创建/保存/送审结果分别记录，不把镜像和配置存在当作业务成功。
 
@@ -65,6 +65,6 @@ Publication 与 Version 使用各自正式读取及 asOf；不把 APPROVED 等�
 
 Gateway `5efc9d5` 为六条现有命令开放 DEVELOPER surface，运行镜像已更新为 published latest `b8a5b26f…`，Admin 不开放。不额外启用版本创建／更新、审核提交或 Tester 写入。新增官方 API 生成子集仍固定 `6fea3db`；UI、合成验证和真实业务联调分别登记，不用镜像路由存在宣称业务成功。
 
-API 固定 6fea3db。当前 Gateway `routes.v3.yaml` 的版本创建和更新没有 DEVELOPER surface，首版默认关闭网络写入，允许在全页体验结构与填写；不宣称实际创建或自动保存已端到端通过。对应命令接通并真实验证后才允许部署开启写能力，不凭环境开关认定服务端授权。
+API 固定 6fea3db。2026-10-27 首版时 Gateway 的版本创建和更新尚无 DEVELOPER surface，因此当时默认关闭网络写入，仅提供整页结构与填写；不以当时的环境开关证明服务端授权。2026-10-30 后的命令接入以上方增量为准，真实证据见[写入接入](../implements/2026-10-30-developer-write-workspace.md)和[审核、恢复与发布闭环](../implements/2026-10-30-version-review-publication-loop.md)，不再将首版限制作为当前实现状态。
 
 验收覆盖：三槽位/major/空态；单状态与游标保留；新建与 DRAFT 共用编辑；无效字段、不重复集合、离页保护；串行保存、迟到 ACK、冲突/未知不重放、重置；私有数据退场和原只读回归。组件 fixture 与真实镜像证据分开登记。

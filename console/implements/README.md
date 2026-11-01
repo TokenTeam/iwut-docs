@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-11-01 App已推送后的[412805专项](2026-10-30-console-integration-gates.md#新-app-镜像后的专项412805)终态为**12通过/4失败/11未执行、exit1**。更新App `latest=18eacd03…` 后，UC015全部16条真实治理命令及暂停/恢复ACK/GET严格比较通过，[时间差异](2026-10-30-app-operation-time-readback-gap.md)已有发布镜像修复证据；[UC008拒绝→恢复→再审核→TEST发布](2026-10-30-version-review-publication-loop.md)完整16条命令也通过。隔离首个失败是Version列表独立发布摘要尚未稳定时的完整页面比较，后续worker EMAIL准备失败和未执行据实保留。下一候选补齐其等待，以及既有UC008送审/恢复后管理摘要读取，再集中完整真实回归；不以单链通过改写整轮exit1。下方“时间待诊断/闭环未实施”等为各历史阶段。
+
 2026-10-30[119394四文件实链](2026-10-30-console-integration-gates.md#四文件专项119394)已终态**28通过/2失败、无skip/retry**：UC017双端退出与UC016双端资料通过；Developer25项隔离中24通过。治理App暂停ACK/GET全资源差异正在增加安全诊断，Tester旧clear的缺失区域检测已修订待复验。UC017已取得真实Auth在线撤销、peer保持及设备保留/明确重登代表证据，不能继续当“只准备未执行”；完整无参数门禁仍待。UC008拒绝/恢复/批准/发布按[已接受的有限工作包](2026-10-30-version-review-publication-loop.md)准备，尚未实施。
 
 2026-10-30 [UC017退出](2026-10-30-current-console-sign-out.md)已实现并本地提交 `8dd231e`：专用BFF/Edge、共享client/面板与按代Query实例宿主接线，旧clear不增加Auth副作用。集中普通1866项Vitest＋404项Node、full strict/build、独立owned Mongo3项与Edge通过；最后结果变化后的入口小修订另32项/strict通过。真实Auth relay/spec接线另行进行，不能把这些绿结果写为实际退出成功。治理/隔离顺序诊断95759为1通过/5失败/1未执行，原失败与后续有限修订见[集中记录](2026-10-30-console-integration-gates.md)。

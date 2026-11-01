@@ -1,6 +1,6 @@
 # Admin 平台人员治理与应用运维接入
 
-状态：`IMPLEMENTED / FOCUSED_LOCAL_VERIFIED / REAL_PENDING`，2026-10-30。依据用户持续 goal 对前端设计、自行接受、实现与 subagent 分工的授权实施 [UC-CONSOLE-015](../use-cases/UC-CONSOLE-015-manage-platform-governance.md)。本记录区分产品、定向合成证据和真实链路；当前未验收 UC015 真实治理写入，不将既有 P0/P1 或 UC014 真实通过结果转移到本包。
+状态：`IMPLEMENTED / FOCUSED_LOCAL_VERIFIED / REAL_REPRESENTATIVE_VERIFIED`，2026-11-01。依据既有自主设计和实施授权接入 [UC-CONSOLE-015](../use-cases/UC-CONSOLE-015-manage-platform-governance.md)。412805 已通过真实治理代表链，见文末；下方初始验证与待验收描述为历史阶段，不把代表链扩大为全部角色组合或完整 Console 门禁。
 
 ## 实际范围与自主决定
 
@@ -70,3 +70,9 @@ Admin 主框架已增加“审核 / 平台治理”任务导航，既有版本�
 - 非平台管理员运维人员的精确自身能力发现仍缺，依 UC015 保留最小依赖；可读状态不等于全部运维角色已完整接入。
 - 未新增初始化、应急恢复、全平台搜索、审计查询、Scope/学年编辑、批量操作或后端治理契约。真实 spec 后续追加和运行的状态不能由本记录预先推定。
 - 本包无独立 commit/push；最终源码冻结点和整体门禁结果由主 agent 在实际执行后记录，不能将本页实现状态当作完整 Console goal 已完成。
+
+## 2026-11-01 真实代表链
+
+冻结 Console `d5cc071`，发布 Auth `518b0917…`、更新 App `18eacd03…`、显式本地 Gateway `90cf10f0…`，412805 中治理场景 **1/1 通过，26.6 秒**。真实 Admin React 完成平台资格授予/撤销、两项审核权限各自授予/撤销、两项运维权限各自授予/撤销、Developer 暂停/恢复、账号禁用/恢复，以及 App 暂停/恢复，共 16 次正式命令与后续专用 GET。管理员名单和禁用账号的 Developer 下一实际请求 401/精确退场均核对；原 Session 保持、零外部请求成立。
+
+App ACK/GET 时间差异由后端 `5b42ed7` 修复后，发布镜像上的完整资源严格比较已通过，见 [交接与复验](2026-10-30-app-operation-time-readback-gap.md)。同轮三文件总结果仍 exit1，不能以本场景通过覆盖其它隔离失败；完整门禁与非平台管理员精确能力发现依赖仍开放。没有新增治理后端规则、编译相邻源码或 push Console。
