@@ -238,3 +238,5 @@ Developer生产JS的SHA256为 `bf85cad173d47c66bc853c99644d6b94f364a4a8a57894d53
 唯一失败是 `qualification-read-matrix.real.spec.ts:165` 的角色边界场景，固定阶段 `reviewer-production-hidden-versions`，脱敏失败坐标 **389:33**，即 completedVersionDenial 对两类并发读取逐一 waitForResponse 的位置。产品第一次完整拒绝后会取消同App捕获的查询，兄弟读取不保证已经产生响应头；要求两份响应头都出现不是有效的产品前提。坐标确认本轮在响应等待处失败，没有原始网络事件证据，不把具体取消时点或正文解析失败写成已证实事实。
 
 接受有界 spec 修正：仍要求至少一个实际完成的拒绝并检查正式reason/最小正文，同时核验统一退场前所有实际收到的匹配响应均404/private/no-store；原生各RPC的精确拒绝、完整页面隐私、Session和零副作用断言全部保留。随后对该文件及版本审核发布闭环集中实链复验，不机械重跑全部139项。另一个由隔离组件直接证实的[发布迟到读回缺陷](2026-10-30-version-review-publication-loop.md#发布浮窗的迟到读回覆盖)已通过整合普通检查，修复 `f4952f2` 在本轮终态后fast-forward进入main；本轮冻结不含此修复，后续生产实链证据须单独记录。Goal继续active，legacy/checkpoint不变，未push。
+
+修正已提交并合入 `e0bc2e8`，仅修改资格读取真实spec。观察延续到该角色context关闭后再核验一次，实际200及非明确取消的网络失败仍硬失败；诊断仅两个固定view的事件计数。独立 real types、privacy1/1及diff均exit0，root核对main与检查汇总的spec SHA相同。随后checkpoint `f6e4c4d` 启动轮次 **540896**，只选择资格文件及版本审核发布闭环文件，目标5项，实际发现与终态待补。runner已确认live，Auth/App重新pull latest仍为518b0917/18eacd03，其余来源保持上述显式模式；主源码和静态产物重新冻结。本轮不冒称139项完整门禁，原138通过/1失败不改写。
