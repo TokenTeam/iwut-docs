@@ -17,7 +17,7 @@
 - `go test ./...` 通过（无 URI 时 Mongo 测试跳过）。包括退休绑定仍执行实时 Scope/URL/OAuth 失败及资格自动拒绝、定义损坏 INTERNAL 与既有状态冲突分类。
 - Version A→B 专项通过：A 退休后批准/拒绝、新提交及拒绝后重提绑定 B、历史保留、提交/发布两种胜序、ledger 重读和回滚。日志 `.artifacts/version-binding-release-target.log`。
 - Profile 串行专项通过：同类 A→B 矩阵、现有提交/决定/公开指针回归、两类提交的缺政策/缺定义/计数溢出无部分写入、Profile unknown commit 原事务恢复。Mongo 包 `230.156s`；日志 `.artifacts/profile-binding-release-target.log`。
-- 补充异常数据、竞争发布、Version unknown commit、HTTP/gRPC 与初始化专项正在执行；最终冻结 `check-full` 待完成。
+- 补充异常数据、竞争发布、两类 unknown commit、HTTP/gRPC 与初始化专项全部通过：Mongo `128.788s`，真实 E2E `20.493s`；日志 `.artifacts/review-binding-final-target.log`。最终完整门禁仍待通过。
 
 以上切换使用明确命名的隔离测试政策，只是组件/事务层证据。真实联合发布必须另有获批的真实新政策和环境发布授权，目前未准备，不能以测试政策冒充已上线。
 
@@ -26,3 +26,11 @@
 Gateway 沿用既有路由/权限，更新 API descriptor 并核对新 reason 透传。Console/BFF 重新生成并严格解码 reviewPolicy，展示两类完整定义；A 下提交、B 后仍按 A 决定，不因人工政策发布清确认或强制重提。Scope、权限、指针冲突及未知决定结果恢复继续按既有契约。
 
 本轮未通知其他聊天、未 push、未部署、未访问或重建用户数据库。隔离测试 Mongo 按新模型创建；故障注入只在测试容器开启 enableTestCommands。
+
+## 首轮完整门禁与夹具修复
+
+冻结 App 工作树、API `2dc002e`、docs `5edb551` 的首轮 `check-full` 前23项通过，第24项失败，`changed_sources=[]`。报告 `.artifacts/verification/20261103T171934Z-nejgdixt/report.json`；真实 HTTP/gRPC E2E 通过，Mongo 包未通过，不能记为 backend 完成。
+
+158 条 Mongo 失败均来自两个共用批准夹具仍只确认 `content-reviewed`。最终事务现在会核对绑定政策的完整检查集合；已将发布/运行消费链及版本管理链的两处夹具改为 v3 四项正式检查，未放宽校验，未修改 Auth 或业务规则。
+
+修复后串行运行版本管理、发布 migration、UC038 Tester 投影及 UC036 清空 Test 消费链的真实 Mongo race 专项，全部通过（Mongo `26.536s`），日志 `.artifacts/review-binding-consumer-fixture-target.log`。随后重新冻结输入执行完整门禁，结论见后续最终记录。
