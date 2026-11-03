@@ -4,7 +4,7 @@
 
 ## 共享 API 改动
 
-输入基线为 API `6fea3db`，最终代码及生成物由 API 所有者本地提交，App 再消费其提交；不 push。
+输入基线为 API `6fea3db`。用户随后明确授权本轮直接修改 App 相关 Proto 和生成物，已本地提交为 `2dc002e`；App 消费该固定版本，不 push。非 App Proto、Gateway、Console 和 Auth 源码未修改。
 
 - `app_center/v1/application_review_query/application_review_query.proto`：`ApplicationVersionReviewDetail` 字段4直接由 `current_policy` 改为 `review_policy`，仍用 ReviewPolicyContext（version=1、required_check_ids=2、required_check_definitions=3）。不保留旧字段、双输出、弃用过渡或只读兼容分支。
 - `app_center/v1/application_profile_review_query/application_profile_review_query.proto`：`ApplicationProfileReviewDetail` 字段4直接改为 `review_policy`；`ProfileReviewPolicyContext` 增加 `required_check_definitions = 3`，每项使用本 package 的 message（id=1、title=2、description=3）。`current_published_profile = 7` 及其 oneof 不变。
@@ -18,3 +18,5 @@
 API 所有者提交 Proto 与全部相应生成物，执行已有生成/漂移检查，回报 commit 和检查结果。App 消费该固定版本后更新 transport、HTTP/gRPC 回归；Console/BFF 按新形状重新生成并严格解码，Gateway 核对 descriptor 和错误透传，无新增路由/权限。客户端不接受 currentPolicy 或缺定义的旧响应。
 
 App 自身可先完成 Domain、提交栅栏、Mongo 绑定、决定及内部查询模型；共享 API 交付前不能把整体六个 UC 标为 COMPLETE，也不能声称新接口已可用。没有启动旧数据兼容或真实数据库重建。
+
+API 验证：`make proto-check` 通过，四个变更相关生成包 `go test` 通过。App transport 已接入新字段与 Profile 完整定义，双协议及最终 backend 门禁进度见[实施记录](2026-11-04-submission-bound-review-policy-implementation.md)。
