@@ -912,7 +912,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | --- | --- | --- |
 | `use-cases/UC-APP-027-close-application.md` | 275 | `c56d7c62e94e` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/account-owner-exit-v1.md` | 70 | `70d736bfa904` |

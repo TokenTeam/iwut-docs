@@ -351,7 +351,7 @@ ApplicationProfileReviewSnapshot {
 }
 ```
 
-snapshot、sourceRevision、submittedBy 和 submittedAt 创建后不可修改。后续 Reviewer 读取 snapshot，不使用可能已经存在的其他草稿或当前公开资料拼装审核输入。
+snapshot、policyBinding、sourceRevision、submittedBy 和 submittedAt 创建后不可修改。policyBinding 指向提交事务中有效的独立 Profile 政策及其不可变完整定义；政策退休不改变本次绑定。后续 Reviewer 读取 snapshot，不使用可能已经存在的其他草稿或当前公开资料拼装审核输入。
 
 <!-- 权威位置: use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-019 -->
 ### BR-PRF-019：审核 attempt 身份
@@ -426,23 +426,32 @@ Reviewer 提交自己实际阅读的 expectedPolicyVersion。App Center 拥有�
 ```text
 ProfileReviewPolicy {
   version
-  requiredChecks
+  requiredChecks: []ReviewCheckDefinition { id, title, description }
   status: ACTIVE | RETIRED
 }
 ```
 
-APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snapshot 要求的检查；REJECT 时 confirmedCheckIds 为空。历史 policy 保留用于解释既有 decision，RETIRED policy 不用于新决定。
+APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snapshot 要求的检查；REJECT 时 confirmedCheckIds 为空。policyBinding 在 UC015 提交时固定；expectedPolicyVersion 必须与它一致，decision.policyVersion 保存该值。历史政策保留；RETIRED 只禁止新提交选择，仍允许已绑定 PENDING 作新决定。
 
 首版策略由 App Center migration 写入：version=`app-profile-review-v1`、status=`ACTIVE`，固定要求以下两项：
 
 - `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
 - `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
 
-策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 当前策略由 UC031 正式详情读取，不将本条“首版无独立查询”解释为禁止已交付的 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+本次 v1 初始完整定义逐字承载上述已接受解释，标题仅用于展示，不新增政策义务：
 
-Profile 以独立 policyKind=PROFILE 遵循 [UC005 策略正式发布与运维读回](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)和 ADR004 的发布回执协议；不复制第二套发布状态机。每类唯一 ACTIVE，事务内退休旧版/激活全新版本并记录回执；最终决定与退休写同一策略文档串行化。零/多 ACTIVE 或当前定义损坏失败关闭，不任意选一条策略。
+| ID | 标题 | description 原文 |
+| --- | --- | --- |
+| `content-policy-reviewed` | 资料内容规范 | Reviewer 已检查名称、描述符合内容规范。 |
+| `icon-content-reviewed` | 图标内容合规 | Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。 |
 
-新 Profile 版本激活前须满足 [UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，先审真实政策正文、提供版本绑定正式定义并部署可失败关闭的消费者；不为测试制造 v2，不从旧 ID 猜新含义。旧 expectedPolicyVersion 不再可用时保留 `ProfileReviewPolicyUnavailable` / HTTP409/gRPC ABORTED，不改 Review/Revision/working/public 指针。历史决定不重写，退休版本不重新激活。
+Profile 的完整定义直接保存在 ProfileReviewPolicy 中，首次初始化就完整写入；与 Version 一样按 version 稳定读取，不建立旧数据补充记录。以后新增政策使用新版本并保留新模型产生的完整历史。
+
+策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 使用 UC031 的 reviewPolicy 读取该次绑定定义，审核详情字段统一为 reviewPolicy，不再输出 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
+Profile 以独立 policyKind=PROFILE 引用 [UC005 正式发布流程](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)，提交和发布在 PROFILE 政策文档上串行；最终决定只读取目标绑定和不可变定义，不与政策退休争抢 ACTIVE 写栅栏。政策变化不清空既有确认、不重提、不改终态，也不创建补审或整改状态。
+
+所有提交与 Reviewer 详情均要求完整绑定定义；按 [UC005 新模型初始化](../use-cases/UC-APP-005-decide-application-version-review.md#新模型初始化与运行门禁)直接建立 Profile v1，不支持旧 ID-only policy、补定义迁移或旧记录读取。其它新政策正文另审，不为接口调整制造 v2。
 
 <!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030 -->
 ### BR-PRF-030：批准后自动公开
@@ -465,7 +474,7 @@ ApplicationProfile.currentPublishedProfileRevisionId = profileRevisionId
 
 REJECT 只把目标 Review/Revision 迁移为 REJECTED，并记录理由。`currentPublishedProfileRevisionId` 保持不变；没有既有公开资料时继续为空。
 
-REJECTED 是该 ProfileRevision 的终态：服务端不提供 `REJECTED -> DRAFT`、复制或恢复命令，也不修改 ApplicationVersion 或发送通知。Review snapshot、decision、Revision 内容和审计事实保持不变。
+REJECTED 是该 ProfileRevision 的终态；新修订经 UC015 提交时重新绑定当时生效政策，不沿用被拒绝 Review 的绑定。服务端不提供 `REJECTED -> DRAFT`、复制或恢复命令，也不修改 ApplicationVersion 或发送通知。Review snapshot、decision、Revision 内容和审计事实保持不变。
 
 重新编辑是网页端便利行为：网页端读取被拒绝资料并预填创建表单，然后调用 [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) 创建一份新 DRAFT。新草稿获得独立的 profileRevisionId、sequence 和创建审计；App Center 不记录它与被拒绝 Revision 的复制关系。
 
@@ -626,8 +635,8 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 
 - `UC-APP-013`（use-cases/UC-APP-013-create-application-profile-revision.md）：目标与范围、业务边界、输入与身份、网页端重新编辑被拒绝资料、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、尚未决定但不阻塞文档、后续用例、迁移说明、变更记录、实现依赖与交付边界
 - `UC-APP-014`（use-cases/UC-APP-014-update-draft-application-profile-revision.md）：目标与范围、可编辑与不可编辑字段、输入与身份、主流程、异常流程、最小领域行为、用例端口、数据模型变化、API 草图、测试与验收、后续用例、迁移说明、变更记录、实现依赖与交付边界
-- `UC-APP-015`（use-cases/UC-APP-015-submit-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约
-- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
+- `UC-APP-015`（use-cases/UC-APP-015-submit-application-profile-revision-review.md）：修订范围与审核状态、目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
+- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：修订范围与审核状态、目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、初始化与实时门禁、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、Claims、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
@@ -639,8 +648,8 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 | `use-cases/UC-APP-039-query-owned-application-profile-revisions.md` | 228 | `114ea58a96cd` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
 | `use-cases/UC-APP-014-update-draft-application-profile-revision.md` | 336 | `fde28528679f` |
-| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 254 | `726a36ab708e` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
+| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 271 | `18f9790b9eae` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

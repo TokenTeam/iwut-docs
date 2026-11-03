@@ -744,7 +744,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-028`（use-cases/UC-APP-028-suspend-and-restore-application.md）：目标与范围、参与者与依赖、输入、输出与 API 草图、正交状态模型、暂停流程、恢复流程、暂停期间的行为、OAuth 在线检查与残余窗口、领域与数据模型、错误语义、并发与验收场景、实现依赖与启用边界、变更记录
 - `UC-APP-033`（use-cases/UC-APP-033-archive-and-unarchive-application.md）：设计结论、目标与范围、参与者与授权、输入、输出与 API 草图、正交状态模型、归档流程、取消归档流程、ARCHIVED 期间的行为、OAuth 在线检查与残余窗口、领域与数据模型、错误语义、并发与验收场景、实现依赖与交付边界、变更记录
 - `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：目标与范围、已有依赖与组合边界、输入与身份、普通公开候选资格、目标解析与 Filter 组合、公开结果模型、列表、排序与分页、列表主流程、详情主流程、错误与部分结果、最小查询模型与持久化影响、API 草图、验收场景、依赖检查与待确认设计选择、后续设计顺序、变更记录
-- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
+- `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：修订范围与审核状态、目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、初始化与实时门禁、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `UC-APP-036`（use-cases/UC-APP-036-clear-test-publication-slot.md）：设计结论、目标与范围、参与者与授权、输入与 API 草图、主流程与 no-op、清空前检查的边界、PublicationHistory 与迁移、在线效果与 OAuth 边界、并发与错误、引用规则与实现输入、验收与交付边界、变更记录
 - `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、变更记录
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
@@ -763,11 +763,11 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | `use-cases/UC-APP-028-suspend-and-restore-application.md` | 273 | `1ada06422863` |
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
 | `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
 | `use-cases/UC-APP-036-clear-test-publication-slot.md` | 180 | `e0aa209d3e5f` |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

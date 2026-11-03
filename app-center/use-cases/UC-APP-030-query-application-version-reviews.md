@@ -2,6 +2,10 @@
 
 状态：`ACCEPTED`
 
+## 修订范围与审核状态
+
+2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
+
 ## 目标与范围
 
 > 具备 `app.version.review` 的 Reviewer 查询待处理 ApplicationVersion 审核队列，并读取完成或审计一次审核所需的不可变详情。
@@ -34,40 +38,35 @@ ListPendingApplicationVersionReviewsQuery {
 
 ## 审核详情
 
-详情输入 `applicationId/versionId/reviewId`，三者必须匹配同一 Review，否则统一 `ApplicationReviewNotFound`。
-
-返回：
+详情路径精确匹配目标 Review，保留 application、当前 Version/Revision 状态、不可变 review.snapshot、原 decision、decisionEligibility 与 asOf；Profile 另保留当前公开投影及指针前置。审核政策统一使用 reviewPolicy：
 
 ```text
-ApplicationVersionReviewDetail {
-  application { applicationId, name, adminId, lifecycleStatus, platformAvailabilityStatus }
-  version { versionId, sequence, reviewStatus, revision, createdBy }
-  review {
-    reviewId, attempt, status, sourceVersionRevision,
-    snapshot, scopeCatalogRevision, preflightPolicyVersion,
-    submittedBy, submittedAt, draftRestoration?, decision?
-  }
-  currentPolicy { version, requiredCheckIds, requiredCheckDefinitions { id, title, description }[] }
-  decisionEligibility
-  asOf
+reviewPolicy {
+  version
+  requiredCheckIds[]
+  requiredCheckDefinitions { id, title, description }[]
 }
 ```
 
-审核内容只能取 `ApplicationReview.snapshot`，不能用当前可变 Version 字段替换。终态 Review 仍可读取以支持审计。当前 policy 用于渲染下一次决定输入；它不是授权或并发保证，UC005 仍在写入时复查 policy version、check IDs、Scope Catalog 和 preflight。
+所有状态的 Review 均有真实 policyBinding，查询按该引用读取完整定义，ID/定义集合与顺序严格一致；终态 decision 的版本与绑定一致。A→B 后 A 的详情继续展示 A，Reviewer 用 reviewPolicy.version 填 expectedPolicyVersion，无需清空确认或换 B。
 
-currentPolicy 的定义来自 [UC005 正式策略](UC-APP-005-decide-application-version-review.md#v3-正式人工检查定义)，与 policy version 绑定，在同一 snapshot 中读取；requiredCheckIds 与 definitions 的 ID 顺序及集合一致。缺失、重复或结构非法返回 ApplicationReviewStateInconsistent / INTERNAL，不允许客户端按 ID 猜政策。当前 v3 四项按政策声明顺序输出；决定确认和保存继续采用集合及排序规则。
-
-终态详情的 currentPolicy 不解释历史 decision：历史 v1/v2 只显示已记录版本及 ID，不能套用 v3 文本。新字段为 ReviewPolicyContext.required_check_definitions = 3；原字段编号保持不变。Console 逐项展示纯文本且不预勾选；缺少完整定义只读。成功和错误响应 private, no-store。
-
-正式策略变化及运维读回由 [UC005 BR-REV-016](UC-APP-005-decide-application-version-review.md#br-rev-016)和[正式发布流程](UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)拥有。Reviewer 仍从本次详情观察当前唯一 ACTIVE 的策略，不通过运维入口取得审核权；加载旧策略后真实冲突、重读与清确认不得用错误版本负例冒充实际发布。此次设计补充不新增本查询 Proto 字段或改写旧决定。
-
-详情不返回管理员管理页的其他 Version、OAuth secret、Tester 或用户资料。
+不输出当前全局策略，也不依赖当前 ACTIVE 才能解释已有绑定。缺绑定、未知引用、定义不完整或 decision 不一致均为 INTERNAL；客户端对缺失/非法响应报错，不猜测或进入旧模型只读模式。响应仍 private, no-store，不扩大管理员或公共目录的政策披露。统一数据约束见 [UC005 初始化](UC-APP-005-decide-application-version-review.md#新模型初始化与运行门禁)。
 
 ## 一致性、分页与错误
 
 队列每页和详情都在单个 MongoDB majority snapshot 中完成。Application、Version 与 Review 的引用或 snapshot 不变量损坏返回 `ApplicationReviewStateInconsistent` / INTERNAL；不得跳过坏项形成看似成功的短页。
 
 合法空队列返回空 items 和空 next token。非法 pageSize/pageToken 返回 INVALID_ARGUMENT。详情中合法终态不是冲突；写决定仍由 UC005 返回 already decided 等错误。
+
+## 策略接口与交付
+
+当前尚未上线，App/API、生成客户端、Gateway descriptor 和 Console 直接按单一新契约交付，不设计旧服务/旧客户端并行或分阶段兼容输出。
+
+两类详情将原字段4直接改为 `review_policy`（JSON reviewPolicy），使用包含完整定义的统一语义；删除 currentPolicy 字段与旧形状。无需新增候选字段7/8、deprecated 别名或 reserve 过渡安排。既有无关字段不作无目的改动；最终新类型和字段号由 API 所有者在实施前冻结并统一生成。
+
+提交命令仍只接受草稿 revision，决定请求的 expectedPolicyVersion 验证目标绑定。错误绑定使用明确的 `ApplicationReviewPolicyMismatch` / `ProfileReviewPolicyMismatch`（HTTP409/gRPC ABORTED）；不为保留旧 PolicyChanged/Unavailable 名称而引入歧义。缺绑定或坏定义属于 INTERNAL，不冒充版本前置冲突。
+
+API 定义/生成、App、Console/BFF 严格解码和夹具按新契约配套更新，再运行新模型的端到端验收；严格解码只接受新形状，不 fallback currentPolicy。Gateway 不新增路由或权限，只核对新 descriptor、三协议与错误透传。本次未修改 Proto 或业务代码。
 
 ## 最小查询模型与索引
 
@@ -94,10 +93,11 @@ rpc GetApplicationVersionReview(...)
 7. 三元路径不匹配统一 NOT_FOUND；无权限先返回 PERMISSION_DENIED。
 8. 损坏引用或 snapshot 返回 INTERNAL，队列不静默跳项。
 9. HTTP 与原生 gRPC 行为一致，响应禁止共享缓存。
+10. A 提交后发布 B，A 的待审与终态详情仍返回 A/完整定义；缺绑定/坏定义不 fallback B，严格解码仅接受新契约。
 
 ## 实现依赖与交付边界
 
-ApplicationReview 队列索引、Version、Application 和版本审核 policy 已存在；无需 migration，除非当前部署缺失已定义索引。实现新增 read port/usecase、Mongo snapshot 查询、Proto/transport/wiring 和真实 MongoDB 验收。
+ApplicationReview 队列索引、Version、Application 和版本审核 policy 已存在；本次绑定修订依赖 UC004/005 的新写模型及首次初始化；不实现旧数据过渡。实现新增 read port/usecase、Mongo snapshot 查询、Proto/transport/wiring 和真实 MongoDB 验收。
 
 ## 业务规则
 
@@ -114,7 +114,7 @@ Version 审核队列与详情只接受具备 `app.version.review` 的可信 Revi
 <a id="br-rev-031"></a>
 ### BR-REV-031：审核快照权威
 
-Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，当前 Version 不能替换该内容。
+Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，政策来自同一 attempt 的不可变 policyBinding；当前 Version 或全局 ACTIVE 都不能替换它们。
 
 <a id="br-rev-032"></a>
 ### BR-REV-032：利益冲突提示不替代写检查
@@ -129,9 +129,15 @@ Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，当�
 <a id="br-rev-034"></a>
 ### BR-REV-034：审核查询一致性与失败关闭
 
-单页和详情必须内部一致；损坏引用、快照或当前策略定义导致整次查询 INTERNAL，不能静默跳过或补齐部分定义。
+单页和详情必须内部一致；损坏引用、快照、必要绑定或绑定定义导致整次查询 INTERNAL，不能静默跳过或补齐部分定义。
 
 ## 变更记录
+
+- 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
+
+- 2026-11-04：按用户确认的未上线前提，删除旧模型、旧数据和旧接口兼容，改为统一新模型初始化及单一契约交付。
+
+- 2026-11-03：PROPOSED 修订以 reviewPolicy 返回 attempt 绑定定义，弃用全局 currentPolicy 的决定用途；未实施。
 
 - 2026-10-26：关联用户接受的正式策略发布与真实变化验收；保持现有正式定义读模型和字段不变。
 - 2026-10-16：用户接受 v3 正式检查定义及详情输出扩展，保持历史策略语义。

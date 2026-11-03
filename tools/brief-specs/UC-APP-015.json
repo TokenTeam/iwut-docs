@@ -1,7 +1,8 @@
 {
   "uc": "UC-APP-015",
-  "note": "Atomically submit a DRAFT profile revision, freeze its full content in a PENDING profile review and retain the working pointer. Depends on completed UC013/014; no decisions, queries, publication, Auth Catalog or frontend.",
+  "note": "2026-11-04 ACCEPTED submission-bound review policy implementation. Prelaunch single new model/contract; no legacy data/client compatibility. Preserve independent real-time gates; see implements/2026-11-03-submission-bound-review-policy-proposal.md.",
   "uc_sections": [
+    "修订范围与审核状态",
     "目标与边界",
     "参与者与输入",
     "成功结果",

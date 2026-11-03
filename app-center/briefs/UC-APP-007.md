@@ -567,7 +567,7 @@ oauthRedirects
 
 snapshot 创建后不可修改。Application.name 和独立的 ApplicationProfileRevision 不进入本次版本审核快照；公开目录资料由其自身的 revision 审核流程负责。
 
-审核记录的 status 和后续决策审计可以发生一次受控状态迁移，但这不允许改写 snapshot、sourceVersionRevision、submittedBy 或 submittedAt。
+审核记录的 status 和后续决策审计可以发生一次受控状态迁移，但这不允许改写 snapshot、policyBinding、sourceVersionRevision、submittedBy 或 submittedAt。policyBinding.version 指向本次提交绑定的不可变正式检查定义；与内容 snapshot 一起冻结。
 
 <!-- 权威位置: use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007 -->
 ### BR-REV-007：公网 HTTPS 预检
@@ -992,8 +992,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-007`（use-cases/UC-APP-007-place-approved-version-in-test-slot.md）：旧实现观察、数据模型/application_publications、数据模型/application_publication_history、后续用例、变更记录
-- `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：目标与范围、提交结果、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、后续用例、迁移说明、变更记录
-- `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：目标与范围、参与者、决定结果、旧实现观察、输入、主流程、异常流程、最小领域行为、用例端口、数据模型变化、策略正式发布与运维读回、API 草图、测试与验收、已确认的实现边界、后续用例、迁移说明、变更记录
+- `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：修订范围与审核状态、目标与范围、提交结果、旧实现观察、输入与身份、主流程、异常流程、策略绑定与提交并发、最小领域模型、用例端口、数据模型、API 草图、测试与验收、后续用例、迁移说明、变更记录
+- `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：修订范围与审核状态、目标与范围、参与者、决定结果、旧实现观察、输入、主流程、异常流程、最小领域行为、用例端口、数据模型变化、策略正式发布与运维读回、API 草图、测试与验收、已确认的实现边界、后续用例、新模型初始化与运行门禁、初始化说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-002`（adr/ADR-002-partition-publication-by-rpc-api-major.md）：背景、为什么不使用 platform/target、考虑过的替代方案、结果、关联用例、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
@@ -1007,8 +1007,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 510 | `929ad0ca9cc4` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 678 | `a548d21c99ed` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 541 | `eb64275c4b7b` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 670 | `fe54ea20c860` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

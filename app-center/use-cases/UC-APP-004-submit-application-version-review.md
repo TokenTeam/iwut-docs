@@ -2,13 +2,17 @@
 
 状态：`ACCEPTED`
 
+## 修订范围与审核状态
+
+2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
+
 ## 目标与范围
 
 > developerStatus 为 `APPROVED` 的当前应用管理员，以自己读取到的 revision 为前提，把一个满足提交条件的 DRAFT ApplicationVersion 提交为一次可审计的审核 attempt。
 
 本用例完成两件不可分割的事：
 
-- 复制当前受审核内容，创建状态为 `PENDING` 的 ApplicationReview。
+- 复制当前受审核内容，并绑定本次提交事务中生效的审核策略，创建状态为 `PENDING` 的 ApplicationReview。
 - 将 ApplicationVersion.reviewStatus 从 `DRAFT` 改为 `SUBMITTED`。
 
 本用例不负责：
@@ -39,6 +43,7 @@ ApplicationReview
   draftRestoration: null
   sourceVersionRevision: expectedRevision
   snapshot: 提交瞬间的受审核字段
+  policyBinding: { version }
 ```
 
 Version 内容字段本身不改变。后续 reviewer 只审核 ApplicationReview.snapshot，不重新把可变的 ApplicationVersion 当成审核输入。
@@ -103,7 +108,7 @@ DeveloperIdentity {
 
 HTTP 和 gRPC adapter 都在 command 中传递 expectedRevision。UC-APP-003 的 PUT 直接替换 Version，所以使用 `If-Match`；本用例的 POST 以 reviews collection 为目标且同时迁移 Version，把 Version ETag 放在 `If-Match` 会产生目标资源歧义，因此使用明确的 command 字段。
 
-reviewId、attempt、status、snapshot、decision、draftRestoration、submittedBy 和 submittedAt 都不能由请求正文指定。
+reviewId、attempt、status、snapshot、policyBinding、decision、draftRestoration、submittedBy 和 submittedAt 都不能由请求正文指定。客户端不选择提交政策。
 
 ## 主流程
 
@@ -121,10 +126,11 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
 8. Repository 在同一事务或等价原子边界中重新确认步骤 3 的全部条件，然后：
    - 为该 Version 分配下一个 attempt，从 1 开始递增。
    - 复制候选 Version 的受审核字段形成不可变 snapshot。
+   - 按下节在同一事务读取并保护当前 Version 策略选择，将 policyBinding 与 snapshot 一同写入。
    - 插入 status 为 `PENDING`、decision 和 draftRestoration 均为 null 的 ApplicationReview。
    - 将 Version.reviewStatus 改为 `SUBMITTED`。
    - 将 Version.revision 原子增加 1，并写入 updatedBy、updatedAt。
-8. 返回新建的 ApplicationReview 和更新后的 Version 摘要。
+9. 返回新建的 ApplicationReview 和更新后的 Version 摘要。
 
 外部检查与最终写入之间允许发生并发，但最终写入必须再次比较 revision。只要 Version 内容、状态或管理员已经变化，就不能保存基于旧候选内容生成的审核快照。
 
@@ -142,6 +148,7 @@ reviewId、attempt、status、snapshot、decision、draftRestoration、submitted
 - scope 已不存在、deprecated 或不再允许新申请：`InvalidApplicationScope`。
 - oauthRedirects 不再满足 BR-VER-018：`InvalidOAuthRedirectConfiguration`。
 - Scope Catalog 无可用的新鲜快照：`ScopeCatalogUnavailable`。
+- 当前策略缺失、多 ACTIVE、选择与定义不一致或正式定义不完整：内部一致性失败，不创建 Review、不迁移 Version。存储故障按依赖不可用处理。
 - reviewId 冲突或持久化失败：内部失败，不产生半完成提交。
 
 applicationId 与 versionId 不匹配时不返回 Version 的真实所属应用。所有失败都必须保持 Version 为原状态且不创建 review。
@@ -193,7 +200,7 @@ oauthRedirects
 
 snapshot 创建后不可修改。Application.name 和独立的 ApplicationProfileRevision 不进入本次版本审核快照；公开目录资料由其自身的 revision 审核流程负责。
 
-审核记录的 status 和后续决策审计可以发生一次受控状态迁移，但这不允许改写 snapshot、sourceVersionRevision、submittedBy 或 submittedAt。
+审核记录的 status 和后续决策审计可以发生一次受控状态迁移，但这不允许改写 snapshot、policyBinding、sourceVersionRevision、submittedBy 或 submittedAt。policyBinding.version 指向本次提交绑定的不可变正式检查定义；与内容 snapshot 一起冻结。
 
 <a id="br-rev-005"></a>
 ### BR-REV-005：审核 attempt
@@ -257,10 +264,25 @@ snapshot 冻结的是登记信息，不是 launchUrl 指向的网页字节。开
 - 最终管理员检查。
 - Version 所属、DRAFT 状态和 expectedRevision 检查。
 - attempt 分配和唯一性检查。
+- 当前有效审核策略的选择、真实并发栅栏及完整 policyBinding 写入。
 - ApplicationReview 插入。
 - Version 状态、revision 和更新审计变更。
 
 MongoDB 实现应使用同一事务覆盖 Application、ApplicationVersion 和 ApplicationReview，或提供能证明相同语义的原子方案。
+
+## 策略绑定与提交并发
+
+本节落实 BR-REV-004/009。Version 与 Profile 分别选择自己集合中的政策，Profile 提交由 UC015 BR-PRF-018/021 引用同一协议，不共享政策正文或新增政策服务。
+
+每次提交保存 `policyBinding { version }`。version 为 1–50 ASCII `[A-Za-z0-9._-]`；绑定与内容在同一次提交完成，沿用 submittedAt 审计，不新增来源分支或重复时间字段。完整定义按 `(kind, version)` 从对应不可变政策仓库稳定读取。新提交只有完整可解释的定义才能成功；不以 preflightPolicyVersion 或 scopeCatalogRevision 代替审核政策，不复制另一个可修改副本。
+
+复用现有 policy 文档的 coordinationRevision：提交事务严格确认本类恰好一个 ACTIVE，读取其完整定义，再按读取的 version、status=ACTIVE、coordinationRevision 作真实条件写（增加技术计数），把 policyBinding、内容 snapshot、attempt 和 SUBMITTED 状态同事务提交。发布退休 A 时也写同一 A 文档；原来位于决定路径的退休写栅栏移到提交路径，不新增 head/全局指针对象。仅 snapshot 读后插入 Review 不足以排除旧读。
+
+归属以提交事务与发布事务的串行提交顺序确定：提交先成功则绑定 A；A→B 发布先成功则旧 A 上的提交不能按旧快照成功，事务重试读取 B 后才绑定 B。重试复用命令、reviewId 和审计时间，但重新选择事务内有效政策；失败不留下绑定或 Review。每个成功提交恰有一份当时有效的规则，不按页面打开时间、事务外缓存或 submittedAt 猜测。技术计数会被提交增加，发布人员不持有它作长期业务前置。
+
+版本唯一索引、逐事务唯一 ACTIVE 复查及对原 ACTIVE 的共享真实条件写共同保护选择/切换；并发发布只能有一个基于 A 成功，不需要另建选择状态。零/多 ACTIVE 或坏定义时新提交/发布失败关闭，不任取一条。绑定后查询/决定只读自身引用与不可变定义，不要求仍 ACTIVE，也不为退休写政策栅栏。
+
+拒绝后 Version 经 UC006 恢复/编辑/重提形成新 attempt，Profile 经 UC013 新建修订再提交，两者均重新选择当时有效政策。旧 attempt 保留原绑定与终态。验收覆盖两种提交胜序、重试、发布回滚、重复 source revision 与无部分绑定；以上方案已接受；实现与验证状态以实施导航为准。
 
 ## 最小领域模型
 
@@ -275,6 +297,7 @@ ApplicationReview {
   decision: null
   draftRestoration: null
   snapshot: ApplicationVersionReviewSnapshot
+  policyBinding: { version }
   scopeCatalogRevision: int64
   preflightPolicyVersion: string
   submittedBy: AuthId
@@ -364,6 +387,7 @@ type ApplicationReviewRepository interface {
 | `snapshot.requiredScopes` | 提交时必需 scopes | array&lt;string&gt; | 已排序；元素唯一 | no | no |
 | `snapshot.optionalScopes` | 提交时可选 scopes | array&lt;string&gt; | 已排序；元素唯一且不与 required 交叉 | no | no |
 | `snapshot.oauthRedirects` | 提交时 OAuth 回调 | object | `pkceRedirectUris/confidentialRedirectUris`；BR-VER-018；已规范排序 | no | no |
+| `policyBinding` | 本次提交的不可变审核策略引用 | object | 仅 version；定义见本 UC 策略绑定章节 | no | no |
 | `scopeCatalogRevision` | scope 校验使用的 Auth catalog revision | int64 | Auth 单调递增版本 | no | no |
 | `preflightPolicyVersion` | URL 提交预检规则版本 | string | 稳定策略标识，1–50 ASCII `[A-Za-z0-9._-]` | no | no |
 | `submittedBy` | 实际提交者 | string | opaque authId | no | no |
@@ -376,12 +400,14 @@ type ApplicationReviewRepository interface {
 - `(versionId, sourceVersionRevision)` 复合唯一索引。
 - 对 `status = PENDING` 建立 versionId 部分唯一索引。
 - `(status, submittedAt, reviewId)` 索引支持稳定审核队列分页。
-- snapshot、提交身份和提交时间创建后不可修改。
+- snapshot、policyBinding、提交身份和提交时间创建后不可修改；所有 Review 从新模型创建起就具有绑定；测试夹具按 UC005 初始化章节重建。
 - 本用例只允许插入 status=`PENDING` 且 decision/draftRestoration 均为 null。
 
 `application_versions` 不增加字段，但 reviewStatus、revision、updatedBy 和 updatedAt 在本用例中一同变化。
 
 ## API 草图
+
+policyBinding 是 Review 的内部持久化事实，不增加开发者提交输入或响应字段；Reviewer 投影见 UC030，管理员历史查询的最小披露白名单不扩展。
 
 ```text
 POST /applications/{applicationId}/versions/{versionId}/reviews
@@ -455,7 +481,8 @@ Location: /applications/{applicationId}/versions/{versionId}/reviews/{reviewId}
 - 只有 DRAFT 可以进入 SUBMITTED。
 - 提交产生与候选内容完全一致、集合顺序稳定且包含 oauthRedirects 的 snapshot。
 - 提交增加 Version revision，并更新最近修改审计。
-- snapshot 与提交审计创建后不可修改。
+- snapshot、policyBinding 与提交审计创建后不可修改。
+- A 下成功提交后切换 B，原 attempt 保持 A；新提交和 UC006 恢复后的重提绑定 B；并发顺序、缺策略和事务回滚见下节。
 - 新 Review 的 decision 固定为 null。
 - 新 Review 的 draftRestoration 固定为 null。
 - attempt 在同一 Version 内递增，不参与 Version 身份或排序。
@@ -502,6 +529,10 @@ UC-APP-005：审核 ApplicationVersion
 既有实现需要 migration 为历史 Review snapshot 回填 `oauthRedirects: {pkceRedirectUris: [], confidentialRedirectUris: []}`，并同步 Version 依附配置读取、snapshot 深拷贝、schema、API 与测试；完成前不覆盖 OAuth 扩展。旧 Application 的 `AUDITING` 状态和直接改审核状态 API 不保留。
 
 ## 变更记录
+
+- 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
+
+- 2026-11-04：按用户确认的未上线前提，删除旧模型、旧数据和旧接口兼容，改为统一新模型初始化及单一契约交付。
 
 - 2026-09-15：建立 UC-APP-004；提交时创建独立审核快照，把 Version 原子迁移为 SUBMITTED，并重新验证 Scope Catalog 与公网 HTTPS 入口。
 - 2026-09-15：UC-APP-005 引入一次性 decision；UC-APP-004 创建 PENDING Review 时将其初始化为 null。

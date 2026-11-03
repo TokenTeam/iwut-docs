@@ -1,12 +1,15 @@
 # 审核策略正式变更途径提案
 
+
+> 2026-11-03 替代说明（新修订技术方案待审）：用户已确认提交时固定政策。本文原“切换打断旧 PENDING 决定、清确认换策略”的要求不再指导后续工作；发布工程范围也按[本轮提案](2026-11-03-submission-bound-review-policy-proposal.md)重新收敛。原文保留历史；Profile 单工作位、公开指针 CAS、Scope 独立门禁和验收分层不在替代范围。
+
 状态：`ACCEPTED`（设计），2026-10-26。用户已同意两项草案并要求编写/修改相应用例；本次仅落实权威文档与派生 brief，不启动实现、迁移、Proto/codegen、测试实现、CI、镜像构建或部署，不 commit/push。
 
 ## 接受与权威收敛
 
 2026-10-26整合补记：下文草案过程与“不commit/push”等表述保留当时授权范围；用户后续已授权本地docs分支整合，Console UC006/007的已接受验收文字已在整合main落地，详见[交接状态](2026-10-26-console-review-acceptance-handoff.md)。其原始工作区与业务源码未改，未运行新增联合验收，未push。Auth UC036状态以独立接受的用例及交付记录为准。
 
-以下核对、选项和候选文字保留为提案过程记录，不是第二份权威定义；其原有“待审核/未修改”等描述表示草案阶段。当前业务规则已收敛到 [UC005](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[UC016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)、[UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)和 [ADR004](../adr/ADR-004-mongodb-transactions-and-schema-management.md#政策发布回执与恢复)，冲突时以这些权威正文为准。Console 对应文字见[已接受交接](2026-10-26-console-review-acceptance-handoff.md)，由其所有者落地；未修改 Console 工作区。
+以下核对、选项和候选文字保留为提案过程记录，不是第二份权威定义；其原有“待审核/未修改”等描述表示草案阶段。当前业务规则已收敛到 [UC005](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[UC016](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)、[UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#完整策略定义)和 [ADR004](../adr/ADR-004-mongodb-transactions-and-schema-management.md#政策发布回执与恢复)，冲突时以这些权威正文为准。Console 对应文字见[已接受交接](2026-10-26-console-review-acceptance-handoff.md)，由其所有者落地；未修改 Console 工作区。
 
 ## 事实核对与来源
 
@@ -15,7 +18,7 @@
 | 事项 | 已有事实 | 权威或实现证据 |
 | --- | --- | --- |
 | Version 策略所有权 | App 拥有不可变版本和历史；RETIRED 不用于新决定 | [BR-REV-016](../use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016) |
-| 当前 Version 基线 | v1/v2 RETIRED；唯一 ACTIVE v3，四项正式定义与版本绑定 | [正式定义及迁移](../use-cases/UC-APP-005-decide-application-version-review.md#v3-迁移与切换)、[0033 实现](https://github.com/TokenTeam/iwut-app-center/blob/d3f510e9b5b6f332405c773e11dfe1aa6cd0d2ea/internal/adapter/mongo/version_review_definitions_migration.go) |
+| 当前 Version 基线 | v1/v2 RETIRED；唯一 ACTIVE v3，四项正式定义与版本绑定 | [正式定义及迁移](../use-cases/UC-APP-005-decide-application-version-review.md#初始正式策略)、[0033 实现](https://github.com/TokenTeam/iwut-app-center/blob/d3f510e9b5b6f332405c773e11dfe1aa6cd0d2ea/internal/adapter/mongo/version_review_definitions_migration.go) |
 | 当前 Profile 基线 | migration 0013 初始化 `app-profile-review-v1`；两项既定检查；无在线策略管理接口 | [BR-PRF-028](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)、[初始化实现](https://github.com/TokenTeam/iwut-app-center/blob/d3f510e9b5b6f332405c773e11dfe1aa6cd0d2ea/internal/adapter/mongo/profile_review_decision_migration.go) |
 | Reviewer 正式读回 | UC030 当前策略带 version/IDs/definitions；UC031 当前 Profile 策略带 version/IDs，并有同次公开指针及公开资料 | [UC030](../use-cases/UC-APP-030-query-application-version-reviews.md#审核详情)、[UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#审核详情)；API27c 的两个 ReviewQuery service |
 | 既有部署入口 | `app-center migrate` 显式运行已编入二进制的 migration；serve 不自动迁移 | [ADR-004](../adr/ADR-004-mongodb-transactions-and-schema-management.md#schema-与索引)、[命令实现](https://github.com/TokenTeam/iwut-app-center/blob/d3f510e9b5b6f332405c773e11dfe1aa6cd0d2ea/cmd/app-center/migrate.go) |
@@ -58,7 +61,7 @@ Console 基线以[已发布缓存头复验记录](../../console/implements/2026-
 
 拟对每一 policyKind 分别保持唯一 ACTIVE；Version 与 Profile 不共用一个“当前策略”。正常变更是同一事务内把唯一预期 A 从 ACTIVE 改为 RETIRED，并插入/精确核对新 B 为 ACTIVE。该事务不重写历史内容、旧 decision、Review snapshot 或 PENDING attempt，不产生对外可见的零 ACTIVE 窗口。不提供单独退休最后一个 ACTIVE 的常规操作。
 
-前置条件为 A 仍是当前唯一 ACTIVE、A 内容精确相符、B 未被其它内容占用、发布清单与批准记录匹配。不允许把已 RETIRED 的版本重新激活作为回滚，延续[UC005 切换规则](../use-cases/UC-APP-005-decide-application-version-review.md#v3-迁移与切换)。兼容故障时先停止决定入口、修复或经批准发布全新版本，不恢复旧策略状态制造 ABA。
+前置条件为 A 仍是当前唯一 ACTIVE、A 内容精确相符、B 未被其它内容占用、发布清单与批准记录匹配。不允许把已 RETIRED 的版本重新激活作为回滚，延续[UC005 切换规则](../use-cases/UC-APP-005-decide-application-version-review.md#初始正式策略)。兼容故障时先停止决定入口、修复或经批准发布全新版本，不恢复旧策略状态制造 ABA。
 
 拟补每类策略最多一个 ACTIVE 的数据库约束，事务提交前同时验证“至少一个”，并补 Profile 查询/决定对唯一当前策略的严格验证。当前 Version 查询已检查唯一 ACTIVE；**Profile 当前读取只 FindOne(ACTIVE)，不是现成的唯一性证明**。这些是正式切换实施前需要解决的范围，不是本轮已修复的缺陷。
 

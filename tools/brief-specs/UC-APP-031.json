@@ -1,21 +1,23 @@
 {
   "uc": "UC-APP-031",
-  "note": "2026-10-26 accepted design delta for UC-APP-031; preserve delivered baseline, formal policy release and fail-closed compatibility; documentation only, implementation not started. See implements/README.md for current coverage and Console handoff.",
+  "note": "2026-11-04 ACCEPTED submission-bound review policy implementation. Prelaunch single new model/contract; no legacy data/client compatibility. Preserve independent real-time gates; see implements/2026-11-03-submission-bound-review-policy-proposal.md.",
   "uc_sections": [
+    "修订范围与审核状态",
     "目标与范围",
     "身份与精确权限",
     "待处理队列",
     "审核详情",
-    "策略版本兼容门槛",
+    "完整策略定义",
     "一致性与错误",
     "当前公开资料投影",
     "授权与一致性",
     "决定与并发",
-    "大小、缓存和兼容",
+    "大小与缓存",
     "最小查询模型与索引",
     "API 草图",
     "验收场景",
-    "实现依赖与交付边界"
+    "实现依赖与交付边界",
+    "策略接口与交付"
   ],
   "include_own_brs": true,
   "include_external_brs": true,

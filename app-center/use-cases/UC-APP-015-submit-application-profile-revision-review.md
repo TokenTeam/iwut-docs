@@ -2,6 +2,10 @@
 
 状态：`ACCEPTED`
 
+## 修订范围与审核状态
+
+2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
+
 ## 目标与边界
 
 > developerStatus 为 `APPROVED` 的当前 Application 管理员，提交一份 DRAFT ApplicationProfileRevision；App Center 冻结本次资料快照，创建独立的 PENDING ApplicationProfileReview，并把资料修订迁移为 SUBMITTED。
@@ -10,7 +14,7 @@
 
 - 检查当前管理员、DRAFT 状态和乐观并发 revision。
 - 重新验证当前完整资料内容。
-- 创建具有独立身份的 ApplicationProfileReview attempt 与不可变 snapshot。
+- 创建具有独立身份的 ApplicationProfileReview attempt、不可变 snapshot 和提交时政策绑定。
 - 原子执行 `DRAFT -> SUBMITTED`、revision 和最近修改审计更新。
 
 本用例不负责：
@@ -43,7 +47,7 @@ SubmitApplicationProfileRevisionReview {
 }
 ```
 
-`applicationId` 和 `profileRevisionId` 使用各自的 UUIDv7 类型；`expectedRevision >= 1`。profileReviewId、attempt、snapshot、状态与审计字段由 App Center 生成，调用者不能指定。
+`applicationId` 和 `profileRevisionId` 使用各自的 UUIDv7 类型；`expectedRevision >= 1`。profileReviewId、attempt、snapshot、policyBinding、状态与审计字段由 App Center 生成，调用者不能指定，也不能选择政策版本。
 
 ## 成功结果
 
@@ -59,6 +63,7 @@ ApplicationProfileReview
   decision: null
   snapshot: submitted ProfileContent
   sourceRevision: expectedRevision
+  policyBinding: { version }
 
 ApplicationProfile
   workingProfileRevisionId: target revision (unchanged)
@@ -75,6 +80,7 @@ ApplicationProfile
 5. 为 ApplicationProfileReview 生成 UUIDv7，分配该 ProfileRevision 下的下一个 attempt，并取得 submittedAt。
 6. 从 ProfileRevision 当前内容创建不可变 snapshot。
 7. 在同一原子边界重新确认管理员、归属、DRAFT、revision 和不存在重复 PENDING Review，然后：
+   - 按 [UC004 策略绑定与提交并发](UC-APP-004-submit-application-version-review.md#策略绑定与提交并发)在 PROFILE 政策文档上选择并保护本次有效政策，保存 policyBinding；
    - 创建 PENDING ApplicationProfileReview；
    - 把 ProfileRevision 迁移为 SUBMITTED；
    - 增加 ProfileRevision.revision，并更新 updatedBy/updatedAt；
@@ -139,7 +145,7 @@ ApplicationProfileReviewSnapshot {
 }
 ```
 
-snapshot、sourceRevision、submittedBy 和 submittedAt 创建后不可修改。后续 Reviewer 读取 snapshot，不使用可能已经存在的其他草稿或当前公开资料拼装审核输入。
+snapshot、policyBinding、sourceRevision、submittedBy 和 submittedAt 创建后不可修改。policyBinding 指向提交事务中有效的独立 Profile 政策及其不可变完整定义；政策退休不改变本次绑定。后续 Reviewer 读取 snapshot，不使用可能已经存在的其他草稿或当前公开资料拼装审核输入。
 
 <a id="br-prf-019"></a>
 
@@ -177,6 +183,7 @@ profileRevisionId、applicationId、sequence、createdBy、createdAt、displayNa
 - 当前管理员、ProfileRevision 归属、DRAFT 和 expectedRevision 的最终检查；
 - ApplicationProfile.workingProfileRevisionId 仍指向目标的检查；
 - Review attempt 分配与重复检查；
+- 当前 Profile 政策选择、与发布串行的真实政策写栅栏及完整 policyBinding；
 - PENDING ApplicationProfileReview 创建；
 - ProfileRevision 状态、revision 和更新审计变更；
 - ApplicationProfile.workingProfileRevisionId 仍指向目标 SUBMITTED Revision。
@@ -204,6 +211,7 @@ ApplicationProfileReview {
   sourceRevision
   status: PENDING
   snapshot: ApplicationProfileReviewSnapshot
+  policyBinding: { version }
   submittedBy
   submittedAt
   decision: null
@@ -212,7 +220,7 @@ ApplicationProfileReview {
 
 ApplicationProfileReview 引用 ProfileRevision，但不放入 ApplicationProfileRevision 聚合内部。应用服务在本地原子边界内协调 ApplicationProfile、ProfileRevision 和 ProfileReview。
 
-本用例不决定 Review decision 的结构，也不引入 Reviewer 权限或审核策略。这些内容由下一条“审核 ApplicationProfileRevision”命令定义。
+本用例不决定 decision 的结构或 Reviewer 权限；政策正文由 UC016 BR-PRF-028 拥有，但提交必须绑定其当时有效的版本。零/多 ACTIVE、政策选择不一致或完整定义不可读时提交失败关闭，不创建半条 Review。
 
 ## 验收场景
 
@@ -224,6 +232,7 @@ ApplicationProfileReview 引用 ProfileRevision，但不放入 ApplicationProfil
 - 任一步失败都不留下孤立 Review 或半完成状态迁移。
 - 提交不改变当前公开资料，也不修改任何运行版本或发布槽位。
 - 首次提交但尚未批准时，普通用户目录仍看不到该资料。
+- A 下提交后发布 B，原 PENDING 仍绑定 A；新修订的提交绑定 B。与切换并发按 UC004 同一协议取得明确归属，失败无半完成绑定。
 
 ## 后续方向
 
@@ -231,13 +240,13 @@ ApplicationProfileReview 引用 ProfileRevision，但不放入 ApplicationProfil
 
 ## 实现依赖与交付边界
 
-本次交付为当前后端工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
+以下为既有交付基线；本次政策绑定修订为 PROPOSED、NOT_STARTED，不据本段启动实现。既有工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
 
 沿用 Application `coordinationRevision` 技术写栅栏，在事务内保护当前管理员资格；资料生命周期、revision 和工作指针同时受最终条件检查保护。数据不变量异常使用 `ApplicationProfileStateInconsistent`，HTTP 500 / gRPC INTERNAL，并输出脱敏 ERROR 告警；不得伪装成客户端冲突或自动修复损坏状态。数据库驱动错误、完整资料文本和身份凭据不进入错误响应或普通日志。
 
 验收必须运行 `make check-full`，覆盖所有 BR 的单元测试、真实副本集 validator/index、回滚、管理员转让竞争和 HTTP/gRPC E2E；冻结代码、API 和设计来源后运行，交付报告与本地 commit，禁止 push。
 
-前置依赖是 UC-APP-013 和 UC-APP-014 已完成且通过各自完整验证；提交命令不等待 UC016、Reviewer 身份签发或审核策略。独立的 ApplicationProfileReview 聚合仍属于 `internal/profile` 能力；不复用运行版本 Review 的 scopes、URL 预检或恢复逻辑。
+前置依赖是 UC-APP-013 和 UC-APP-014 已完成且通过各自完整验证；提交不等待 Reviewer 身份签发，但新增绑定依赖可解释的 Profile 正式政策及原子选择机制；它们必须先于新写入启用。独立的 ApplicationProfileReview 聚合仍属于 `internal/profile` 能力；不复用运行版本 Review 的 scopes、URL 预检或恢复逻辑。
 
 Repository 使用业务原子方法 SubmitDraft，输入 applicationId、profileRevisionId、expectedAdminId、expectedRevision、profileReviewId、submittedAt，返回提交后的 ProfileRevision 与 ProfileReview。事务内部重新加载内容并验证，使用当前持久化内容形成快照；不信任事务外或客户端传来的 snapshot。UUIDv7 与时钟经端口提供，技术重试不重新分配外部身份或时间。
 
@@ -249,6 +258,14 @@ Repository 使用业务原子方法 SubmitDraft，输入 applicationId、profile
 
 内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews`；外部只加 `/app-center`。原生 gRPC：`app_center.v1.application_profile_review.ApplicationProfileReview/SubmitApplicationProfileRevisionReview`。复用 UC004 提交审核惯例，HTTP 正文为 `{ "expectedRevision": "3" }`（Proto int64 JSON 形状），gRPC command.expected_revision；本命令不使用 If-Match。正文只接受 expectedRevision，不接受 snapshot、身份、归属、attempt 或审计；query 不可覆盖正文和路径。
 
-成功 HTTP201 返回 `{ "profileRevision": <完整提交后修订>, "review": <完整审核记录> }`，ETag 为提交后 ProfileRevision.revision。Review 包含 profileReviewId、applicationId、profileRevisionId、attempt、sourceRevision、status、snapshot、submittedBy、submittedAt、decision:null；snapshot 的 description/icon 沿用 UC013 的 string/null 表达。decision 在 Proto 使用 google.protobuf.Value 且只输出 null_value 表示当前唯一合法形状，UC016 再定义 object 内容契约；不预建审核决定业务。
+成功 HTTP201 返回 `{ "profileRevision": <完整提交后修订>, "review": <完整审核记录> }`，ETag 为提交后 ProfileRevision.revision。policyBinding 在内部保存，通过 UC031 的 Reviewer 专用投影读取，不增加开发者响应或管理员查询披露。Review 响应继续包括 profileReviewId、applicationId、profileRevisionId、attempt、sourceRevision、status、snapshot、submittedBy、submittedAt、decision:null；snapshot 的 description/icon 沿用 UC013 的 string/null 表达。decision 在 Proto 使用 google.protobuf.Value 且只输出 null_value 表示当前唯一合法形状，UC016 再定义 object 内容契约；不预建审核决定业务。
 
 错误：身份401/UNAUTHENTICATED，Developer/管理员不足403/PERMISSION_DENIED，归属错误或不存在404/NOT_FOUND，非法输入/内容400/INVALID_ARGUMENT，非DRAFT或stale409/ABORTED，内部不变量或基础设施失败500/INTERNAL。response loss 后查询的读模型契约独立交付，不在本工作包偷偷增加 GET，也不能声称完整管理端流程已可用。
+
+## 变更记录
+
+- 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
+
+- 2026-11-04：按用户确认的未上线前提，删除旧模型、旧数据和旧接口兼容，改为统一新模型初始化及单一契约交付。
+
+- 2026-11-03：PROPOSED 修订将审核政策与内容快照在成功提交时一同绑定，未启动实现。

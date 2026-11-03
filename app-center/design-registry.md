@@ -39,8 +39,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-001` | 开发者新建应用 | `ACCEPTED` | [UC-APP-001-create-application.md](use-cases/UC-APP-001-create-application.md) | — | Domain、UseCase、MongoDB、Proto、HTTP/gRPC Transport、可信身份、Composition Root 与真实 MongoDB 端到端测试已闭合；实现状态见 `implements/README.md`。 |
 | `UC-APP-002` | 创建应用版本 | `ACCEPTED` | [UC-APP-002-create-application-version.md](use-cases/UC-APP-002-create-application-version.md) | — | Domain、UseCase、MongoDB 持久化、Scope Catalog cache 与事务集成测试已闭合；实现状态见 `implements/README.md`。 |
 | `UC-APP-003` | 更新草稿应用版本 | `ACCEPTED` | [UC-APP-003-update-draft-application-version.md](use-cases/UC-APP-003-update-draft-application-version.md) | — | Domain、UseCase、MongoDB 持久化、显式 migration 与事务并发集成测试已闭合；实现状态见 `implements/README.md`。 |
-| `UC-APP-004` | 提交应用版本审核 | `ACCEPTED` | [UC-APP-004-submit-application-version-review.md](use-cases/UC-APP-004-submit-application-version-review.md) | — | Domain、UseCase、MongoDB 持久化、显式 migration 与事务并发集成测试已闭合；实现状态见 `implements/README.md`。 |
-| `UC-APP-005` | 审核应用版本 | `ACCEPTED` | [UC-APP-005-decide-application-version-review.md](use-cases/UC-APP-005-decide-application-version-review.md) | — | 既有决定/策略基线已交付；2026-10-26正式发布治理增量已接受未实现，见 implements/README.md。 |
+| `UC-APP-004` | 提交应用版本审核 | `ACCEPTED` | [UC-APP-004-submit-application-version-review.md](use-cases/UC-APP-004-submit-application-version-review.md) | — | 2026-11-03 提交时固定政策修订已接受；新语义 IN_PROGRESS，已交付历史保留，见 implements/README.md。 |
+| `UC-APP-005` | 审核应用版本 | `ACCEPTED` | [UC-APP-005-decide-application-version-review.md](use-cases/UC-APP-005-decide-application-version-review.md) | — | 2026-11-03 提交时固定政策修订已接受；新语义 IN_PROGRESS，已交付历史保留，见 implements/README.md。 |
 | `UC-APP-006` | 将被拒绝的应用版本恢复为草稿 | `ACCEPTED` | [UC-APP-006-restore-rejected-version-to-draft.md](use-cases/UC-APP-006-restore-rejected-version-to-draft.md) | — | — |
 | `UC-APP-007` | 将已批准应用版本放入测试发布槽位 | `ACCEPTED` | [UC-APP-007-place-approved-version-in-test-slot.md](use-cases/UC-APP-007-place-approved-version-in-test-slot.md) | — | Domain、UseCase、MongoDB、Proto、HTTP/gRPC 与 consumer E2E 已交付；外部依赖见 `implements/README.md`。 |
 | `UC-APP-008` | 创建或轮换 Tester 加入链接 | `ACCEPTED` | [UC-APP-008-create-or-rotate-tester-join-link.md](use-cases/UC-APP-008-create-or-rotate-tester-join-link.md) | — | 当前 mock 入口后端工作包 COMPLETE，含 env URL 前缀、原子轮换、API 与真实 MongoDB E2E；见 `implements/README.md`。 |
@@ -50,8 +50,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-012` | 为 Tester 解析 Application 的 test 启动目标 | `ACCEPTED` | [UC-APP-012-resolve-test-launch-target-for-tester.md](use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md) | — | — |
 | `UC-APP-013` | 创建应用公开资料修订草稿 | `ACCEPTED` | [UC-APP-013-create-application-profile-revision.md](use-cases/UC-APP-013-create-application-profile-revision.md) | — | — |
 | `UC-APP-014` | 更新应用公开资料修订草稿 | `ACCEPTED` | [UC-APP-014-update-draft-application-profile-revision.md](use-cases/UC-APP-014-update-draft-application-profile-revision.md) | — | — |
-| `UC-APP-015` | 提交应用公开资料修订审核 | `ACCEPTED` | [UC-APP-015-submit-application-profile-revision-review.md](use-cases/UC-APP-015-submit-application-profile-revision-review.md) | — | — |
-| `UC-APP-016` | 审核应用公开资料修订 | `ACCEPTED` | [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md) | — | 2026-10-26接受正式策略发布及单工作位下并发验收分层；新增后端约束未实现。 |
+| `UC-APP-015` | 提交应用公开资料修订审核 | `ACCEPTED` | [UC-APP-015-submit-application-profile-revision-review.md](use-cases/UC-APP-015-submit-application-profile-revision-review.md) | — | 2026-11-03 提交时固定政策修订已接受；新语义 IN_PROGRESS，已交付历史保留，见 implements/README.md。 |
+| `UC-APP-016` | 审核应用公开资料修订 | `ACCEPTED` | [UC-APP-016-decide-application-profile-revision-review.md](use-cases/UC-APP-016-decide-application-profile-revision-review.md) | — | 2026-11-03 提交时固定政策修订已接受；新语义 IN_PROGRESS，已交付历史保留，见 implements/README.md。 |
 | `UC-APP-017` | 将被拒绝的应用公开资料修订恢复为草稿 | `SUPERSEDED` | [归档重建](archive/UC-APP-017-restore-rejected-profile-revision-to-draft.md) | [UC-APP-013](use-cases/UC-APP-013-create-application-profile-revision.md)＋[UC-APP-016 / BR-PRF-031](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | 提案已废弃，不进入待实现清单；以新建独立修订取代服务端恢复。 |
 | `UC-APP-018` | 管理应用 OAuth Client | `ACCEPTED` | [UC-APP-018](use-cases/UC-APP-018-manage-oauth-client.md) | — | 管理后端及 UC019 provider/runtime 已完成；STABLE/GREY 由 UC020/021 补齐。 |
 | `UC-APP-019` | 为 Auth 解析 OAuth 应用授权上下文 | `ACCEPTED` | [UC-APP-019](use-cases/UC-APP-019-resolve-oauth-authorization-context.md) | — | Auth-only 原生 gRPC provider 已完成；实现证据见 `implements/README.md`。 |
@@ -65,8 +65,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-027` | 关闭 Application | `ACCEPTED` | [UC-APP-027](use-cases/UC-APP-027-close-application.md) | — | 不可逆 CLOSING/CLOSED、本地即时隔离、配额释放和持久 Auth 授权撤销收敛。 |
 | `UC-APP-028` | 暂停与恢复 Application | `ACCEPTED` | [UC-APP-028](use-cases/UC-APP-028-suspend-and-restore-application.md) | — | 平台运维精确权限、正交可用状态、运行/OAuth 在线门禁与可恢复配置保留。 |
 | `UC-APP-029` | 查询我的 Application 列表与管理详情 | `ACCEPTED` | [UC-APP-029](use-cases/UC-APP-029-query-owned-application-management.md) | — | 当前管理员私有列表与一致管理快照。 |
-| `UC-APP-030` | 查询 ApplicationVersion 审核队列与审核详情 | `ACCEPTED` | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md) | — | 精确 Version Reviewer 权限、不可变快照与稳定待审队列。 |
-| `UC-APP-031` | 查询 ApplicationProfileRevision 审核队列与审核详情 | `ACCEPTED` | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md) | — | 2026-10-26接受唯一ACTIVE严格读取及新策略正式定义兼容门槛；增量待实施。 |
+| `UC-APP-030` | 查询 ApplicationVersion 审核队列与审核详情 | `ACCEPTED` | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md) | — | 2026-11-03 提交时固定政策修订已接受；新语义 IN_PROGRESS，已交付历史保留，见 implements/README.md。 |
+| `UC-APP-031` | 查询 ApplicationProfileRevision 审核队列与审核详情 | `ACCEPTED` | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md) | — | 2026-11-03 提交时固定政策修订已接受；新语义 IN_PROGRESS，已交付历史保留，见 implements/README.md。 |
 | `UC-APP-032` | 修改 Application 技术名称 | `SUPERSEDED` | [归档提案](archive/UC-APP-032-rename-application.md) | [UC-APP-001 / BR-APP-003](use-cases/UC-APP-001-create-application.md#br-app-003) | 提案已废弃，不进入待实现清单；技术名称创建后不可修改，显示名称由 ProfileRevision.displayName 承担。 |
 | `UC-APP-033` | 归档与重新上线 Application | `ACCEPTED` | [UC-APP-033](use-cases/UC-APP-033-archive-and-unarchive-application.md) | — | 已确认采用管理员控制的整 Application 在线门禁；普通 Catalog 隐藏仍使用 Stable clear。 |
 | `UC-APP-034` | 查询我的 ApplicationVersion 列表与详情 | `ACCEPTED` | [UC-APP-034](use-cases/UC-APP-034-query-owned-application-versions.md) | — | 当前管理员私有 Version 历史与当前详情；Reviewer 查询继续使用 UC030。 |
@@ -163,27 +163,27 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-PRF-015` | 提交权限 | Authorization | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-015) | — | — |
 | `BR-PRF-016` | 提交前状态与乐观并发 | Lifecycle / Concurrency | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-016) | — | — |
 | `BR-PRF-017` | 提交时内容复检 | Validation / Boundary | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-017) | — | — |
-| `BR-PRF-018` | 不可变审核快照 | Snapshot / Invariant | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-018) | — | — |
+| `BR-PRF-018` | 不可变审核快照 | Snapshot / Invariant | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-018) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-PRF-019` | 审核 attempt 身份 | Identity / Invariant | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-019) | — | — |
 | `BR-PRF-020` | ProfileRevision 状态与审计 | Lifecycle / Audit | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-020) | — | — |
-| `BR-PRF-021` | 原子提交与重复请求 | Consistency / Idempotency | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-021) | — | — |
+| `BR-PRF-021` | 原子提交与重复请求 | Consistency / Idempotency | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-021) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-PRF-022` | 提交不改变当前公开资料 | Boundary | [UC-APP-015](use-cases/UC-APP-015-submit-application-profile-revision-review.md#br-prf-022) | — | — |
 | `BR-PRF-023` | Reviewer 权限与利益冲突 | Authorization / Policy | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-023) | — | — |
 | `BR-PRF-024` | 一次性决定与前置状态 | Lifecycle / Invariant | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-024) | — | — |
 | `BR-PRF-025` | Review、Revision 与 snapshot 一致性 | Consistency / Invariant | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-025) | — | — |
 | `BR-PRF-026` | 状态同步 | Lifecycle / Consistency | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-026) | — | — |
 | `BR-PRF-027` | 决定理由 | Field / Policy | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-027) | — | — |
-| `BR-PRF-028` | 版本化资料审核策略 | Policy / Audit | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028) | — | 2026-10-26关联正式发布与新策略兼容门槛。 |
-| `BR-PRF-029` | 批准时资料复检 | Validation / Content Safety | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-029) | — | — |
+| `BR-PRF-028` | 版本化资料审核策略 | Policy / Audit | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
+| `BR-PRF-029` | 批准时资料复检 | Validation / Content Safety | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-029) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-PRF-030` | 批准后自动公开 | Lifecycle / Consistency | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030) | — | 2026-10-26澄清单工作位可达性；保留指针防御及原子公开。 |
-| `BR-PRF-031` | 拒绝终止修订且不改变当前公开资料 | Boundary / Lifecycle | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | — | — |
-| `BR-PRF-032` | Revision、审计与原子决定 | Concurrency / Audit / Consistency | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-032) | — | — |
+| `BR-PRF-031` | 拒绝终止修订且不改变当前公开资料 | Boundary / Lifecycle | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-031) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
+| `BR-PRF-032` | Revision、审计与原子决定 | Concurrency / Audit / Consistency | [UC-APP-016](use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-032) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-PRF-041` | Profile Reviewer 查询精确授权 | Authorization / Separation | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-041) | — | — |
 | `BR-PRF-042` | 待处理资料队列资格 | Eligibility / Lifecycle | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-042) | — | — |
-| `BR-PRF-043` | 资料审核快照权威 | Snapshot / Invariant | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-043) | — | — |
+| `BR-PRF-043` | 资料审核快照权威 | Snapshot / Invariant | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-043) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-PRF-044` | 利益冲突提示不替代决定检查 | Authorization / Consistency | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-044) | — | — |
 | `BR-PRF-045` | 稳定资料队列分页 | Pagination / Consistency | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-045) | — | — |
-| `BR-PRF-046` | 资料审核查询失败关闭 | Consistency / Invariant | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-046) | — | 2026-10-26补唯一ACTIVE与新策略失败关闭门槛。 |
+| `BR-PRF-046` | 资料审核查询失败关闭 | Consistency / Invariant | [UC-APP-031](use-cases/UC-APP-031-query-application-profile-reviews.md#br-prf-046) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-PRF-047` | 当前管理员私有资料读取 | Authorization / Privacy | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-047) | — | 继承 UC039 ACCEPTED。 |
 | `BR-PRF-048` | 全部修订状态与保留生命周期可见 | Visibility / Lifecycle | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-048) | — | 继承 UC039 ACCEPTED。 |
 | `BR-PRF-049` | 当前修订与历史审核投影分离 | Projection / Boundary | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md#br-prf-049) | — | 继承 UC039 ACCEPTED。 |
@@ -240,22 +240,22 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-REV-001` | 提交权限 | Authorization | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-001) | — | — |
 | `BR-REV-002` | 提交前状态 | Lifecycle / Precondition | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-002) | — | — |
 | `BR-REV-003` | 乐观并发与 Version revision | Concurrency | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-003) | — | — |
-| `BR-REV-004` | 审核快照 | Snapshot / Invariant | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-004) | — | — |
+| `BR-REV-004` | 审核快照 | Snapshot / Invariant | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-004) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-REV-005` | 审核 attempt | Identity / Invariant | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-005) | — | — |
 | `BR-REV-006` | Scope 重新验证 | External Validation | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-006) | — | — |
 | `BR-REV-007` | 公网 HTTPS 预检 | External Validation / Security | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-007) | — | — |
 | `BR-REV-008` | 自托管内容的弱保证 | Limitation | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-008) | — | — |
-| `BR-REV-009` | 原子提交 | Consistency | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-009) | — | — |
+| `BR-REV-009` | 原子提交 | Consistency | [UC-APP-004](use-cases/UC-APP-004-submit-application-version-review.md#br-rev-009) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-REV-010` | Reviewer 权限 | Authorization | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-010) | — | — |
 | `BR-REV-011` | 利益冲突 | Authorization / Policy | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-011) | — | — |
 | `BR-REV-012` | 一次性决定 | Lifecycle / Invariant | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-012) | — | — |
 | `BR-REV-013` | 状态一致性 | Consistency / Invariant | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-013) | — | — |
 | `BR-REV-014` | Version revision 与审计 | Concurrency / Audit | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-014) | — | — |
 | `BR-REV-015` | 拒绝理由 | Field / Policy | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-015) | — | — |
-| `BR-REV-016` | 版本化审核策略 | Policy / Audit | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016) | — | 2026-10-26补正式发布治理，实施状态见索引。 |
-| `BR-REV-017` | 批准检查确认 | Policy / Audit | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-017) | — | — |
-| `BR-REV-018` | 批准时重新验证 | External Validation | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-018) | — | — |
-| `BR-REV-019` | 审核与发布分离 | Boundary / Invariant | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-019) | — | — |
+| `BR-REV-016` | 版本化审核策略 | Policy / Audit | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-016) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
+| `BR-REV-017` | 批准检查确认 | Policy / Audit | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-017) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
+| `BR-REV-018` | 批准时重新验证 | External Validation | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-018) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
+| `BR-REV-019` | 审核与发布分离 | Boundary / Invariant | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-019) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-REV-020` | 弱内容保证 | Limitation | [UC-APP-005](use-cases/UC-APP-005-decide-application-version-review.md#br-rev-020) | — | — |
 | `BR-REV-021` | 恢复权限 | Authorization | [UC-APP-006](use-cases/UC-APP-006-restore-rejected-version-to-draft.md#br-rev-021) | — | — |
 | `BR-REV-022` | 只恢复最新拒绝 | Lifecycle / Invariant | [UC-APP-006](use-cases/UC-APP-006-restore-rejected-version-to-draft.md#br-rev-022) | — | — |
@@ -267,10 +267,10 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-REV-028` | 不提前重新验证 | Command Semantics | [UC-APP-006](use-cases/UC-APP-006-restore-rejected-version-to-draft.md#br-rev-028) | — | — |
 | `BR-REV-029` | Reviewer 查询精确授权 | Authorization / Separation | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-029) | — | — |
 | `BR-REV-030` | 待处理队列资格 | Eligibility / Lifecycle | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-030) | — | — |
-| `BR-REV-031` | 审核快照权威 | Snapshot / Invariant | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-031) | — | — |
+| `BR-REV-031` | 审核快照权威 | Snapshot / Invariant | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-031) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 | `BR-REV-032` | 利益冲突提示不替代写检查 | Authorization / Consistency | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-032) | — | — |
 | `BR-REV-033` | 稳定队列分页 | Pagination / Consistency | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-033) | — | — |
-| `BR-REV-034` | 审核查询一致性与失败关闭 | Consistency / Invariant | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-034) | — | — |
+| `BR-REV-034` | 审核查询一致性与失败关闭 | Consistency / Invariant | [UC-APP-030](use-cases/UC-APP-030-query-application-version-reviews.md#br-rev-034) | — | 2026-11-03 政策绑定修订已接受，状态继承所属 UC；不再以退休拒绝旧绑定决定。 |
 
 ### Publication (`BR-PUB`)
 

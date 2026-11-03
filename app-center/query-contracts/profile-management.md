@@ -1,6 +1,6 @@
 # Application Profile 管理与审核查询契约
 
-状态：`ACCEPTED`；管理员查询由 UC-APP-039 接受，Reviewer 查询由 UC-APP-031 接受并交付
+状态：`ACCEPTED`（2026-11-04 用户接受 Reviewer 政策绑定修订；新增实现状态另见实施导航）
 
 ## 定位
 
@@ -122,7 +122,7 @@ PendingProfileReviewSummary {
 
 ### GetApplicationProfileReviewForReviewer
 
-用途：返回 Reviewer 完成一次审核所需的快照、当前状态和策略输入，或查看已作出的决定。
+用途：返回 Reviewer 完成一次审核所需的快照、当前状态和本次绑定策略输入，或查看已作出的决定。
 
 输入：
 
@@ -171,17 +171,14 @@ ReviewerProfileReviewDetail {
     conflicts: (CURRENT_ADMIN | REVISION_CREATOR | REVIEW_SUBMITTER)[]
   }
   currentPublishedProfile: { oneof state { none | published { profileRevisionId, displayName, description?, icon? } } }
-  currentPolicy: {
-    version
-    requiredCheckIds
-  }
+  reviewPolicy: { version, requiredCheckIds, requiredCheckDefinitions }
   asOf
 }
 ```
 
-`currentPolicy` 来自查询时唯一 ACTIVE 的不可变 ProfileReviewPolicy。Reviewer 将实际阅读的 version 作为 `expectedPolicyVersion` 传给 UC-APP-016。如果在查询后发生策略、Revision、管理员或当前公开指针变化，UC-APP-016 通过自己的前置条件拒绝过期决定。
+reviewPolicy 来自该次 Review 的绑定，语义以 [UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#审核详情)和 [UC030 公共投影](../use-cases/UC-APP-030-query-application-version-reviews.md#审核详情)为唯一权威。所有状态都要求完整绑定与定义，终态 decision 版本与绑定一致；不存在从旧 decision 反推提交政策的分支。expectedPolicyVersion 对照目标绑定，不要求仍 ACTIVE；A→B 本身不导致换政策或重提。
 
-唯一 ACTIVE、未知策略和新版本正式定义的兼容门槛统一引用 [UC031](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)；本契约不另维护版本文案，也不把尚未交付的新定义字段当作当前 API。资料并发的可达性和分层证据引用 [BR-PRF-030](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)，不从 snapshot 读取能力推导出不同修订能同时待审。
+接口统一使用 reviewPolicy，直接删除 currentPolicy 旧形状。API/客户端按 [UC031 新接口交付](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略接口与交付)配套生成和验收，不支持新旧服务或客户端并行降级。缺绑定或完整定义是错误，不能只读兜底。Revision、管理员、公开指针和权限等门禁按各自决定边界复查。本次尚未修改 API 或业务代码。
 
 当前公开资料投影的 presence、授权、snapshot、失败关闭与指针 CAS 交互以 [UC031 当前公开资料投影](../use-cases/UC-APP-031-query-application-profile-reviews.md#当前公开资料投影) 为准。`none` 必须显式返回；不能把缺字段或 Catalog 不可见当作 NONE。
 
@@ -200,6 +197,6 @@ ReviewerProfileReviewDetail {
 - 非当前 admin 无法通过管理员查询区分 Application 或 Revision 是否存在。
 - 具有 `app.profile.review` 的 Reviewer 可以读取 PENDING 队列和审核详情，并看到查询时的利益冲突提示。
 - Reviewer 详情在可决定时返回构造 UC-APP-016 Command 所需的并发前置值和审核策略。
-- 列表排序和 cursor 分页在并发插入下保持稳定；管理员详情内的 Review、Revision、Profile 指针来自一个一致快照，Reviewer 详情另外包括其权限允许读取的当前策略。
+- 列表排序和 cursor 分页在并发插入下保持稳定；管理员详情内的 Review、Revision、Profile 指针来自一个一致快照，Reviewer 详情另外包括其权限允许读取的本次绑定政策。
 - 所有查询都是无副作用的读取；最终写入权限与并发检查仍由对应 Command UC 承担。
 - icon 作为可空不透明字符串原样返回；查询层不验证其指向内容，也不获取外部资产。

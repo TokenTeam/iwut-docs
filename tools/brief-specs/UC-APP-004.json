@@ -1,7 +1,8 @@
 {
   "uc": "UC-APP-004",
-  "note": "Scope mirrors the UC-APP-004 API delivery and consumer E2E work package. Domain, UseCase, MongoDB persistence and transactional concurrency behavior are already CORE_COMPLETE, but the brief keeps the complete submission flow and authoritative BR blocks because the remaining URL preflight adapter, API Transport and Composition Root must preserve their atomicity and failure semantics. ADR-001 covers submission-time Scope Catalog revalidation; ADR-006 and the shared routing contract cover the formal Proto/API boundary. The shared Auth contract supplies the generated Scope Catalog wire contract. Cross-cutting ADRs (003/004/005) remain in the engineering baseline.",
+  "note": "2026-11-04 ACCEPTED submission-bound review policy implementation. Prelaunch single new model/contract; no legacy data/client compatibility. Preserve independent real-time gates; see implements/2026-11-03-submission-bound-review-policy-proposal.md.",
   "uc_sections": [
+    "修订范围与审核状态",
     "目标与范围",
     "提交结果",
     "输入与身份",
@@ -11,13 +12,22 @@
     "用例端口",
     "数据模型",
     "API 草图",
-    "测试与验收"
+    "测试与验收",
+    "策略绑定与提交并发"
   ],
   "include_own_brs": true,
   "include_external_brs": true,
   "adr_sections": {
-    "ADR-001": ["决定/权威来源", "决定/第一阶段缓存", "决定/多阶段校验"],
-    "ADR-006": ["决定", "协议演进", "子模块与构建"]
+    "ADR-001": [
+      "决定/权威来源",
+      "决定/第一阶段缓存",
+      "决定/多阶段校验"
+    ],
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
   },
   "shared_sections": {
     "platform/contracts/auth-scope-catalog-v1.md": [

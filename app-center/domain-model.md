@@ -2,6 +2,9 @@
 
 状态：`PROPOSED`
 
+
+2026-11-03 已接受增量：UC004/015 拟把 policyBinding 与 snapshot 一起写入 Review，UC005/016 拟按绑定决定，UC030/031 拟输出完整 reviewPolicy；所有 Review 从新模型创建起具备真实绑定，不承接旧模型数据。具体定义与状态以[提案引用的 UC/BR](implements/2026-11-03-submission-bound-review-policy-proposal.md)为准，以下模型保留既有基线，不声明新字段已经实现。
+
 ## 文档目的
 
 本文把 [Capability Map](capability-map.md) 中的能力映射为聚合、实体、值对象和领域服务。它只描述业务模型与关系，不规定 HTTP、数据库、缓存、消息系统或 Go package。

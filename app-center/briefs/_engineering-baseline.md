@@ -213,6 +213,6 @@ App Center 建立以下首版基线：
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |
 | `adr/ADR-007-observability-baseline.md` | 57 | `99db94b4d6b1` |

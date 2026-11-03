@@ -1,5 +1,8 @@
 # Console UC006/007 已接受设计的文档交接
 
+
+> 2026-11-03 替代说明（新修订技术方案待审）：用户已确认提交时固定政策。本文原“切换打断旧 PENDING 决定、清确认换策略”的要求不再指导后续工作；发布工程范围也按[本轮提案](2026-11-03-submission-bound-review-policy-proposal.md)重新收敛。原文保留历史；Profile 单工作位、公开指针 CAS、Scope 独立门禁和验收分层不在替代范围。
+
 状态：`ACCEPTED / DOCS_APPLIED`，2026-10-26。用户已同意两项审核设计草案，并要求编写/修改相应用例。本文件保留已接受文字的交接与落地记录，不是第二份 Console UC 权威正文，也不是实现或跨聊天消息授权。
 
 App权威调整已写入UC005/016/030/031和ADR004。初次交接遵循用户分工，未修改Console专用工作区。2026-10-26用户随后要求解决docs问题并整合全部分支；核对console-uc002仍为干净的534f02f后，在整合main中将下列已接受文字写入Console UC006/007并同步实现索引。Console专用工作区和业务代码不改，未运行新增联合验收，不能据文档落地宣称实现或门禁完成。
@@ -7,7 +10,7 @@ App权威调整已写入UC005/016/030/031和ADR004。初次交接遵循用户分
 ## 来源与边界
 
 - 原文为 docs `console-uc002@534f02f` 的 [UC006](../../console/use-cases/UC-CONSOLE-006-review-application-versions.md)及 [UC007](../../console/use-cases/UC-CONSOLE-007-review-application-profiles.md)。落地时先核对所有者是否有更新，不覆盖其未提交内容。
-- App 当前业务权威：[UC005 正式发布流程](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[UC016 BR-PRF-028](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)、[BR-PRF-030](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)、[UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)。不在 Console 复制 App 发布状态机、政策文本或 Scope 写模型。
+- App 当前业务权威：[UC005 正式发布流程](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)、[UC016 BR-PRF-028](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-028)、[BR-PRF-030](../use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-030)、[UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#完整策略定义)。不在 Console 复制 App 发布状态机、政策文本或 Scope 写模型。
 - 缓存头的已发布专项35/35、完整115/115为已完成证据，不重开旧故障，不把新增设计误记为已实现。
 - Scope管理归Auth，其独立接受的[UC036](../../auth-center/use-cases/UC-AUTH-036-release-scope-enablement-changes.md)与[CORE_COMPLETE / FULL_REGRESSION_PENDING交付记录](../../auth-center/implements/UC-AUTH-036-readiness.md)已合入；App草案的接受不代替Auth审核或真实联合验收。
 

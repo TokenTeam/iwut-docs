@@ -1,7 +1,8 @@
 {
   "uc": "UC-APP-005",
-  "note": "2026-10-26 accepted design delta for UC-APP-005; preserve delivered baseline, formal policy release and fail-closed compatibility; documentation only, implementation not started. See implements/README.md for current coverage and Console handoff.",
+  "note": "2026-11-04 ACCEPTED submission-bound review policy implementation. Prelaunch single new model/contract; no legacy data/client compatibility. Preserve independent real-time gates; see implements/2026-11-03-submission-bound-review-policy-proposal.md.",
   "uc_sections": [
+    "修订范围与审核状态",
     "目标与范围",
     "参与者",
     "决定结果",
@@ -14,7 +15,8 @@
     "策略正式发布与运维读回",
     "API 草图",
     "测试与验收",
-    "已确认的实现边界"
+    "已确认的实现边界",
+    "新模型初始化与运行门禁"
   ],
   "include_own_brs": true,
   "include_external_brs": true,

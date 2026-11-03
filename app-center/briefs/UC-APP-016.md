@@ -35,6 +35,10 @@
 
 ## 用例正文
 
+### 修订范围与审核状态
+
+2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
+
 ### 目标与边界
 
 > 具有 `app.profile.review` 权限且不存在利益冲突的 Reviewer，对一条 PENDING ApplicationProfileReview 作出一次性批准或拒绝决定；批准时资料自动成为当前公开资料，拒绝时已有公开资料保持不变。
@@ -113,7 +117,7 @@ ApplicationProfile.workingProfileRevisionId = null
 2. 加载 Application、ApplicationProfile、ProfileRevision 和 ProfileReview，确认它们的归属关系。
 3. 确认可信 ReviewerIdentity 包含 `app.profile.review`，并且 Reviewer 不是当前 admin、Revision 创建者或 Review 提交者。
 4. 确认 Review 为 PENDING 且 decision 为空；ProfileRevision 为 SUBMITTED，revision 匹配 expectedProfileRevisionRevision，当前内容与 snapshot 一致，并且 ApplicationProfile.workingProfileRevisionId 指向目标 Revision。
-5. 加载 expectedPolicyVersion 对应的 ACTIVE ProfileReviewPolicy，并计算该 snapshot 所需检查项。
+5. 读取 Review.policyBinding 指定的不可变 ProfileReviewPolicy，确认 expectedPolicyVersion 等于绑定版本，并计算该 snapshot 所需检查项；RETIRED 仍可决定。
 6. outcome=APPROVE 时：
    - 确认 confirmedCheckIds 完整覆盖所需检查；
    - 重新验证 snapshot 的 displayName、description 和 icon；
@@ -134,7 +138,8 @@ ApplicationProfile.workingProfileRevisionId = null
 - ProfileRevision revision 不匹配：`ApplicationProfileRevisionConflict`。
 - APPROVE 时当前公开指针已改变：`ApplicationProfilePublicationConflict`。
 - Revision/Review 内容或 revision 关系不一致：`ApplicationProfileReviewStateInconsistent`。
-- 策略不存在、已 RETIRED 或 expectedPolicyVersion 不是当前可用版本：`ProfileReviewPolicyUnavailable`。
+- expectedPolicyVersion 与目标绑定不符：返回 `ProfileReviewPolicyMismatch`（409/ABORTED）；不因绑定版本已退休触发。
+- 必需绑定缺失、引用或正式定义损坏：`ApplicationProfileReviewStateInconsistent` / INTERNAL；存储不可用沿用基础设施错误，均不猜测当前策略。
 - 批准检查不完整或拒绝理由非法：`ProfileReviewChecksIncomplete` 或 `InvalidProfileReviewReason`。
 - 批准时 snapshot 不再满足资料规则：`InvalidApplicationProfileContent`。
 - 持久化失败：内部失败，不产生部分 decision、状态或公开指针变化。
@@ -161,6 +166,7 @@ ApplicationProfileReview、ApplicationProfileRevision 和 ApplicationProfile 仍
 ### 验收场景
 
 - 具有 `app.profile.review` 且无利益冲突的 Reviewer 可以决定一致的 PENDING Review。
+- 按 UC005 新语义矩阵验证 A 提交/B 生效/A 决定、B 新提交、拒绝后新建重提、提交/切换两种胜序、错误绑定、历史不变和实时门禁；本次只定义验收，未运行新测试。
 - APPROVE 原子写入 decision、把 Review/Revision 设为 APPROVED，并替换当前公开资料。
 - REJECT 要求有效理由，把 Review/Revision 设为 REJECTED，且旧公开资料保持不变。
 - Reviewer 不能审核自己创建、提交或当前管理的资料。
@@ -177,19 +183,19 @@ ApplicationProfileReview、ApplicationProfileRevision 和 ApplicationProfile 仍
 
 UC013–015 已完成并通过完整 backend 验收；本工作包交付 App Center Domain、UseCase、原子 Mongo Repository、migration、资源化 HTTP/原生 gRPC、Wire 与真实 Mongo E2E。权限仅来自可信请求，不调用 Auth Catalog、Developer Status、System principal、DNS 或资产服务。生产 Auth 的 `app.profile.review` 授予/签发尚未实现，作为独立外部交付记录，不以测试签名 token 冒充生产权限链路完成。
 
-复用 Application `coordinationRevision` 真写栅栏，最终事务重查 BR-PRF-023–032 的本地事实。策略在同一事务中取得 ACTIVE 版本并使用真实技术写栅栏，使并发退休与决定可串行；不可变策略定义与可变 status/技术协调字段分离，不提供运行时策略 CRUD。时钟经端口取得，事务重试不重新生成决定时间。revision 和技术计数器溢出失败并回滚。
+复用 Application `coordinationRevision` 真写栅栏，最终事务重查 BR-PRF-023–032 的本地事实。策略在同一事务中核对目标 attempt 绑定及按版本读取的不可变定义；退休不再是决定前置，也不对 ACTIVE 作决定写栅栏；不可变策略定义与可变 status/技术协调字段分离，不提供运行时策略 CRUD。时钟经端口取得，事务重试不重新生成决定时间。revision 和技术计数器溢出失败并回滚。
 
-Review、Revision、ApplicationProfile 分别持久化。新增 migration 升级 Review 的 APPROVED/REJECTED 与 decision 结构、状态一致性、理由与审计约束，保留既有唯一索引；建立独立 `profile_review_policies` 的 version 唯一索引并写入首版策略。migration/readiness 和迁移账本测试同步更新。已决定对象只能读取，不可再次写决定。
+Review、Revision、ApplicationProfile 分别持久化。首次初始化完整 Review 的 APPROVED/REJECTED 与 decision 结构、状态一致性、理由与审计约束，保留既有唯一索引；建立独立 `profile_review_policies` 的 version 唯一索引并写入首版策略。migration/readiness 和迁移账本测试同步更新。已决定对象只能读取，不可再次写决定。
 
 REJECT 的候选重建必须保持原始内容，先验证 BSON 字段存在/类型、metadata、路径、sourceRevision、当前 PENDING attempt、工作指针与逐字 snapshot 相等；不能调用无条件复检内容的提交/工作指针 helper，也不能规范化后再比较。仅 APPROVE 调用资料内容复检。决定后的 REJECTED 响应/历史重建同样保留原文。Revision 与 Review validator 仅在 REJECTED 状态把内容长度/字符规则放宽为完整 string/string-or-null 类型约束，其余结构、审计、decision 约束保持严格；其它状态仍要求完整资料内容规则。不得使用运行时 bypassDocumentValidation。
 
 合法终态 Review 返回 `ApplicationProfileReviewAlreadyDecided`；尚为 PENDING 但目标修订非 SUBMITTED 返回 `ApplicationProfileReviewStateConflict`。非法状态/decision 组合、悬空/错误工作指针、内容漂移、sourceRevision 或 attempt 关系异常返回 `ApplicationProfileReviewStateInconsistent`，HTTP500/gRPC INTERNAL，并输出不含资料正文、reason、凭据或数据库错误的安全 ERROR 告警；不自动修复。stale revision 与公开指针冲突是业务冲突，不冒充内部异常。
 
-完整验收执行 `make check-auth-app`（包含 backend 与现有真实 Auth 回归），覆盖 BR、双协议及实际生成 HTTP 客户端、真实副本集 validators/indexes、回滚、并发决定、管理员转让和策略退休、公开指针前置冲突、revision 溢出、REJECT 坏内容与后续创建新 DRAFT。跨服务回归不代表尚未实现的 Auth 资料审核权限签发已验收。冻结 service/API/docs/涉及的 Auth 来源后验收，API 先本地提交再提交服务 gitlink；不得 push。
+完整验收执行 `make check-auth-app`（包含 backend 与现有真实 Auth 回归），覆盖 BR、双协议及实际生成 HTTP 客户端、真实副本集 validators/indexes、回滚、并发决定、管理员转让、退休后仍按绑定决定、公开指针前置冲突、revision 溢出、REJECT 坏内容与后续创建新 DRAFT。跨服务回归不代表尚未实现的 Auth 资料审核权限签发已验收。冻结 service/API/docs/涉及的 Auth 来源后验收，API 先本地提交再提交服务 gitlink；不得 push。
 
 ### API 实现契约
 
-2026-10-26设计增量：正式策略发布遵循 BR-PRF-028 引用流程，仍待实施；指针验收分层只澄清可达性，不更改下列决定 Proto、reason/status、单工作位或已交付指针契约。本次未启动实现。
+2026-11-03 修订待审：提交绑定、按绑定决定与详情新字段均未实施，替代 2026-10-26 的退休打断决定语义；指针验收分层只澄清可达性，不更改下列决定 Proto、reason/status、单工作位或已交付指针契约。本次未启动实现。
 
 内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision`；外部只加 `/app-center`。原生 gRPC 为 `app_center.v1.application_profile_review.ApplicationProfileReview/DecideApplicationProfileRevisionReview`。
 
@@ -209,7 +215,11 @@ expectedProfileRevisionRevision 是正 int64（ProtoJSON 表达），不使用 I
 
 HTTP200 返回 `{ "profileRevision": <完整决定后修订>, "review": <完整审核记录>, "currentPublishedProfileRevisionId": <string|null> }`，ETag 是决定后 ProfileRevision.revision。保留已提交的 ReviewRecord.decision 的 field 10 与 `google.protobuf.Value` 类型；PENDING 输出 null，终态输出对象：outcome（APPROVED/REJECTED）、policyVersion、confirmedCheckIds（排序）、reason（string/null）、decidedBy、decidedAt（UTC RFC3339）。其它已提交字段编号/类型不改。
 
-错误映射：身份401/UNAUTHENTICATED；缺权限或利益冲突403/PERMISSION_DENIED；不存在或路径归属不匹配404/NOT_FOUND；非法输入、reason、checks或批准内容400/INVALID_ARGUMENT；已决定、状态/revision/公开指针冲突或策略不可用409/ABORTED；内部不变量或基础设施失败500/INTERNAL。错误码稳定且不泄漏存储细节。响应丢失后的管理查询仍单独交付，不在本 UC 添加 GET。
+错误映射：身份401/UNAUTHENTICATED；缺权限或利益冲突403/PERMISSION_DENIED；不存在或路径归属不匹配404/NOT_FOUND；非法输入、reason、checks或批准内容400/INVALID_ARGUMENT；已决定、状态/revision/公开指针冲突或政策绑定不符409/ABORTED；内部不变量或基础设施失败500/INTERNAL。错误码稳定且不泄漏存储细节。响应丢失后的管理查询仍单独交付，不在本 UC 添加 GET。
+
+### 初始化与实时门禁
+
+按 [UC005 新模型初始化与运行门禁](../use-cases/UC-APP-005-decide-application-version-review.md#新模型初始化与运行门禁)建立完整绑定及定义，不回填旧记录。本次不增加 Profile 决定的 Auth/Scope/DNS 依赖；现有权限、利益冲突、生命周期、内容校验和公开指针 CAS 保持。SUSPENDED 继续可审核，关闭不可借政策冻结绕过。
 
 ## 业务规则（UC-APP-016 权威正文）
 
@@ -277,23 +287,32 @@ Reviewer 提交自己实际阅读的 expectedPolicyVersion。App Center 拥有�
 ```text
 ProfileReviewPolicy {
   version
-  requiredChecks
+  requiredChecks: []ReviewCheckDefinition { id, title, description }
   status: ACTIVE | RETIRED
 }
 ```
 
-APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snapshot 要求的检查；REJECT 时 confirmedCheckIds 为空。历史 policy 保留用于解释既有 decision，RETIRED policy 不用于新决定。
+APPROVE 时 confirmedCheckIds 使用集合语义，并完整覆盖策略对 snapshot 要求的检查；REJECT 时 confirmedCheckIds 为空。policyBinding 在 UC015 提交时固定；expectedPolicyVersion 必须与它一致，decision.policyVersion 保存该值。历史政策保留；RETIRED 只禁止新提交选择，仍允许已绑定 PENDING 作新决定。
 
 首版策略由 App Center migration 写入：version=`app-profile-review-v1`、status=`ACTIVE`，固定要求以下两项：
 
 - `content-policy-reviewed`：Reviewer 已检查名称、描述符合内容规范。
 - `icon-content-reviewed`：Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。
 
-策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 当前策略由 UC031 正式详情读取，不将本条“首版无独立查询”解释为禁止已交付的 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+本次 v1 初始完整定义逐字承载上述已接受解释，标题仅用于展示，不新增政策义务：
 
-Profile 以独立 policyKind=PROFILE 遵循 [UC005 策略正式发布与运维读回](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)和 ADR004 的发布回执协议；不复制第二套发布状态机。每类唯一 ACTIVE，事务内退休旧版/激活全新版本并记录回执；最终决定与退休写同一策略文档串行化。零/多 ACTIVE 或当前定义损坏失败关闭，不任意选一条策略。
+| ID | 标题 | description 原文 |
+| --- | --- | --- |
+| `content-policy-reviewed` | 资料内容规范 | Reviewer 已检查名称、描述符合内容规范。 |
+| `icon-content-reviewed` | 图标内容合规 | Reviewer 已检查图标内容合规；icon 为空时明确确认不适用，仍提交该检查项。 |
 
-新 Profile 版本激活前须满足 [UC031 兼容门槛](../use-cases/UC-APP-031-query-application-profile-reviews.md#策略版本兼容门槛)，先审真实政策正文、提供版本绑定正式定义并部署可失败关闭的消费者；不为测试制造 v2，不从旧 ID 猜新含义。旧 expectedPolicyVersion 不再可用时保留 `ProfileReviewPolicyUnavailable` / HTTP409/gRPC ABORTED，不改 Review/Revision/working/public 指针。历史决定不重写，退休版本不重新激活。
+Profile 的完整定义直接保存在 ProfileReviewPolicy 中，首次初始化就完整写入；与 Version 一样按 version 稳定读取，不建立旧数据补充记录。以后新增政策使用新版本并保留新模型产生的完整历史。
+
+策略内容不可原地修改；变更检查项或其含义使用新 version，历史定义保留。同版本已有不同定义时 migration 失败，不覆盖。不提供在线策略管理 API；Reviewer 使用 UC031 的 reviewPolicy 读取该次绑定定义，审核详情字段统一为 reviewPolicy，不再输出 currentPolicy。confirmedCheckIds 不接受重复、未知或缺失项，持久化按 ID 排序；REJECT 必须为空。
+
+Profile 以独立 policyKind=PROFILE 引用 [UC005 正式发布流程](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)，提交和发布在 PROFILE 政策文档上串行；最终决定只读取目标绑定和不可变定义，不与政策退休争抢 ACTIVE 写栅栏。政策变化不清空既有确认、不重提、不改终态，也不创建补审或整改状态。
+
+所有提交与 Reviewer 详情均要求完整绑定定义；按 [UC005 新模型初始化](../use-cases/UC-APP-005-decide-application-version-review.md#新模型初始化与运行门禁)直接建立 Profile v1，不支持旧 ID-only policy、补定义迁移或旧记录读取。其它新政策正文另审，不为接口调整制造 v2。
 
 <!-- 权威位置: use-cases/UC-APP-016-decide-application-profile-revision-review.md#br-prf-029 -->
 ### BR-PRF-029：批准时资料复检
@@ -323,7 +342,7 @@ ApplicationProfile.currentPublishedProfileRevisionId = profileRevisionId
 
 REJECT 只把目标 Review/Revision 迁移为 REJECTED，并记录理由。`currentPublishedProfileRevisionId` 保持不变；没有既有公开资料时继续为空。
 
-REJECTED 是该 ProfileRevision 的终态：服务端不提供 `REJECTED -> DRAFT`、复制或恢复命令，也不修改 ApplicationVersion 或发送通知。Review snapshot、decision、Revision 内容和审计事实保持不变。
+REJECTED 是该 ProfileRevision 的终态；新修订经 UC015 提交时重新绑定当时生效政策，不沿用被拒绝 Review 的绑定。服务端不提供 `REJECTED -> DRAFT`、复制或恢复命令，也不修改 ApplicationVersion 或发送通知。Review snapshot、decision、Revision 内容和审计事实保持不变。
 
 重新编辑是网页端便利行为：网页端读取被拒绝资料并预填创建表单，然后调用 [UC-APP-013](../use-cases/UC-APP-013-create-application-profile-revision.md) 创建一份新 DRAFT。新草稿获得独立的 profileRevisionId、sequence 和创建审计；App Center 不记录它与被拒绝 Revision 的复制关系。
 
@@ -397,17 +416,13 @@ REJECTED 是该 ProfileRevision 的终态：服务端不提供 `REJECTED -> DRAF
 
 #### 政策发布回执与恢复
 
-2026-10-26用户接受的正式政策发布沿用本 ADR 与 UC005 BR-REV-016、UC016 BR-PRF-028，不引入第二政策服务。后续实现应满足：
+2026-11-03 用户确认业务改为提交时固定政策；对应 UC004/005/015/016/030/031 修订已于 2026-11-04 ACCEPTED。本 ADR 的通用本地事务、显式迁移、重试与历史保护规范保持 ACCEPTED；本节撤下 2026-10-26 仅服务于“退休打断决定”的工程要求，具体业务方案由已接受 UC 拥有，用户已授权本次实施。
 
-- 每类策略的唯一 ACTIVE 约束、旧版退休、新版激活与对应发布回执在同一事务提交。退休和决定均对同一 policy 文档作真实条件写；coordinationRevision 是内部栅栏，不是操作人员长期持有的业务版本。
-- 复用 migration ledger，为新政策 migration 的记录增加不可变发布元数据：changeId/migrationId、kind、from/toVersion、清单摘要、批准依据、release、appliedAt；与可信发布控制面的部署身份审计以 changeId 关联。旧 ledger 记录保留，不伪造或回填旧审计事实。
-- 新回执在政策切换事务内写入，通用 apply/记账/重入流程需兼容它；不能继续把“apply返回后另记 ledger”当作该政策的原子成功证明。重复同 ID/同清单读原回执，同 ID/异参拒绝；缺记录或未知提交不等于已回滚。
-- unknown commit 按原事务身份恢复提交，再读同一回执；更晚发布已改变当前策略时，只报告原操作结果与最新事实，不重新执行历史激活，不回拨版本状态。
-- 读回来自受环境访问控制的正式只读运维入口，核对回执、当前唯一 ACTIVE 与不可变历史；不以 exit0 或无清单绑定的日志替代。记录不一致时停止并告警，不修复业务事实。
-- 回执元数据格式/限制、发布身份及批准凭据可信来源、保留/访问策略、退出码和唯一索引定义须在实施 brief 冻结并经文档复核；未经授权不扩展为任意 policy CRUD。
-- 集成验收覆盖幂等/异参、两个发布竞争、发布与决定的两种提交顺序、事务回滚、未知提交恢复、历史保留，以及多/零 ACTIVE 失败关闭。正式联合验收不直接改库制造 policy 切换。
-
-这是一项已接受、未实现的工程增量；现有 migration ledger 只有 ID/appliedAt 且通用记账在 apply 之后，不满足本节完整协议。实现开始前若不能证明复用兼容性，应报告具体 gap，不自行新建政策服务或绕开原子回执。
+- 新提交与政策发布的一致性方案引用 [UC004 策略绑定与提交并发](../use-cases/UC-APP-004-submit-application-version-review.md#策略绑定与提交并发)。关键原子保护对象从“退休与决定”移到“政策选择与新提交”；决定不为退休写全局政策栅栏。
+- 专用发布 migration 的最小同事务标识、清单核对与 unknown commit 恢复，引用 [UC005 正式发布与运维读回](../use-cases/UC-APP-005-decide-application-version-review.md#策略正式发布与运维读回)。首次初始化按新模型建立账本；通用 apply 后记账不能单独证明未来政策切换原子成功，需在专用实现时验证衔接。
+- 不再要求为此建设通用政策发布 CLI、policy-status 服务或扩展整套治理回执状态机；仍以现有受控迁移/发布审计承载最小恢复证据。不把不同 migration 的重入当作历史重新激活。
+- 用户确认尚未上线，按 [UC005 新模型初始化](../use-cases/UC-APP-005-decide-application-version-review.md#新模型初始化与运行门禁)建立完整数据与夹具；删除旧记录过渡、分批回填、维护窗口及新旧版本双读方案。本轮没有执行数据库操作。
+- 技术验收围绕提交/发布两个胜序、同 ID 重入、未知提交、无部分绑定和不可变历史；旧“切换先提交则旧决定409”不再是目标。正式联合验收仍不能直接改库或制造同义生产政策。
 
 ### ADR-006：Proto v1 与独立 API 仓库协作（`ACCEPTED`）
 
@@ -589,9 +604,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 328 | `63050ed32249` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
-| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 99 | `631489494572` |
+| `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
