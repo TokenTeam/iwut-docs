@@ -27,6 +27,8 @@ BrowserSession 只有会话身份及代际信息，没有 role 或 permissions�
 
 ### 保留的最小缺口
 
+2026-11-04 已核查并记录[本人运维权限发现的待审提案](../../auth-center/implements/2026-11-04-own-application-operations-permissions-proposal.md)（`PROPOSED`）。尚未接受或实施，以下现行边界继续有效。
+
 独立 App 运维人员可以合法不具备平台管理员资格。当前 `GetApplicationOperationsPermissions` 同样要求调用者是完整平台管理员，即使 subject 是自己也没有例外；`GetApplicationPlatformAvailability` 只证明调用者拥有两项运维权中的至少一项，响应没有指出是哪项。因此现有 API 无法向这类调用者权威区分 suspend-only / restore-only / both。
 
 最小依赖是：在既有 Session 信任边界内，为当前调用者提供这两项精确、独立、当前有效权限的权威发现结果，且允许非平台管理员运维人员读取；只需本人能力，不需要他人的权限、用户目录或原始 JWS。本用例不选择新增 RPC、放宽既有 RPC、扩充 BrowserSession 等实现，不自行修改 Auth/Gateway 契约。
