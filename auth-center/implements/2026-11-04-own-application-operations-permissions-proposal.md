@@ -1,6 +1,6 @@
 # 独立 App 运维人员：本人精确权限发现提案
 
-状态：`PROPOSED`；2026-11-04。用户要求先核查并记录供审核的方案，本提案尚未接受，不授权实现。现行 UC-AUTH-027、UC-CONSOLE-015 及 App UC028 的已接受规则继续有效；本文不直接修改 Auth UC/BR、共享 Proto 或服务代码。
+状态：`PROPOSED`；2026-11-04。用户要求先核查并记录供审核的方案，本提案尚未接受，不授权实现。现行 UC-AUTH-027、UC-CONSOLE-015 及 App UC028 的已接受规则继续有效；本文不直接修改 Auth UC/BR、共享 Proto 或服务代码。按用户随后建议，待审读模型已改为仅返回当前生效的 permission ID 列表。
 
 ## 已确认的缺口
 
@@ -31,37 +31,42 @@ GetOwnApplicationOperationsPermissions {}
 OwnApplicationOperationsPermissions {
   subjectAuthId: AuthId             // 只来自当前可信 USER 身份
   permissionRevision: Int64         // 权威共享正数版本；ProtoJSON/int64 精确处理
-  permissions: [                   // 固定两项，按 permission 字典序
-    { permission: "app.application.restore", effective: Bool },
-    { permission: "app.application.suspend", effective: Bool }
-  ]
+  effectivePermissions: String[]   // 公开范围内当前生效的完整 permission ID 集合
 }
 ```
 
-每项 effective 必须具有明确 presence（例如 Proto 的 optional bool），以便 HTTP/JSON 和原生 gRPC 都能区分“显式 false”与“字段缺失”；不得依赖无 presence 的 proto3 bool 默认值补 false。
+列表具有集合语义：无重复、按 permission 字典序输出；没有有效权限时为空集合。HTTP/JSON 明确输出 `effectivePermissions: []`，客户端先验证该字段存在且为合法字符串数组，再按生成契约解码；缺字段、null 或畸形资源不能补成空集合。原生 gRPC 的 repeated string 零项按协议表示空集合，仍须同时验证响应主体和正数 revision。这里不再引入逐项布尔值或 optional bool。
 
-字段名、tag 和路径在方案接受后由 Auth/API owner 同步到正式 UC 与可执行 Proto；本提案中的候选名称不作为已发布契约。响应不含其它 permissions、granted、grantBlockers、邮箱、Developer、平台管理员资格、Application 列表、Session 或原始 JWS。这里不增加账户/授权管理读模型；只回答本人本次权威读取观察到的两项有效能力。
+字段名、tag 和路径在方案接受后由 Auth/API owner 同步到正式 UC 与可执行 Proto；本提案中的候选名称不作为已发布契约。首版响应不含未公开的其它 permissions、granted、grantBlockers、邮箱、Developer、平台管理员资格、Application 列表、Session 或原始 JWS。这里不增加账户/授权管理读模型；首版只回答本人本次权威读取观察到的两项有效能力。
 
-`effective` 引用 [BR-AOP-005](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-005) 的既有效力规则，不引入新的授权条件。合法 ACTIVE USER 没有这两项授权时成功返回两个 false，不能把“没有授权”伪装成 403、404 或查询不可用。
+列表只纳入符合 [BR-AOP-005](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-005) 既有效力规则的权限，不引入新的授权条件。合法 ACTIVE USER 没有本接口范围内的有效权限时成功返回空集合，不能把“没有授权”伪装成 403、404 或查询不可用。
 
-| 本人的已保存授权 | restore.effective | suspend.effective |
-| --- | --- | --- |
-| 无两项授权，包括没有另获 App 权限的完整平台管理员 | false | false |
-| 仅 suspend | false | true |
-| 仅 restore | true | false |
-| 两项都有 | true | true |
+| 本人的已保存授权 | effectivePermissions |
+| --- | --- |
+| 无两项授权，包括没有另获 App 权限的完整平台管理员 | `[]` |
+| 仅 suspend | `["app.application.suspend"]` |
+| 仅 restore | `["app.application.restore"]` |
+| 两项都有 | `["app.application.restore", "app.application.suspend"]` |
+
+### 返回范围与后续扩展
+
+首版服务端公开 allowlist 仍只有这两项 App 运维权限，不能直接透传 auth_principals.permissions 的全部内容。成功响应是该接口公开范围内的**完整有效集合**，不分页、不截断、不返回部分结果；只有在成功且完整的响应中，某个已支持权限 ID 不在列表里才表示当前不生效。这个结论不能外推到本接口未公开的其它 Auth/App 权限。
+
+以后经相应业务设计接受，可以向公开 allowlist 增加 permission ID，响应仍为字符串列表，无需为每项增加布尔字段或要求客户端先提交查询清单。旧客户端只用自己认识的精确 ID 控制已支持动作：合法但不认识的新增 ID 不使整个集合解码失败，也不动态生成按钮、扩大授权或推导同前缀权限。空/非法 ID、重复项、错类型和错误资源继续按协议异常处理。
+
+该扩展规则不预先授权增加其它权限，也不把本轮接口扩成全量人员权限目录；具体新增权限的业务和披露范围仍由其权威用例审核。
 
 ### Auth 身份、读取与失败语义
 
-沿当前 Gateway SESSION → Auth audience USER 身份链，Auth 校验签名、issuer/audience/typ/时间及在线当前身份/账号版本，以调用者 authId 为唯一查找键。在现有认证事务协调边界中读取当前有效账号、权威 permissions 和共享 permissionRevision，返回同次观察的两项最小投影。
+沿当前 Gateway SESSION → Auth audience USER 身份链，Auth 校验签名、issuer/audience/typ/时间及在线当前身份/账号版本，以调用者 authId 为唯一查找键。在现有认证事务协调边界中读取当前有效账号、权威 permissions 和共享 permissionRevision，返回同次观察中公开 allowlist 内的完整有效集合。
 
 - 新方法不能进入现有“整个运维权限 service 都要求 admin.Manager”的分派分支；必须按精确 full method 区分本人读取与管理员 Get/Manage。只放宽 transport 或只跳过 repository 管理员检查，任一单层修改都不足以交付，也不得按 service 通配放宽。
 - 不调用 `RequireAdministratorTx`，不依赖管理员初始化标记、完整管理 bundle、Developer 或 Reviewer 资格。复用普通 USER 的在线身份确认，不把普通 USER 变成管理员。
 - 不直接复用现有管理 `snapshot()` 的邮箱/恢复配置和 grantBlockers 路径。已有 grant 的效力不因本人查询引入新的邮箱或部署恢复前置；授予时的门禁继续由原管理写入拥有。
-- 身份缺失、失效、被禁用/关闭或在线版本不符，沿既有身份拒绝处理；不把它降级成两个 false。存储不可用、权限结构损坏、重复非法项目或版本异常失败关闭，沿 Auth 不可用语义处理，不合成“未授予”。429 与协议错误也不能解释为无权限。
+- 身份缺失、失效、被禁用/关闭或在线版本不符，沿既有身份拒绝处理；不把它降级成成功空集合。存储不可用、权限结构损坏、重复非法项目或版本异常失败关闭，沿 Auth 不可用语义处理，不合成成功空集合。429 与协议错误也不能解释为空集合或无权限。
 - 读取不改变 grant、permissionRevision 或授权业务审计；现有认证事务的技术协调机制可以复用。响应及错误采用私有 no-store 策略；严格拒绝请求的未知/重复输入，不暴露其它用户的存在性。
 
-“当前”指本次 Auth 权威读取的观察，不是整个 Session 生命周期的授权租约。查询与并发授权变更可以观察合法提交顺序中的前/后事实；不能从旧 JWS claim 推算当前值。撤销已提交后发起的新读取应观察到 false/更新后的共享版本。读取后的再撤销仍由实际命令鉴权及既有身份传播窗口约束。
+“当前”指本次 Auth 权威读取的观察，不是整个 Session 生命周期的授权租约。查询与并发授权变更可以观察合法提交顺序中的前/后事实；不能从旧 JWS claim 推算当前值。撤销已提交后发起的新读取应观察到该 ID 已移出集合，以及更新后的共享版本。读取后的再撤销仍由实际命令鉴权及既有身份传播窗口约束。
 
 ### Gateway 与 Console 消费
 
@@ -69,8 +74,8 @@ Gateway 增加该精确方法的 ADMIN surface、SESSION、目标 Auth audience 
 
 Console 的“应用平台运维”能力发现独立调用新方法，不再先要求平台管理员查询成功。人员资格管理仍使用现有完整管理员链；没有另获运维权限的管理员不能凭管理资格打开操作按钮。
 
-- 读取成功须严格匹配当前 Session 的 authId，恰好包含两个已知 permission、每项显式布尔值及合法正数 int64；拒绝缺项、重复项、未知项目、错主体、非法版本或畸形成功，不补 false/true。生成/解码策略沿既有官方工具链，不手写第二套 DTO。
-- suspend/restore 各用自己的 effective 与 Application 当前状态、双 revision 控制动作。打开/提交确认前完成当前 Session/attempt 的明确能力读取和目标专用状态核对；两个服务的 GET 不宣称原子快照。permissionRevision 仅作观察及旧确认失效依据，不新增 App 命令参数，也不是权限证明。
+- 读取成功须严格匹配当前 Session 的 authId，包含合法的完整 effectivePermissions 集合及正数 int64。拒绝缺失/畸形集合、重复或非法 ID、错主体、非法版本，不把失败填为空集合。合法但不认识的新增 ID 按上节扩展规则忽略其动作意义。生成/解码策略沿既有官方工具链，不手写第二套 DTO。
+- suspend/restore 分别检查自己的精确 ID 是否在集合中，再结合 Application 当前状态、双 revision 控制动作。打开/提交确认前完成当前 Session/attempt 的明确能力读取和目标专用状态核对；两个服务的 GET 不宣称原子快照。permissionRevision 仅作观察及旧确认失效依据，不新增 App 命令参数，也不是权限证明。
 - 某项失效只关闭对应动作及旧确认；无两项权限时关闭 App 运维写入和相应私有范围，不影响独立 Reviewer 或人员治理。权限读取失败为“无法确认”，禁止据旧快照发新命令；现有按 App ID 的只读请求仍受 App OR 鉴权独立保护，不利用其成功反推精确写权限。
 - Session 换代、离页、目标切换、迟到响应、读取/命令未知结果继续按 UC015 的 attempt 与 Query 身份隔离。能力不持久化进 BrowserSession、URL 或本地存储，不轮询续权，不发送写请求探权或自动重放。
 
@@ -78,7 +83,7 @@ App Suspend/Restore 继续独立检查各自精确权限、双 revision、生命
 
 ## 审核后的协作顺序与所有权
 
-1. **用户审核本提案**：重点是“新增本人最小读取，不放宽管理员目标 Get/Manage”和“ACTIVE 普通用户无授权返回两个 false”。未接受前继续现行 UC015 的受限只读行为。
+1. **用户审核本提案**：重点是“新增本人最小读取，不放宽管理员目标 Get/Manage”和“ACTIVE 普通用户无有效权限返回成功空集合，后续按权限 ID 扩展”。未接受前继续现行 UC015 的受限只读行为。
 2. **Auth 设计/实现 owner**：接受后修改 UC-AUTH-027 的参与者、本人读取、错误与验收，并登记相应 BR/registry、刷新 brief；完成普通 USER 在线身份确认、同次权威投影和精确方法分派。具体 Auth 源码修改由 Auth agent 承接，本 App 任务不越界实现。
 3. **共享 API owner**：按被接受的正式 Auth 契约修改 App 运维权限相关 Auth Proto 与生成物，输入/输出一起提交。该工作属于 Auth API，不能沿用上轮“允许本任务修改 App 相关 Proto”的授权自行实施。
 4. **Gateway owner**：消费固定 API 提交，新增精确 ADMIN/SESSION surface、代理和路由生成物，验证三协议、Session 与失败透传；不代替 Auth 计算权限。
@@ -87,11 +92,11 @@ App Suspend/Restore 继续独立检查各自精确权限、双 revision、生命
 
 ## 有界验收计划（尚未执行）
 
-- 非平台管理员的 none / suspend-only / restore-only / both 四组合；完整管理员无 App grant 仍为双 false；身份或其它资格不能隐式授予 App 权限。
-- 正式管理入口授予/撤销单项后，同一有效 Session 的新本人读取反映新共享版本和对应项目，另一项保持。读取与并发授权变更按合法快照取值；读取没有授权业务写入或业务审计。
+- 非平台管理员的 none / suspend-only / restore-only / both 四组合；完整管理员无 App grant 仍为空集合；身份或其它资格不能隐式授予 App 权限。
+- 正式管理入口授予/撤销单项后，同一有效 Session 的新本人读取反映新共享版本及所选 ID 的加入/移出，另一项保持。读取与并发授权变更按合法快照取值；读取没有授权业务写入或业务审计。
 - 非管理员旧的目标 Get/Manage 仍 403（包括目标是自己），新本人方法不能指定他人或查询目录；错误 audience、OAuth/service 身份、伪造输入与未知方法拒绝。
-- 禁用/关闭/身份版本不符、Session 换代和恢复后重新登录；邮箱/恢复配置故障不成为合法本人读取的新授权前置。数据损坏或依赖不可用不回填 false。
-- Gateway 三协议、严格 DTO、私有 no-store、限流和 Auth reason 透传；未授予用户的成功双 false 与基础设施失败可明确区分。
+- 禁用/关闭/身份版本不符、Session 换代和恢复后重新登录；邮箱/恢复配置故障不成为合法本人读取的新授权前置。数据损坏或依赖不可用不回填空集合。
+- Gateway 三协议、严格 DTO、私有 no-store、限流和 Auth reason 透传；未授予用户的成功空集合与基础设施失败可明确区分；合法新增 ID 不影响已有动作，非法/重复 ID 失败关闭。
 - Console 真页面仅打开对应动作；在权限读取后撤销、旧响应迟到和目标/Session 换代下清除相应确认。实际 App 写接口仍拒绝缺项权限，并分别验证已有 JWS 传播窗口与新身份签发后的授权事实。
 
 本轮交付仅为待审方案与只读核查；没有运行新业务测试、生成 API、修改产品代码、发送跨聊天消息、部署或 push。
