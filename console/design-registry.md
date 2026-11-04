@@ -13,8 +13,8 @@
 | `UC-CONSOLE-003` | 只读管理 Application Version | `ACCEPTED` | [UC-CONSOLE-003](use-cases/UC-CONSOLE-003-query-owned-application-versions.md) | 查询与私有读取已有实链；编辑/提交另见UC008 |
 | `UC-CONSOLE-004` | 只读管理 Application 资料修订 | `ACCEPTED` | [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md) | 查询、历史与私有读取已有实链；编辑/提交另见UC010 |
 | `UC-CONSOLE-005` | 只读查询 Application Tester 管理 | `ACCEPTED` | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md) | 2026-10-16 接受并实现；真实镜像成功读取及失效回收基线通过，完整验收矩阵继续实施 |
-| `UC-CONSOLE-006` | 审核 Application Version | `ACCEPTED` | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md) | 双权限/决定与恢复已有实链；策略发布等外部边界见 implements |
-| `UC-CONSOLE-007` | 审核 Application 公开资料 | `ACCEPTED` | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md) | 决定/公开指针/开发者投影已有实链；并发按接受的单工作位方案分层 |
+| `UC-CONSOLE-006` | 审核 Application Version | `ACCEPTED` | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md) | 既有实链保留；2026-11-04提交绑定新契约已同步，验证边界见 implements |
+| `UC-CONSOLE-007` | 审核 Application 公开资料 | `ACCEPTED` | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md) | 既有实链保留；提交绑定与完整定义新契约已同步；保留单工作位 |
 | `UC-CONSOLE-008` | 版本与发布工作台及版本编辑 | `ACCEPTED` | [UC-CONSOLE-008](use-cases/UC-CONSOLE-008-version-workspace.md) | 创建/保存/送审/放弃及拒绝恢复、再审核、首次TEST发布代表实链通过；不外推全部发布矩阵 |
 | `UC-CONSOLE-009` | 创建应用 | `ACCEPTED` | [UC-CONSOLE-009](use-cases/UC-CONSOLE-009-create-application.md) | 2026-10-30自主接受；页面/客户端与真实创建链已通过 |
 | `UC-CONSOLE-010` | 创建、编辑与提交应用公开资料 | `ACCEPTED` | [UC-CONSOLE-010](use-cases/UC-CONSOLE-010-edit-application-profile.md) | 草稿/保存/送审实链通过，拒绝后预填新修订已实现并定向验证 |
@@ -53,7 +53,7 @@
 | `BR-CMG-009` | Tester 管理事实不扩张到用户资料或凭证 | Console Management Query | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md#br-cmg-009) | `ACCEPTED`，随 UC005 实施 |
 | `BR-CMG-010` | 概览与两类列表独立恢复 | Console Management Query | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md#br-cmg-010) | `ACCEPTED`，随 UC005 实施 |
 | `BR-CRV-001` | 精确权限、利益冲突与在线重查 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-001) | `ACCEPTED`，随所属完整UC分阶段实施 |
-| `BR-CRV-002` | snapshot、当前策略与确认绑定 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-002) | `ACCEPTED`，随所属完整UC分阶段实施 |
+| `BR-CRV-002` | snapshot、提交绑定策略与确认绑定 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-002) | `ACCEPTED`，随所属完整UC分阶段实施 |
 | `BR-CRV-003` | 并发变化与结果未知恢复 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-003) | `ACCEPTED`，随所属完整UC分阶段实施 |
 | `BR-CRV-004` | 审核敏感状态与可访问性 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-004) | `ACCEPTED`，随所属完整UC分阶段实施 |
 | `BR-CRV-005` | 资料审核独立权限 | Console Review Flow | [UC-CONSOLE-007](use-cases/UC-CONSOLE-007-review-application-profiles.md#br-crv-005) | `ACCEPTED`，随所属完整UC分阶段实施 |
