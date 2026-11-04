@@ -60,6 +60,8 @@ Console/Gateway/Auth 的代码和 UC 未由本轮修改；Console UC006/007 对�
 
 ## 验收边界
 
+2026-11-04 实施已完成 App/API 后端及完整门禁，见[实施与验收记录](2026-11-04-submission-bound-review-policy-implementation.md)。以下“本轮未运行/未提交”为设计阶段历史，不能作为当前实施状态。
+
 业务验收覆盖 A 提交→B 发布→仍按 A 批准/拒绝、B 新提交、拒绝后重提、提交/发布两个胜序、错误版本无法决定、历史不改写及独立实时门禁。只创建符合新模型的测试数据，不保留旧数据/旧客户端兼容用例。
 
 本轮只进行文档生成器测试、brief freshness、registry 及链接/格式检查；没有运行新业务或联合链验收，没有 commit/push。resource-hub 工作保持原样。

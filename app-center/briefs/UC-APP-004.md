@@ -808,8 +808,8 @@ Provider 与 Consumer 至少共同验证：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 541 | `eb64275c4b7b` |
-| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 271 | `18f9790b9eae` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
+| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 273 | `c91b78de6449` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

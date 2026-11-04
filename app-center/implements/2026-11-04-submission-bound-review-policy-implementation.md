@@ -1,6 +1,6 @@
 # 提交绑定审核政策：实施与验收
 
-状态：`IN_PROGRESS`；2026-11-04。设计已由用户接受，文档接受提交 `5dc6351`。本记录描述 UC004/005/015/016/030/031 的新增后端实现，不替代原基线证据。
+状态：`COMPLETE`（App/API 后端；跨端消费与正式新政策发布联合验收待准备）；2026-11-04。设计已由用户接受，文档接受提交 `5dc6351`。本记录描述 UC004/005/015/016/030/031 的新增后端实现，不替代原基线证据。
 
 ## 实现范围
 
@@ -12,7 +12,7 @@
 
 ## 分层验证
 
-当前 App 工作树尚未提交；以下为开发期专项，不能代替最终完整门禁。
+App 本地提交 `a95bd13`，API 本地提交 `2dc002e`；以下专项补充最终完整门禁，均不冒充已部署联合链证据。
 
 - `go test ./...` 通过（无 URI 时 Mongo 测试跳过）。包括退休绑定仍执行实时 Scope/URL/OAuth 失败及资格自动拒绝、定义损坏 INTERNAL 与既有状态冲突分类。
 - Version A→B 专项通过：A 退休后批准/拒绝、新提交及拒绝后重提绑定 B、历史保留、提交/发布两种胜序、ledger 重读和回滚。日志 `.artifacts/version-binding-release-target.log`。
@@ -34,3 +34,9 @@ Gateway 沿用既有路由/权限，更新 API descriptor 并核对新 reason �
 158 条 Mongo 失败均来自两个共用批准夹具仍只确认 `content-reviewed`。最终事务现在会核对绑定政策的完整检查集合；已将发布/运行消费链及版本管理链的两处夹具改为 v3 四项正式检查，未放宽校验，未修改 Auth 或业务规则。
 
 修复后串行运行版本管理、发布 migration、UC038 Tester 投影及 UC036 清空 Test 消费链的真实 Mongo race 专项，全部通过（Mongo `26.536s`），日志 `.artifacts/review-binding-consumer-fixture-target.log`。随后重新冻结输入执行完整门禁，结论见后续最终记录。
+
+## 最终完整门禁
+
+`make check-full` / backend **24/24 PASS**，`changed_sources=[]`。报告：`.artifacts/verification/20261103T175414Z-39loaggx/report.json`；Go 1.25.5，固定 API `2dc002e`、权威文档 `46c8bb5`。最后一项耗时 1382.134s。验证在提交前工作树进行，服务起始指纹 `597b145edb5a48225bcc527fd2a845be5eca8e801c67ffb2c8a432ffc250d0b6`；本地提交仅改变 Git 记录，文件内容与验证时保持一致。
+
+文档随后只更新实现状态与证据并重新生成 briefs、检查 freshness/registry；没有修改业务规则。未更改共享 Auth/身份契约，本轮未执行新的 check-auth-app，历史跨服务通过记录不替代本次 Gateway/Console 新契约消费验收。未发布镜像或部署。

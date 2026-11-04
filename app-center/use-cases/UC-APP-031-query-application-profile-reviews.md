@@ -151,7 +151,7 @@ APPROVE 提供的指针与最终事务中的当前指针不同时，由现有指
 
 统一引用 [UC030 策略接口与交付](UC-APP-030-query-application-version-reviews.md#策略接口与交付)：未上线前直接把详情字段4改为 reviewPolicy，包含完整 Profile 定义，不保留 currentPolicy 输出、旧客户端降级或维护切换方案。Profile 现有当前公开投影字段7及 oneof、权限和公开指针 CAS 不变。
 
-API/生成客户端、App、Gateway descriptor、Console/BFF 和夹具直接按同一新契约验收，由各所有者在方案接受后实施。本次不修改共享 Proto 或其他服务代码。
+API/生成客户端、App、Gateway descriptor、Console/BFF 和夹具直接按同一新契约验收，由各所有者按同一契约实施。2026-11-04 用户明确授权本轮修改 App 相关共享 Proto，API 与 App 已完成并通过 backend 门禁；其他服务代码未修改。
 
 ## 最小查询模型与索引
 
@@ -220,6 +220,8 @@ ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。�
 本次绑定及其定义必须可解释；只读详情不因全局 ACTIVE 已变化而失败，不通过 latest 替补。正式定义按本 UC 的[完整策略定义](#完整策略定义)执行；不授予政策发布权。
 
 ## 变更记录
+
+- 2026-11-04：用户接受提交绑定与无旧模型兼容修订；App `a95bd13` / API `2dc002e` 已实现，完整 backend `check-full` 24/24 PASS。Gateway/Console 新契约消费及真实新政策发布另行验收；见[实施记录](../implements/2026-11-04-submission-bound-review-policy-implementation.md)。
 
 - 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
 

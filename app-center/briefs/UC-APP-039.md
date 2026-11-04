@@ -648,8 +648,8 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 | `use-cases/UC-APP-039-query-owned-application-profile-revisions.md` | 228 | `114ea58a96cd` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
 | `use-cases/UC-APP-014-update-draft-application-profile-revision.md` | 336 | `fde28528679f` |
-| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 271 | `18f9790b9eae` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
+| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 273 | `c91b78de6449` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

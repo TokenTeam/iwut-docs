@@ -133,6 +133,8 @@ Reviewer 看到和裁决依据的内容来自提交时不可变 snapshot，政�
 
 ## 变更记录
 
+- 2026-11-04：用户接受提交绑定与无旧模型兼容修订；App `a95bd13` / API `2dc002e` 已实现，完整 backend `check-full` 24/24 PASS。Gateway/Console 新契约消费及真实新政策发布另行验收；见[实施记录](../implements/2026-11-04-submission-bound-review-policy-implementation.md)。
+
 - 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
 
 - 2026-11-04：按用户确认的未上线前提，删除旧模型、旧数据和旧接口兼容，改为统一新模型初始化及单一契约交付。

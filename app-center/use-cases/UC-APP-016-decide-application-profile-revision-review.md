@@ -286,7 +286,7 @@ ApplicationProfileReview、ApplicationProfileRevision 和 ApplicationProfile 仍
 ## 验收场景
 
 - 具有 `app.profile.review` 且无利益冲突的 Reviewer 可以决定一致的 PENDING Review。
-- 按 UC005 新语义矩阵验证 A 提交/B 生效/A 决定、B 新提交、拒绝后新建重提、提交/切换两种胜序、错误绑定、历史不变和实时门禁；本次只定义验收，未运行新测试。
+- 按 UC005 新语义矩阵验证 A 提交/B 生效/A 决定、B 新提交、拒绝后新建重提、提交/切换两种胜序、错误绑定、历史不变和实时门禁；2026-11-04 隔离组件/事务及双协议专项、完整 backend 门禁已通过，真实新政策的正式联合发布另行准备。
 - APPROVE 原子写入 decision、把 Review/Revision 设为 APPROVED，并替换当前公开资料。
 - REJECT 要求有效理由，把 Review/Revision 设为 REJECTED，且旧公开资料保持不变。
 - Reviewer 不能审核自己创建、提交或当前管理的资料。
@@ -320,7 +320,7 @@ REJECT 的候选重建必须保持原始内容，先验证 BSON 字段存在/类
 
 ## API 实现契约
 
-2026-11-03 修订待审：提交绑定、按绑定决定与详情新字段均未实施，替代 2026-10-26 的退休打断决定语义；指针验收分层只澄清可达性，不更改下列决定 Proto、reason/status、单工作位或已交付指针契约。本次未启动实现。
+2026-11-03 修订已于 2026-11-04 接受并完成 App/API 后端实现与完整门禁：提交绑定、按绑定决定及 reviewPolicy 新字段替代退休打断决定。决定命令、单工作位及已交付指针契约保持；错误绑定使用 PolicyMismatch，绑定/定义损坏使用 INTERNAL。当前实现证据与跨端待办见实施记录。
 
 内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision`；外部只加 `/app-center`。原生 gRPC 为 `app_center.v1.application_profile_review.ApplicationProfileReview/DecideApplicationProfileRevisionReview`。
 
@@ -343,6 +343,8 @@ HTTP200 返回 `{ "profileRevision": <完整决定后修订>, "review": <完整�
 错误映射：身份401/UNAUTHENTICATED；缺权限或利益冲突403/PERMISSION_DENIED；不存在或路径归属不匹配404/NOT_FOUND；非法输入、reason、checks或批准内容400/INVALID_ARGUMENT；已决定、状态/revision/公开指针冲突或政策绑定不符409/ABORTED；内部不变量或基础设施失败500/INTERNAL。错误码稳定且不泄漏存储细节。响应丢失后的管理查询仍单独交付，不在本 UC 添加 GET。
 
 ## 变更记录
+
+- 2026-11-04：用户接受提交绑定与无旧模型兼容修订；App `a95bd13` / API `2dc002e` 已实现，完整 backend `check-full` 24/24 PASS。Gateway/Console 新契约消费及真实新政策发布另行验收；见[实施记录](../implements/2026-11-04-submission-bound-review-policy-implementation.md)。
 
 - 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
 

@@ -173,7 +173,7 @@ ApplicationProfileReview 引用 ProfileRevision，但不放入 ApplicationProfil
 
 ### 实现依赖与交付边界
 
-以下为既有交付基线；本次政策绑定修订为 PROPOSED、NOT_STARTED，不据本段启动实现。既有工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
+以下为既有交付基线；2026-11-04 已接受的政策绑定增量已由 App/API 实现并通过完整 backend 门禁，当前证据见实施记录。既有工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
 
 沿用 Application `coordinationRevision` 技术写栅栏，在事务内保护当前管理员资格；资料生命周期、revision 和工作指针同时受最终条件检查保护。数据不变量异常使用 `ApplicationProfileStateInconsistent`，HTTP 500 / gRPC INTERNAL，并输出脱敏 ERROR 告警；不得伪装成客户端冲突或自动修复损坏状态。数据库驱动错误、完整资料文本和身份凭据不进入错误响应或普通日志。
 
@@ -552,9 +552,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 271 | `18f9790b9eae` |
+| `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 273 | `c91b78de6449` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

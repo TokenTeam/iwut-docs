@@ -240,7 +240,7 @@ ApplicationProfileReview 引用 ProfileRevision，但不放入 ApplicationProfil
 
 ## 实现依赖与交付边界
 
-以下为既有交付基线；本次政策绑定修订为 PROPOSED、NOT_STARTED，不据本段启动实现。既有工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
+以下为既有交付基线；2026-11-04 已接受的政策绑定增量已由 App/API 实现并通过完整 backend 门禁，当前证据见实施记录。既有工作包：Domain、UseCase、MongoDB 原子 Repository、显式 migration、独立 API Proto 及生成物、可信身份 HTTP/原生 gRPC、Wire 和真实 MongoDB E2E。前端、生产 Gateway、资料管理查询和 UC-APP-016 审核决定分别交付，不阻塞当前命令实现。不得调用 Auth Scope Catalog、DNS、图标 URL 或资产服务。
 
 沿用 Application `coordinationRevision` 技术写栅栏，在事务内保护当前管理员资格；资料生命周期、revision 和工作指针同时受最终条件检查保护。数据不变量异常使用 `ApplicationProfileStateInconsistent`，HTTP 500 / gRPC INTERNAL，并输出脱敏 ERROR 告警；不得伪装成客户端冲突或自动修复损坏状态。数据库驱动错误、完整资料文本和身份凭据不进入错误响应或普通日志。
 
@@ -263,6 +263,8 @@ Repository 使用业务原子方法 SubmitDraft，输入 applicationId、profile
 错误：身份401/UNAUTHENTICATED，Developer/管理员不足403/PERMISSION_DENIED，归属错误或不存在404/NOT_FOUND，非法输入/内容400/INVALID_ARGUMENT，非DRAFT或stale409/ABORTED，内部不变量或基础设施失败500/INTERNAL。response loss 后查询的读模型契约独立交付，不在本工作包偷偷增加 GET，也不能声称完整管理端流程已可用。
 
 ## 变更记录
+
+- 2026-11-04：用户接受提交绑定与无旧模型兼容修订；App `a95bd13` / API `2dc002e` 已实现，完整 backend `check-full` 24/24 PASS。Gateway/Console 新契约消费及真实新政策发布另行验收；见[实施记录](../implements/2026-11-04-submission-bound-review-policy-implementation.md)。
 
 - 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
 

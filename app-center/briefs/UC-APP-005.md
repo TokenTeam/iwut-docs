@@ -474,13 +474,13 @@ API 测试：
   权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer Status、
   内部服务身份/allowlist 与 System principal resolve 均已有平台契约；App Center 不读取
   Auth 数据库，也不配置固定 SYSTEM Auth ID。
-- 现有持久化、决定与查询仍按全局 ACTIVE 工作，没有提交绑定。本次新语义及简化后的发布/初始化/API 增量全部 NOT_STARTED；2026-10-26 仅为打断待审决定设计的工作不再列为待实现目标。
+- 设计阶段核对的旧基线按全局 ACTIVE 工作。2026-11-04 App/API 已完成提交绑定、按绑定决定/查询、新模型初始化及发布事务原语，并通过完整 backend 门禁；真实新政策及正式发布联合证据待准备。2026-10-26 仅为打断待审决定设计的工作不再列为待实现目标。
 - reviewer 访问未知自托管页面的 iframe/隔离浏览环境属于后续前端与安全运行环境，不属于本后端核心工作包，也不在当前注入 rpc-bridge。
 - 批准时若当前 admin 或 submittedBy 已暂停，使用注入的 System Auth ID 和固定 reason 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
 
 ### 新模型初始化与运行门禁
 
-本节由 BR-REV-016 拥有，Profile 的 BR-PRF-028 引用同一原则。本轮只读核对 App `5b42ed7`、API `6fea3db`；它们尚无提交政策绑定。用户明确当前未上线，因此只设计统一的新模型，不承接旧数据库、旧审核记录或旧接口。
+本节由 BR-REV-016 拥有，Profile 的 BR-PRF-028 引用同一原则。设计阶段只读核对的是 App `5b42ed7`、API `6fea3db`；当时尚无提交政策绑定，实施进度见本 UC 变更记录。用户明确当前未上线，因此采用统一的新模型，不承接旧数据库、旧审核记录或旧接口。
 
 #### 初始数据与约束
 
@@ -1249,10 +1249,10 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 670 | `fe54ea20c860` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 672 | `f1fc65adc1ea` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 541 | `eb64275c4b7b` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
 | `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |

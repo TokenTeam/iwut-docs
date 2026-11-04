@@ -166,7 +166,7 @@ ApplicationProfileReview、ApplicationProfileRevision 和 ApplicationProfile 仍
 ### 验收场景
 
 - 具有 `app.profile.review` 且无利益冲突的 Reviewer 可以决定一致的 PENDING Review。
-- 按 UC005 新语义矩阵验证 A 提交/B 生效/A 决定、B 新提交、拒绝后新建重提、提交/切换两种胜序、错误绑定、历史不变和实时门禁；本次只定义验收，未运行新测试。
+- 按 UC005 新语义矩阵验证 A 提交/B 生效/A 决定、B 新提交、拒绝后新建重提、提交/切换两种胜序、错误绑定、历史不变和实时门禁；2026-11-04 隔离组件/事务及双协议专项、完整 backend 门禁已通过，真实新政策的正式联合发布另行准备。
 - APPROVE 原子写入 decision、把 Review/Revision 设为 APPROVED，并替换当前公开资料。
 - REJECT 要求有效理由，把 Review/Revision 设为 REJECTED，且旧公开资料保持不变。
 - Reviewer 不能审核自己创建、提交或当前管理的资料。
@@ -195,7 +195,7 @@ REJECT 的候选重建必须保持原始内容，先验证 BSON 字段存在/类
 
 ### API 实现契约
 
-2026-11-03 修订待审：提交绑定、按绑定决定与详情新字段均未实施，替代 2026-10-26 的退休打断决定语义；指针验收分层只澄清可达性，不更改下列决定 Proto、reason/status、单工作位或已交付指针契约。本次未启动实现。
+2026-11-03 修订已于 2026-11-04 接受并完成 App/API 后端实现与完整门禁：提交绑定、按绑定决定及 reviewPolicy 新字段替代退休打断决定。决定命令、单工作位及已交付指针契约保持；错误绑定使用 PolicyMismatch，绑定/定义损坏使用 INTERNAL。当前实现证据与跨端待办见实施记录。
 
 内部 `POST /v1/applications/{application_id}/profile-revisions/{profile_revision_id}/reviews/{profile_review_id}/decision`；外部只加 `/app-center`。原生 gRPC 为 `app_center.v1.application_profile_review.ApplicationProfileReview/DecideApplicationProfileRevisionReview`。
 
@@ -604,7 +604,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

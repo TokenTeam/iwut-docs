@@ -216,7 +216,7 @@ ProfileRevision、ProfileReview、固定 policy 和决定流程均已交付。�
 
 统一引用 [UC030 策略接口与交付](../use-cases/UC-APP-030-query-application-version-reviews.md#策略接口与交付)：未上线前直接把详情字段4改为 reviewPolicy，包含完整 Profile 定义，不保留 currentPolicy 输出、旧客户端降级或维护切换方案。Profile 现有当前公开投影字段7及 oneof、权限和公开指针 CAS 不变。
 
-API/生成客户端、App、Gateway descriptor、Console/BFF 和夹具直接按同一新契约验收，由各所有者在方案接受后实施。本次不修改共享 Proto 或其他服务代码。
+API/生成客户端、App、Gateway descriptor、Console/BFF 和夹具直接按同一新契约验收，由各所有者按同一契约实施。2026-11-04 用户明确授权本轮修改 App 相关共享 Proto，API 与 App 已完成并通过 backend 门禁；其他服务代码未修改。
 
 ## 业务规则（UC-APP-031 权威正文）
 
@@ -823,9 +823,9 @@ reviewPolicy 来自该次 Review 的绑定，语义以 [UC031](../use-cases/UC-A
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-031-query-application-profile-reviews.md` | 232 | `60959ad3c154` |
+| `use-cases/UC-APP-031-query-application-profile-reviews.md` | 234 | `62883e3eefc9` |
 | `use-cases/UC-APP-013-create-application-profile-revision.md` | 404 | `42ec2452522f` |
-| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 353 | `07bef4d49d30` |
+| `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

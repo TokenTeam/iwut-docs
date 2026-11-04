@@ -596,7 +596,7 @@ API 测试：
   权限申请、授予、暂停和撤销生命周期仍由后续 Auth Center 用例拥有。Developer Status、
   内部服务身份/allowlist 与 System principal resolve 均已有平台契约；App Center 不读取
   Auth 数据库，也不配置固定 SYSTEM Auth ID。
-- 现有持久化、决定与查询仍按全局 ACTIVE 工作，没有提交绑定。本次新语义及简化后的发布/初始化/API 增量全部 NOT_STARTED；2026-10-26 仅为打断待审决定设计的工作不再列为待实现目标。
+- 设计阶段核对的旧基线按全局 ACTIVE 工作。2026-11-04 App/API 已完成提交绑定、按绑定决定/查询、新模型初始化及发布事务原语，并通过完整 backend 门禁；真实新政策及正式发布联合证据待准备。2026-10-26 仅为打断待审决定设计的工作不再列为待实现目标。
 - reviewer 访问未知自托管页面的 iframe/隔离浏览环境属于后续前端与安全运行环境，不属于本后端核心工作包，也不在当前注入 rpc-bridge。
 - 批准时若当前 admin 或 submittedBy 已暂停，使用注入的 System Auth ID 和固定 reason 将 PENDING Review 与 SUBMITTED Version 原子迁移为 REJECTED。
 
@@ -612,7 +612,7 @@ UC-APP-006：将被拒绝的 ApplicationVersion 恢复为 DRAFT
 
 ## 新模型初始化与运行门禁
 
-本节由 BR-REV-016 拥有，Profile 的 BR-PRF-028 引用同一原则。本轮只读核对 App `5b42ed7`、API `6fea3db`；它们尚无提交政策绑定。用户明确当前未上线，因此只设计统一的新模型，不承接旧数据库、旧审核记录或旧接口。
+本节由 BR-REV-016 拥有，Profile 的 BR-PRF-028 引用同一原则。设计阶段只读核对的是 App `5b42ed7`、API `6fea3db`；当时尚无提交政策绑定，实施进度见本 UC 变更记录。用户明确当前未上线，因此采用统一的新模型，不承接旧数据库、旧审核记录或旧接口。
 
 ### 初始数据与约束
 
@@ -650,6 +650,8 @@ Version 和 Profile 各覆盖：A 下成功提交→发布 B→A attempt 仍按 
 本次采用上节的新模型初始化及夹具重建，不提供旧实验数据库升级方案。Schema 仍通过显式初始化/迁移机制建立；这里的工程入口不代表兼容旧数据。原 v2/v3 变更过程只保留在历史文档和 Git 记录，不作为本次实施指令。
 
 ## 变更记录
+
+- 2026-11-04：用户接受提交绑定与无旧模型兼容修订；App `a95bd13` / API `2dc002e` 已实现，完整 backend `check-full` 24/24 PASS。Gateway/Console 新契约消费及真实新政策发布另行验收；见[实施记录](../implements/2026-11-04-submission-bound-review-policy-implementation.md)。
 
 - 2026-11-04：用户接受无旧模型兼容的提交政策绑定方案，开始实施；接受不代表交付完成。
 
