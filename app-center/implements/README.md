@@ -22,6 +22,10 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 ## 当前实现覆盖
 
+### 平台爬虫配置
+
+用户接受同服务、同库的脚本管理设计 UC-APP-041–049 与 ADR-008，并要求按顺序执行。UC041 与 UC042 已通过 App 直连及 App、Gateway、Auth 本地三镜像专项。API 固定为 `1cb48a9`。App 全量回归通过 24/24。UC043–049 随后按串行清单开展。详见 [UC041 实施记录](UC-APP-041-script-resource-implementation.md)、[UC042 实施与镜像联验](UC-APP-042-script-version-implementation.md)和[串行工作清单](../design-notes/2026-11-05-crawler-script-use-case-review.md)。
+
 ### 2026-11-03 提交时绑定审核政策：已接受修订
 
 用户已确认简化方向，六份 UC004/005/015/016/030/031 的修订正文已于 2026-11-04 ACCEPTED；提交时绑定、新模型初始化、按绑定决定、reviewPolicy 投影及发布事务原语的 App/API 后端已完成，完整 check-full 24/24 PASS；跨端消费和真实新政策正式发布联合验收待准备。旧已交付基线和历史验收保留，不把修订草案记为新交付。2026-10-26“切换使旧决定冲突”的要求及只为此服务的准备工作不再进入后续待办；仍需保护新提交与切换的一致性。详见[已接受提案、替代关系与跨端交接](2026-11-03-submission-bound-review-policy-proposal.md)。
