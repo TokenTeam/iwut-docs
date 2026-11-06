@@ -77,6 +77,8 @@ BR-{BUSINESS_TOPIC}-{NNN}
 | `TST` | Tester Membership 及加入链接 |
 | `RUN` | 运行时启动目标解析 |
 | `OAC` | OAuth Client registration、credential 与提供方查询 |
+| `SCR` | 平台爬虫脚本资源、版本、审核与独立分发 |
+| `SDP` | ApplicationVersion 的精确脚本依赖与审核级联 |
 
 BR 编号属于业务主题，不属于单个 UC。因此同一主题的编号跨 UC 连续：`BR-VER-001` 至 `BR-VER-009` 位于 UC-APP-002，后续 UC-APP-003 从 `BR-VER-010` 继续。
 

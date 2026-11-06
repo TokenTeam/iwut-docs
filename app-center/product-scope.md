@@ -157,9 +157,15 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 
 这里的“读取”包含开发者管理查询、Reviewer 待办查询和用户目录查询，但它们可以采用较短的 Query Contract，不需要全部扩写成与命令相同体量的 UC。
 
+## 平台爬虫配置管理（2026-11-05 新增范围）
+
+用户已确认此能力正式归入 App Center 服务，采用同库的独立脚本领域，具有自己的资源、版本、审核和发布机制，并由 ApplicationVersion 按精确版本引用。服务端管理平台维护的文本配置，客户端本地执行；应用送审、脚本审核结果依赖和拒绝级联由 App Center 维护一致性。
+
+这是对原首版范围的明确扩展。UC-APP-041–049 与 ADR-008 已于 2026-11-06 接受；详细规则与实施顺序见[用例审核清单](design-notes/2026-11-05-crawler-script-use-case-review.md)。通用资源平台、用户配置中心、服务端执行和客户端 Runner 实现继续不在本次范围内。
+
 ## 明确不纳入首版
 
-- 网页托管、构建、静态资源发布或 Resource Hub。
+- 网页托管、构建、静态资源发布或通用 Resource Hub；平台爬虫配置管理按上文已确认的新增范围单独设计。
 - Expo 客户端、WebView、RPC bridge 和客户端升级机制的实现。
 - Auth consent、token 签发以及 RPC 用户数据读写的执行由 Auth Center 拥有；App Center 只提供 client 与应用资格事实。
 - 协作者、细粒度 Application 团队角色和多租户组织。

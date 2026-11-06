@@ -1,0 +1,8 @@
+{
+  "uc": "UC-APP-042",
+  "note": "Implement script draft create and full content replacement. Preserve accepted UTF-8 bytes exactly, enforce permanent per-resource version labels and record revisions, contributors and audit atomically.",
+  "uc_sections": ["目标与输入", "流程与验收"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {"ADR-006": ["决定", "子模块与构建"]}
+}
