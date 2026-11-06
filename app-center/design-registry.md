@@ -15,7 +15,7 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / App Center | `UC-APP-041` |
+| Use Case / App Center | `UC-APP-050` |
 | Business Rule / Application | `BR-APP-059` |
 | Business Rule / Application Profile | `BR-PRF-057` |
 | Business Rule / ApplicationVersion | `BR-VER-034` |
@@ -26,7 +26,9 @@
 | Business Rule / Application Catalog | `BR-CAT-018` |
 | Business Rule / OAuth Client | `BR-OAC-014` |
 | Business Rule / Application Filter | `BR-FLT-011` |
-| Architecture Decision | `ADR-008` |
+| Business Rule / Crawler Script | `BR-SCR-023` |
+| Business Rule / Script Dependency | `BR-SDP-010` |
+| Architecture Decision | `ADR-009` |
 
 Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确认没有未登记的既有定义。
 
@@ -76,6 +78,15 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-038` | 查询我参与的测试 Application | `ACCEPTED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 本人 ACTIVE 参与、暂不可用卡片、门禁隐藏与纯 Test 后端已完成；见 implements。 |
 | `UC-APP-039` | 查询我的 ApplicationProfileRevision 列表与详情 | `ACCEPTED` | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | — | 管理员私有查询后端 COMPLETE；API/完整验收见 implements。 |
 | `UC-APP-040` | Tester 主动退出 Application 测试 | `ACCEPTED` | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) | — | 本人指定 episode 退出、历史/幂等/容量与保留状态后端已完成并验收；见 implements。 |
+| `UC-APP-041` | 管理平台爬虫脚本资源 | `ACCEPTED` | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-042` | 创建与编辑脚本版本草稿 | `ACCEPTED` | [UC-APP-042](use-cases/UC-APP-042-manage-script-version-draft.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-043` | 提交脚本版本审核 | `ACCEPTED` | [UC-APP-043](use-cases/UC-APP-043-submit-script-version-review.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-044` | 审核脚本版本 | `ACCEPTED` | [UC-APP-044](use-cases/UC-APP-044-decide-script-version-review.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-045` | 查询脚本管理与审核视图 | `ACCEPTED` | [UC-APP-045](use-cases/UC-APP-045-query-script-management-and-reviews.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-046` | 管理脚本独立发布与分发门禁 | `ACCEPTED` | [UC-APP-046](use-cases/UC-APP-046-manage-script-publication.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-047` | 查询脚本独立分发与应用精确内容 | `ACCEPTED` | [UC-APP-047](use-cases/UC-APP-047-resolve-application-script-content.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-048` | 管理应用版本的脚本审核依赖 | `ACCEPTED` | [UC-APP-048](use-cases/UC-APP-048-manage-application-script-dependencies.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-049` | 因脚本拒绝自动拒绝关联待审应用 | `ACCEPTED` | [UC-APP-049](use-cases/UC-APP-049-cascade-script-rejection.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
 
 ## Business Rules
 
@@ -450,6 +461,47 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `BR-FLT-010` | 最小披露与不可变历史 | Audit / Privacy | [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md#br-flt-010) | — | — |
 
 
+### Crawler Script (`BR-SCR`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-SCR-001` | 平台脚本身份与历史 | Identity / History | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-001) | — | — |
+| `BR-SCR-002` | 精确权限与职责隔离 | Authorization | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-002) | — | — |
+| `BR-SCR-003` | 资源元数据与乐观并发 | Field / Concurrency | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-003) | — | — |
+| `BR-SCR-004` | 独立版本与不可复用标签 | Identity / Lifecycle | [UC-APP-042](use-cases/UC-APP-042-manage-script-version-draft.md#br-scr-004) | — | — |
+| `BR-SCR-005` | 不透明文本及精确摘要 | Content / Integrity | [UC-APP-042](use-cases/UC-APP-042-manage-script-version-draft.md#br-scr-005) | — | — |
+| `BR-SCR-006` | 草稿替换与受审冻结 | Concurrency / Immutability | [UC-APP-042](use-cases/UC-APP-042-manage-script-version-draft.md#br-scr-006) | — | — |
+| `BR-SCR-007` | 单次提交与固定受审对象 | Review / Consistency | [UC-APP-043](use-cases/UC-APP-043-submit-script-version-review.md#br-scr-007) | — | — |
+| `BR-SCR-008` | 提交时绑定正式脚本政策 | Review Policy | [UC-APP-043](use-cases/UC-APP-043-submit-script-version-review.md#br-scr-008) | — | — |
+| `BR-SCR-009` | 未来机器检查的事实边界 | Boundary | [UC-APP-043](use-cases/UC-APP-043-submit-script-version-review.md#br-scr-009) | — | — |
+| `BR-SCR-010` | 审核资格与利益冲突 | Authorization / Conflict of Interest | [UC-APP-044](use-cases/UC-APP-044-decide-script-version-review.md#br-scr-010) | — | — |
+| `BR-SCR-011` | 明确检查与相斥终态 | Decision / Consistency | [UC-APP-044](use-cases/UC-APP-044-decide-script-version-review.md#br-scr-011) | — | — |
+| `BR-SCR-012` | 拒绝事实与级联义务同生 | Consistency / Delivery | [UC-APP-044](use-cases/UC-APP-044-decide-script-version-review.md#br-scr-012) | — | — |
+| `BR-SCR-013` | 按职责限定查询披露 | Authorization / Privacy | [UC-APP-045](use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-013) | — | — |
+| `BR-SCR-014` | 一致详情与有界列表 | Query / Consistency | [UC-APP-045](use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-014) | — | — |
+| `BR-SCR-015` | 批准与发布分离 | Publication / Consistency | [UC-APP-046](use-cases/UC-APP-046-manage-script-publication.md#br-scr-015) | — | — |
+| `BR-SCR-016` | 历史精确版本与回退 | Publication / History | [UC-APP-046](use-cases/UC-APP-046-manage-script-publication.md#br-scr-016) | — | — |
+| `BR-SCR-017` | 正交分发门禁 | Availability | [UC-APP-046](use-cases/UC-APP-046-manage-script-publication.md#br-scr-017) | — | — |
+| `BR-SCR-018` | 发布命令并发与审计 | Concurrency / Audit | [UC-APP-046](use-cases/UC-APP-046-manage-script-publication.md#br-scr-018) | — | — |
+| `BR-SCR-019` | 受审版本的运行清单 | Runtime / Integrity | [UC-APP-047](use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-019) | — | — |
+| `BR-SCR-020` | 发布与在线解析的精确依赖门禁 | Publication / Runtime Gate | [UC-APP-047](use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) | — | — |
+| `BR-SCR-021` | 内容获取的资格与字节一致性 | Authorization / Content | [UC-APP-047](use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-021) | — | — |
+| `BR-SCR-022` | 独立已发布脚本的查询与获取 | Distribution / Authorization | [UC-APP-047](use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-022) | — | — |
+
+### Script Dependency (`BR-SDP`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-SDP-001` | 显式有界的精确引用 | Reference / Field | [UC-APP-048](use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-001) | — | — |
+| `BR-SDP-002` | 候选选择与关联正文权限 | Authorization / Privacy | [UC-APP-048](use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-002) | — | — |
+| `BR-SDP-003` | 送审冻结与依赖登记 | Submission / Consistency | [UC-APP-048](use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-003) | — | — |
+| `BR-SDP-004` | 批准前的全部脚本获批条件 | Approval / Invariant | [UC-APP-048](use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-004) | — | — |
+| `BR-SDP-005` | 终态与历史引用不被重写 | History / Lifecycle | [UC-APP-048](use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-005) | — | — |
+| `BR-SDP-006` | 精确级联集合与决定原因 | Cascade / Decision | [UC-APP-049](use-cases/UC-APP-049-cascade-script-rejection.md#br-sdp-006) | — | — |
+| `BR-SDP-007` | 可追溯的 SYSTEM 身份 | Identity / Audit | [UC-APP-049](use-cases/UC-APP-049-cascade-script-rejection.md#br-sdp-007) | — | — |
+| `BR-SDP-008` | 一次终态与可靠重试 | Idempotency / Consistency | [UC-APP-049](use-cases/UC-APP-049-cascade-script-rejection.md#br-sdp-008) | — | — |
+| `BR-SDP-009` | 有界执行与可验证完成 | Recovery / Completion | [UC-APP-049](use-cases/UC-APP-049-cascade-script-rejection.md#br-sdp-009) | — | — |
+
 ## Architecture Decision Records
 
 | ID | 标题 | 状态 | 权威位置 | 替代项 | 备注 |
@@ -461,6 +513,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `ADR-005` | 领域错误与 Transport 映射 | `ACCEPTED` | [ADR-005-domain-errors-and-transport-mapping.md](adr/ADR-005-domain-errors-and-transport-mapping.md) | — | 稳定 reason 与 HTTP/gRPC 映射已在现有纵切片统一使用。 |
 | `ADR-006` | Proto v1 与独立 API 仓库协作 | `ACCEPTED` | [ADR-006-proto-v1-and-api-repository.md](adr/ADR-006-proto-v1-and-api-repository.md) | — | — |
 | `ADR-007` | App Center 可观测性基线 | `ACCEPTED` | [ADR-007-observability-baseline.md](adr/ADR-007-observability-baseline.md) | — | 结构化日志、OTLP trace/metric、低基数标签及 HTTP/gRPC health。 |
+| `ADR-008` | 脚本依赖同库事务与拒绝级联 | `ACCEPTED` | [ADR-008-script-dependency-transactions-and-cascade.md](adr/ADR-008-script-dependency-transactions-and-cascade.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
 
 ## 注册表维护规则
 

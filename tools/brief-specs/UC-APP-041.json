@@ -1,0 +1,18 @@
+{
+  "uc": "UC-APP-041",
+  "note": "Implement accepted platform ScriptResource creation and metadata replacement only. Before starting, verify that Auth can grant and project app.script.maintain in a real App audience USER JWS; do not bypass the serial dependency gate.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与操作",
+    "失败与验收"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": false,
+  "adr_sections": {
+    "ADR-006": ["决定", "子模块与构建"]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": ["传输载体", "校验顺序", "错误边界"],
+    "platform/contracts/app-center-api-routing.md": ["路由映射", "契约测试要求"]
+  }
+}
