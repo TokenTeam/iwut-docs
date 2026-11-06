@@ -10,6 +10,8 @@
 
 因此本用例只解决 Developer Console 中无用初始草稿无法清理的问题，并把用户动作命名为“放弃草稿”。成功后 Version 当前内容及其一对一 OAuth 配置从有效数据中永久移除，另存最小不可变 `ApplicationVersionAbandonment` 事实支持审计和安全重试。放弃不新增 `ABANDONED` reviewStatus，也不改变任何 Review 或 Publication。
 
+放弃未提交草稿时随其版本内容删除当前脚本引用。保留独立脚本资源与审核历史，见 [BR-SDP-005](UC-APP-048-manage-application-script-dependencies.md#br-sdp-005)。
+
 ## 目标与范围
 
 本用例负责：

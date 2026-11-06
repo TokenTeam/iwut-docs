@@ -1,0 +1,8 @@
+{
+  "uc": "UC-APP-045",
+  "note": "Expose role-scoped script management, pending review, review detail, publication history, and cascade observations. Authorize before resource lookup and verify bounded keyset reads, consistent details and redaction for each permission.",
+  "uc_sections": ["目标与查询", "验收"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {"ADR-006": ["决定", "子模块与构建"], "ADR-008": ["决定"]}
+}

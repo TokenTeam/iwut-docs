@@ -10,6 +10,8 @@
 
 版本创建成功后不会出现在普通用户的应用目录中。
 
+创建请求显式提供 `scriptReferences`。Proto 用消息字段区分缺失与空列表，HTTP JSON 使用 `{"scriptReferences":{"items":[]}}` 表示无引用。引用按 [BR-SDP-001](UC-APP-048-manage-application-script-dependencies.md#br-sdp-001) 校验，并随版本内容保存。
+
 ## 当前 ApplicationVersion
 
 ```text

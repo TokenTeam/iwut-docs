@@ -700,9 +700,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | --- | --- | --- |
 | `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 672 | `f1fc65adc1ea` |
-| `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 674 | `b9046e5f69b2` |
+| `use-cases/UC-APP-002-create-application-version.md` | 477 | `75bb54122bd2` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-003` 更新草稿应用版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-VER-010`–`BR-VER-017`（8 条） |
-| 外部引用 BR | `BR-VER-003`、`BR-VER-004`、`BR-VER-005`、`BR-VER-006`、`BR-VER-007`、`BR-VER-018`（来自 `UC-APP-002`） |
+| 外部引用 BR | `BR-SDP-001`，`BR-VER-003`、`BR-VER-004`、`BR-VER-005`、`BR-VER-006`、`BR-VER-007`、`BR-VER-018`（来自 `UC-APP-002`、`UC-APP-048`） |
 | ADR | `ADR-001` |
 
 ## 遇到 brief 未覆盖的问题
@@ -47,6 +47,8 @@
 - 保存每次草稿编辑的完整历史。
 
 读取单个版本或版本列表是支持管理页面的 Query，不需要为此建立新的领域实体。
+
+完整替换显式提供 `scriptReferences`，格式与 UC002 一致。引用进入既有 revision 比较与内容相等判断，按 [BR-SDP-001](../use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-001) 重新校验。
 
 ### 可编辑与不可编辑字段
 
@@ -322,6 +324,15 @@ versionLabel、launchUrl、RPC range、capabilities、scopes 和 oauthRedirects 
 
 > 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
 
+### 来自 `UC-APP-048`
+
+<!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-001 -->
+### BR-SDP-001：显式有界的精确引用
+
+scriptReferences 为 0..16 项 `{scriptResourceId, scriptVersionId}`，每个资源最多一个版本，重复 ID、同资源多版本、未知/跨资源版本均报错，不能静默去重。新模型中空列表显式表示不使用脚本；不以字段缺失触发旧客户端兼容。服务保存确定排序的引用，不接受客户端自报 digest 或审核状态。只有 [UC042](../use-cases/UC-APP-042-manage-script-version-draft.md) 的文本内容保持原样，引用列表排序不改写脚本字节。
+
+创建/编辑草稿可选 SUBMITTED 或 APPROVED 版本；不选 DRAFT/REJECTED。后来被拒绝的既有引用可留在应用 DRAFT 展示需修正，但再次编辑提交的完整引用列表须重新满足条件。脚本资源暂停/未发布不阻止准备或送审，不代表允许应用发布/运行。
+
 ### 来自 `UC-APP-002`
 
 <!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-003 -->
@@ -439,6 +450,7 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-003`（use-cases/UC-APP-003-update-draft-application-version.md）：旧实现观察、API 草图、后续用例、迁移说明、变更记录
+- `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 
@@ -446,6 +458,7 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-003-update-draft-application-version.md` | 377 | `429ee4761a19` |
-| `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
+| `use-cases/UC-APP-003-update-draft-application-version.md` | 379 | `83fbbf4f0067` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-002-create-application-version.md` | 477 | `75bb54122bd2` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |

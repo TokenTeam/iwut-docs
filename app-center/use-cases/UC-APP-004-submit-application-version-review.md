@@ -6,6 +6,8 @@
 
 2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
 
+送审事务冻结每个脚本的资源 ID、版本 ID、格式、摘要和脚本审核 ID，并执行脚本版本写栅栏与反向依赖登记。原子边界见 [BR-SDP-003](UC-APP-048-manage-application-script-dependencies.md#br-sdp-003)。
+
 ## 目标与范围
 
 > developerStatus 为 `APPROVED` 的当前应用管理员，以自己读取到的 revision 为前提，把一个满足提交条件的 DRAFT ApplicationVersion 提交为一次可审计的审核 attempt。

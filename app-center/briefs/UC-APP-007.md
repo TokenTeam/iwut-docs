@@ -1007,8 +1007,8 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 672 | `f1fc65adc1ea` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 674 | `b9046e5f69b2` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

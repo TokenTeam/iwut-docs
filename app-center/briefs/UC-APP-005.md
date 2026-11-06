@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-005` 审核应用版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-REV-010`–`BR-REV-020`（11 条） |
-| 外部引用 BR | `BR-APP-011`，`BR-PRF-023`、`BR-PRF-028`，`BR-REV-004`，`BR-VER-018`（来自 `UC-APP-002`、`UC-APP-004`、`UC-APP-016`、`UC-APP-025`） |
+| 外部引用 BR | `BR-APP-011`，`BR-PRF-023`、`BR-PRF-028`，`BR-REV-004`，`BR-SDP-004`，`BR-VER-018`（来自 `UC-APP-002`、`UC-APP-004`、`UC-APP-016`、`UC-APP-025`、`UC-APP-048`） |
 | ADR | `ADR-001`、`ADR-004`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-developer-status-v1.md`、`platform/contracts/auth-scope-catalog-v1.md`、`platform/contracts/auth-system-principal-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -38,6 +38,8 @@
 ### 修订范围与审核状态
 
 2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
+
+批准事务复核全部固定脚本的批准事实，并保存实际依据的脚本审核决定 ID、版本 ID 和摘要。待审和拒绝分别返回 `ScriptDependencyPending` 和 `ScriptDependencyRejected`，详见 [BR-SDP-004](../use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-004)。
 
 ### 目标与范围
 
@@ -718,6 +720,17 @@ snapshot 创建后不可修改。Application.name 和独立的 ApplicationProfil
 
 审核记录的 status 和后续决策审计可以发生一次受控状态迁移，但这不允许改写 snapshot、policyBinding、sourceVersionRevision、submittedBy 或 submittedAt。policyBinding.version 指向本次提交绑定的不可变正式检查定义；与内容 snapshot 一起冻结。
 
+### 来自 `UC-APP-048`
+
+<!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-004 -->
+### BR-SDP-004：批准前的全部脚本获批条件
+
+在保留 UC005 所有身份、利益冲突、政策、Scope、管理员与提交者资格等检查的基础上，只有全部精确依赖具有匹配的 ScriptReview APPROVED 终态，才可批准应用。原文/摘要/引用关系缺失或损坏失败关闭，客户端 confirmedCheckIds 不能代替后端核对。
+
+任一 SUBMITTED 则返回 ScriptDependencyPending 并保持原审核；任一 REJECTED 则返回 ScriptDependencyRejected 并等待/触发已存在的可靠级联，不得批准。该 gate 不妨碍现行资格规则先作合法系统拒绝，也不禁止 Reviewer 按原规则人工拒绝。脚本已批准但未发布或暂停不阻止应用人工审核，实际发布/运行由 UC047 校验。
+
+应用批准记录保存实际依据的脚本审核决定 ID、versionId 和 digest。没有脚本的应用继续通过全部原有条件，不新增伪检查项，也不改变 App 已绑定政策的正式检查文本。
+
 ### 来自 `UC-APP-002`
 
 <!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
@@ -1235,6 +1248,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 - `UC-APP-025`（use-cases/UC-APP-025-coordinate-account-owner-exit.md）：目标与范围、主流程与 API、数据与验收、交付依赖
 - `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：修订范围与审核状态、目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、初始化与实时门禁、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：修订范围与审核状态、目标与范围、提交结果、旧实现观察、输入与身份、主流程、异常流程、策略绑定与提交并发、最小领域模型、用例端口、数据模型、API 草图、测试与验收、后续用例、迁移说明、变更记录
+- `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、决定、Schema 与索引、测试环境、考虑过的替代方案、结果、关联文档
@@ -1249,11 +1263,12 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 672 | `f1fc65adc1ea` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 674 | `b9046e5f69b2` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
 | `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
-| `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-002-create-application-version.md` | 477 | `75bb54122bd2` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

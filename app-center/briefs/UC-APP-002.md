@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-002` 创建应用版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-VER-001`、`BR-VER-002`、`BR-VER-003`、`BR-VER-004`、`BR-VER-005`、`BR-VER-006`、`BR-VER-007`、`BR-VER-008`、`BR-VER-009`、`BR-VER-018` |
-| 外部引用 BR | `BR-REV-007`（来自 `UC-APP-004`） |
+| 外部引用 BR | `BR-REV-007`，`BR-SDP-001`（来自 `UC-APP-004`、`UC-APP-048`） |
 | ADR | `ADR-001` |
 | 平台共享 | `platform/contracts/auth-scope-catalog-v1.md` |
 
@@ -42,6 +42,8 @@
 本用例只创建 `DRAFT` ApplicationVersion，不提交审核、不批准、不发布，也不修改 stable/grey/test 槽位。
 
 版本创建成功后不会出现在普通用户的应用目录中。
+
+创建请求显式提供 `scriptReferences`。Proto 用消息字段区分缺失与空列表，HTTP JSON 使用 `{"scriptReferences":{"items":[]}}` 表示无引用。引用按 [BR-SDP-001](../use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-001) 校验，并随版本内容保存。
 
 ### 输入与身份
 
@@ -351,6 +353,15 @@ Application 入口地址。
 
 ApplicationReview 保存 preflightPolicyVersion，便于以后解释提交时使用的规则版本。
 
+### 来自 `UC-APP-048`
+
+<!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-001 -->
+### BR-SDP-001：显式有界的精确引用
+
+scriptReferences 为 0..16 项 `{scriptResourceId, scriptVersionId}`，每个资源最多一个版本，重复 ID、同资源多版本、未知/跨资源版本均报错，不能静默去重。新模型中空列表显式表示不使用脚本；不以字段缺失触发旧客户端兼容。服务保存确定排序的引用，不接受客户端自报 digest 或审核状态。只有 [UC042](../use-cases/UC-APP-042-manage-script-version-draft.md) 的文本内容保持原样，引用列表排序不改写脚本字节。
+
+创建/编辑草稿可选 SUBMITTED 或 APPROVED 版本；不选 DRAFT/REJECTED。后来被拒绝的既有引用可留在应用 DRAFT 展示需修正，但再次编辑提交的完整引用列表须重新满足条件。脚本资源暂停/未发布不阻止准备或送审，不代表允许应用发布/运行。
+
 ## 架构决定（仅本次需要的章节）
 
 ### ADR-001：Scope Catalog 权威来源与缓存（`ACCEPTED`）
@@ -473,6 +484,7 @@ Provider 与 Consumer 至少共同验证：
 
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：当前 ApplicationVersion、旧实现观察、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、迁移说明、变更记录
 - `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：修订范围与审核状态、目标与范围、提交结果、旧实现观察、输入与身份、主流程、异常流程、策略绑定与提交并发、最小领域模型、用例端口、数据模型、API 草图、测试与验收、后续用例、迁移说明、变更记录
+- `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `platform/contracts/auth-scope-catalog-v1.md`（docs 根级共享文档）：目的与所有权、兼容性、关联文档
 
@@ -480,7 +492,8 @@ Provider 与 Consumer 至少共同验证：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
+| `use-cases/UC-APP-002-create-application-version.md` | 477 | `75bb54122bd2` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |

@@ -13,6 +13,8 @@
 
 本用例不交付 Profile/Version 完整历史、Tester 成员名单、审核队列、secret 明文、审计日志、搜索排名或前端页面。这些事实通过各自能力查询或后续 UC 提供。
 
+从应用管理详情进入版本和候选查询。具备 Developer 资格的当前应用管理员可在该应用下查询候选元数据，权限及披露边界见 [BR-SDP-002](UC-APP-048-manage-application-script-dependencies.md#br-sdp-002)。
+
 ## 身份、授权与存在性隐藏
 
 查询只接受 Gateway 验证后的可信 USER 身份。调用者不需要当前仍是 APPROVED Developer；资格变化不删除其已有管理关系，也不能阻止其查看需要处置的 Application。

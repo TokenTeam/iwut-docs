@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-006` 将被拒绝的应用版本恢复为草稿 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-REV-021`–`BR-REV-028`（8 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-SDP-005`（来自 `UC-APP-048`） |
 | ADR | `ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -54,6 +54,8 @@
 - 重新检查 Scope Catalog、launchUrl 或审核策略。
 - 撤回 SUBMITTED、撤销 APPROVED 或处理申诉。
 - 发送审核通知。
+
+恢复草稿保留当前脚本引用。恢复后的引用替换只影响当前草稿，旧审核快照和反向依赖按 [BR-SDP-005](../use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-005) 保留。
 
 ### 输入与身份
 
@@ -377,6 +379,17 @@ ApplicationReviewDraftRestoration {
 
 UC-APP-004 在下一次提交时重新执行提交校验，因此跳过恢复时的外部检查不会降低审核入口约束。
 
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-048`
+
+<!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-005 -->
+### BR-SDP-005：终态与历史引用不被重写
+
+ScriptVersion APPROVED/REJECTED 相斥且不可改写；脚本发布 head 移动不改变 App snapshot。App 拒绝恢复 DRAFT 后可以修改引用，但旧 Review 及其反向关系作为历史保留，活跃级联不再作用于其终态。新送审创建新 attempt 和新依赖，不继承旧批准或旧拒绝结果；已拒绝脚本不能通过恢复草稿重新进入待审链路。
+
 ## 架构决定（仅本次需要的章节）
 
 ### ADR-006：Proto v1 与独立 API 仓库协作（`ACCEPTED`）
@@ -549,6 +562,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-006`（use-cases/UC-APP-006-restore-rejected-version-to-draft.md）：为什么需要显式恢复、旧实现观察、后续方向、变更记录
+- `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：JOSE Header、时间与有效期、校验顺序、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
@@ -557,7 +571,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-006-restore-rejected-version-to-draft.md` | 416 | `82ee4c6d47dc` |
+| `use-cases/UC-APP-006-restore-rejected-version-to-draft.md` | 418 | `4a534a20d9cb` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

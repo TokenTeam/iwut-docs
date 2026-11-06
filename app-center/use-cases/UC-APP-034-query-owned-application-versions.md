@@ -12,6 +12,8 @@ Reviewer 继续通过 [UC-APP-030](UC-APP-030-query-application-version-reviews.
 
 如果未来平台支持人员需要跨 Application 排障，应建立带精确权限、强审计和最小披露的独立运维查询；不得把“平台管理员”解释为本用例的隐式超级读取者。
 
+私有版本详情区分当前草稿引用与最新审核的固定快照。展示当前审核状态及拒绝导致的失效标记，按 [BR-SDP-002](UC-APP-048-manage-application-script-dependencies.md#br-sdp-002) 披露元数据。
+
 ## 目标与范围
 
 本用例交付两个只读查询：

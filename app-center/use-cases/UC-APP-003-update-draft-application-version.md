@@ -16,6 +16,8 @@
 
 读取单个版本或版本列表是支持管理页面的 Query，不需要为此建立新的领域实体。
 
+完整替换显式提供 `scriptReferences`，格式与 UC002 一致。引用进入既有 revision 比较与内容相等判断，按 [BR-SDP-001](UC-APP-048-manage-application-script-dependencies.md#br-sdp-001) 重新校验。
+
 ## 可编辑与不可编辑字段
 
 完整替换以下字段：
