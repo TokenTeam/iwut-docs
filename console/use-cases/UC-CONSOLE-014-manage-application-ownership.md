@@ -1,12 +1,22 @@
 # UC-CONSOLE-014：管理应用归档与管理权交接
 
-状态：`ACCEPTED`，2026-10-30，依据用户持续 goal 的自主设计、接受和实施授权登记。
+状态：`ACCEPTED`。2026-10-30 原基线保留；2026-11-08 用户明确接受本人待接收列表修订并要求更新 UC 后串行实施。
 
 ## 用户目标与结构
 
 当前管理员在应用设置中读取并改变归档状态、向已有账号发起管理权转让；转让双方通过独立整页读取和处理申请。业务权威为 App [UC033](../../app-center/use-cases/UC-APP-033-archive-and-unarchive-application.md) 与 [UC026](../../app-center/use-cases/UC-APP-026-transfer-application-administration.md)，本用例只定义 Console 组合交互，不复制业务规则。
 
-应用设置沿用 `/applications/:applicationId/settings`；转让详情使用 `/application-transfers/:transferId`。转让详情只依赖参与者转让读取，不放在“我的应用”管理权门禁内，也不要求接收前先能读取应用管理摘要。当前没有转让列表、用户搜索或通知 API；目标使用用户明确提供的已有账号 opaque Auth ID，不把邮箱、昵称或自造 UUID 当作账号。
+应用设置沿用 `/applications/:applicationId/settings`；转让详情使用 `/application-transfers/:transferId`。转让详情只依赖参与者转让读取，不放在“我的应用”管理权门禁内，也不要求接收前先能读取应用管理摘要。本人入站列表依据 App UC050；目标仍使用用户明确提供的已有账号 opaque Auth ID，不把邮箱、昵称或自造 UUID 当作账号，不接入 Auth 人员搜索或通知。
+
+## 本人待接收列表（2026-11-08 修订）
+
+账号入口增加“待接收转让”，独立整页 `/application-transfers`，不依赖当前应用、我的应用列表或 APPROVED Developer。可信 ACTIVE USER 的本人集合、观察时间、过期排除、只读语义和错误以 [App UC050 / BR-APP-059–062](../../app-center/use-cases/UC-APP-050-query-incoming-application-admin-transfers.md) 与[入站读契约](../../app-center/query-contracts/incoming-application-transfers.md) 为唯一权威。
+
+调用 `ListIncomingApplicationAdminTransfers`，`POST /app-center/v1/application-admin-transfers/incoming:search`，正文为 query 本身，只传 pageSize/pageToken，不传主体或状态。每页20，按正式 token 明确续读、刷新第一页；不自动扫全量、不推算总数/未读数。每页显示自身 asOf；换 Session 清全部页/token。事项只展示技术名称/ID、发起者Auth ID及申请/到期时间，不聚合Auth资料。
+
+成功空数组明确无事项，失败不伪装为空；协议错误/访问拒绝清当前范围，暂时故障保留同上下文旧页时标明原读取时间。浏览器时钟不改写到期状态。点击只携带transferId进入原参与者详情，重新读取当前事实；打开接受/拒绝确认及实际提交前分别重读该详情，事实变化清旧确认/选择，原命令最终判定资格与并发。原分享链接保持可达，不要求事项仍在列表。
+
+命令确认完成沿原详情读回；返回列表重读第一页，不以客户端删除行证明成功。未知不重放，KEEP/ROTATE及Secret只披露一次仍沿原规则。列表、详情和应用管理使用独立失效范围；旧列表不能成为授权或修订基线。
 
 ## 归档与设置
 
@@ -37,3 +47,5 @@
 ## 验收与限制
 
 固定官方 API `6fea3db` 已包含归档与转让消息。验收覆盖专用基线、归档/恢复/no-op、非活动只读、目标输入和确认、双方独立详情、KEEP/ROTATE 显式选择、只披露一次、未知不重放、终态/修订回退、Session 与 Query 实例保护。组件与 client 合成检查不冒充真实镜像业务验收；真实转让和发布门禁另记证据。
+
+2026-11-08 增量验收：普通/非批准Developer本人可达、无应用可达、本人绑定与他人隔离、同时间分页/刷新/空数组、逻辑到期、旧列表与变化后的详情、确认前/提交前重读、旧Session/旧Query迟到响应、错误分类及private/no-store。后端验收不替代真实React链。
