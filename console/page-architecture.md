@@ -31,6 +31,7 @@ Console 应围绕用户任务组织，而不是把 App Center 的资源路径逐
 └─ 全局账号入口                     独立于当前应用及 Developer 资格
    ├─ 本人资料                      /account/profile，UC016
    ├─ 开发者资格                    /account/developer，UC018，仅 Developer Console
+   ├─ 待接收转让                    /application-transfers，UC014，不依赖当前应用或Developer批准
    └─ 退出此工作台                  UC017，明确确认后结束当前会话
 ```
 
@@ -121,3 +122,7 @@ Console 应围绕用户任务组织，而不是把 App Center 的资源路径逐
 4. 再补发布与测试管理操作；OAuth/Filter 和归档/转让/关闭按独立工作包逐步引入。后端没有通用 DeleteApplication，因此不以凑齐 CRUD 为由增加删除按钮。
 
 暂定导航顺序已接受；具体布局通过初版调整，必要时同步修订结构文档。后端规则、密码/设备治理和 Tester 本人客户端不由本规划自动授权。
+
+## 2026-11-08 已接受的发现入口
+
+Developer账号入口新增本人待接收转让整页；Admin应用运维增加精确权限保护的应用目录，人员治理增加完整管理员专用的Auth ID/邮箱精确查找。目录和搜索只定位，选择后先读原专用资源再确认写入。功能与验收以[UC014](use-cases/UC-CONSOLE-014-manage-application-ownership.md)、[UC015](use-cases/UC-CONSOLE-015-manage-platform-governance.md)为准，交付状态另记；不扩展爬虫页面。

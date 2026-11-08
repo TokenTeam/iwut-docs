@@ -1,5 +1,7 @@
 # iWUT Console 实现状态
 
+2026-11-08 用户已接受UC014/015搜索与本人待接收转让修订，权威UC和导航已更新，按[串行实施工作包](2026-11-08-search-and-incoming-transfer.md)接入。实现和后端镜像验收分别记录，不以原139或App backend通过替代新增React实链。
+
 ## 当前状态
 
 2026-11-04 [提交绑定审核策略](2026-11-04-submission-bound-review-policy.md)已完成 Console 本地适配：固定 API `2dc002e`、严格 `reviewPolicy` 和两类完整定义、按绑定决定及刷新保留确认；UC006/007 同步接受设计。客户端540＋Admin241项、夹具105项、完整类型检查、生成漂移、独立性及完整构建通过。API尚未远程发布，本次生成显式使用进程级同 revision mirror；仓库不加入本地路径。App新镜像与Gateway新descriptor链仍待准备，未运行本次真实139项或正式新政策联合发布；下面139绿及旧政策阻塞为历史基线。

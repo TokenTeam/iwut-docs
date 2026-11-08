@@ -21,8 +21,8 @@
 | `UC-CONSOLE-011` | 管理应用测试邀请与成员 | `ACCEPTED` | [UC-CONSOLE-011](use-cases/UC-CONSOLE-011-manage-application-testers.md) | 2026-10-30页面已实现；首次创建/轮换/撤销/成员移除代表实链通过 |
 | `UC-CONSOLE-012` | 管理应用 OAuth 客户端 | `ACCEPTED` | [UC-CONSOLE-012](use-cases/UC-CONSOLE-012-manage-oauth-clients.md) | 三渠道组件已实现；登记/启停/轮换与一次secret披露代表链通过 |
 | `UC-CONSOLE-013` | 编排应用展示规则 | `ACCEPTED` | [UC-CONSOLE-013](use-cases/UC-CONSOLE-013-compose-application-display-filter.md) | 完整树与目录独立读取，设置/清空代表实链通过；本地结构编排补强 |
-| `UC-CONSOLE-014` | 管理应用归档与管理权交接 | `ACCEPTED` | [UC-CONSOLE-014](use-cases/UC-CONSOLE-014-manage-application-ownership.md) | 专用读取/参与者全局页已实现；归档与KEEP/ROTATE代表实链通过 |
-| `UC-CONSOLE-015` | 管理平台人员资格与可用状态 | `ACCEPTED` | [UC-CONSOLE-015](use-cases/UC-CONSOLE-015-manage-platform-governance.md) | 16条正式治理命令与专用读回代表实链通过；独立运维精确权限发现缺口保留 |
+| `UC-CONSOLE-014` | 管理应用归档与管理权交接 | `ACCEPTED` | [UC-CONSOLE-014](use-cases/UC-CONSOLE-014-manage-application-ownership.md) | 原归档与KEEP/ROTATE代表链保留；2026-11-08本人待接收列表修订获用户明确接受，串行实施验收中 |
+| `UC-CONSOLE-015` | 管理平台人员资格与可用状态 | `ACCEPTED` | [UC-CONSOLE-015](use-cases/UC-CONSOLE-015-manage-platform-governance.md) | 本人发现与2026-11-08平台应用目录/人员精确定位均获用户具体接受；新增链实施验收中，旧治理证据不替代新功能 |
 | `UC-CONSOLE-016` | 查看与编辑本人账号资料 | `ACCEPTED` | [UC-CONSOLE-016](use-cases/UC-CONSOLE-016-edit-own-account-profile.md) | 共享六类型/明确set-remove已实现；双端普通USER五类型代表实链通过，AcademicGrade实链未覆盖 |
 | `UC-CONSOLE-017` | 显式退出当前 Console 会话 | `ACCEPTED` | [UC-CONSOLE-017](use-cases/UC-CONSOLE-017-sign-out-current-console.md) | 专用BFF/Edge/共享面板已实现，普通、Mongo与双端真实Auth退出代表链通过 |
 | `UC-CONSOLE-018` | 查看并申请本人 Developer 资格 | `ACCEPTED` | [UC-CONSOLE-018](use-cases/UC-CONSOLE-018-apply-for-developer.md) | 已实现，普通用户生产页面开通后沿原Session创建首个App代表链通过；精确BFF复用既有DIRECT路由 |
