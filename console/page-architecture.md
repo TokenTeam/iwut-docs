@@ -4,11 +4,13 @@
 
 Console 应围绕用户任务组织，而不是把 App Center 的资源路径逐层翻译成页面。建议采用“全局工作区 + 当前应用工作区”，应用内各模块平级切换；版本配置在同一版本工作页完成，不再继续钻入配置子页面。本规划只定义功能组织与信息层级，不规定具体样式。
 
+2026-11-10 已接受增量：[UC023 管理动态](use-cases/UC-CONSOLE-023-query-application-management-activity.md) 在当前应用增加平级整页，查看 Version/Profile 六类审核提交与决定，并提供只读事件详情。下方对应导航已接受，初版与Version代表历史实链已完成；覆盖范围与发布依赖单独记录。完整功能与失败/分页规则只在 UC023 定义。
+
 ## 结构依据与交付边界
 
 2026-10-30 更新：Gateway9d6a27f已交付所列普通P0/P1 Console路由。UC009应用创建、UC008版本写入/送审、UC010资料写入/送审，以及UC011–013测试/OAuth/Filter已有[代表性真实页面证据](implements/2026-10-30-developer-management-writes.md)，不能扩大为旧128全量重新通过。UC014归档/转让已接线、独立实链验收中；UC015治理在实施，Admin布局仍由后续试用迭代。账号与特殊凭据编排未因普通路由补齐而完成。
 
-业务语义以 [App Center 用例](../app-center/README.md)及下文具体 UC 为准；API 输入固定为 [iwut-api-proto 6fea3db](https://github.com/TokenTeam/iwut-api-proto/tree/6fea3db899d3d096d4d3dfc59b2c85432a4b9eb6/app_center/v1)。Gateway 依据[当前 routes.v3](https://github.com/TokenTeam/iwut-gateway/blob/master/config/routes.v3.yaml)核对；正式实施时重新验证发布镜像，不能仅凭 Proto 存在认定浏览器可调用。
+业务语义以 [App Center 用例](../app-center/README.md)及下文具体 UC 为准；当前固定 API 输入与镜像身份按[实施记录](implements/README.md)核对，不在页面结构规划重复维护 revision。Gateway 依据[当前 routes.v3](https://github.com/TokenTeam/iwut-gateway/blob/master/config/routes.v3.yaml)核对；正式实施时重新验证发布镜像，不能仅凭 Proto 存在认定浏览器可调用。
 
 区分三个层次：App 已有 RPC，不等于已开放对应 Console surface；已开放 surface，也不等于页面已实现。当前 Developer 管理读取与 Admin 两类审核已接入；本规划中的 Developer 写入、发布、OAuth、Filter、转让和关闭仍须各自 Console UC、最小 API 生成子集、精确 Gateway 路由与真实验收。不得改走非 Console Gateway、浏览器 Session header 或数据库来绕过缺口。
 
@@ -24,10 +26,10 @@ Console 应围绕用户任务组织，而不是把 App Center 的资源路径逐
 │     ├─ 版本与发布                   三个发布槽位、版本列表 → 版本工作页
 │     ├─ 测试配置                     应用级测试成员与邀请链接
 │     ├─ 公开资料                     当前公开资料、工作修订、历史
+│     ├─ 管理动态                     UC023已接受；六类审核事件 → 只读历史详情
 │     ├─ 接入配置                     OAuth 客户端
 │     ├─ 展示规则                     应用级 Filter 独立编排空间
 │     └─ 应用设置                     技术信息、归档、管理权转让、关闭
-├─ 爬虫配置                         平台级栏目；目前只说明尚未建设
 └─ 全局账号入口                     独立于当前应用及 Developer 资格
    ├─ 本人资料                      /account/profile，UC016
    ├─ 开发者资格                    /account/developer，UC018，仅 Developer Console
@@ -41,7 +43,7 @@ Console 应围绕用户任务组织，而不是把 App Center 的资源路径逐
 
 按用户后续简化，两态保持原生滚动，不再使用展开动画、位置补偿、占位空白或日常滚动强制边界校正。展开或选择应用后仅尝试把已加载目标滚入可见区域；当前应用不在已加载列表时取可见项，不无限查找页外数据。选择应用后收起；未选择应用而直接收起（含 Escape）时恢复原紧凑列表滚动位置。具体呈现继续通过原型调整。应用内模块与平台栏目分层，切换应用继续适用未保存离页提示。
 
-应用切换复用 `ListMyApplications` 默认范围和显式游标加载，不受当前内容区筛选影响；不为了寻找一个页外当前应用无限自动翻页。列表绑定会话代际、独立读取时间，失效后清理，不以常驻导航保留旧权限下的私有名称。爬虫配置没有设计/API，仅显示规划说明，不发明设置项或调用。
+应用切换复用 `ListMyApplications` 默认范围和显式游标加载，不受当前内容区筛选影响；不为了寻找一个页外当前应用无限自动翻页。列表绑定会话代际、独立读取时间，失效后清理，不以常驻导航保留旧权限下的私有名称。平台脚本维护已按 UC019–021 移至 Admin；Developer 在 UC022 的版本工作页选择固定引用。
 
 | 页面或区域 | 用户任务与主信息 | 操作规划与 API 依据 | 当前接入状态 |
 | --- | --- | --- | --- |
