@@ -68,3 +68,7 @@ Gateway `5efc9d5` 为六条现有命令开放 DEVELOPER surface，运行镜像�
 API 固定 6fea3db。2026-10-27 首版时 Gateway 的版本创建和更新尚无 DEVELOPER surface，因此当时默认关闭网络写入，仅提供整页结构与填写；不以当时的环境开关证明服务端授权。2026-10-30 后的命令接入以上方增量为准，真实证据见[写入接入](../implements/2026-10-30-developer-write-workspace.md)和[审核、恢复与发布闭环](../implements/2026-10-30-version-review-publication-loop.md)，不再将首版限制作为当前实现状态。
 
 验收覆盖：三槽位/major/空态；单状态与游标保留；新建与 DRAFT 共用编辑；无效字段、不重复集合、离页保护；串行保存、迟到 ACK、冲突/未知不重放、重置；私有数据退场和原只读回归。组件 fixture 与真实镜像证据分开登记。
+
+## 2026-11-10 脚本引用消费增量
+
+状态：`ACCEPTED`，用户授权 Console 脚本管理范围自行设计、接受和实现。新增行为统一由 [UC022](UC-CONSOLE-022-application-script-dependencies.md) 定义：应用草稿显式保存固定引用，详情忠实显示后端依赖状态，应用 Reviewer 按该次审核专属入口惰性读取固定脚本；依赖阻塞批准不一并禁止原规则允许的人工拒绝。不改写既有版本/审核历史或新增前端伪检查项。实现证据另记，不因本增量接受宣布全部原 UC 完成。

@@ -60,3 +60,7 @@
 2026-10-15 首个实现工作包已交付：固定类型与同源 client、列表/详情路由、单状态 URL 筛选、显式游标翻页、当前 Version/latestReview 分区、无效 token 回收、`SESSION_INVALID` 回登录和运行声明惰性纯文本均已落地。浏览器 fixture 用例、Gateway `latest` 路由组成测试及真实 Auth/App/Mongo 协议 E2E 已通过。
 
 本登记不宣称真实浏览器联合验收已完成：仍需让页面连接同一套真实服务环境，使用真实管理员及四种状态/恢复后 DRAFT 数据覆盖管理权变化、生命周期组合、no-store 与迟到响应。证据和固定镜像 digest 记录在 [Console 实现状态](../implements/README.md)。
+
+## 2026-11-10 脚本引用消费增量
+
+状态：`ACCEPTED`，用户授权 Console 脚本管理范围自行设计、接受和实现。新增行为统一由 [UC022](UC-CONSOLE-022-application-script-dependencies.md) 定义：应用草稿显式保存固定引用，详情忠实显示后端依赖状态，应用 Reviewer 按该次审核专属入口惰性读取固定脚本；依赖阻塞批准不一并禁止原规则允许的人工拒绝。不改写既有版本/审核历史或新增前端伪检查项。实现证据另记，不因本增量接受宣布全部原 UC 完成。

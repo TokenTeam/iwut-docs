@@ -58,6 +58,8 @@ Console 文档不重新定义 Auth Center、App Center 或 Gateway 的业务规�
 - UC016：本人账号资料全页编辑，目录驱动且明确提交；共享实现、普通验证与双端五类型代表实链通过。
 - UC017：显式退出当前工作台，精确Auth撤销与Console按代清理分别确认；普通、Mongo及双端真实Auth退出代表链通过。
 - UC018：Developer 独立本人资格入口，明确申请或补设永久开发者 ID，再主动进入创建应用；首次申请与原会话创建的代表实链通过，当前完整候选回归另行记录。
+- UC019–022：平台脚本维护、独立审核、发布门禁与应用引用已获 2026-11-10 实施授权，初版实现与三角色代表实链已完成。整体页面责任、权限治理增量、后端设计依赖与既有策略/运维的验收安排见 [2026-11-09 设计总案](design-notes/2026-11-09-console-completion-design.md)。
+- UC023：[查看应用管理动态](use-cases/UC-CONSOLE-023-query-application-management-activity.md)，设计 `ACCEPTED`、实现 `LOCAL_VERIFIED`。单应用六类审核事件与最小历史详情，消费已交付 App UC052；联合验收见本轮实施记录，不包含个人收件/已读或真实通知。
 
 ## 开工规则
 

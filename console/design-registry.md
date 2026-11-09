@@ -26,6 +26,11 @@
 | `UC-CONSOLE-016` | 查看与编辑本人账号资料 | `ACCEPTED` | [UC-CONSOLE-016](use-cases/UC-CONSOLE-016-edit-own-account-profile.md) | 共享六类型/明确set-remove已实现；双端普通USER五类型代表实链通过，AcademicGrade实链未覆盖 |
 | `UC-CONSOLE-017` | 显式退出当前 Console 会话 | `ACCEPTED` | [UC-CONSOLE-017](use-cases/UC-CONSOLE-017-sign-out-current-console.md) | 专用BFF/Edge/共享面板已实现，普通、Mongo与双端真实Auth退出代表链通过 |
 | `UC-CONSOLE-018` | 查看并申请本人 Developer 资格 | `ACCEPTED` | [UC-CONSOLE-018](use-cases/UC-CONSOLE-018-apply-for-developer.md) | 已实现，普通用户生产页面开通后沿原Session创建首个App代表链通过；精确BFF复用既有DIRECT路由 |
+| `UC-CONSOLE-019` | 维护平台脚本资源与版本工作页 | `ACCEPTED` | [UC-CONSOLE-019](use-cases/UC-CONSOLE-019-script-resource-workspace.md) | 全页新建/编辑复用；本人脚本能力发现已交付，代表联合链通过 |
+| `UC-CONSOLE-020` | 审核平台脚本版本 | `ACCEPTED` | [UC-CONSOLE-020](use-cases/UC-CONSOLE-020-review-script-versions.md) | 独立脚本队列、固定受审原文与拒绝级联观测；代表链通过 |
+| `UC-CONSOLE-021` | 管理脚本发布与分发门禁 | `ACCEPTED` | [UC-CONSOLE-021](use-cases/UC-CONSOLE-021-script-publication-and-distribution.md) | 单一推荐版本；发布/暂停/恢复独立 |
+| `UC-CONSOLE-022` | 选择与审核应用脚本依赖 | `ACCEPTED` | [UC-CONSOLE-022](use-cases/UC-CONSOLE-022-application-script-dependencies.md) | UC003/006/008增量；应用内精确引用与受限正文读取 |
+| `UC-CONSOLE-023` | 查看应用管理动态 | `ACCEPTED` | [UC-CONSOLE-023](use-cases/UC-CONSOLE-023-query-application-management-activity.md) | `LOCAL_VERIFIED`；Version代表动态/历史实链通过，六类完整矩阵与发布依赖见实施记录 |
 
 ## Business Rules
 
@@ -52,6 +57,9 @@
 | `BR-CMG-008` | 资料与审核历史独立分页 | Console Management Query | [UC-CONSOLE-004](use-cases/UC-CONSOLE-004-query-owned-profile-revisions.md#br-cmg-008) | `ACCEPTED`，随 UC004 实施 |
 | `BR-CMG-009` | Tester 管理事实不扩张到用户资料或凭证 | Console Management Query | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md#br-cmg-009) | `ACCEPTED`，随 UC005 实施 |
 | `BR-CMG-010` | 概览与两类列表独立恢复 | Console Management Query | [UC-CONSOLE-005](use-cases/UC-CONSOLE-005-query-application-tester-management.md#br-cmg-010) | `ACCEPTED`，随 UC005 实施 |
+| `BR-CMG-011` | 历史事件和当前资源分开消费 | Console Management Query | [UC-CONSOLE-023](use-cases/UC-CONSOLE-023-query-application-management-activity.md#br-cmg-011) | `ACCEPTED`；不扫描资源或借Reviewer查询补历史 |
+| `BR-CMG-012` | 活动分页和深链接有独立上下文 | Console Management Query | [UC-CONSOLE-023](use-cases/UC-CONSOLE-023-query-application-management-activity.md#br-cmg-012) | `ACCEPTED`；token及Query按会话/应用/筛选隔离 |
+| `BR-CMG-013` | 只读失败隔离与原文保护 | Console Management Query | [UC-CONSOLE-023](use-cases/UC-CONSOLE-023-query-application-management-activity.md#br-cmg-013) | `ACCEPTED`；单项与应用拒绝分开，故障不伪装空历史 |
 | `BR-CRV-001` | 精确权限、利益冲突与在线重查 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-001) | `ACCEPTED`，随所属完整UC分阶段实施 |
 | `BR-CRV-002` | snapshot、提交绑定策略与确认绑定 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-002) | `ACCEPTED`，随所属完整UC分阶段实施 |
 | `BR-CRV-003` | 并发变化与结果未知恢复 | Console Review Flow | [UC-CONSOLE-006](use-cases/UC-CONSOLE-006-review-application-versions.md#br-crv-003) | `ACCEPTED`，随所属完整UC分阶段实施 |
@@ -80,10 +88,10 @@
 
 | 空间 | 下一个编号 |
 | --- | --- |
-| Console UC | `UC-CONSOLE-019` |
+| Console UC | `UC-CONSOLE-024` |
 | Console BR-CVW | `BR-CVW-004` |
 | Console BR-CSE | `BR-CSE-009` |
-| Console BR-CMG | `BR-CMG-011` |
+| Console BR-CMG | `BR-CMG-014` |
 | Console BR-CRV | `BR-CRV-009` |
 | Console BR-CDA | `BR-CDA-006` |
 | Console ADR | `ADR-CONSOLE-006` |

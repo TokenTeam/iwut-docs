@@ -178,3 +178,9 @@ GET 无 body/query；POST 查询仍按官方 JSON request 发送且不自动重�
 - 2026-10-30：接受首版前端职责设计；明确平台资格自查询的真实授权门槛、不返回 permissions，以及独立 App 运维人员精确能力发现的最小依赖。仅交付文档，未实施产品、生成物或真实治理写入。
 - 2026-11-04：新增独立本人能力发现消费设计，本次修订 DRAFT 待用户审核；原人员治理及受限 App 运维基线继续有效，不实施新发现链。
 - 2026-11-04：用户明确接受本次本人读取/消费修订并授权实现；依赖复核通过，同步 ACCEPTED 后脚本生成 brief，开始串行实施；未授权自动 commit/push 或生产启用。
+
+## 2026-11-10 脚本五权限治理增量
+
+状态：`ACCEPTED`，依据用户授权自行接受并实施前端脚本管理范围。复用人员精确定位，在既有人员治理增加“脚本权限”分区，业务权威为 [Auth UC038](../../auth-center/use-cases/UC-AUTH-038-manage-script-maintainer-permission.md)。完整平台管理员通过正式目标 Get 读取五项 granted/effective，逐项独立授撤；操作人本人发现则用独立 GetOwnScriptPermissions，不放宽目标治理门禁。
+
+维护、审核、发布、暂停分发、恢复分发分别显示；单次确认只修改一项并使用该次目标的共享 permissionRevision。与管理员/应用审核/应用运维权限共用修订下界，不能重放旧确认或合并多项隐式写入。目标停用时保留 grant 与 effective 差别，授予条件及原因限制引用 Auth，不由前端猜测。既有会话、未知结果读回、独立能力拒绝和 Query 实例保护同样适用；具体交付见[脚本接入记录](../implements/2026-11-10-script-and-management-activity.md)。
