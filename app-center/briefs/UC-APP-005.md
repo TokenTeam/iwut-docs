@@ -1105,6 +1105,7 @@ message ResolveSystemPrincipalResponse {
 #### 调用与缓存语义
 
 - 调用使用 [trusted-service-identity-v1](../../platform/contracts/trusted-service-identity-v1.md)，同时要求 `auth.system-principal.resolve` permission 与 caller 的 purpose allowlist。
+- 现有 `SYSTEM_PRINCIPAL_PURPOSE_APP_CENTER_REVIEW_AUTO_REJECTION=1` 映射到 `app-center.review-auto-rejection`。其用途覆盖范围由 [UC-AUTH-003 的目标与范围](../../auth-center/use-cases/UC-AUTH-003-resolve-system-principal.md#目标与范围) 定义，包含脚本拒绝引发的 ApplicationReview 自动拒绝。消费方在本地记录具体 cause 与来源。
 - Auth 启动时幂等 provision 已知 purpose；同一 purpose 在同一环境中映射到唯一、稳定、非空 authId。
 - App Center 不以该 ID 作为启动依赖。首次需要自动审核决定时查询；成功结果可缓存到进程结束。
 - 查询失败或返回不匹配 purpose/空 ID 时不得缓存，当前决定 fail closed；后续请求可重试。
@@ -1122,6 +1123,8 @@ message ResolveSystemPrincipalResponse {
 #### 契约测试要求
 
 Provider/consumer 必须验证 full method、字段号、purpose 枚举、稳定 ID、身份与 purpose allowlist、失败不缓存，以及 App 自动拒绝最终写入 Auth 返回的 SYSTEM authId。
+
+脚本级联消费方还须验证最终决定记录保留 `cause=SCRIPT_VERSION_REJECTED` 及 App 用例要求的源决定关联，使用相同 purpose 解析的 authId；解析失败且无成功缓存时保留任务重试，恢复后仍使用该稳定身份完成决定。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -1260,6 +1263,6 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/auth-developer-status-v1.md` | 97 | `65d986d93af1` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |
-| `platform/contracts/auth-system-principal-v1.md` | 57 | `5191d48e8707` |
+| `platform/contracts/auth-system-principal-v1.md` | 60 | `7d4081b9bf90` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
 | `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

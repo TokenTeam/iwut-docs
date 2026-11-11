@@ -8,6 +8,8 @@
 
 首个 purpose 是 `app-center.review-auto-rejection`。本用例不创建普通用户、不授予 reviewer 权限，也不允许调用方指定或修改 authId。
 
+该 purpose 统一标识 App Center 自动拒绝 ApplicationReview 的 SYSTEM 审计主体，覆盖既有[应用版本审核中的资格自动拒绝](../../app-center/use-cases/UC-APP-005-decide-application-version-review.md)，以及已接受的[脚本拒绝级联](../../app-center/use-cases/UC-APP-049-cascade-script-rejection.md)所记录的 `cause=SCRIPT_VERSION_REJECTED`。具体拒绝条件、目标集合、源决定及终态事务由 App Center 拥有。不同原因使用同一 purpose 和稳定 authId，通过 App 决定记录中的 cause 与来源信息区分。
+
 ## 主流程
 
 1. 验证内部服务身份、`auth.system-principal.resolve` permission 与 purpose allowlist。
@@ -42,6 +44,8 @@ SYSTEM principal 由 Auth Center 唯一拥有，不对应自然人、不能登�
 
 服务身份认证成功不自动允许解析。调用方同时需要固定 RPC permission 和其注册记录中精确匹配的 purpose；未知 purpose 默认拒绝。
 
+解析结果用于 App 内部自动拒绝的身份归属。App 按对应已接受用例检查业务条件并写入决定；获得该 authId 的调用方仍须满足各业务入口的鉴权。解析请求只携带 purpose，拒绝原因及脚本依赖信息保留在 App 的业务记录中。
+
 <a id="br-sys-004"></a>
 ### BR-SYS-004：消费方失败关闭
 
@@ -66,3 +70,4 @@ SYSTEM principal 由 Auth Center 唯一拥有，不对应自然人、不能登�
 ## 变更记录
 
 - 2026-09-22：接受按 purpose provision/resolve 的 SYSTEM principal，移除 App Center 静态 System Auth ID 部署耦合。
+- 2026-11-07：确认既有自动拒绝 purpose 覆盖 UC-APP-049 的脚本版本拒绝级联；沿用同一身份、解析协议与服务 allowlist，原因和可靠重试由 App 用例定义。
