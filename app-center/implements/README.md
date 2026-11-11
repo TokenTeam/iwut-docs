@@ -24,7 +24,9 @@ agent 在无法访问该目录时不得依据记忆补写业务规则，应先�
 
 ### 2026-11-11 发布收尾与当前范围
 
-App 功能分支 `auto/script-review-uc043` 已推送至 `db01313`，API 引用统一为 `241d56de6f8a3f68ed91969a4239a8c9fe32baad`。本轮 `master` 合入、推送及 CNB 镜像发布已完成，GitHub/CNB 主分支均为 `db01313`；产物 digest、当前依赖补验与既有完整门禁的范围见[发布记录](2026-11-11-accepted-backend-release.md)。以下各轮 SHA、门禁报告和镜像结果仍对应当时固定输入，其中“本地”“未push”等只描述当轮历史阶段，当前发布进度以上述最新状态为准。
+UC027 关闭时间一致性修复的真实 Mongo race 专项 5/5 和完整 backend 24/24 均通过，`changed_sources=[]`。修复 `48b3b146` 已合入并推送 master，GitHub/CNB 构建成功，固定新镜像已拉取并核实源码来源；Console UC024 的已发布跨端实链复验由 Console owner 继续维护。原 2400 秒超时报告保留，最终采用源码不变、外层 3600 秒的完整重跑结果。详见[关闭回执与持久化时间记录](2026-11-11-application-closure-time-readback.md)。
+
+此前 App 功能分支 `auto/script-review-uc043` 已推送至 `db01313` 并合入 master，完成 GitHub/CNB 同步与镜像发布；随后 master 已推进至上述 `48b3b146`。API 引用统一为 `241d56de6f8a3f68ed91969a4239a8c9fe32baad`。此前产物 digest、依赖补验与既有完整门禁的范围见[发布记录](2026-11-11-accepted-backend-release.md)。以下各轮 SHA、门禁报告和镜像结果仍对应当时固定输入，其中“本地”“未push”等只描述当轮历史阶段，当前发布进度以上述最新状态为准。
 
 系统尚未上线，直接采用已接受的新审核策略。A→B 迁移和新增 Version v4/Profile v2 候选政策均退出本轮，不再作为收尾依赖；原草案保留为[退出本轮的历史记录](../design-notes/2026-11-09-review-policy-release-joint-acceptance-proposal.md)。现有提交绑定、并发与恢复机制及其测试证据保留。UC052 为 ACCEPTED / App 后端 COMPLETE；[Console UC023](../../console/use-cases/UC-CONSOLE-023-query-application-management-activity.md)已 ACCEPTED，具体实现、验收与发布由 Console owner 维护。本轮不新增个人通知、自动加载、long polling 或 WebSocket。
 
