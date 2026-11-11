@@ -1,5 +1,7 @@
 # Gateway 实现状态
 
+当前已接受 API 接入与发布门禁见 [2026-11-11 发布核对](2026-11-11-accepted-api-release.md)。下方按用例和日期保留历史记录，其中旧 API 未 push、87 条目录与旧工作区描述不代表当前发布状态。
+
 | 用例 | 设计 | 实现 | 缺口 |
 | --- | --- | --- | --- |
 | [UC-GW-001](../use-cases/UC-GW-001-authenticate-and-forward.md) | `ACCEPTED` | `COMPLETE` | —（当前后端/本地部署工作包；生产公网发布仍为独立部署事项） |

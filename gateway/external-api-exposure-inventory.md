@@ -1,6 +1,8 @@
 # Gateway 外部 API 接入清单
 
-状态：`ACTIVE`
+状态：`HISTORICAL_SNAPSHOT`
+
+本页逐条表格保留 2026-10-07 历史快照。当前已接受 API 接入数量、重点路由及发布门禁以 [2026-11-11 发布核对](implements/2026-11-11-accepted-api-release.md) 为准：API `241d56d`，Auth 73、App 93，共 166 个精确 Proto 方法。旧表中的退役注册/邮箱绑定方法不代表当前可调用入口。
 
 - 快照日期：2026-10-07
 - 统一 API 基线：`9f914c5`

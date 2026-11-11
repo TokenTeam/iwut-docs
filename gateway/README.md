@@ -4,6 +4,8 @@
 
 Gateway 为终端到平台服务的请求提供路由选择、认证编排与转发。首版保持薄层，不建立人员权限、用户资料或 Session 数据模型，也不直接访问 Auth MongoDB。
 
+当前接入基线见 [2026-11-11 已接受 API 发布核对](implements/2026-11-11-accepted-api-release.md)：统一 API `241d56d`，166 个精确 Proto 外部方法（Auth 73、App 93）。下方旧工作区、提交与数量保留为历史实现记录；当前代码位于 [iwut-gateway](https://cnb.cool/TokenTeam/iwut-gateway)，发布分支为 `master`。
+
 - [UC-GW-001](use-cases/UC-GW-001-authenticate-and-forward.md)：按同一路由选择 DIRECT/SESSION 策略，认证成功后由 Router 转发；OAUTH2 保留但不启用。
 - [UC-GW-002](use-cases/UC-GW-002-authenticate-oauth-and-forward.md)：对应用 Bearer 做在线委托交换，并显式接入 OIDC 标准 HTTP 端点；当前为提案。
 - [UC-GW-003](use-cases/UC-GW-003-attach-optional-user-identity.md)：公开读取允许匿名，提供 Session 时必须完整验证并附加 USER JWS；已接受并完成本地实现验证。
