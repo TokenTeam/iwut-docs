@@ -189,7 +189,7 @@ LaunchTargetDescriptor {
 <a id="br-run-016"></a>
 ### BR-RUN-016：能力回退与不变量失败关闭
 
-高优先级候选仅因 `requiredCapabilities` 不被当前宿主覆盖时可以继续低优先级候选。跨 Application、非 APPROVED、RPC range/Review snapshot 漂移、悬空 pointer 或损坏 Grey 是内部不变量异常，不允许回退掩盖。
+高优先级候选仅因 `requiredCapabilities` 不被当前宿主覆盖时可以继续低优先级候选。原资格和能力分支选中的候选必须通过 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020)；合法未发布/暂停返回 ApplicationLaunchTargetUnavailable，不能作为新的回退理由。跨 Application、非 APPROVED、RPC range/Review snapshot 漂移、悬空 pointer 或损坏 Grey 是内部不变量异常，不允许回退掩盖。
 
 <a id="br-run-017"></a>
 ### BR-RUN-017：唯一目标与最小披露
@@ -298,6 +298,10 @@ Cache-Control: private, no-store
 2. “我参与的测试”列表，允许 test-only Application 进入独立入口。
 3. Application 归档/管理员停用与平台 suspension，统一影响 Catalog、resolver 和 OAuth provider。
 4. test clear、原子 Grey promote 等管理操作按实际体验补充。
+
+## UC047 发布与运行联合门禁
+
+2026-11-08 落实 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020)。原 TEST > GREY > STABLE、身份/cohort/能力分支不变；仅对该路径所需且能力满足的候选检查脚本，不探测无权/未命中候选。已选候选不可分发返回 APPLICATION_LAUNCH_TARGET_UNAVAILABLE（404 / NOT_FOUND），不自动换版本；损坏为既有500、存储失败不伪装成无候选。依赖、批准和当前 Publication 来自同一只读 snapshot。验收含 blocked Test 不回退、缺能力 Test 仍可按原规则选择、Grey 命中/未命中隔离。
 
 ## 变更记录
 

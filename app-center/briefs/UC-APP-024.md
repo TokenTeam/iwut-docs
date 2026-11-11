@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-024` 查询普通 Application Catalog 列表与详情 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-CAT-001`–`BR-CAT-010`（10 条） |
-| 外部引用 BR | `BR-FLT-006`（来自 `UC-APP-022`） |
+| 外部引用 BR | `BR-FLT-006`，`BR-SCR-020`（来自 `UC-APP-022`、`UC-APP-047`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -122,7 +122,8 @@ OptionalAuthenticatedUserIdentity {
 2. `currentPublishedProfileRevisionId` 指向同一 Application 的有效 APPROVED ProfileRevision，且其批准事实一致。
 3. exact `(applicationId, hostRpcApiMajor)` Publication 存在有效 stable pointer。
 4. Stable Version 属于同一 Application、保持 APPROVED、批准 snapshot 一致、RPC range 覆盖请求 major，并且 `requiredCapabilities ⊆ hostCapabilities`。
-5. 当前不存在已建模的归档、停止分发或 suspension 状态。首版尚无这些字段，因此本条暂时只保留扩展位置。
+5. Application 通过 UC027/028/033 当前生命周期、平台 availability 与归档 gate。
+6. Stable 基线通过 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的全部精确脚本依赖门禁。
 
 缺少公开 Profile、缺少 exact-major Publication、没有 Stable 或 Stable 正常但不兼容当前宿主，都是“不进入普通候选集”，不是错误。存在 pointer 但指向损坏、跨 Application、非 APPROVED 或 snapshot 漂移的事实属于内部不变量异常。
 
@@ -144,6 +145,7 @@ eligible stable-backed Application
 - 非 Tester 的已登录用户命中 Grey 时得到 GREY，否则得到 STABLE。
 - 匿名用户得到 STABLE。
 - 高优先级目标仅因 capability 不足时按 UC023 回退。
+- 最终选中 Test/Grey/Stable 的脚本不可分发时隐藏该项，不能回退另一个应用版本。
 - 任何实际读取到的运行不变量损坏按 UC023 失败关闭。
 
 普通 Catalog 的可见性仍由 Stable-backed 候选资格建立。即使 Tester 的最终启动目标是 TEST，这一项仍属于普通公开 Catalog，因此返回并执行当前 Filter。后续独立的 test-only“我参与的测试”入口不执行 Filter；两者不能用 selected channel 判断是否分发规则。
@@ -368,6 +370,17 @@ Catalog 只返回当前已发布 Profile 的 revision 身份和 displayName、de
 ### BR-FLT-006：客户端确定性求值
 
 官方客户端必须实现本用例的相同布尔、类型、比较和缺失字段语义。未知 schemaVersion 或节点 fail closed。App Center 不接收原始用户字段，不执行或保存用户级求值结果。
+
+### 来自 `UC-APP-047`
+
+<!-- 权威位置: use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020 -->
+### BR-SCR-020：发布与在线解析的精确依赖门禁
+
+App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVED、曾发布且资源 AVAILABLE；任一不满足则整个发布失败。只调整灰度比例也复核目标，清空槽位仍允许。该规则为对 UC007/020/021 的已接受扩展，在进入发布/运行工作包时同步这些用例及对应 brief。
+
+后续在线 Test/统一启动、普通目录、本人测试和 Auth OAuth 上下文按其原有资格及隐藏语义消费同一门禁：依赖不可分发的候选不能作为可启动/可授权目标，不能省略脚本继续返回目标、替换脚本或自动回退到另一应用版本。既有候选优先级保留，只在原 UC 明确允许的分支选择。管理/审核历史仍可读。
+
+读取可线性化在暂停前或后，已经返回的目标不被撤回；后续实际内容获取再次核验。不可读或事实损坏须失败关闭，并按原 UC 区分业务不可用与依赖故障，不把存储错误当作永久无候选。新增联合门禁的 Catalog/OAuth 错误见下文「既有入口的稳定映射」与运行读契约。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -683,8 +696,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：后续设计顺序、变更记录
+- `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：后续设计顺序、UC047 发布与运行联合门禁、变更记录
 - `UC-APP-022`（use-cases/UC-APP-022-manage-application-filter.md）：目标与范围、已确认的设计选择、输入与身份、规则结构、客户端求值契约、设置主流程、清空主流程、读取主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
+- `UC-APP-047`（use-cases/UC-APP-047-resolve-application-script-content.md）：目标与范围、正式分发接口、内容与传输预算、事实一致性与写入排序、既有入口的稳定映射、新接口错误、验收
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -696,8 +710,9 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
+| `use-cases/UC-APP-024-query-public-application-catalog.md` | 344 | `6baf8e7d5fb8` |
 | `use-cases/UC-APP-022-manage-application-filter.md` | 314 | `385fb67364de` |
+| `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

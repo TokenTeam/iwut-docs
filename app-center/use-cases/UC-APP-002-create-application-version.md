@@ -10,6 +10,8 @@
 
 版本创建成功后不会出现在普通用户的应用目录中。
 
+创建请求显式提供 `scriptReferences`。Proto 用消息字段区分缺失与空列表，HTTP JSON 使用 `{"scriptReferences":{"items":[]}}` 表示无引用。引用按 [BR-SDP-001](UC-APP-048-manage-application-script-dependencies.md#br-sdp-001) 校验，并随版本内容保存。
+
 ## 当前 ApplicationVersion
 
 ```text
@@ -24,6 +26,7 @@ requiredCapabilities
 requiredScopes
 optionalScopes
 oauthRedirects
+scriptReferences
 reviewStatus
 createdBy
 createdAt
@@ -95,6 +98,7 @@ CreateApplicationVersionCommand {
   requiredScopes: []string
   optionalScopes: []string
   oauthRedirects: OAuthRedirectConfiguration
+  scriptReferences: ScriptReferences
 }
 ```
 
@@ -113,7 +117,7 @@ applicationId、reviewStatus、sequence、versionId、createdBy、createdAt、re
 
 1. 从可信身份上下文取得 authId 和 developerStatus。
 2. 确认 developerStatus 为 `APPROVED`。
-3. 校验 versionLabel、launchUrl、RPC range、capabilities、scopes 和 oauthRedirects。
+3. 校验 versionLabel、launchUrl、RPC range、capabilities、scopes、oauthRedirects 和 scriptReferences。
 4. 通过 ScopeCatalog port 确认所有 scope 当前允许被新版本申请；生产组装最终使用 ADR-001 定义的带本地有界缓存 adapter，其快照源调用 [Auth Scope Catalog v1 契约](../../platform/contracts/auth-scope-catalog-v1.md)。
 5. 生成 UUIDv7 versionId，并取得 UTC createdAt；初始化 revision 为 1、updatedBy 为 createdBy、updatedAt 为 createdAt。
 6. Repository 在同一个原子操作中：
@@ -136,6 +140,7 @@ applicationId、reviewStatus、sequence、versionId、createdBy、createdAt、re
 - capability 名称非法或重复：`InvalidRequiredCapability`。
 - requiredScopes 或 optionalScopes 包含未知、重复或交叉项：`InvalidApplicationScope`。
 - oauthRedirects 的数组、数量或 URL 规则不满足：`InvalidOAuthRedirectConfiguration`。
+- scriptReferences 缺失或引用不符合 BR-SDP-001：`InvalidScriptReferences`。
 - Scope Catalog 无可用的新鲜快照：`ScopeCatalogUnavailable`，不创建版本。
 - ID 或持久化失败：内部失败，不产生部分版本。
 
@@ -373,6 +378,7 @@ Authorization: <authenticated identity>
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
   "optionalScopes": ["schedule.read"],
+  "scriptReferences": {"items": []},
   "oauthRedirects": {
     "pkceRedirectUris": ["https://example.edu/oauth/callback"],
     "confidentialRedirectUris": []
@@ -398,6 +404,7 @@ ETag: "1"
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
   "optionalScopes": ["schedule.read"],
+  "scriptReferences": {"items": []},
   "oauthRedirects": {
     "pkceRedirectUris": ["https://example.edu/oauth/callback"],
     "confidentialRedirectUris": []

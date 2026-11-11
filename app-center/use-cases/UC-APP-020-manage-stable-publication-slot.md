@@ -141,7 +141,7 @@ DeveloperIdentity {
 <a id="br-pub-012"></a>
 ### BR-PUB-012：Stable 发布资格与直接发布
 
-stableVersionId 只能引用同一 Application、覆盖当前 rpcApiMajor 且当前仍具有完整 APPROVED Review/snapshot 一致性的 Version。设置时还必须存在当前已批准公开资料。
+stableVersionId 只能引用同一 Application、覆盖当前 rpcApiMajor 且当前仍具有完整 APPROVED Review/snapshot 一致性的 Version。设置时还必须存在当前已批准公开资料，并通过 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的全部精确脚本依赖门禁。
 
 Version 不需要曾进入 test 或 grey。设置 stable 不修改 Version 审核状态，不修改 test/grey，也不自动形成目录响应。一个 APPROVED Version 可以同时被多个 major 和多个槽位引用。
 
@@ -211,7 +211,7 @@ STABLE identity 可以在 Publication 之前登记。client 为 DISABLED 不阻�
 <a id="br-pub-018"></a>
 ### BR-PUB-018：Stable 变化原子性
 
-设置事务必须原子复查当前 admin、Version/Review/snapshot、Profile、STABLE registration/credential、Publication revision，并同时提交指针、revision、审计和 History。清空事务原子复查当前 admin、Publication revision、stable/grey 指针，并同时提交清空与 History。
+设置事务必须原子复查当前 admin、Version/Review/snapshot、Profile、STABLE registration/credential、Publication revision 和 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的精确依赖，并取得全部脚本资源共享门禁写栅栏，同时提交指针、revision、审计和 History。清空事务原子复查当前 admin、Publication revision、stable/grey 指针，并同时提交清空与 History。
 
 与 test 修改、未来 grey 修改、管理员转让、审核资格撤销、Profile 切换或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序；失败不能留下部分状态。
 
@@ -346,6 +346,10 @@ Mongo migration 固定为 `0016_stable_publication`：
 3. 统一运行目标解析 Query Contract，按 Tester test、命中 grey、stable 的顺序返回唯一目标。
 4. 独立 ApplicationFilterRevision 的规则、审核和客户端求值契约。
 5. 普通目录与“我参与的测试”两个查询入口。
+
+## UC047 发布与运行联合门禁
+
+2026-11-08 落实 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020)。实际 SetStable 必须检查精确版本批准、曾发布及资源 AVAILABLE，与 Suspend 采用同一资源写栅栏；发布 head 不作为依赖选择。正常不可分发复用 UC007 新 APPLICATION_SCRIPT_DEPENDENCY_UNAVAILABLE（422 / FAILED_PRECONDITION），损坏与存储故障按 UC047 稳定映射。清空和匹配 OCC no-op 保留原行为，旧 revision 不因相同目标而成功。测试覆盖暂停与 Stable 发布两个提交胜序、失败整体回滚、ClearHead 后固定依赖仍可用。
 
 ## 变更记录
 

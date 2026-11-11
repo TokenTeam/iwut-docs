@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-038` 查询我参与的测试 Application |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-CAT-011`–`BR-CAT-017`（7 条） |
-| 外部引用 BR | `BR-APP-010`、`BR-APP-031`、`BR-APP-053`，`BR-CAT-004`，`BR-PRF-030`，`BR-PUB-036`，`BR-RUN-001`–`BR-RUN-008`（8 条）（来自 `UC-APP-012`、`UC-APP-016`、`UC-APP-024`、`UC-APP-025`、`UC-APP-028`、`UC-APP-033`、`UC-APP-036`） |
+| 外部引用 BR | `BR-APP-010`、`BR-APP-031`、`BR-APP-053`，`BR-CAT-004`，`BR-PRF-030`，`BR-PUB-036`，`BR-RUN-001`–`BR-RUN-008`（8 条），`BR-SCR-020`（来自 `UC-APP-012`、`UC-APP-016`、`UC-APP-024`、`UC-APP-025`、`UC-APP-028`、`UC-APP-033`、`UC-APP-036`、`UC-APP-047`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -106,7 +106,7 @@ MyTestApplicationItem {
     profileRevisionId, displayName, description?, icon?
   }
   availability: READY | PROFILE_REQUIRED | TEST_TARGET_UNAVAILABLE
-                | HOST_CAPABILITIES_INSUFFICIENT
+                | HOST_CAPABILITIES_INSUFFICIENT | SCRIPT_DEPENDENCY_UNAVAILABLE
   launchTarget?: TestLaunchDescriptor
   missingCapabilities[]
 }
@@ -124,7 +124,8 @@ MyTestApplicationDetail { item: MyTestApplicationItem, asOf }
 | 没有 currentPublishedProfileRevisionId | PROFILE_REQUIRED | 无 | 无 | 空 |
 | 有有效公开资料，但 exact-major Publication 或 Test 指针不存在 | TEST_TARGET_UNAVAILABLE | 有 | 无 | 空 |
 | 有有效公开资料/批准 Test，但宿主缺少必需 capabilities | HOST_CAPABILITIES_INSUFFICIENT | 有 | 无 | 稳定排序的缺少能力 |
-| 有有效公开资料、批准兼容 Test 且能力满足 | READY | 有 | 有 | 空 |
+| 有有效公开资料、批准兼容 Test 且能力满足，但固定脚本依赖正常不可分发 | SCRIPT_DEPENDENCY_UNAVAILABLE | 有 | 无 | 空 |
+| 有有效公开资料、批准兼容 Test、能力满足且固定脚本依赖可分发 | READY | 有 | 有 | 空 |
 
 availability 是当次查询投影，不是新的持久化业务状态。PROFILE_REQUIRED 可出现在加入先于首次公开资料的合法阶段；客户端可使用本地通用文案表示等待就绪，服务端不能回退技术名称或未审核 displayName。测试应用当前不支持请求 major 时等价于没有 exact-major Test；不扫描其他 major。
 
@@ -142,7 +143,7 @@ UC012 自身保留现有“无 Test/缺能力则错误”的单目标 RPC；本�
 
 UC036 被接受并实现后，最近 CLEAR_TEST_VERSION 与空 Test 必须一致；不能从旧 SET_TEST 历史取得运行目标。Stable/Grey 变化后的共享 Publication revision 不表示 Test 批准依据丢失，校验最近相关 Test action。若 UC036 未接受，本查询也可以对既有 stable-only/EMPTY Publication 返回 TEST_TARGET_UNAVAILABLE。
 
-每个列表页或详情用一个 MongoDB majority read-only snapshot，同时确认 Membership、Application 在线门禁和所需 Profile、Publication/History、Version/Review/OAuth。与 Test clear/replace、Profile 批准、Membership 移除/加入、暂停/归档、关闭和账号清理并发时，必须返回提交前或后的完整事实组合。
+每个列表页或详情用一个 MongoDB majority read-only snapshot，同时确认 Membership、Application 在线门禁和所需 Profile、Publication/History、Version/Review/OAuth，以及 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的精确脚本依赖。与 Test clear/replace、Profile 批准、Membership 移除/加入、应用/脚本暂停恢复、归档、关闭和账号清理并发时，必须返回提交前或后的完整事实组合。
 
 只读查询不写 coordinationRevision、访问历史、asOf 记录、计数或持久化可用性；不调用 Scope Catalog、DNS preflight、Auth 用户资料或 OAuth provider。技术观测不记录可信 authId、pageToken、完整 URL/scopes、凭证或返回正文。
 
@@ -222,7 +223,7 @@ application_tester_memberships:
 <!-- 权威位置: use-cases/UC-APP-038-query-my-test-applications.md#br-cat-012 -->
 ### BR-CAT-012：参与记录与可运行状态分离
 
-通过资格和 gate 的候选，即使无公开资料、无 exact-major Test 或宿主缺能力，也保留参与卡片并返回确定的 availability。正常缺资料优先于无 Test、缺能力；有损坏指针时 INTERNAL。availability 不持久化、不新增 Membership 状态。
+通过资格和 gate 的候选，即使无公开资料、无 exact-major Test、宿主缺能力或精确脚本依赖正常不可分发，也保留参与卡片并返回确定的 availability。正常缺资料优先于无 Test、缺能力，随后才检查脚本；脚本未发布/暂停投影 SCRIPT_DEPENDENCY_UNAVAILABLE，不返回 launchTarget，missingCapabilities 为空。有损坏指针或已读脚本不变量异常时 INTERNAL，存储失败沿用 MY_TEST_APPLICATION_UNAVAILABLE（503），不能投影为正常卡片。availability 不持久化、不新增 Membership 状态。
 
 <!-- 权威位置: use-cases/UC-APP-038-query-my-test-applications.md#br-cat-013 -->
 ### BR-CAT-013：纯 Test 目标且不执行 Filter
@@ -397,7 +398,7 @@ Descriptor 不包含 client secret、Tester 列表、审核备注、其他 Versi
 <!-- 权威位置: use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-007 -->
 ### BR-RUN-007：一致快照与并发
 
-Membership、Publication 和 Version 必须来自一个逻辑一致的解析快照：
+Membership、Publication、Version 与 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 所需的精确脚本事实必须来自一个逻辑一致的解析快照：
 
 - 移除先于解析快照可见：解析失败。
 - 解析快照先于移除：本次可以成功，后续解析失败。
@@ -412,6 +413,17 @@ Membership、Publication 和 Version 必须来自一个逻辑一致的解析快�
 解析不得修改 Membership、Publication、Version、Review 或 History，也不写领域“访问次数”。技术观测日志不属于领域事实。
 
 解析不调用 Auth Scope Catalog、不请求 launchUrl、不执行 DNS/公网 HTTPS 预检。发布时复检和未来持续监控负责这些保证，避免把外部依赖加入启动热路径。
+
+### 来自 `UC-APP-047`
+
+<!-- 权威位置: use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020 -->
+### BR-SCR-020：发布与在线解析的精确依赖门禁
+
+App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVED、曾发布且资源 AVAILABLE；任一不满足则整个发布失败。只调整灰度比例也复核目标，清空槽位仍允许。该规则为对 UC007/020/021 的已接受扩展，在进入发布/运行工作包时同步这些用例及对应 brief。
+
+后续在线 Test/统一启动、普通目录、本人测试和 Auth OAuth 上下文按其原有资格及隐藏语义消费同一门禁：依赖不可分发的候选不能作为可启动/可授权目标，不能省略脚本继续返回目标、替换脚本或自动回退到另一应用版本。既有候选优先级保留，只在原 UC 明确允许的分支选择。管理/审核历史仍可读。
+
+读取可线性化在暂停前或后，已经返回的目标不被撤回；后续实际内容获取再次核验。不可读或事实损坏须失败关闭，并按原 UC 区分业务不可用与依赖故障，不把存储错误当作永久无候选。新增联合门禁的 Catalog/OAuth 错误见下文「既有入口的稳定映射」与运行读契约。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -743,10 +755,11 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 - `UC-APP-025`（use-cases/UC-APP-025-coordinate-account-owner-exit.md）：目标与范围、主流程与 API、数据与验收、交付依赖
 - `UC-APP-028`（use-cases/UC-APP-028-suspend-and-restore-application.md）：目标与范围、参与者与依赖、输入、输出与 API 草图、正交状态模型、暂停流程、恢复流程、暂停期间的行为、OAuth 在线检查与残余窗口、领域与数据模型、错误语义、并发与验收场景、实现依赖与启用边界、变更记录
 - `UC-APP-033`（use-cases/UC-APP-033-archive-and-unarchive-application.md）：设计结论、目标与范围、参与者与授权、输入、输出与 API 草图、正交状态模型、归档流程、取消归档流程、ARCHIVED 期间的行为、OAuth 在线检查与残余窗口、领域与数据模型、错误语义、并发与验收场景、实现依赖与交付边界、变更记录
-- `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：目标与范围、已有依赖与组合边界、输入与身份、普通公开候选资格、目标解析与 Filter 组合、公开结果模型、列表、排序与分页、列表主流程、详情主流程、错误与部分结果、最小查询模型与持久化影响、API 草图、验收场景、依赖检查与待确认设计选择、后续设计顺序、变更记录
+- `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：目标与范围、已有依赖与组合边界、输入与身份、普通公开候选资格、目标解析与 Filter 组合、公开结果模型、列表、排序与分页、列表主流程、详情主流程、错误与部分结果、最小查询模型与持久化影响、API 草图、验收场景、依赖检查与待确认设计选择、后续设计顺序、UC047 发布与运行联合门禁、变更记录
 - `UC-APP-016`（use-cases/UC-APP-016-decide-application-profile-revision-review.md）：修订范围与审核状态、目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、初始化与实时门禁、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
 - `UC-APP-036`（use-cases/UC-APP-036-clear-test-publication-slot.md）：设计结论、目标与范围、参与者与授权、输入与 API 草图、主流程与 no-op、清空前检查的边界、PublicationHistory 与迁移、在线效果与 OAuth 边界、并发与错误、引用规则与实现输入、验收与交付边界、变更记录
-- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、变更记录
+- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-047`（use-cases/UC-APP-047-resolve-application-script-content.md）：目标与范围、正式分发接口、内容与传输预算、事实一致性与写入排序、既有入口的稳定映射、新接口错误、验收
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -758,14 +771,15 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-038-query-my-test-applications.md` | 217 | `e3db8b35da72` |
+| `use-cases/UC-APP-038-query-my-test-applications.md` | 218 | `492b7af3c54f` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
 | `use-cases/UC-APP-028-suspend-and-restore-application.md` | 273 | `1ada06422863` |
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
-| `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
+| `use-cases/UC-APP-024-query-public-application-catalog.md` | 344 | `6baf8e7d5fb8` |
 | `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
 | `use-cases/UC-APP-036-clear-test-publication-slot.md` | 180 | `e0aa209d3e5f` |
-| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
+| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 407 | `d5101bb5e28d` |
+| `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

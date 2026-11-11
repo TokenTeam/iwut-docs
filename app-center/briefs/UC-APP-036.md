@@ -282,7 +282,7 @@ test、grey、stable 和 clear 操作共享 Publication revision。首次由 set
 <!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-018 -->
 ### BR-PUB-018：Stable 变化原子性
 
-设置事务必须原子复查当前 admin、Version/Review/snapshot、Profile、STABLE registration/credential、Publication revision，并同时提交指针、revision、审计和 History。清空事务原子复查当前 admin、Publication revision、stable/grey 指针，并同时提交清空与 History。
+设置事务必须原子复查当前 admin、Version/Review/snapshot、Profile、STABLE registration/credential、Publication revision 和 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的精确依赖，并取得全部脚本资源共享门禁写栅栏，同时提交指针、revision、审计和 History。清空事务原子复查当前 admin、Publication revision、stable/grey 指针，并同时提交清空与 History。
 
 与 test 修改、未来 grey 修改、管理员转让、审核资格撤销、Profile 切换或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序；失败不能留下部分状态。
 
@@ -304,7 +304,7 @@ test、grey、stable 和 clear 操作共享 Publication revision。首次由 set
 <!-- 权威位置: use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-016 -->
 ### BR-RUN-016：能力回退与不变量失败关闭
 
-高优先级候选仅因 `requiredCapabilities` 不被当前宿主覆盖时可以继续低优先级候选。跨 Application、非 APPROVED、RPC range/Review snapshot 漂移、悬空 pointer 或损坏 Grey 是内部不变量异常，不允许回退掩盖。
+高优先级候选仅因 `requiredCapabilities` 不被当前宿主覆盖时可以继续低优先级候选。原资格和能力分支选中的候选必须通过 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020)；合法未发布/暂停返回 ApplicationLaunchTargetUnavailable，不能作为新的回退理由。跨 Application、非 APPROVED、RPC range/Review snapshot 漂移、悬空 pointer 或损坏 Grey 是内部不变量异常，不允许回退掩盖。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -699,11 +699,11 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 - `UC-APP-026`（use-cases/UC-APP-026-transfer-application-administration.md）：目标与范围、参与者与依赖、输入与身份、生命周期、发起流程、接受流程、拒绝与取消、领域与数据模型、API 草图、错误边界、并发验收场景、实现依赖与交付边界、变更记录
 - `UC-APP-027`（use-cases/UC-APP-027-close-application.md）：目标与范围、参与者与前置依赖、输入、预览与身份、生命周期与可见行为、发起关闭流程、本地关闭事务、Auth 持久撤销与最终收敛、领域与数据模型、API 草图、并发与验收场景、实现前决策结论、变更记录
-- `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：目标与范围、已有依赖与组合边界、输入与身份、普通公开候选资格、目标解析与 Filter 组合、公开结果模型、列表、排序与分页、列表主流程、详情主流程、错误与部分结果、最小查询模型与持久化影响、API 草图、验收场景、依赖检查与待确认设计选择、后续设计顺序、变更记录
-- `UC-APP-007`（use-cases/UC-APP-007-place-approved-version-in-test-slot.md）：目标与范围、发布边界、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、实现依赖与交付边界、后续用例、迁移说明、变更记录
-- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
-- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、变更记录
-- `UC-APP-023`（use-cases/UC-APP-023-resolve-unified-launch-target.md）：目标与范围、已有依赖与扩展边界、输入与身份、统一选择算法、回退与损坏状态、主流程、结果、异常流程、最小查询模型、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
+- `UC-APP-024`（use-cases/UC-APP-024-query-public-application-catalog.md）：目标与范围、已有依赖与组合边界、输入与身份、普通公开候选资格、目标解析与 Filter 组合、公开结果模型、列表、排序与分页、列表主流程、详情主流程、错误与部分结果、最小查询模型与持久化影响、API 草图、验收场景、依赖检查与待确认设计选择、后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-007`（use-cases/UC-APP-007-place-approved-version-in-test-slot.md）：目标与范围、发布边界、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、实现依赖与交付边界、后续用例、迁移说明、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-023`（use-cases/UC-APP-023-resolve-unified-launch-target.md）：目标与范围、已有依赖与扩展边界、输入与身份、统一选择算法、回退与损坏状态、主流程、结果、异常流程、最小查询模型、API 草图、验收场景、依赖与实现边界、后续设计顺序、UC047 发布与运行联合门禁、变更记录
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -717,13 +717,13 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-036-clear-test-publication-slot.md` | 180 | `e0aa209d3e5f` |
-| `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `7e93553d9cdd` |
-| `use-cases/UC-APP-027-close-application.md` | 275 | `c56d7c62e94e` |
-| `use-cases/UC-APP-024-query-public-application-catalog.md` | 338 | `88484d65cdb4` |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
-| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
-| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
-| `use-cases/UC-APP-023-resolve-unified-launch-target.md` | 305 | `30ae34bdccb2` |
+| `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `4e2569e985b2` |
+| `use-cases/UC-APP-027-close-application.md` | 275 | `32640781379c` |
+| `use-cases/UC-APP-024-query-public-application-catalog.md` | 344 | `6baf8e7d5fb8` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 572 | `2ebe99f6dfff` |
+| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 357 | `cedac12b66d4` |
+| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 407 | `d5101bb5e28d` |
+| `use-cases/UC-APP-023-resolve-unified-launch-target.md` | 309 | `6a9f66b9a639` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

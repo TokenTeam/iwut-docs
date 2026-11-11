@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-020` 管理稳定发布槽位 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAC-012`，`BR-PUB-011`–`BR-PUB-019`（9 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-SCR-020`（来自 `UC-APP-047`） |
 | ADR | `ADR-001`、`ADR-002`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/app-oauth-client-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -293,7 +293,7 @@ App 仍不保存 sector/sub，不签发 code/token。STABLE provider 扩展继�
 <!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-012 -->
 ### BR-PUB-012：Stable 发布资格与直接发布
 
-stableVersionId 只能引用同一 Application、覆盖当前 rpcApiMajor 且当前仍具有完整 APPROVED Review/snapshot 一致性的 Version。设置时还必须存在当前已批准公开资料。
+stableVersionId 只能引用同一 Application、覆盖当前 rpcApiMajor 且当前仍具有完整 APPROVED Review/snapshot 一致性的 Version。设置时还必须存在当前已批准公开资料，并通过 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的全部精确脚本依赖门禁。
 
 Version 不需要曾进入 test 或 grey。设置 stable 不修改 Version 审核状态，不修改 test/grey，也不自动形成目录响应。一个 APPROVED Version 可以同时被多个 major 和多个槽位引用。
 
@@ -363,7 +363,7 @@ STABLE identity 可以在 Publication 之前登记。client 为 DISABLED 不阻�
 <!-- 权威位置: use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-018 -->
 ### BR-PUB-018：Stable 变化原子性
 
-设置事务必须原子复查当前 admin、Version/Review/snapshot、Profile、STABLE registration/credential、Publication revision，并同时提交指针、revision、审计和 History。清空事务原子复查当前 admin、Publication revision、stable/grey 指针，并同时提交清空与 History。
+设置事务必须原子复查当前 admin、Version/Review/snapshot、Profile、STABLE registration/credential、Publication revision 和 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的精确依赖，并取得全部脚本资源共享门禁写栅栏，同时提交指针、revision、审计和 History。清空事务原子复查当前 admin、Publication revision、stable/grey 指针，并同时提交清空与 History。
 
 与 test 修改、未来 grey 修改、管理员转让、审核资格撤销、Profile 切换或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序；失败不能留下部分状态。
 
@@ -371,6 +371,21 @@ STABLE identity 可以在 Publication 之前登记。client 为 DISABLED 不阻�
 ### BR-PUB-019：不隐式扩散
 
 Stable set/clear 不得修改其他 rpcApiMajor、test/grey、Version 状态、Profile、Tester Membership 或 FilterRule，也不触发批量发布。一个 range 覆盖多个 major 时仍需逐 major 操作。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-047`
+
+<!-- 权威位置: use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020 -->
+### BR-SCR-020：发布与在线解析的精确依赖门禁
+
+App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVED、曾发布且资源 AVAILABLE；任一不满足则整个发布失败。只调整灰度比例也复核目标，清空槽位仍允许。该规则为对 UC007/020/021 的已接受扩展，在进入发布/运行工作包时同步这些用例及对应 brief。
+
+后续在线 Test/统一启动、普通目录、本人测试和 Auth OAuth 上下文按其原有资格及隐藏语义消费同一门禁：依赖不可分发的候选不能作为可启动/可授权目标，不能省略脚本继续返回目标、替换脚本或自动回退到另一应用版本。既有候选优先级保留，只在原 UC 明确允许的分支选择。管理/审核历史仍可读。
+
+读取可线性化在暂停前或后，已经返回的目标不被撤回；后续实际内容获取再次核验。不可读或事实损坏须失败关闭，并按原 UC 区分业务不可用与依赖故障，不把存储错误当作永久无候选。新增联合门禁的 Catalog/OAuth 错误见下文「既有入口的稳定映射」与运行读契约。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -808,7 +823,8 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：后续设计顺序、变更记录
+- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-047`（use-cases/UC-APP-047-resolve-application-script-content.md）：目标与范围、正式分发接口、内容与传输预算、事实一致性与写入排序、既有入口的稳定映射、新接口错误、验收
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-002`（adr/ADR-002-partition-publication-by-rpc-api-major.md）：背景、为什么不使用 platform/target、考虑过的替代方案、结果、关联用例、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
@@ -821,7 +837,8 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
+| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 357 | `cedac12b66d4` |
+| `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

@@ -187,7 +187,7 @@ reviewer 批准 Version 不会替开发者作出发布选择。管理员转让�
 <a id="br-pub-003"></a>
 ### BR-PUB-003：Version 发布资格
 
-testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Review 必须是完整 APPROVED decision，Version 内容必须仍等于 snapshot，且 revision 关系必须一致。
+testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Review 必须是完整 APPROVED decision，Version 内容必须仍等于 snapshot，且 revision 关系必须一致。实际放入/替换还须通过 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的全部精确脚本依赖门禁；批准本身不代表脚本已发布。
 
 ApplicationVersion 的批准与 TEST/GREY/STABLE 槽位选择解耦：批准不自动进入任何槽位，槽位也不改变 Version 审核状态。所有槽位一致地只选择已批准 Version，再执行各自的渠道资格；TEST 的额外资格包括当前已批准公开资料和运行时 Tester Membership。
 
@@ -271,6 +271,7 @@ ScopeCatalog 使用 [ADR-001](../adr/ADR-001-scope-catalog-cache.md) 的有界�
 - 当前公开 ProfileRevision 的归属、APPROVED 状态和内容不变量复查。
 - 非空 OAuth 配置对应的稳定 client identity/credential 存在性复查。
 - Publication 存在性和 expected revision 检查。
+- [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的全部精确依赖复核及共享资源门禁真实写栅栏，与脚本 Suspend 确定排序。
 - Publication 创建或 testVersionId/revision/审计更新。
 - PublicationHistory 插入。
 
@@ -553,6 +554,10 @@ UC-APP-012：为 Tester 解析 Application 的 test 启动目标
 ## 迁移说明
 
 既有 UC-APP-007 实现需要在稳定 registration 落地时加入非空 redirect 对应 identity/credential 的存在性检查及竞争测试；在此之前其原有发布能力仍有效，但不覆盖 OAuth 扩展。旧 Application.betaVersion、Version.status=TEST 或内嵌 tester 数组不迁移。
+
+## UC047 发布与运行联合门禁
+
+2026-11-08 落实用户已接受的 UC047 修订。新发布/替换在最终事务复核固定脚本依赖，外部 preflight 不替代该检查。合法未发布/暂停返回 APPLICATION_SCRIPT_DEPENDENCY_UNAVAILABLE（HTTP422 / FAILED_PRECONDITION）；批准来源损坏复用 ApplicationReviewStateInconsistent，发布资格/gate 损坏复用 ApplicationPublicationStateInconsistent，存储故障 APPLICATION_PUBLICATION_UNAVAILABLE（503 / UNAVAILABLE），不推进 Publication/History。旧 revision 仍冲突，匹配的同 Version no-op 保持原规则；清空由 UC036 定义。空依赖继续全部原有条件。验收含多依赖整体回滚、暂停/发布两个提交胜序和 head 变化不替换固定引用。
 
 ## 变更记录
 

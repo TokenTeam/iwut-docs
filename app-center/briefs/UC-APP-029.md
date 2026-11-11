@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-029` 查询我的 Application 列表与管理详情 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-APP-038`–`BR-APP-043`（6 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-SDP-002`（来自 `UC-APP-048`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -45,6 +45,8 @@
 - `GetMyApplication`：返回一个 Application 的核心状态和依附能力摘要。
 
 本用例不交付 Profile/Version 完整历史、Tester 成员名单、审核队列、secret 明文、审计日志、搜索排名或前端页面。这些事实通过各自能力查询或后续 UC 提供。
+
+从应用管理详情进入版本和候选查询。具备 Developer 资格的当前应用管理员可在该应用下查询候选元数据，权限及披露边界见 [BR-SDP-002](../use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-002)。
 
 ### 身份、授权与存在性隐藏
 
@@ -178,6 +180,19 @@ SUSPENDED Application 始终保留管理可见性；CLOSED 只在显式筛选或
 ### BR-APP-043：管理最小披露
 
 管理结果只披露当前管理任务需要的事实，永不返回 OAuth secret/hash、Tester 身份名单或 Reviewer 内部事实，并禁止共享缓存。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-048`
+
+<!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-002 -->
+### BR-SDP-002：候选选择与关联正文权限
+
+具有现行 Developer 资格的当前 Application 管理员，可在该应用上下文查询 SUBMITTED/APPROVED 脚本候选的资源名称、用途、版本标签/ID、format、digest 和审核状态；不能因此取得未获批原文、审核员个人资料或拒绝原因。保留的失效草稿引用显示终态/需修正，不把它伪装成新可选项。
+
+有权读取某次 ApplicationReview 的 App Reviewer，可读取该固定引用的脚本受审原文、摘要、完整脚本政策及关联决定状态，用于了解应用依赖；只覆盖所引用版本，不开放全部脚本队列。其能否决定脚本另按 [BR-SCR-010](../use-cases/UC-APP-044-decide-script-version-review.md#br-scr-010) 验证。普通 App 管理员的版本历史不增加未获批正文披露。候选列表分页复用 [BR-SCR-014](../use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-014) 的有界模式。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -507,6 +522,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-029`（use-cases/UC-APP-029-query-owned-application-management.md）：变更记录
+- `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -518,7 +534,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-029-query-owned-application-management.md` | 151 | `bf56cdb407d2` |
+| `use-cases/UC-APP-029-query-owned-application-management.md` | 153 | `143bc85de8b9` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

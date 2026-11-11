@@ -101,9 +101,15 @@ Developer 资格的申请、核验和审核由 Auth Center 拥有。App Center �
 - 当前不为 Scope Catalog 单独引入 RabbitMQ 或 Redis；未来事件只能用于加速失效，不能取代 Auth 快照读取和 revision 对账。
 - Identity Context 不依赖 App Center。
 
+## 已确认的新增内部能力（2026-11-05）
+
+平台爬虫脚本/配置管理归入 App Center 同一服务和数据库，内部保留独立脚本领域及版本/审核/发布机制。App Center 拥有脚本与 ApplicationVersion 的精确依赖、批准前置及拒绝级联，不新建 Resource Hub 上下游服务或独立 audience。客户端仍拥有执行器与本地凭据；Auth 只提供相应可信身份和经审核的精确权限投影。
+
+归属和业务设计已接受；实施状态与权限接入进度见[脚本串行工作清单](design-notes/2026-11-05-crawler-script-use-case-review.md)。不改变上文已交付能力的当前实现状态。
+
 ## 当前不存在的上下文关系
 
-- 没有 Resource Hub 授权。
+- 没有通用 Resource Hub 资源授权；新增平台脚本能力属于 App Center 内部设计，见上节。
 - 没有 Expo Host RPC bridge、客户端加载或升级实现；App Center 只消费宿主提供的 rpcApiMajor/capabilities 并解析启动描述。
 - 没有 Hosting Runtime。
 

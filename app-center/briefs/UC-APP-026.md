@@ -246,7 +246,7 @@ secretsDisclosed: bool
 
 数组按 `TEST < GREY < STABLE` 的固定渠道顺序返回；同一渠道至多一个 CONFIDENTIAL client。幂等重试固定返回空数组和 `secretsDisclosed=false`。
 
-所有响应使用 `Cache-Control: no-store`。不提供列表接口；管理界面通过已知 transferId 打开详情，通知能力留给后续 outbox 工作包。
+本UC既有方法响应使用 `Cache-Control: no-store`。本人待接收列表由 [UC050](../use-cases/UC-APP-050-query-incoming-application-admin-transfers.md) 独立定义并使用 private,no-store；它只读过滤逻辑到期项，不替代本UC详情Get、命令、owner-exit检查和后台的持久EXPIRED收敛。已知transferId的详情与分享链接保持可用，通知能力仍留给后续工作包。
 
 ### 错误边界
 
@@ -952,7 +952,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `7e93553d9cdd` |
+| `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `4e2569e985b2` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

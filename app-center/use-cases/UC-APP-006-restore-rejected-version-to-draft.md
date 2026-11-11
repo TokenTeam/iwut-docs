@@ -22,6 +22,8 @@
 - 撤回 SUBMITTED、撤销 APPROVED 或处理申诉。
 - 发送审核通知。
 
+恢复草稿保留当前脚本引用。恢复后的引用替换只影响当前草稿，旧审核快照和反向依赖按 [BR-SDP-005](UC-APP-048-manage-application-script-dependencies.md#br-sdp-005) 保留。
+
 ## 为什么需要显式恢复
 
 如果 UC-APP-003 直接允许编辑 `REJECTED`，第一次修改就会隐式改变生命周期，接口很难清楚表达“接受了哪一次拒绝并重新开始”。如果拒绝时直接自动回到 DRAFT，又会丢失 Version 当前处于被拒绝状态这一事实。

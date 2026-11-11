@@ -37,7 +37,7 @@ redirect URIs、requiredScopes 和 optionalScopes 都从该批准 snapshot 取�
 <a id="br-oac-008"></a>
 ### BR-OAC-008：一致快照与资格版本
 
-一次 provider 响应的 registration、Publication、Version、Review、当前公开 ProfileRevision、回调和 scopes 来自同一个 Mongo snapshot。`RuntimeConfiguration` 返回 `(registrationRevision, authorizationEpoch, versionId, publicationRevision, profileRevisionId, adminAuthId)`；用户授权上下文在此基础上增加 `testerMembershipId`。Auth 必须把运行 tuple 作为不可拆分值比较，不能拼接不同调用的字段。
+一次 provider 响应的 registration、Publication、Version、Review、当前公开 ProfileRevision、回调、scopes 与 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 所需的精确脚本事实来自同一个 Mongo snapshot。`RuntimeConfiguration` 返回 `(registrationRevision, authorizationEpoch, versionId, publicationRevision, profileRevisionId, adminAuthId)`；用户授权上下文在此基础上增加 `testerMembershipId`。Auth 必须把运行 tuple 作为不可拆分值比较，不能拼接不同调用的字段。
 
 credentialRevision 只用于一次 confidential secret 验证，不属于运行 tuple。secret 轮换不会使已建立的 grant、授权交互、code 或 token 仅因 revision 改变而失效。移除后重新加入的 Tester 必须产生新的 membership episode；发布、公开资料、管理员或 client 状态变化后不能用旧查询继续成功。App 不回调 Auth；当前 Developer 状态由 Auth 自己确认。
 
@@ -75,7 +75,11 @@ GetApplicationPublishedRedirects 仅向授权 Auth 服务返回单个应用当�
 
 ## 依赖与实现边界
 
-依赖 UC-APP-018、版本依附的 OAuth redirect 配置、版本审核/TEST 发布/Tester 与公开资料读取。STABLE/灰度公开运行资格尚无 UC，不阻碍本 TEST 纵切片设计。Auth Scope Catalog 的生产来源仍需实现。
+依赖 UC-APP-018、版本依附的 OAuth redirect 配置、版本审核、渠道发布/Tester 与公开资料读取。STABLE/GREY 由已接受并实现的 UC020/021 扩展；权威 Scope Catalog 与启用检查由现行 Auth 契约承担。运行查询同时依赖 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020)，不复制 Auth 的 Scope 决策。
+
+## UC047 发布与运行联合门禁
+
+2026-11-08 落实 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020)。ResolveClientRuntimeConfiguration 与 ResolveAuthorizationContext 每次均在本次 snapshot 检查固定脚本依赖。未发布/暂停复用 OAUTH_CLIENT_RUNTIME_UNAVAILABLE（422 / FAILED_PRECONDITION），损坏 OAUTH_CLIENT_STATE_INCONSISTENT（500），依赖故障 OAUTH_PROVIDER_UNAVAILABLE（503）；不改 tuple，不以旧解析结果旁路 gate。GetClientConfiguration、VerifyClientSecret、GetApplicationPublishedRedirects 保持原职责；sector 回调并集不是运行授权，暂停脚本不删改已批准槽位回调。已有 token/consent 沿用原后续资格复查，不新增批量撤销。
 
 ## 变更记录
 

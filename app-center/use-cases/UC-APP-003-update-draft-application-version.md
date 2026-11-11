@@ -16,6 +16,8 @@
 
 读取单个版本或版本列表是支持管理页面的 Query，不需要为此建立新的领域实体。
 
+完整替换显式提供 `scriptReferences`，格式与 UC002 一致。引用进入既有 revision 比较与内容相等判断，按 [BR-SDP-001](UC-APP-048-manage-application-script-dependencies.md#br-sdp-001) 重新校验。
+
 ## 可编辑与不可编辑字段
 
 完整替换以下字段：
@@ -29,6 +31,7 @@ requiredCapabilities
 requiredScopes
 optionalScopes
 oauthRedirects
+scriptReferences
 ```
 
 系统在成功修改时更新：
@@ -99,6 +102,7 @@ UpdateDraftApplicationVersionCommand {
   requiredScopes: []string
   optionalScopes: []string
   oauthRedirects: OAuthRedirectConfiguration
+  scriptReferences: ScriptReferences
 }
 ```
 
@@ -118,7 +122,7 @@ HTTP adapter 从 `If-Match` 读取 expectedRevision；gRPC adapter 使用 comman
 1. 从可信身份上下文取得 authId 和 developerStatus。
 2. 确认 developerStatus 为 `APPROVED`。
 3. 确认 expectedRevision `>= 1`。
-4. 使用 UC-APP-002 的相同规则校验所有可编辑字段，包括 BR-VER-018 的 oauthRedirects。
+4. 使用 UC-APP-002 的相同规则校验所有可编辑字段，包括 BR-VER-018 的 oauthRedirects 和 BR-SDP-001 的 scriptReferences。
 5. 通过 ScopeCatalog adapter 确认 requiredScopes 和 optionalScopes 当前允许被新版本申请。
 6. 将 capabilities、scopes 和 OAuth 回调分别规范化为稳定集合表示。
 7. 从系统时钟取得 updatedAt。
@@ -163,7 +167,7 @@ HTTP adapter 从 `If-Match` 读取 expectedRevision；gRPC adapter 使用 comman
 
 请求必须提供全部可编辑字段，服务端以新值整体替换旧值。空数组表示明确清空该集合，不表示“不修改”。
 
-本用例不提供单字段 Patch，也不使用字段 mask。这样 URL、RPC range、capabilities、scopes 和 oauthRedirects 可以在同一组校验和一次原子写入中保持一致。
+本用例不提供单字段 Patch，也不使用字段 mask。这样 URL、RPC range、capabilities、scopes、oauthRedirects 和 scriptReferences 可以在同一组校验和一次原子写入中保持一致。
 
 <a id="br-ver-012"></a>
 ### BR-VER-012：不可变身份与创建审计
@@ -297,6 +301,7 @@ If-Match: "3"
   "requiredCapabilities": ["user.profile.v1"],
   "requiredScopes": ["profile.basic"],
   "optionalScopes": ["schedule.read"],
+  "scriptReferences": {"items": []},
   "oauthRedirects": {
     "pkceRedirectUris": ["https://example.edu/oauth/callback"],
     "confidentialRedirectUris": []

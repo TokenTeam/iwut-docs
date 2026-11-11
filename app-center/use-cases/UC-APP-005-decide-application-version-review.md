@@ -6,6 +6,8 @@
 
 2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
 
+批准事务复核全部固定脚本的批准事实，并保存实际依据的脚本审核决定 ID、版本 ID 和摘要。待审和拒绝分别返回 `ScriptDependencyPending` 和 `ScriptDependencyRejected`，详见 [BR-SDP-004](UC-APP-048-manage-application-script-dependencies.md#br-sdp-004)。
+
 ## 目标与范围
 
 治理扩展：批准门禁的角色区分、WITHDRAWN/CLOSED 和账号状态条件由 [BR-APP-011](UC-APP-025-coordinate-account-owner-exit.md#br-app-011) 定义，替代仅判断 AnySuspended 的门禁；本文其余“暂停检查”均表示该完整批准资格检查。依赖故障仍保持 PENDING。

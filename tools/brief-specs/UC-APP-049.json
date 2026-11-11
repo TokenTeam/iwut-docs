@@ -1,0 +1,25 @@
+{
+  "uc": "UC-APP-049",
+  "note": "Implement script review decisions and durable bounded application rejection as one work package. Preserve exact dependency fences, immutable policy bindings, SYSTEM ownership and one-time terminal decisions.",
+  "uc_sections": [
+    "目标与参与者",
+    "验收"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "子模块与构建"
+    ],
+    "ADR-008": [
+      "决定"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/auth-system-principal-v1.md": [
+      "调用与缓存语义",
+      "契约测试要求"
+    ]
+  }
+}

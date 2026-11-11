@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-021` 管理灰度发布 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAC-013`，`BR-PUB-020`–`BR-PUB-030`（11 条） |
-| 外部引用 BR | `BR-PUB-016`、`BR-PUB-017`（来自 `UC-APP-020`） |
+| 外部引用 BR | `BR-PUB-016`、`BR-PUB-017`，`BR-SCR-020`（来自 `UC-APP-020`、`UC-APP-047`） |
 | ADR | `ADR-001`、`ADR-002`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/app-oauth-client-v1.md`、`platform/contracts/trusted-identity-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -319,7 +319,7 @@ GreyRollout {
 <!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-022 -->
 ### BR-PUB-022：Grey Version 发布资格
 
-Grey Version 必须属于同一 Application、覆盖当前 rpcApiMajor，并保持完整 APPROVED Review/snapshot 一致性；Application 必须存在当前有效的 APPROVED ProfileRevision。Version 不要求曾进入 Test，也可以与 Stable 指向同一 Version。设置 Grey 不改变 Version 状态、Stable 或 Test。
+Grey Version 必须属于同一 Application、覆盖当前 rpcApiMajor，并保持完整 APPROVED Review/snapshot 一致性；Application 必须存在当前有效的 APPROVED ProfileRevision。Version 不要求曾进入 Test，也可以与 Stable 指向同一 Version。实际设置/替换及比例变化还须通过 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的精确脚本门禁。设置 Grey 不改变 Version 状态、Stable 或 Test。
 
 <!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-023 -->
 ### BR-PUB-023：确定性已登录用户分桶
@@ -354,7 +354,7 @@ History 保存 rolloutId、previous/new Version、previous/new exposure、change
 <!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-027 -->
 ### BR-PUB-027：按风险方向复检
 
-START、INCREASE、REPLACE 会新增用户或运行内容，必须按 [BR-PUB-016](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-016) 同等强度复查 Profile、Version/Review/snapshot、Scope、URL 和 GREY OAuth registration/credential。DECREASE 与 Clear 只收敛风险，不依赖外部检查；外部依赖故障不能阻止管理员降低或停止 Grey。
+START、INCREASE、REPLACE 会新增用户或运行内容，必须按 [BR-PUB-016](../use-cases/UC-APP-020-manage-stable-publication-slot.md#br-pub-016) 同等强度复查 Profile、Version/Review/snapshot、Scope、URL 和 GREY OAuth registration/credential。DECREASE 与 Clear 只收敛风险，不依赖外部检查；外部依赖故障不能阻止管理员降低或停止 Grey。DECREASE 的实际比例变更仍复核 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的本地精确脚本门禁；Clear 不依赖该门禁。
 
 <!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-028 -->
 ### BR-PUB-028：清空与损坏状态
@@ -364,7 +364,7 @@ Clear 只移除 GreyRollout，保留 Stable、Test、Publication 和历史。Pub
 <!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-029 -->
 ### BR-PUB-029：Grey 变化原子性
 
-最终事务必须取得 Application 写栅栏，复查当前管理员、Publication revision、Stable/Grey 状态，并按变化类型复查资格来源；Rollout、revision、审计和 History 必须一起提交。与 Test/Stable 修改、管理员转让、Profile 切换、Version 资格变化或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序。
+最终事务必须取得 Application 写栅栏，复查当前管理员、Publication revision、Stable/Grey 状态，并按变化类型复查资格来源；实际 Set/Replace/比例变更还按 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 取得全部脚本资源共享门禁真实写栅栏。Rollout、revision、审计和 History 必须一起提交。与 Test/Stable 修改、管理员转让、Profile 切换、Version 资格变化或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序。
 
 <!-- 权威位置: use-cases/UC-APP-021-manage-grey-rollout.md#br-pub-030 -->
 ### BR-PUB-030：不隐式提升或扩散
@@ -390,6 +390,17 @@ STABLE identity 可以在 Publication 之前登记。client 为 DISABLED 不阻�
 清空 stable 只移除 stable 指针，不删除 Publication。test 可以继续存在；未来 grey 必须以 stable 为基线，因此 greyRollout 非空时拒绝清空 stable。管理员应先清空 grey，再清空 stable。
 
 清空不删除 OAuth identity、credential、grant、Version、Review、Profile 或历史。全部槽位为空时 Publication 进入 EMPTY 形态并保留 revision，使后续并发和审计连续。
+
+### 来自 `UC-APP-047`
+
+<!-- 权威位置: use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020 -->
+### BR-SCR-020：发布与在线解析的精确依赖门禁
+
+App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVED、曾发布且资源 AVAILABLE；任一不满足则整个发布失败。只调整灰度比例也复核目标，清空槽位仍允许。该规则为对 UC007/020/021 的已接受扩展，在进入发布/运行工作包时同步这些用例及对应 brief。
+
+后续在线 Test/统一启动、普通目录、本人测试和 Auth OAuth 上下文按其原有资格及隐藏语义消费同一门禁：依赖不可分发的候选不能作为可启动/可授权目标，不能省略脚本继续返回目标、替换脚本或自动回退到另一应用版本。既有候选优先级保留，只在原 UC 明确允许的分支选择。管理/审核历史仍可读。
+
+读取可线性化在暂停前或后，已经返回的目标不被撤回；后续实际内容获取再次核验。不可读或事实损坏须失败关闭，并按原 UC 区分业务不可用与依赖故障，不把存储错误当作永久无候选。新增联合门禁的 Catalog/OAuth 错误见下文「既有入口的稳定映射」与运行读契约。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -833,8 +844,9 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：后续设计顺序、变更记录
-- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
+- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-047`（use-cases/UC-APP-047-resolve-application-script-content.md）：目标与范围、正式分发接口、内容与传输预算、事实一致性与写入排序、既有入口的稳定映射、新接口错误、验收
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-002`（adr/ADR-002-partition-publication-by-rpc-api-major.md）：背景、为什么不使用 platform/target、考虑过的替代方案、结果、关联用例、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
@@ -846,8 +858,9 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `5d63fc0c10b4` |
-| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
+| `use-cases/UC-APP-021-manage-grey-rollout.md` | 356 | `2797477b11db` |
+| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 357 | `cedac12b66d4` |
+| `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-002-partition-publication-by-rpc-api-major.md` | 84 | `ce434a38d0d1` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

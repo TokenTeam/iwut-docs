@@ -1,0 +1,27 @@
+{
+  "uc": "UC-APP-050",
+  "note": "Implement only the caller incoming pending unexpired transfer page with consistent local Application names, read-only expiry filtering, actor/purpose-bound signed keysets and strict transport. Preserve UC026 commands and lazy expiration. No user directory, outgoing/history inbox, notification, credential disclosure or compatibility.",
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "gRPC-Web 终止"
+    ]
+  },
+  "query_sections": {
+    "app-center/query-contracts/incoming-application-transfers.md": [
+      "权威与投影",
+      "组合与消费"
+    ]
+  }
+}

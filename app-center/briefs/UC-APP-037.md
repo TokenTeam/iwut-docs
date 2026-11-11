@@ -724,8 +724,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | --- | --- | --- |
 | `use-cases/UC-APP-037-query-application-tester-management.md` | 219 | `a3f5c7f757cc` |
 | `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
-| `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `7e93553d9cdd` |
-| `use-cases/UC-APP-029-query-owned-application-management.md` | 151 | `bf56cdb407d2` |
+| `use-cases/UC-APP-026-transfer-application-administration.md` | 324 | `4e2569e985b2` |
+| `use-cases/UC-APP-029-query-owned-application-management.md` | 153 | `143bc85de8b9` |
 | `use-cases/UC-APP-008-create-or-rotate-tester-join-link.md` | 414 | `9a39e6856efb` |
 | `use-cases/UC-APP-009-join-application-as-tester.md` | 413 | `71b19b545669` |
 | `use-cases/UC-APP-010-remove-application-tester.md` | 337 | `4804d0a44f36` |

@@ -6,6 +6,8 @@
 
 2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
 
+审核详情列出本次快照的精确脚本引用和当前状态。Reviewer 通过同一应用审核路径下的单条引用详情读取受审原文和政策。每次都复核 AppReview 读取权限及引用归属，见 [BR-SDP-002](UC-APP-048-manage-application-script-dependencies.md#br-sdp-002)。
+
 ## 目标与范围
 
 > 具备 `app.version.review` 的 Reviewer 查询待处理 ApplicationVersion 审核队列，并读取完成或审计一次审核所需的不可变详情。

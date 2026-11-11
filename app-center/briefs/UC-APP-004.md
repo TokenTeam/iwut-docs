@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-004` 提交应用版本审核 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-REV-001`–`BR-REV-009`（9 条） |
-| 外部引用 BR | `BR-PRF-018`，`BR-VER-018`（来自 `UC-APP-002`、`UC-APP-015`） |
+| 外部引用 BR | `BR-PRF-018`，`BR-SDP-003`，`BR-VER-018`（来自 `UC-APP-002`、`UC-APP-015`、`UC-APP-048`） |
 | ADR | `ADR-001`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/auth-scope-catalog-v1.md` |
 
@@ -38,6 +38,8 @@
 ### 修订范围与审核状态
 
 2026-11-04 用户已接受本次修订并要求开始更新。提交时固定政策、未上线不做旧模型/数据/接口兼容，均为当前实施依据；旧已交付基线和历史记录保留，本次接受不表示新增实现已完成。实施范围与依赖见[已接受提案](../implements/2026-11-03-submission-bound-review-policy-proposal.md)。
+
+送审事务冻结每个脚本的资源 ID、版本 ID、格式、摘要和脚本审核 ID，并执行脚本版本写栅栏与反向依赖登记。原子边界见 [BR-SDP-003](../use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-003)。
 
 ### 目标与范围
 
@@ -536,6 +538,15 @@ ApplicationProfileReviewSnapshot {
 
 snapshot、policyBinding、sourceRevision、submittedBy 和 submittedAt 创建后不可修改。policyBinding 指向提交事务中有效的独立 Profile 政策及其不可变完整定义；政策退休不改变本次绑定。后续 Reviewer 读取 snapshot，不使用可能已经存在的其他草稿或当前公开资料拼装审核输入。
 
+### 来自 `UC-APP-048`
+
+<!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-003 -->
+### BR-SDP-003：送审冻结与依赖登记
+
+ApplicationReview.snapshot 固定规范化引用、每项脚本 format/digest 和脚本审核 ID。应用提交只允许每项当前为 SUBMITTED 或 APPROVED 且受审事实匹配，不要求脚本已发布。在同一原子边界完成现行全部提交检查、Version → SUBMITTED、AppReview PENDING 和每个精确版本的反向依赖登记，任一失败全部回滚。
+
+提交与脚本 REJECTED 迁移必须有可验证的串行关系：应用提交先完成则属于级联义务；脚本拒绝先完成则不允许新的应用待审登记。不能只读一次状态或事后异步登记依赖。工程实现见 [ADR008](../adr/ADR-008-script-dependency-transactions-and-cascade.md)。
+
 ### 来自 `UC-APP-002`
 
 <!-- 权威位置: use-cases/UC-APP-002-create-application-version.md#br-ver-018 -->
@@ -798,6 +809,7 @@ Provider 与 Consumer 至少共同验证：
 
 - `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：旧实现观察、后续用例、迁移说明、变更记录
 - `UC-APP-015`（use-cases/UC-APP-015-submit-application-profile-revision-review.md）：修订范围与审核状态、目标与边界、参与者与输入、成功结果、主流程、失败结果、领域模型影响、验收场景、后续方向、实现依赖与交付边界、API 实现契约、变更记录
+- `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-001`（adr/ADR-001-scope-catalog-cache.md）：背景、决定、为什么现在不上 RabbitMQ、未来何时引入事件、结果、参考
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
@@ -808,9 +820,10 @@ Provider 与 Consumer 至少共同验证：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
 | `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 273 | `c91b78de6449` |
-| `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-002-create-application-version.md` | 482 | `36cd857b840a` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |

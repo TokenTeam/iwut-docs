@@ -163,7 +163,7 @@ CLOSING 是关闭生效点。所有目录、启动、Tester、审核、Publicati
 <a id="br-app-024"></a>
 ### BR-APP-024：依附状态保留与待处理操作终止
 
-关闭保留 Version、Profile、Review、Publication、Filter、Tester Membership、OAuth registration/credential 和全部历史。PENDING 管理员转让与 ACTIVE 加入链接在本地事务中终止；待审核记录不改写，但从队列排除且不能再决定。避免为每个依附模型伪造 CLOSED/CANCELLED 状态，也避免一次关闭产生无界批量写入。
+关闭保留 Version、Profile、Review、Publication、Filter、Tester Membership、OAuth registration/credential 和全部历史。PENDING 管理员转让与 ACTIVE 加入链接在本地事务中终止；待审核记录不改写，但从队列排除且不能再决定。[UC049](UC-APP-049-cascade-script-rejection.md#br-sdp-006) 可在同一 Application fence 下记录精确依赖的 APPLICATION_CLOSED 级联豁免，该记录关联真实关闭事实，不改写 Review/Version 历史。避免为每个依附模型伪造 CLOSED/CANCELLED 状态，也避免一次关闭产生无界批量写入。
 
 <a id="br-app-025"></a>
 ### BR-APP-025：配额、名称与 owner 义务

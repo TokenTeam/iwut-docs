@@ -12,6 +12,8 @@ Reviewer 继续通过 [UC-APP-030](UC-APP-030-query-application-version-reviews.
 
 如果未来平台支持人员需要跨 Application 排障，应建立带精确权限、强审计和最小披露的独立运维查询；不得把“平台管理员”解释为本用例的隐式超级读取者。
 
+私有版本详情区分当前草稿引用与最新审核的固定快照。展示当前审核状态及拒绝导致的失效标记，按 [BR-SDP-002](UC-APP-048-manage-application-script-dependencies.md#br-sdp-002) 披露元数据。
+
 ## 目标与范围
 
 本用例交付两个只读查询：
@@ -176,7 +178,7 @@ OwnedApplicationVersionDetail {
 
 管理员投影也不返回 ApplicationVersion.updatedBy。UC005 在审核决定后会把人工 Reviewer 或 SYSTEM principal 的 authId 写入该字段；将它放入列表或详情会绕过上述 Reviewer 身份最小披露。查询仍返回 revision 与 updatedAt，足以支持 OCC 和界面更新时间展示；createdBy 继续返回，因为它记录 Version 创建者而不是审核决定者。
 
-本用例不提供历史 attempts 数组。若未来需要管理员浏览完整审核时间线，应建立独立分页查询并明确 Reviewer 身份、内部策略和历史理由的披露边界，不能无界嵌入 Version 详情。
+本用例不提供历史 attempts 数组。完整审核时间线及最小历史详情另见已接受 [UC052](UC-APP-052-query-application-management-activity.md)，其新增披露边界不改变本用例的 latestReview 行为，也不能无界嵌入 Version 详情；交付状态由UC052实施记录维护。
 
 ## 当前内容、审核快照与写命令边界
 

@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-035` 放弃从未提交审核的 ApplicationVersion 草稿 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-VER-026`–`BR-VER-033`（8 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-SDP-005`（来自 `UC-APP-048`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -42,6 +42,8 @@
 “未发布”不是安全的删除条件。APPROVED Version 即使当前不在 Test、Grey 或 Stable 槽位中，仍保存有效审核决定并可能再次发布；SUBMITTED 正在接受审核；REJECTED 和恢复后的 DRAFT 都连接不可变 Review snapshot、decision 或 restoration。删除这些记录会破坏审核、发布资格与审计关系。
 
 因此本用例只解决 Developer Console 中无用初始草稿无法清理的问题，并把用户动作命名为“放弃草稿”。成功后 Version 当前内容及其一对一 OAuth 配置从有效数据中永久移除，另存最小不可变 `ApplicationVersionAbandonment` 事实支持审计和安全重试。放弃不新增 `ABANDONED` reviewStatus，也不改变任何 Review 或 Publication。
+
+放弃未提交草稿时随其版本内容删除当前脚本引用。保留独立脚本资源与审核历史，见 [BR-SDP-005](../use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-005)。
 
 ### 目标与范围
 
@@ -309,6 +311,17 @@ validator 要求所有字段存在、禁止额外字段，并验证 UUIDv7、正
 ### BR-VER-033：不可恢复与最小披露
 
 放弃成功后不提供恢复或内容读取。响应只返回定位和审计时间所需摘要；不得返回被删除运行内容、OAuth 配置、secret/hash、Reviewer 事实或 abandonedBy。日志、错误和 trace 同样不得记录这些敏感事实。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-048`
+
+<!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-005 -->
+### BR-SDP-005：终态与历史引用不被重写
+
+ScriptVersion APPROVED/REJECTED 相斥且不可改写；脚本发布 head 移动不改变 App snapshot。App 拒绝恢复 DRAFT 后可以修改引用，但旧 Review 及其反向关系作为历史保留，活跃级联不再作用于其终态。新送审创建新 attempt 和新依赖，不继承旧批准或旧拒绝结果；已拒绝脚本不能通过恢复草稿重新进入待审链路。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -638,6 +651,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-APP-035`（use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md）：变更记录
+- `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -649,7 +663,8 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md` | 283 | `42cc1cff657d` |
+| `use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md` | 285 | `c1239cb68b8c` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

@@ -175,7 +175,7 @@ GreyRollout {
 <a id="br-pub-022"></a>
 ### BR-PUB-022：Grey Version 发布资格
 
-Grey Version 必须属于同一 Application、覆盖当前 rpcApiMajor，并保持完整 APPROVED Review/snapshot 一致性；Application 必须存在当前有效的 APPROVED ProfileRevision。Version 不要求曾进入 Test，也可以与 Stable 指向同一 Version。设置 Grey 不改变 Version 状态、Stable 或 Test。
+Grey Version 必须属于同一 Application、覆盖当前 rpcApiMajor，并保持完整 APPROVED Review/snapshot 一致性；Application 必须存在当前有效的 APPROVED ProfileRevision。Version 不要求曾进入 Test，也可以与 Stable 指向同一 Version。实际设置/替换及比例变化还须通过 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的精确脚本门禁。设置 Grey 不改变 Version 状态、Stable 或 Test。
 
 <a id="br-pub-023"></a>
 ### BR-PUB-023：确定性已登录用户分桶
@@ -210,7 +210,7 @@ History 保存 rolloutId、previous/new Version、previous/new exposure、change
 <a id="br-pub-027"></a>
 ### BR-PUB-027：按风险方向复检
 
-START、INCREASE、REPLACE 会新增用户或运行内容，必须按 [BR-PUB-016](UC-APP-020-manage-stable-publication-slot.md#br-pub-016) 同等强度复查 Profile、Version/Review/snapshot、Scope、URL 和 GREY OAuth registration/credential。DECREASE 与 Clear 只收敛风险，不依赖外部检查；外部依赖故障不能阻止管理员降低或停止 Grey。
+START、INCREASE、REPLACE 会新增用户或运行内容，必须按 [BR-PUB-016](UC-APP-020-manage-stable-publication-slot.md#br-pub-016) 同等强度复查 Profile、Version/Review/snapshot、Scope、URL 和 GREY OAuth registration/credential。DECREASE 与 Clear 只收敛风险，不依赖外部检查；外部依赖故障不能阻止管理员降低或停止 Grey。DECREASE 的实际比例变更仍复核 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的本地精确脚本门禁；Clear 不依赖该门禁。
 
 <a id="br-pub-028"></a>
 ### BR-PUB-028：清空与损坏状态
@@ -220,7 +220,7 @@ Clear 只移除 GreyRollout，保留 Stable、Test、Publication 和历史。Pub
 <a id="br-pub-029"></a>
 ### BR-PUB-029：Grey 变化原子性
 
-最终事务必须取得 Application 写栅栏，复查当前管理员、Publication revision、Stable/Grey 状态，并按变化类型复查资格来源；Rollout、revision、审计和 History 必须一起提交。与 Test/Stable 修改、管理员转让、Profile 切换、Version 资格变化或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序。
+最终事务必须取得 Application 写栅栏，复查当前管理员、Publication revision、Stable/Grey 状态，并按变化类型复查资格来源；实际 Set/Replace/比例变更还按 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 取得全部脚本资源共享门禁真实写栅栏。Rollout、revision、审计和 History 必须一起提交。与 Test/Stable 修改、管理员转让、Profile 切换、Version 资格变化或 OAuth registration 建立并发时，结果必须等价于某个明确先后顺序。
 
 <a id="br-pub-030"></a>
 ### BR-PUB-030：不隐式提升或扩散
@@ -345,6 +345,10 @@ Mongo migration 预留为 `0017_grey_rollout`：
 3. [UC-APP-022](UC-APP-022-manage-application-filter.md) 已定义无审核 ApplicationFilterRevision 与客户端求值契约。
 4. 普通目录与“我参与的测试”两个查询入口。
 5. test clear、原子 Grey promote 等后续操作按实际管理体验补充。
+
+## UC047 发布与运行联合门禁
+
+2026-11-08 落实 UC047。START、INCREASE、DECREASE、REPLACE 的实际改变均检查固定依赖；免外部复检不等于免本地脚本门禁。Clear 仍可停止分发，匹配 no-op 保留原规则，迟到 OCC 仍冲突。正常脚本不可分发返回 APPLICATION_SCRIPT_DEPENDENCY_UNAVAILABLE（422 / FAILED_PRECONDITION），损坏/故障遵循 UC047 稳定映射。验收含比例调整、暂停竞争和多依赖回滚，不改变 cohort/seed 生命周期。
 
 ## 变更记录
 

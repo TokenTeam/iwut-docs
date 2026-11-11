@@ -89,7 +89,8 @@ OptionalAuthenticatedUserIdentity {
 2. `currentPublishedProfileRevisionId` 指向同一 Application 的有效 APPROVED ProfileRevision，且其批准事实一致。
 3. exact `(applicationId, hostRpcApiMajor)` Publication 存在有效 stable pointer。
 4. Stable Version 属于同一 Application、保持 APPROVED、批准 snapshot 一致、RPC range 覆盖请求 major，并且 `requiredCapabilities ⊆ hostCapabilities`。
-5. 当前不存在已建模的归档、停止分发或 suspension 状态。首版尚无这些字段，因此本条暂时只保留扩展位置。
+5. Application 通过 UC027/028/033 当前生命周期、平台 availability 与归档 gate。
+6. Stable 基线通过 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的全部精确脚本依赖门禁。
 
 缺少公开 Profile、缺少 exact-major Publication、没有 Stable 或 Stable 正常但不兼容当前宿主，都是“不进入普通候选集”，不是错误。存在 pointer 但指向损坏、跨 Application、非 APPROVED 或 snapshot 漂移的事实属于内部不变量异常。
 
@@ -111,6 +112,7 @@ eligible stable-backed Application
 - 非 Tester 的已登录用户命中 Grey 时得到 GREY，否则得到 STABLE。
 - 匿名用户得到 STABLE。
 - 高优先级目标仅因 capability 不足时按 UC023 回退。
+- 最终选中 Test/Grey/Stable 的脚本不可分发时隐藏该项，不能回退另一个应用版本。
 - 任何实际读取到的运行不变量损坏按 UC023 失败关闭。
 
 普通 Catalog 的可见性仍由 Stable-backed 候选资格建立。即使 Tester 的最终启动目标是 TEST，这一项仍属于普通公开 Catalog，因此返回并执行当前 Filter。后续独立的 test-only“我参与的测试”入口不执行 Filter；两者不能用 selected channel 判断是否分发规则。
@@ -331,6 +333,10 @@ Proto 可以复用 `app_center.v1.runtime_resolution.LaunchTargetDescriptor` 和
 2. Application 管理查询已交付；技术名称创建后不可修改。
 3. 平台 suspension 已由 UC-APP-028 定义；管理员整 Application 归档由 UC-APP-033 统一进入 Catalog、UC023 和 OAuth provider 资格，单纯停止普通公开分发使用 Stable clear。
 4. 搜索、分类、推荐或排名只在出现真实产品需求后建立独立模型。
+
+## UC047 发布与运行联合门禁
+
+2026-11-08 落实 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020)。Stable 的脚本门禁独立建立普通候选资格；即使本人 Test 可运行，也不能绕过不可分发 Stable。基线或最终目标正常不可分发，列表隐藏该项，详情统一 PUBLIC_APPLICATION_NOT_FOUND。已读依赖损坏整页/详情 APPLICATION_CATALOG_STATE_INCONSISTENT（500），存储失败整次失败，不静默丢项。批量加载固定依赖并与 Profile、Publication、目标和 Filter 保持单页 snapshot，不新增 N+1 或降级。
 
 ## 变更记录
 

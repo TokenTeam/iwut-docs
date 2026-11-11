@@ -205,7 +205,7 @@ Descriptor 不包含 client secret、Tester 列表、审核备注、其他 Versi
 <a id="br-run-007"></a>
 ### BR-RUN-007：一致快照与并发
 
-Membership、Publication 和 Version 必须来自一个逻辑一致的解析快照：
+Membership、Publication、Version 与 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 所需的精确脚本事实必须来自一个逻辑一致的解析快照：
 
 - 移除先于解析快照可见：解析失败。
 - 解析快照先于移除：本次可以成功，后续解析失败。
@@ -394,6 +394,10 @@ test 闭环到此完成。后续发布设计可以进入：
 ```
 
 具体顺序和编号仍应由下一阶段业务目标及注册表的 Next ID 决定；本候选列表不预分配 ID。
+
+## UC047 发布与运行联合门禁
+
+2026-11-08 落实 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020)。通过原 Membership、exact-major、批准和 capability 条件的 Test 在返回前整体核验固定脚本依赖；未发布/暂停返回既有 APPLICATION_TEST_TARGET_UNAVAILABLE（404 / NOT_FOUND），不省略脚本或回退其他槽位。已读依赖关系损坏仍按 APPLICATION_TEST_PUBLICATION_INCONSISTENT（503 / UNAVAILABLE），存储失败维持故障分类。请求不额外读取已被资格/能力排除的私有候选。与暂停并发返回完整提交前/后事实，后续内容请求再次核验。
 
 ## 变更记录
 

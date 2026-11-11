@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-019` 为 Auth 解析 OAuth 应用授权上下文 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-OAC-006`–`BR-OAC-011`（6 条） |
-| 外部引用 BR | `BR-OAC-012`、`BR-OAC-013`（来自 `UC-APP-020`、`UC-APP-021`） |
+| 外部引用 BR | `BR-OAC-012`、`BR-OAC-013`，`BR-SCR-020`（来自 `UC-APP-020`、`UC-APP-021`、`UC-APP-047`） |
 | ADR | `ADR-006` |
 | 平台共享 | `platform/contracts/app-oauth-client-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -66,7 +66,7 @@
 
 ### 依赖与实现边界
 
-依赖 UC-APP-018、版本依附的 OAuth redirect 配置、版本审核/TEST 发布/Tester 与公开资料读取。STABLE/灰度公开运行资格尚无 UC，不阻碍本 TEST 纵切片设计。Auth Scope Catalog 的生产来源仍需实现。
+依赖 UC-APP-018、版本依附的 OAuth redirect 配置、版本审核、渠道发布/Tester 与公开资料读取。STABLE/GREY 由已接受并实现的 UC020/021 扩展；权威 Scope Catalog 与启用检查由现行 Auth 契约承担。运行查询同时依赖 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020)，不复制 Auth 的 Scope 决策。
 
 ## 业务规则（UC-APP-019 权威正文）
 
@@ -87,7 +87,7 @@ redirect URIs、requiredScopes 和 optionalScopes 都从该批准 snapshot 取�
 <!-- 权威位置: use-cases/UC-APP-019-resolve-oauth-authorization-context.md#br-oac-008 -->
 ### BR-OAC-008：一致快照与资格版本
 
-一次 provider 响应的 registration、Publication、Version、Review、当前公开 ProfileRevision、回调和 scopes 来自同一个 Mongo snapshot。`RuntimeConfiguration` 返回 `(registrationRevision, authorizationEpoch, versionId, publicationRevision, profileRevisionId, adminAuthId)`；用户授权上下文在此基础上增加 `testerMembershipId`。Auth 必须把运行 tuple 作为不可拆分值比较，不能拼接不同调用的字段。
+一次 provider 响应的 registration、Publication、Version、Review、当前公开 ProfileRevision、回调、scopes 与 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 所需的精确脚本事实来自同一个 Mongo snapshot。`RuntimeConfiguration` 返回 `(registrationRevision, authorizationEpoch, versionId, publicationRevision, profileRevisionId, adminAuthId)`；用户授权上下文在此基础上增加 `testerMembershipId`。Auth 必须把运行 tuple 作为不可拆分值比较，不能拼接不同调用的字段。
 
 credentialRevision 只用于一次 confidential secret 验证，不属于运行 tuple。secret 轮换不会使已建立的 grant、授权交互、code 或 token 仅因 revision 改变而失效。移除后重新加入的 Tester 必须产生新的 membership episode；发布、公开资料、管理员或 client 状态变化后不能用旧查询继续成功。App 不回调 Auth；当前 Developer 状态由 Auth 自己确认。
 
@@ -147,6 +147,17 @@ UC-APP-019 的五个 Auth-only provider 方法支持 GREY：
 - runtime tuple 继续绑定 Publication revision；比例、目标或 Clear 改变后，旧 tuple 不能生成新授权上下文。
 
 App 不生成 sector/sub，不签发 code/token。默认的 `test > grey > stable` 路由由后续统一解析契约负责；provider 只验证调用方明确请求的 GREY client 在当前用户和 runtime tuple 下是否有资格。
+
+### 来自 `UC-APP-047`
+
+<!-- 权威位置: use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020 -->
+### BR-SCR-020：发布与在线解析的精确依赖门禁
+
+App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVED、曾发布且资源 AVAILABLE；任一不满足则整个发布失败。只调整灰度比例也复核目标，清空槽位仍允许。该规则为对 UC007/020/021 的已接受扩展，在进入发布/运行工作包时同步这些用例及对应 brief。
+
+后续在线 Test/统一启动、普通目录、本人测试和 Auth OAuth 上下文按其原有资格及隐藏语义消费同一门禁：依赖不可分发的候选不能作为可启动/可授权目标，不能省略脚本继续返回目标、替换脚本或自动回退到另一应用版本。既有候选优先级保留，只在原 UC 明确允许的分支选择。管理/审核历史仍可读。
+
+读取可线性化在暂停前或后，已经返回的目标不被撤回；后续实际内容获取再次核验。不可读或事实损坏须失败关闭，并按原 UC 区分业务不可用与依赖故障，不把存储错误当作永久无候选。新增联合门禁的 Catalog/OAuth 错误见下文「既有入口的稳定映射」与运行读契约。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -380,9 +391,10 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-019`（use-cases/UC-APP-019-resolve-oauth-authorization-context.md）：变更记录
-- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
-- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：目标与范围、已确认的设计选择、输入与身份、建立、调整或替换主流程、清空主流程、确定性分桶、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
+- `UC-APP-019`（use-cases/UC-APP-019-resolve-oauth-authorization-context.md）：UC047 发布与运行联合门禁、变更记录
+- `UC-APP-020`（use-cases/UC-APP-020-manage-stable-publication-slot.md）：目标与范围、已确认的设计选择、输入与身份、设置或替换主流程、清空主流程、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：目标与范围、已确认的设计选择、输入与身份、建立、调整或替换主流程、清空主流程、确定性分桶、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-047`（use-cases/UC-APP-047-resolve-application-script-content.md）：目标与范围、正式分发接口、内容与传输预算、事实一致性与写入排序、既有入口的稳定映射、新接口错误、验收
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-oauth-client-v1.md`（docs 根级共享文档）：管理接口、STABLE 扩展、GREY 扩展
 - `platform/contracts/trusted-service-identity-v1.md`（docs 根级共享文档）：Auth Center 固定授权映射、账号归属退出方法、Application 关闭方法
@@ -391,9 +403,10 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 89 | `a50377983f49` |
-| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 353 | `ed0e74da0b64` |
-| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `5d63fc0c10b4` |
+| `use-cases/UC-APP-019-resolve-oauth-authorization-context.md` | 93 | `df96fe4ee122` |
+| `use-cases/UC-APP-020-manage-stable-publication-slot.md` | 357 | `cedac12b66d4` |
+| `use-cases/UC-APP-021-manage-grey-rollout.md` | 356 | `2797477b11db` |
+| `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-oauth-client-v1.md` | 98 | `38d735de91e1` |
 | `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

@@ -4,13 +4,19 @@
 
 <a id="current-delivery-and-followups"></a>
 
-## 当前交付与后续目标（2026-11-04 更新）
+## 当前交付与后续目标（2026-11-11 更新）
 
-既有后端交付和验收基线保留；2026-11-03 用户确认改为提交时固定审核政策，六份 UC004/005/015/016/030/031 的本次修订已 ACCEPTED、开始实施。它替代旧“决定必须使用最新 ACTIVE、切换打断待审”的工作方向；不新增补审、整改期限或撤销旧批准。见[已接受提案](implements/2026-11-03-submission-bound-review-policy-proposal.md)与[实现导航](implements/README.md#当前实现覆盖)。UC028 时间一致性修复及其两轮 backend 24/24 属于独立已交付基线，不被本轮设计取代。
+既有后端交付和验收基线保留；提交时固定审核政策的六份 UC004/005/015/016/030/031 已完成App/API实现及完整backend验收。它替代旧“决定必须使用最新 ACTIVE、切换打断待审”的工作方向；不新增补审、整改期限或撤销旧批准。见[已接受提案](implements/2026-11-03-submission-bound-review-policy-proposal.md)与[实现导航](implements/README.md#当前实现覆盖)。UC028 时间一致性修复及其两轮 backend 24/24 属于独立已交付基线，不被本轮设计取代。
+
+系统尚未上线，本轮直接采用已接受的新审核策略。A→B 迁移验收及另造 Version v4/Profile v2 候选政策已退出本轮，不作为接口接入、合入或镜像发布的前置。App 功能分支 `auto/script-review-uc043` 已推送至 `db01313`，API 引用为 `241d56de6f8a3f68ed91969a4239a8c9fe32baad`。本轮 `master` 已快进至 `db01313` 并推送，GitHub 同步与 CNB 镜像发布均成功；提交标签与 `latest` 的 digest 及验证边界见[发布记录](implements/2026-11-11-accepted-backend-release.md)。下列日期、SHA 和测试结果保留各轮固定输入的历史含义。
 
 | 后续目标 | 当前边界与状态 |
 | --- | --- |
-| 提交时绑定审核政策、新模型初始化与查询协议切换 | 本次 ACCEPTED、IN_PROGRESS；发布只保留新提交选择一致性和必要恢复，不再建设打断旧待审的流程 |
+| 提交时绑定审核政策、新模型初始化与查询协议切换 | App/API后端及完整backend已完成；直接采用已接受新策略，按现有契约接入和验收，不要求 A→B 或新增候选政策；Console消费与发布状态由其owner记录 |
+| 平台爬虫脚本/配置 UC041–049 | App/API、Gateway与固定镜像验收完成；Console、客户端Runner和机器检查另属其边界 |
+| 本人待接收转让 UC050 | App/API、Gateway、固定三镜像及完整backend24/24完成，见[实施记录](implements/UC-APP-050-incoming-transfer-readiness.md) |
+| 平台应用目录 UC051 | App/API、Gateway、固定三镜像及最终完整backend24/24完成，见[实施记录](implements/UC-APP-051-platform-application-directory-readiness.md) |
+| 单应用管理动态 UC052 | 2026-11-09 用户接受App范围并授权实现；[UC正文](use-cases/UC-APP-052-query-application-management-activity.md)与[读契约](query-contracts/application-management-activity.md)为ACCEPTED，App后端COMPLETE，完整backend24/24通过，见[实施记录](implements/UC-APP-052-management-activity-readiness.md)；Gateway165路由与固定镜像三协议联验完成，当轮四后端已commit/push；[Console UC023](../console/use-cases/UC-CONSOLE-023-query-application-management-activity.md)已ACCEPTED，实现与发布由Console owner维护 |
 | 版本批准资格撤销、决定纠错 | 此前明确暂缓；现有决定不可原地改写，未来能力需独立设计 |
 | 可靠告警投递 | 已有日志、审计和告警 outbox；可靠投递闭环暂缓 |
 | 受控 icon 资产 | 目前只有不透明字符串；上传、所有权、内容版本和失效生命周期暂缓 |
@@ -21,9 +27,17 @@ Console 的实现与发布状态由其自身记录维护。其未完成内容不
 
 本目录从业务用例出发设计 App Center 的首个正式版本。旧实现已经雪藏，只作为历史需求证据，不是迁移来源，也不是当前模型的规范。
 
+## 平台爬虫脚本/配置管理（2026-11-05 新增范围）
+
+用户已确认将平台维护的爬虫脚本/配置正式归入 App Center，同服务、同库，内部保持独立资源、版本、审核、发布和 API。当前 JSON 文本、未来可扩展 Lua，客户端本地执行。应用可引用正在审核的精确脚本版本；应用批准依赖脚本获批，脚本拒绝后自动拒绝引用该版本的待审应用。
+
+2026-11-06 用户接受 UC-APP-041–049 与 ADR-008，并要求按顺序实施。2026-11-08已完成全部九项App后端范围，包含查询、拒绝级联、独立发布/暂停/恢复、分发以及应用精确依赖门禁；完整backend和固定三镜像验收均通过。见[串行工作清单](design-notes/2026-11-05-crawler-script-use-case-review.md)和 [UC045 实施记录](implements/UC-APP-045-script-query-readiness.md)。
+
 ## 当前迭代
 
-当前已经定义三十八个活跃纵切片；UC-APP-017 与 UC-APP-032 已被否决并归档，除上述六份规则修订已于 2026-11-04 接受 外，原 UC-APP-001–016、UC-APP-018–031、UC-APP-033–040 的已接受/交付历史保留：
+2026-11-09 [UC052 管理动态](use-cases/UC-APP-052-query-application-management-activity.md)App正文获接受，App后端已完成，完整backend24/24通过。当轮共享App Proto由API agent提交为7651f96，后续接入与四后端推送已完成；当前统一API与本轮发布状态见上节。[UC-CONSOLE-023](../console/use-cases/UC-CONSOLE-023-query-application-management-activity.md)已于2026-11-10获接受，其实现、验收及发布由Console owner独立维护。本轮不新增个人通知、自动加载、long polling或WebSocket。
+
+既有三十八个已接受纵切片和九个脚本用例的后端交付已完成。UC050已完成后端验收；UC051也已串行完成App/API、固定镜像及完整backend验收。UC-APP-017 与 UC-APP-032 已被否决并归档，除上述六份规则修订已于 2026-11-04 接受外，原 UC-APP-001–016、UC-APP-018–031、UC-APP-033–040 的已接受/交付历史保留：
 
 - `UC-APP-001`：开发者新建一个最小应用。
 - `UC-APP-002`：当前管理员创建一个 DRAFT 应用版本。
@@ -63,6 +77,9 @@ Console 的实现与发布状态由其自身记录维护。其未完成内容不
 - `UC-APP-038`：用户查询本人 ACTIVE 测试参与列表与详情，取得纯 Test 目标或暂不可用卡片。
 - `UC-APP-039`：当前管理员查询公开资料修订列表、详情和有界审核历史。
 - `UC-APP-040`：Tester 主动退出指定参与 episode，保留历史并原子释放容量。
+- `UC-APP-041–049`：平台脚本资源、独立版本、审核/级联、查询、发布/暂停/恢复、分发与应用依赖一致性。
+- `UC-APP-050`：可信USER查询本人未到期待接收管理权转让。
+- `UC-APP-051`：获精确search权限的用户查询全平台Application核心目录和摘要。
 
 Application 的稳定业务字段仍为：
 

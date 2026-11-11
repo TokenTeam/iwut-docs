@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-023` 解析 Application 的统一启动目标 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-RUN-011`–`BR-RUN-020`（10 条） |
-| 外部引用 BR | `BR-PUB-023`，`BR-RUN-005`（来自 `UC-APP-012`、`UC-APP-021`） |
+| 外部引用 BR | `BR-PUB-023`，`BR-RUN-005`，`BR-SCR-020`（来自 `UC-APP-012`、`UC-APP-021`、`UC-APP-047`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-005`、`ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -303,7 +303,7 @@ Cache-Control: private, no-store
 <!-- 权威位置: use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-016 -->
 ### BR-RUN-016：能力回退与不变量失败关闭
 
-高优先级候选仅因 `requiredCapabilities` 不被当前宿主覆盖时可以继续低优先级候选。跨 Application、非 APPROVED、RPC range/Review snapshot 漂移、悬空 pointer 或损坏 Grey 是内部不变量异常，不允许回退掩盖。
+高优先级候选仅因 `requiredCapabilities` 不被当前宿主覆盖时可以继续低优先级候选。原资格和能力分支选中的候选必须通过 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020)；合法未发布/暂停返回 ApplicationLaunchTargetUnavailable，不能作为新的回退理由。跨 Application、非 APPROVED、RPC range/Review snapshot 漂移、悬空 pointer 或损坏 Grey 是内部不变量异常，不允许回退掩盖。
 
 <!-- 权威位置: use-cases/UC-APP-023-resolve-unified-launch-target.md#br-run-017 -->
 ### BR-RUN-017：唯一目标与最小披露
@@ -348,6 +348,17 @@ Version.requiredCapabilities ⊆ hostCapabilities
 ```
 
 宿主可以声明额外能力。缺少能力时返回稳定排序的 missingCapabilities；optional/required scopes 不属于宿主 capabilities，不参与该集合判断。
+
+### 来自 `UC-APP-047`
+
+<!-- 权威位置: use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020 -->
+### BR-SCR-020：发布与在线解析的精确依赖门禁
+
+App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVED、曾发布且资源 AVAILABLE；任一不满足则整个发布失败。只调整灰度比例也复核目标，清空槽位仍允许。该规则为对 UC007/020/021 的已接受扩展，在进入发布/运行工作包时同步这些用例及对应 brief。
+
+后续在线 Test/统一启动、普通目录、本人测试和 Auth OAuth 上下文按其原有资格及隐藏语义消费同一门禁：依赖不可分发的候选不能作为可启动/可授权目标，不能省略脚本继续返回目标、替换脚本或自动回退到另一应用版本。既有候选优先级保留，只在原 UC 明确允许的分支选择。管理/审核历史仍可读。
+
+读取可线性化在暂停前或后，已经返回的目标不被撤回；后续实际内容获取再次核验。不可读或事实损坏须失败关闭，并按原 UC 区分业务不可用与依赖故障，不把存储错误当作永久无候选。新增联合门禁的 Catalog/OAuth 错误见下文「既有入口的稳定映射」与运行读契约。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -663,9 +674,10 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-023`（use-cases/UC-APP-023-resolve-unified-launch-target.md）：后续设计顺序、变更记录
-- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：目标与范围、已确认的设计选择、输入与身份、建立、调整或替换主流程、清空主流程、确定性分桶、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、变更记录
-- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、变更记录
+- `UC-APP-023`（use-cases/UC-APP-023-resolve-unified-launch-target.md）：后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-021`（use-cases/UC-APP-021-manage-grey-rollout.md）：目标与范围、已确认的设计选择、输入与身份、建立、调整或替换主流程、清空主流程、确定性分桶、异常流程、最小领域模型变化、API 草图、验收场景、依赖与实现边界、后续设计顺序、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：目标与范围、业务边界、输入与身份、主流程、异常流程、最小查询模型、用例端口、API 草图、测试与验收、实现依赖与交付边界、后续用例、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-047`（use-cases/UC-APP-047-resolve-application-script-content.md）：目标与范围、正式分发接口、内容与传输预算、事实一致性与写入排序、既有入口的稳定映射、新接口错误、验收
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-005`（adr/ADR-005-domain-errors-and-transport-mapping.md）：背景、考虑过的替代方案、结果、关联文档
@@ -677,9 +689,10 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-023-resolve-unified-launch-target.md` | 305 | `30ae34bdccb2` |
-| `use-cases/UC-APP-021-manage-grey-rollout.md` | 352 | `5d63fc0c10b4` |
-| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
+| `use-cases/UC-APP-023-resolve-unified-launch-target.md` | 309 | `6a9f66b9a639` |
+| `use-cases/UC-APP-021-manage-grey-rollout.md` | 356 | `2797477b11db` |
+| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 407 | `d5101bb5e28d` |
+| `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

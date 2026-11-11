@@ -73,7 +73,7 @@ MyTestApplicationItem {
     profileRevisionId, displayName, description?, icon?
   }
   availability: READY | PROFILE_REQUIRED | TEST_TARGET_UNAVAILABLE
-                | HOST_CAPABILITIES_INSUFFICIENT
+                | HOST_CAPABILITIES_INSUFFICIENT | SCRIPT_DEPENDENCY_UNAVAILABLE
   launchTarget?: TestLaunchDescriptor
   missingCapabilities[]
 }
@@ -91,7 +91,8 @@ MyTestApplicationDetail { item: MyTestApplicationItem, asOf }
 | 没有 currentPublishedProfileRevisionId | PROFILE_REQUIRED | 无 | 无 | 空 |
 | 有有效公开资料，但 exact-major Publication 或 Test 指针不存在 | TEST_TARGET_UNAVAILABLE | 有 | 无 | 空 |
 | 有有效公开资料/批准 Test，但宿主缺少必需 capabilities | HOST_CAPABILITIES_INSUFFICIENT | 有 | 无 | 稳定排序的缺少能力 |
-| 有有效公开资料、批准兼容 Test 且能力满足 | READY | 有 | 有 | 空 |
+| 有有效公开资料、批准兼容 Test 且能力满足，但固定脚本依赖正常不可分发 | SCRIPT_DEPENDENCY_UNAVAILABLE | 有 | 无 | 空 |
+| 有有效公开资料、批准兼容 Test、能力满足且固定脚本依赖可分发 | READY | 有 | 有 | 空 |
 
 availability 是当次查询投影，不是新的持久化业务状态。PROFILE_REQUIRED 可出现在加入先于首次公开资料的合法阶段；客户端可使用本地通用文案表示等待就绪，服务端不能回退技术名称或未审核 displayName。测试应用当前不支持请求 major 时等价于没有 exact-major Test；不扫描其他 major。
 
@@ -109,7 +110,7 @@ UC012 自身保留现有“无 Test/缺能力则错误”的单目标 RPC；本�
 
 UC036 被接受并实现后，最近 CLEAR_TEST_VERSION 与空 Test 必须一致；不能从旧 SET_TEST 历史取得运行目标。Stable/Grey 变化后的共享 Publication revision 不表示 Test 批准依据丢失，校验最近相关 Test action。若 UC036 未接受，本查询也可以对既有 stable-only/EMPTY Publication 返回 TEST_TARGET_UNAVAILABLE。
 
-每个列表页或详情用一个 MongoDB majority read-only snapshot，同时确认 Membership、Application 在线门禁和所需 Profile、Publication/History、Version/Review/OAuth。与 Test clear/replace、Profile 批准、Membership 移除/加入、暂停/归档、关闭和账号清理并发时，必须返回提交前或后的完整事实组合。
+每个列表页或详情用一个 MongoDB majority read-only snapshot，同时确认 Membership、Application 在线门禁和所需 Profile、Publication/History、Version/Review/OAuth，以及 [BR-SCR-020](UC-APP-047-resolve-application-script-content.md#br-scr-020) 的精确脚本依赖。与 Test clear/replace、Profile 批准、Membership 移除/加入、应用/脚本暂停恢复、归档、关闭和账号清理并发时，必须返回提交前或后的完整事实组合。
 
 只读查询不写 coordinationRevision、访问历史、asOf 记录、计数或持久化可用性；不调用 Scope Catalog、DNS preflight、Auth 用户资料或 OAuth provider。技术观测不记录可信 authId、pageToken、完整 URL/scopes、凭证或返回正文。
 
@@ -152,7 +153,7 @@ pageSize 默认20、范围1–100。不返回 totalCount。首版每页最多扫
 <a id="br-cat-012"></a>
 ### BR-CAT-012：参与记录与可运行状态分离
 
-通过资格和 gate 的候选，即使无公开资料、无 exact-major Test 或宿主缺能力，也保留参与卡片并返回确定的 availability。正常缺资料优先于无 Test、缺能力；有损坏指针时 INTERNAL。availability 不持久化、不新增 Membership 状态。
+通过资格和 gate 的候选，即使无公开资料、无 exact-major Test、宿主缺能力或精确脚本依赖正常不可分发，也保留参与卡片并返回确定的 availability。正常缺资料优先于无 Test、缺能力，随后才检查脚本；脚本未发布/暂停投影 SCRIPT_DEPENDENCY_UNAVAILABLE，不返回 launchTarget，missingCapabilities 为空。有损坏指针或已读脚本不变量异常时 INTERNAL，存储失败沿用 MY_TEST_APPLICATION_UNAVAILABLE（503），不能投影为正常卡片。availability 不持久化、不新增 Membership 状态。
 
 <a id="br-cat-013"></a>
 ### BR-CAT-013：纯 Test 目标且不执行 Filter

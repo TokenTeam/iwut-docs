@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-012` 为 Tester 解析 Application 的 test 启动目标 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-RUN-001`–`BR-RUN-010`（10 条） |
-| 外部引用 BR | `BR-PUB-003`、`BR-PUB-007`，`BR-REV-004`、`BR-REV-013`、`BR-REV-014`，`BR-VER-006`（来自 `UC-APP-002`、`UC-APP-004`、`UC-APP-005`、`UC-APP-007`） |
+| 外部引用 BR | `BR-PUB-003`、`BR-PUB-007`，`BR-REV-004`、`BR-REV-013`、`BR-REV-014`，`BR-SCR-020`，`BR-VER-006`（来自 `UC-APP-002`、`UC-APP-004`、`UC-APP-005`、`UC-APP-007`、`UC-APP-047`） |
 | ADR | `ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -375,7 +375,7 @@ Descriptor 不包含 client secret、Tester 列表、审核备注、其他 Versi
 <!-- 权威位置: use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md#br-run-007 -->
 ### BR-RUN-007：一致快照与并发
 
-Membership、Publication 和 Version 必须来自一个逻辑一致的解析快照：
+Membership、Publication、Version 与 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 所需的精确脚本事实必须来自一个逻辑一致的解析快照：
 
 - 移除先于解析快照可见：解析失败。
 - 解析快照先于移除：本次可以成功，后续解析失败。
@@ -424,7 +424,7 @@ App Center 的职责在返回 Descriptor 时结束。以下行为由其他组件
 <!-- 权威位置: use-cases/UC-APP-007-place-approved-version-in-test-slot.md#br-pub-003 -->
 ### BR-PUB-003：Version 发布资格
 
-testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Review 必须是完整 APPROVED decision，Version 内容必须仍等于 snapshot，且 revision 关系必须一致。
+testVersionId 只能引用同一 Application 的 APPROVED Version。其最新 Review 必须是完整 APPROVED decision，Version 内容必须仍等于 snapshot，且 revision 关系必须一致。实际放入/替换还须通过 [BR-SCR-020](../use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020) 的全部精确脚本依赖门禁；批准本身不代表脚本已发布。
 
 ApplicationVersion 的批准与 TEST/GREY/STABLE 槽位选择解耦：批准不自动进入任何槽位，槽位也不改变 Version 审核状态。所有槽位一致地只选择已批准 Version，再执行各自的渠道资格；TEST 的额外资格包括当前已批准公开资料和运行时 Tester Membership。
 
@@ -503,6 +503,17 @@ Review 和 Version 的结果必须相同。Version 内容必须等于 snapshot�
 决定成功后 Version.revision 原子增加 1，updatedBy 记录 decision.decidedBy，updatedAt 等于 decision.decidedAt。人工决定的 decidedBy 是 reviewer authId；暂停触发的自动拒绝使用注入的 System Auth ID。
 
 createdBy、createdAt、submittedBy 和 submittedAt 都不因审核决定改变。审核人和审核时间属于 ApplicationReview.decision。
+
+### 来自 `UC-APP-047`
+
+<!-- 权威位置: use-cases/UC-APP-047-resolve-application-script-content.md#br-scr-020 -->
+### BR-SCR-020：发布与在线解析的精确依赖门禁
+
+App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVED、曾发布且资源 AVAILABLE；任一不满足则整个发布失败。只调整灰度比例也复核目标，清空槽位仍允许。该规则为对 UC007/020/021 的已接受扩展，在进入发布/运行工作包时同步这些用例及对应 brief。
+
+后续在线 Test/统一启动、普通目录、本人测试和 Auth OAuth 上下文按其原有资格及隐藏语义消费同一门禁：依赖不可分发的候选不能作为可启动/可授权目标，不能省略脚本继续返回目标、替换脚本或自动回退到另一应用版本。既有候选优先级保留，只在原 UC 明确允许的分支选择。管理/审核历史仍可读。
+
+读取可线性化在暂停前或后，已经返回的目标不被撤回；后续实际内容获取再次核验。不可读或事实损坏须失败关闭，并按原 UC 区分业务不可用与依赖故障，不把存储错误当作永久无候选。新增联合门禁的 Catalog/OAuth 错误见下文「既有入口的稳定映射」与运行读契约。
 
 ### 来自 `UC-APP-002`
 
@@ -685,10 +696,11 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
-- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：后续用例、变更记录
-- `UC-APP-007`（use-cases/UC-APP-007-place-approved-version-in-test-slot.md）：目标与范围、发布边界、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、实现依赖与交付边界、后续用例、迁移说明、变更记录
+- `UC-APP-012`（use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md）：后续用例、UC047 发布与运行联合门禁、变更记录
+- `UC-APP-007`（use-cases/UC-APP-007-place-approved-version-in-test-slot.md）：目标与范围、发布边界、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、API 草图、测试与验收、实现依赖与交付边界、后续用例、迁移说明、UC047 发布与运行联合门禁、变更记录
 - `UC-APP-004`（use-cases/UC-APP-004-submit-application-version-review.md）：修订范围与审核状态、目标与范围、提交结果、旧实现观察、输入与身份、主流程、异常流程、策略绑定与提交并发、最小领域模型、用例端口、数据模型、API 草图、测试与验收、后续用例、迁移说明、变更记录
 - `UC-APP-005`（use-cases/UC-APP-005-decide-application-version-review.md）：修订范围与审核状态、目标与范围、参与者、决定结果、旧实现观察、输入、主流程、异常流程、最小领域行为、用例端口、数据模型变化、策略正式发布与运维读回、API 草图、测试与验收、已确认的实现边界、后续用例、新模型初始化与运行门禁、初始化说明、变更记录
+- `UC-APP-047`（use-cases/UC-APP-047-resolve-application-script-content.md）：目标与范围、正式分发接口、内容与传输预算、事实一致性与写入排序、既有入口的稳定映射、新接口错误、验收
 - `UC-APP-002`（use-cases/UC-APP-002-create-application-version.md）：目标与范围、当前 ApplicationVersion、旧实现观察、输入与身份、主流程、异常流程、最小领域模型、用例端口、数据模型、对 Application 持久化模型的影响、API 草图、测试与验收、后续接口工作、迁移说明、变更记录
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、关联文档
@@ -698,11 +710,12 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 403 | `6db4e23c15a2` |
-| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 567 | `d246090acbc7` |
-| `use-cases/UC-APP-004-submit-application-version-review.md` | 543 | `feb93073e144` |
-| `use-cases/UC-APP-005-decide-application-version-review.md` | 672 | `f1fc65adc1ea` |
-| `use-cases/UC-APP-002-create-application-version.md` | 475 | `29c68f062589` |
+| `use-cases/UC-APP-012-resolve-test-launch-target-for-tester.md` | 407 | `d5101bb5e28d` |
+| `use-cases/UC-APP-007-place-approved-version-in-test-slot.md` | 572 | `2ebe99f6dfff` |
+| `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
+| `use-cases/UC-APP-005-decide-application-version-review.md` | 674 | `b9046e5f69b2` |
+| `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
+| `use-cases/UC-APP-002-create-application-version.md` | 482 | `36cd857b840a` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

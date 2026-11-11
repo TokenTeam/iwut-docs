@@ -1,0 +1,8 @@
+{
+  "uc": "UC-APP-048",
+  "note": "Extend the existing application draft, submission, decision, restoration and management reads with exact script dependencies. Verify atomic registration and the approval gate. Distribution remains in UC047.",
+  "uc_sections": ["目标与既有用例关系", "联合验收"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {"ADR-006": ["决定", "子模块与构建"], "ADR-008": ["决定"]}
+}

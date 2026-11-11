@@ -280,7 +280,7 @@ CLOSING 是关闭生效点。所有目录、启动、Tester、审核、Publicati
 <!-- 权威位置: use-cases/UC-APP-027-close-application.md#br-app-024 -->
 ### BR-APP-024：依附状态保留与待处理操作终止
 
-关闭保留 Version、Profile、Review、Publication、Filter、Tester Membership、OAuth registration/credential 和全部历史。PENDING 管理员转让与 ACTIVE 加入链接在本地事务中终止；待审核记录不改写，但从队列排除且不能再决定。避免为每个依附模型伪造 CLOSED/CANCELLED 状态，也避免一次关闭产生无界批量写入。
+关闭保留 Version、Profile、Review、Publication、Filter、Tester Membership、OAuth registration/credential 和全部历史。PENDING 管理员转让与 ACTIVE 加入链接在本地事务中终止；待审核记录不改写，但从队列排除且不能再决定。[UC049](../use-cases/UC-APP-049-cascade-script-rejection.md#br-sdp-006) 可在同一 Application fence 下记录精确依赖的 APPLICATION_CLOSED 级联豁免，该记录关联真实关闭事实，不改写 Review/Version 历史。避免为每个依附模型伪造 CLOSED/CANCELLED 状态，也避免一次关闭产生无界批量写入。
 
 <!-- 权威位置: use-cases/UC-APP-027-close-application.md#br-app-025 -->
 ### BR-APP-025：配额、名称与 owner 义务
@@ -910,7 +910,7 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-027-close-application.md` | 275 | `c56d7c62e94e` |
+| `use-cases/UC-APP-027-close-application.md` | 275 | `32640781379c` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

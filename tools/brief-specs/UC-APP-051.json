@@ -1,0 +1,28 @@
+{
+  "uc": "UC-APP-051",
+  "note": "Implement exact app.application.search permission-protected platform core directory and detail after UC050 and Auth permission contract readiness. Preserve other permissions and private owner queries; bounded keysets, local core state only, no user directory or configuration disclosure.",
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "协议演进",
+      "子模块与构建"
+    ]
+  },
+  "shared_sections": {
+    "platform/contracts/trusted-identity-v1.md": [
+      "错误边界"
+    ],
+    "platform/contracts/app-center-api-routing.md": [
+      "gRPC-Web 终止"
+    ]
+  },
+  "query_sections": {
+    "app-center/query-contracts/platform-application-directory.md": [
+      "权威与输入",
+      "核心投影",
+      "消费组合"
+    ]
+  }
+}

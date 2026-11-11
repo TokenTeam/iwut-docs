@@ -1,0 +1,19 @@
+{
+  "uc": "UC-APP-046",
+  "note": "Implement the accepted single release head, permanent exact-version publication facts, resource distribution availability gate and role-separated publication commands. Preserve immutable approvals, OCC, no-op semantics, durable audit and the shared publication/availability write fence. Application runtime consumers remain in UC047.",
+  "uc_sections": [
+    "目标与发布模型",
+    "验收"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "adr_sections": {
+    "ADR-006": [
+      "决定",
+      "子模块与构建"
+    ],
+    "ADR-008": [
+      "决定"
+    ]
+  }
+}
