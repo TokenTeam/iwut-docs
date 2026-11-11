@@ -231,6 +231,14 @@ tombstone 提交后立即阻断该 applicationId 的全部 namespace 访问；AP
 
 #### 路由边界
 
+UC038 新增已接受的本人读取 `/auth_center.v1.script_permission.ScriptPermissionService/GetOwnScriptPermissions`，GET `/v1/users/me/script-permissions`，空请求返回本人五项状态和共享版本。Gateway 采用 SESSION → Auth audience、ADMIN Console surface，原生 gRPC/HTTP/gRPC-Web 按精确方法接入。该本人方法不要求管理或脚本 permission，目标管理方法沿原规则鉴权。开关、无权限与失败区分唯一见 [UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004)。
+
+
+UC039 的 `ManagedUserSearchService/SearchUsers` 使用 `POST /v1/managed-users:search` 和原生 gRPC，业务及最小披露见 [UC039](../use-cases/UC-AUTH-039-search-users-for-administration.md)。Gateway 接入时使用 SESSION → Auth audience，限定 Admin surface。UC027 的固定管理和本人公开范围已接受增加精确 `app.application.search`，沿用现有方法及线格式。
+
+
+UC038 的两组脚本权限管理方法按 [UC038 API 契约](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#api-契约) 固定 HTTP 和原生 gRPC。Gateway 按精确 RPC 接入 Admin 管理路由，采用 SESSION → Auth audience USER JWS，管理权限由 Auth 复核。
+
 2026-10-12 下表仅已交付基线。密码管理/恢复、默认密码登录已展开 UC033/034 DRAFT 和 auth-password-v1 草案，未注册真实入口；旧 REGISTER/BIND/凭据撤销、注销 Prepare/app.close Complete 须同步密码与防旁路门禁，新修订未实施，不提前启用或登记虚构公网清单。
 
 与 [App API 路由](../../platform/contracts/app-center-api-routing.md) 一致，Proto 只声明服务内部 `/v1/...` 路径。
@@ -440,7 +448,7 @@ ApplicationUserStorage 对 PUBLIC client 复用同一当前 callback HTTPS origi
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
 - `UC-AUTH-030`（use-cases/UC-AUTH-030-manage-application-user-storage.md）：变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC020 同账号 Session 管理
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC027 本人运维权限读取、UC020 同账号 Session 管理
 - `platform/contracts/oauth-oidc-v1.md`（docs 根级共享文档）：客户端配置、授权请求与登录门户、标准 sector 注册与回调清单、标准依据
 
 ## 溯源
@@ -448,5 +456,5 @@ ApplicationUserStorage 对 PUBLIC client 复用同一当前 callback HTTPS origi
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-AUTH-030-manage-application-user-storage.md` | 197 | `44f02f431092` |
-| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
 | `platform/contracts/oauth-oidc-v1.md` | 148 | `9fec6b0f0311` |

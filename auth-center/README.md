@@ -7,7 +7,7 @@
 
 ## 当前迭代
 
-当前 36 项 UC，其中 35 项 ACCEPTED、UC035 为 DRAFT；UC036 管理员 Scope 管理核心已交付，全量真实回归门禁仍待闭合。UC009/025/026 密码防旁路、邮箱 v3 与 UC032 后端已交付。UC033/034 在用户授权后于 2026-10-15 串行完成 Auth 后端及真实回归；设计接受、后端完成与生产启用分别记录，见 registry/implements。
+当前 38 项 UC，其中 37 项 ACCEPTED、UC035 为 DRAFT。[UC039 与 UC027/010 的搜索能力修订](design-notes/2026-11-08-governance-user-search-and-application-search-permission.md) 已由用户接受并授权实施。UC036 管理员 Scope 管理核心已交付，全量真实回归门禁仍待闭合。UC009/025/026 密码防旁路、邮箱 v3 与 UC032 后端已交付。UC033/034 在用户授权后于 2026-10-15 串行完成 Auth 后端及真实回归；设计接受、后端完成与生产启用分别记录，见 registry/implements。
 
 2026-10-12 最新方向：注册验证邮箱并设置平台密码；已验证邮箱列表中恰好一个登录/恢复角色，切换需密码，忘记密码仅用当前登录邮箱验证码重置；非登录邮箱不能登录或恢复。UC031 认证由当前学校绑定支撑，删除最后依据撤回，不再无条件永久保存。UC006/011/031 v3 修订已审核接受、脚本 brief 后实施，新目录/密码注册/校园依据通过全仓回归；生产联合启用独立。此前无密码邮箱 v2/永久独立事实仅为历史，公开旧注册/BIND 已退役。次数仍由应用自管，第三方继续用 Application pairwise sub，不公开 authId。
 
@@ -74,6 +74,8 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [UC-AUTH-034](use-cases/UC-AUTH-034-login-with-password.md)：默认登录邮箱＋密码＋本机设备证明，ACCEPTED / 后端 COMPLETE；[联合 readiness](implements/UC-AUTH-033-034-readiness.md)、[密码协议](../platform/contracts/auth-password-v1.md)。
 - [UC-AUTH-035](use-cases/UC-AUTH-035-authorize-application-in-host.md)：宿主内 RPC 发起第三方 OAuth，不要求独立网页登录；DRAFT / DESIGN_BLOCKED，受信交互与 code 交付待审核，[依赖检查](implements/UC-AUTH-035-readiness.md)。草案不覆盖既有浏览器契约。
 - [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md)：管理 Scope 定义与生命周期；ACCEPTED / CORE_COMPLETE，完整管理员管理 API、CAS/审计/操作查询、启动防覆盖与 consent 展示绑定已交付；完整真实回归尚未全绿。
+- [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md)：五项脚本权限独立授撤与 UC010 App 投影；保留旧 maintain 接口。[五项交付](implements/UC-AUTH-038-readiness.md)及[本人读取增量](implements/UC-AUTH-038-own-read-readiness.md)分别记录版本与验收。
+- [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md)：管理员精确搜索用户；ACCEPTED，Auth 后端与 API 交付见[readiness](implements/UC-AUTH-039-search-readiness.md)。
 - [应用次数权益开发者参考](design-notes/email-first-campus-entitlements.md)：应用自管领取、余额、幂等消费与退回；非权威参考，不分配 Auth/App Center 权益 UC，不把业务数量作为 Auth 依赖。
 
 - [账号与平台资格治理草案](design-notes/account-governance-delivery-plan.md)：管理员授予/撤销、账号禁用/恢复与注销、Developer 暂停/恢复与退出的候选 UC 边界、顺序和交付依赖；尚未接受或实施。

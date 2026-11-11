@@ -439,10 +439,10 @@ UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contra
 - `UC-AUTH-025`（use-cases/UC-AUTH-025-close-own-account.md）：目标与范围、认证与资格、API 与确认过程、主流程、首版运行与协议固定值、错误、限额与验收、实现依赖与联动、变更记录
 - `UC-AUTH-002`（use-cases/UC-AUTH-002-batch-get-developer-statuses.md）：目标与范围、调用者与输入、输出、主流程、异常流程、数据模型、API 契约、测试与验收、非目标、变更记录
 - `UC-AUTH-011`（use-cases/UC-AUTH-011-set-and-activate-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖与边界、变更记录
-- `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录
+- `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录、2026-11-08 已接受的搜索权限投影
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-012`（use-cases/UC-AUTH-012-login-with-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC020 同账号 Session 管理
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC027 本人运维权限读取、UC020 同账号 Session 管理
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
@@ -453,9 +453,9 @@ UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contra
 | `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `502a7c77806d` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
-| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
 | `platform/contracts/auth-developer-application-v1.md` | 58 | `83ce98a96c34` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

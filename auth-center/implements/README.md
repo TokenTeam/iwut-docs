@@ -2,6 +2,24 @@
 
 状态：`ACTIVE`
 
+## 2026-11-10 本人脚本权限发现（AUTH_BACKEND_VERIFIED）
+
+2026-11-10 用户接受[本人脚本权限发现](../design-notes/2026-11-09-own-script-permission-discovery-proposal.md)。已合入 UC038 和 BR-SMP-004/005，先生成 brief 后实施。普通 ACTIVE USER 空请求读取本人五项状态，继续使用既有总开关及身份链。Auth/API 已完成并通过普通检查、race、真实 Mongo 全仓及生产 Wire 回归，固定本地 API 提交、源码身份、镜像和 Gateway 精确交接见[readiness](UC-AUTH-038-own-read-readiness.md)。Gateway/Console 交付独立。
+
+## 2026-11-08 用户搜索与平台应用搜索权限（AUTH_BACKEND_VERIFIED）
+
+[UC039 与 UC027/010 已接受修订](../design-notes/2026-11-08-governance-user-search-and-application-search-permission.md) 已完成设计检查。用户已接受，语义已合入权威正文，先生成 UC039/027/010 brief 后实施。App UC051 正式权限联验依赖后续 Auth 交付。
+
+Auth 入口与正式授撤/签发专项已通过，[当前版本与回归记录](UC-AUTH-039-search-readiness.md)包含 API 独立分支及交接边界。
+
+## UC038 脚本权限（AUTH_BACKEND_VERIFIED）
+
+[UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 和 UC010 五项权限修订已接受并生成 brief。Auth/API 逐项授撤、旧 maintain 兼容和 App audience 签发已通过真实专项联验和全仓 Mongo/race 回归。跨仓库交接见 [readiness](UC-AUTH-038-readiness.md)。
+
+## UC027 本人运维权限读取（AUTH_BACKEND_PUBLISHED）
+
+Auth 本人空请求读取当前 ACTIVE USER 的 `restore/search/suspend` 完整有效集合与共享版本。旧目标管理继续要求完整管理员；成功空集合与失败严格区分。固定 API 和镜像已发布，见[本人读取验证](UC-AUTH-027-own-read-readiness.md)和[发布记录](UC-AUTH-038-own-read-readiness.md#发布版本2026-11-11)。Gateway/Console 交付按对应工作包记录。
+
 ## 2026-10-26 UC036 管理员 Scope 管理（核心已交付）
 
 用户接受简化方案并授权实现，[UC036：管理 Scope 定义与生命周期](../use-cases/UC-AUTH-036-release-scope-enablement-changes.md) 已 ACCEPTED，并用脚本生成 brief。复用 UC021/029 完整管理员在线身份，不建设专用签名发布体系或双人审批。登记/文案/启停为严格类型化管理 API，CAS/原子审计/回执与原操作查询统一执行，首版记录不自动过期；长期 disabled 表示退役。
@@ -110,7 +128,7 @@ UC012/013/017/025 的 COMPLETE/CORE_COMPLETE 记录仅指已交付基线；新�
 | [UC-AUTH-024](../use-cases/UC-AUTH-024-withdraw-developer.md) | `ACCEPTED` | `COMPLETE` | Auth ab60f32/API 5144c8c；本人 Session 准备/确认/取消/查询、WITHDRAWN、永久 handle、独立 App provider、持久协调及回执丢失恢复；真实 Auth＋App 验收 | 公网默认关闭；名下应用转让/关闭仍为独立 UC，存在归属时明确阻止退出；Gateway/客户端独立交付 |
 | [UC-AUTH-025](../use-cases/UC-AUTH-025-close-own-account.md) | `ACCEPTED` | `COMPLETE` | 旧设备-only 专用注销/退出协调/终止清理基线 COMPLETE | 双证明/下界、共享失败额度、版本竞争、真实 App 与恢复/清理回归完成；旧上线门禁仍保留 |
 | [UC-AUTH-026](../use-cases/UC-AUTH-026-apply-application-closure.md) | `ACCEPTED` | `COMPLETE` | 旧 tombstone/OAuth 栅栏/设备-only proof 与实际 App 联调基线 COMPLETE | 双证明、固定重试、版本下界、Wire/SMTP/HTTP/gRPC/Mongo race 完成；门户联测独立交付；旧离线 proof 窗口不追溯撤销 |
-| [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `ACCEPTED` | `COMPLETE` | Auth `e110b97` / API `359c6bc`；suspend/restore 两项独立权限、HTTP/gRPC、当前管理员复核、邮箱恢复门禁、ACTIVE/DISABLED 语义、共享权限版本与原子审计、严格解码、有界限流及 App audience 投影；真实 Mongo/Wire 验收 | 公网开关默认关闭；Gateway 路由、客户端治理界面、App Center 暂停/恢复状态机与实际 consumer 联合验收独立交付 |
+| [UC-AUTH-027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | `ACCEPTED`（本人读取修订） | `AUTH_BACKEND_PUBLISHED` | 旧管理/投影基线保留；新增 API/Auth 本人读取、普通/race、最终全仓真实 Mongo/race 通过（Wire 261.105s / Mongo 760.103s） | 固定 API 已发布，Gateway/Console 交接与联合验收见 [readiness](UC-AUTH-027-own-read-readiness.md) |
 | [UC-AUTH-028](../use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md) | `ACCEPTED` | `COMPLETE` | 九个不可变一字段一 scope 映射、目录启动交叉校验、当前 profile 在线读取、STRING_SET array 投影、UC029 同事务当前年级推算与 finalYear 封顶、固定 `iwut_profile` claim/Discovery；真实 Mongo/Wire/OAuth 回归 | 未部署到生产；Gateway consent 展示与第三方客户端消费独立交付 |
 | [UC-AUTH-029](../use-cases/UC-AUTH-029-manage-academic-year-rollover.md) | `ACCEPTED` | `COMPLETE` | 独立 API、Domain/Port/UseCase、Mongo 权威锚点与删除检测、9 月 1 日缺省、上海公历常数时间递推、2 月 29 日永久规范化、纳秒无损存储、完整管理员在线复核、CAS/no-op/原子审计、严格 HTTP/gRPC、Profile/OAuth 同事务消费；check/race/真实 Mongo 全包通过 | 管理入口默认关闭；Gateway 路由、管理 UI 与生产启用独立交付 |
 | [UC-AUTH-030](../use-cases/UC-AUTH-030-manage-application-user-storage.md) | `ACCEPTED` | `COMPLETE` | `storage.read/write` 与固定 audience、Bearer HTTP/CORS、channel 隔离 Mongo KV、整 namespace CAS/配额/严格 JSON、本人三 channel 清空、账号清理、Application tombstone 同事务清理任务与可恢复 worker；独立 API、生产 Wire、真实 Mongo 并发验收 | 入口默认关闭；Gateway 路由、用户/第三方客户端界面与生产启用独立交付 |

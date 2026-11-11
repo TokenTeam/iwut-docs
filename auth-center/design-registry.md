@@ -10,12 +10,14 @@
 
 | 编号空间 | Next ID |
 | --- | --- |
-| Use Case / Auth Center | `UC-AUTH-038` |
+| Use Case / Auth Center | `UC-AUTH-040` |
+| Business Rule / Managed User Search | `BR-USR-006` |
 | Business Rule / Password Lifecycle | `BR-PWD-009` |
 | Business Rule / Campus Certification | `BR-CMP-006` |
 | Business Rule / Account Lifecycle | `BR-ACC-015` |
 | Business Rule / Application User Storage | `BR-AUS-008` |
-| Business Rule / Application Operations Permission | `BR-AOP-007` |
+| Business Rule / Application Operations Permission | `BR-AOP-009` |
+| Business Rule / Script Permission | `BR-SMP-006` |
 | Business Rule / Platform Administrator | `BR-ADM-009` |
 | Business Rule / OAuth Authorization | `BR-OAU-033` |
 | Business Rule / Identity Issuance | `BR-IDN-007` |
@@ -41,7 +43,7 @@
 | `UC-AUTH-007` | 登录并建立会话 | `ACCEPTED` | [UC-AUTH-007-login.md](use-cases/UC-AUTH-007-login.md) | — | 设备登录、会话检查、10 条有效会话上限与 LRU 淘汰。 [brief](briefs/UC-AUTH-007.md)。 |
 | `UC-AUTH-008` | 撤销自己的当前 Session | `ACCEPTED` | [UC-AUTH-008-revoke-own-session.md](use-cases/UC-AUTH-008-revoke-own-session.md) | — | 由 token 定向、幂等撤销当前 Session，不改变设备凭据。 [brief](briefs/UC-AUTH-008.md)。 |
 | `UC-AUTH-009` | 撤销自己的设备凭据 | `ACCEPTED` | [UC-AUTH-009-revoke-own-credential.md](use-cases/UC-AUTH-009-revoke-own-credential.md) | — | 新修订旧入口仅当前凭据退出，其他目标走 UC032 密码＋新签名；当前入口限制已实施并通过最终回归；UC032 仍 DRAFT。 |
-| `UC-AUTH-010` | 由 Session 签发可信用户身份 | `ACCEPTED` | [UC-AUTH-010-issue-user-identity-from-session.md](use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | — | 受授权服务以有效 Session 换取目标 audience 的短期用户 JWS；不缓存身份结果。 |
+| `UC-AUTH-010` | 由 Session 签发可信用户身份 | `ACCEPTED` | [UC-AUTH-010-issue-user-identity-from-session.md](use-cases/UC-AUTH-010-issue-user-identity-from-session.md) | — | 受授权服务以有效 Session 换取目标 audience 的短期用户 JWS；不缓存身份结果。2026-11-08 search 投影增量已接受。 |
 | `UC-AUTH-011` | 设置并激活邮箱 | `ACCEPTED` | [UC-AUTH-011-set-and-activate-email.md](use-cases/UC-AUTH-011-set-and-activate-email.md) | — | 邮箱列表唯一登录角色、切换密码保护、非登录绑定增删；v3 修订已 ACCEPTED/脚本 brief 后实施，旧 REGISTER/BIND 已退役；最终回归通过。 |
 | `UC-AUTH-012` | 使用邮箱登录 | `ACCEPTED` | [UC-AUTH-012-login-with-email.md](use-cases/UC-AUTH-012-login-with-email.md) | — | 邮箱验证码授权本机设备，回到原账号并建立 Session；不自动注册。 |
 | `UC-AUTH-013` | 申请 Developer | `ACCEPTED` | [UC-AUTH-013-apply-for-developer.md](use-cases/UC-AUTH-013-apply-for-developer.md) | — | 当前激活邮箱及可用邮箱登录为前提，自助开通 APPROVED；不增加人工资格审核。 |
@@ -58,7 +60,7 @@
 | `UC-AUTH-024` | 本人退出 Developer 资格 | `ACCEPTED` | [UC-AUTH-024](use-cases/UC-AUTH-024-withdraw-developer.md) | — | WITHDRAWN、永久 handle 占用及 App 归属屏障；尚未实现。 |
 | `UC-AUTH-025` | 本人注销账号 | `ACCEPTED` | [UC-AUTH-025](use-cases/UC-AUTH-025-close-own-account.md) | — | 2026-10-13 当前密码/凭据下界修订获接受、实施及最终回归完成；旧协调/终止/清理保留。 |
 | `UC-AUTH-026` | 应用关闭授权收敛与近期认证 | `ACCEPTED` | [UC-AUTH-026](use-cases/UC-AUTH-026-apply-application-closure.md) | — | 2026-10-13 app.close 当前密码门禁获接受、实施及最终回归完成；旧 tombstone/协调保留。 |
-| `UC-AUTH-027` | 管理应用平台运维权限 | `ACCEPTED` | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | — | 独立 suspend/restore 权限；平台管理员管理但不自动获得操作权，App 暂停状态机独立交付。 |
+| `UC-AUTH-027` | 管理应用平台运维权限 | `ACCEPTED` | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md) | — | 2026-11-04 本人读取修订已接受；2026-11-08 search 授撤及本人公开范围增量已接受。交付状态见 implements。 |
 | `UC-AUTH-028` | 向第三方应用披露用户资料字段 | `ACCEPTED` | [UC-AUTH-028](use-cases/UC-AUTH-028-disclose-user-profile-to-applications.md) | — | 首批九字段一字段一 scope、固定 `iwut_profile` claim、多片区数组与封顶年级投影；[brief](briefs/UC-AUTH-028.md)。 |
 | `UC-AUTH-029` | 管理下一次学年更新时间 | `ACCEPTED` | [UC-AUTH-029](use-cases/UC-AUTH-029-manage-academic-year-rollover.md) | — | 平台管理员设置带年份的下一更新时间；缺省逐年 9 月 1 日；[brief](briefs/UC-AUTH-029.md)。 |
 | `UC-AUTH-030` | 读写应用用户存储 | `ACCEPTED` | [UC-AUTH-030](use-cases/UC-AUTH-030-manage-application-user-storage.md) | — | 用户/Application/channel 隔离的有界字符串 KV；OAuth 读写与生命周期清理语义已固定。 |
@@ -68,8 +70,20 @@
 | `UC-AUTH-034` | 使用登录邮箱与密码登录 | `ACCEPTED` | [UC-AUTH-034](use-cases/UC-AUTH-034-login-with-password.md) | — | Auth 后端密码/设备证明登录与真实回归完成；默认关闭，客户端与生产启用独立。 |
 | `UC-AUTH-035` | 在官方宿主内授权第三方应用 | `DRAFT` | [UC-AUTH-035](use-cases/UC-AUTH-035-authorize-application-in-host.md) | — | 宿主可信界面已确认；Auth 交互/code 协议待接受，RPC 与 Native 内部实现不是 Auth 开工前置。 |
 | `UC-AUTH-036` | 管理 Scope 定义与生命周期 | `ACCEPTED` | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md) | — | 管理员 API/CAS/审计/查询、启动防覆盖与展示绑定核心已交付；全量真实回归未全绿。 |
+| `UC-AUTH-038` | 管理脚本权限 | `ACCEPTED` | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) | — | 五项独立授撤和签发已接受；[本人发现增量](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#proposed-own-script-permissions)已于 2026-11-10 接受。 |
+| `UC-AUTH-039` | 管理员搜索用户 | `ACCEPTED` | [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md) | — | 仅治理侧 Auth ID/完整邮箱精确定位；2026-11-08 已接受。 |
 
 ## Business Rules
+
+### Managed User Search (`BR-USR`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-USR-001` | 治理专用且在线复核 | Authorization / Consistency | [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md#br-usr-001) | — | ACCEPTED；完整管理员最终事务复核。 |
+| `BR-USR-002` | 精确选择与当前绑定 | Matching / Ownership | [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md#br-usr-002) | — | ACCEPTED；当前已验证邮箱与 opaque Auth ID。 |
+| `BR-USR-003` | 最小披露与账号状态 | Privacy / Lifecycle | [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md#br-usr-003) | — | ACCEPTED；最小摘要，不披露邮箱。 |
+| `BR-USR-004` | 一致观察与有界读取 | Consistency / Bounded Query | [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md#br-usr-004) | — | ACCEPTED；单次快照及错误区分。 |
+| `BR-USR-005` | 输入、限流与秘密边界 | Protocol / Privacy | [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md#br-usr-005) | — | ACCEPTED；精确入口及有界 actor 限流。 |
 
 ### Password Lifecycle (`BR-PWD`)
 
@@ -126,6 +140,18 @@
 | `BR-AOP-004` | Audience 最小投影与撤销窗口 | Projection / Revocation | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-004) | — | — |
 | `BR-AOP-005` | 账号状态、恢复能力与授权事实 | Lifecycle / Recovery | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-005) | — | — |
 | `BR-AOP-006` | Auth 授权与 App 业务状态分离 | Boundary / Ownership | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-006) | — | — |
+| `BR-AOP-007` | 本人最小有效权限集合 | Projection / Privacy | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-007) | — | ACCEPTED；任意有效 ACTIVE USER，仅本人公开范围完整集合。 |
+| `BR-AOP-008` | 本人读取的一致性与失败关闭 | Consistency / Failure | [UC-AUTH-027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#br-aop-008) | — | ACCEPTED；同次权威观察，不以失败替代空集合。 |
+
+### Script Permission (`BR-SMP`)
+
+| ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `BR-SMP-001` | 独立显式授权与目标门槛 | Authorization / Lifecycle | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-001) | — | 不按角色隐式授予。 |
+| `BR-SMP-002` | 共享版本、事务与审计 | Consistency / Audit | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-002) | — | 复用 Auth 栅栏及人员权限存储。 |
+| `BR-SMP-003` | 只向 App audience 投影已授权项 | Projection / Revocation | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003) | — | 扩充 UC010 的 App audience 清单。 |
+| `BR-SMP-004` | 本人最小权限读取 | Projection / Privacy | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004) | — | ACCEPTED；空请求固定本人五项状态。 |
+| `BR-SMP-005` | 本人在线观察与失败关闭 | Consistency / Failure | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-005) | — | ACCEPTED；当前 ACTIVE/代际与共享版本同次观察。 |
 
 ### Application User Storage (`BR-AUS`)
 
@@ -204,7 +230,7 @@
 | --- | --- | --- | --- | --- | --- |
 | `BR-SYS-001` | Auth 所有权与不可登录 | Boundary / Authority | [UC-AUTH-003](use-cases/UC-AUTH-003-resolve-system-principal.md#br-sys-001) | — | — |
 | `BR-SYS-002` | 按 purpose 唯一且稳定 | Identity / Consistency | [UC-AUTH-003](use-cases/UC-AUTH-003-resolve-system-principal.md#br-sys-002) | — | — |
-| `BR-SYS-003` | 最小授权解析 | Authorization / Boundary | [UC-AUTH-003](use-cases/UC-AUTH-003-resolve-system-principal.md#br-sys-003) | — | — |
+| `BR-SYS-003` | 最小授权解析 | Authorization / Boundary | [UC-AUTH-003](use-cases/UC-AUTH-003-resolve-system-principal.md#br-sys-003) | — | SYSTEM 身份归属与 App 业务鉴权各由对应所有者检查。 |
 | `BR-SYS-004` | 消费方失败关闭 | Failure / Consistency | [UC-AUTH-003](use-cases/UC-AUTH-003-resolve-system-principal.md#br-sys-004) | — | — |
 
 ### Application Review Permissions (`BR-RVW`)
@@ -298,7 +324,7 @@
 
 ## 维护规则
 
-- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU/ADM/ACC/AOP/PWD-NNN`。
+- UC 使用 `UC-AUTH-NNN`；业务规则按能力使用 `BR-SCP/DEV/SYS/RVW/UPF/REG/LGN/IDN/EML/OAU/ADM/ACC/AOP/SMP/PWD-NNN`。
 - `PWD` 表示平台密码策略/验证、修改/恢复及密码安全变更的凭据收敛；邮箱角色仍由 `EML` 拥有。
 - `UPF` 表示 User Profile，覆盖用户资料字段定义与资料编辑；不复用 App Center 的 `PRF` 编号空间。
 - `REG` 表示用户创建及初始关联，`LGN` 表示登录、Session 与设备凭据撤销规则。
@@ -306,6 +332,7 @@
 - `ADM` 表示平台管理员资格、初始化及治理连续性约束。
 - `ACC` 表示账号生命周期与账号级认证材料失效。
 - `AOP` 表示由 Auth 管理并投影给 App Center 的平台级 Application 运维权限。
+- `SMP` 表示由 Auth 管理的脚本维护人员权限。
 - BR 状态继承其权威 UC，不单独保存状态。
 - 新增编号时同时更新 Next ID；废弃编号不得重新分配。
 - 同一规则只有一个权威正文；其它 bounded context 通过链接引用。

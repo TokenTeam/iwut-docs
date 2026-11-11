@@ -452,7 +452,7 @@ UC031 扩展内部 kind=USERINFO_CAMPUS：只允许 campus.whut，audience/profi
 
 - `UC-AUTH-031`（use-cases/UC-AUTH-031-establish-email-account-and-campus-certification.md）：实现约定与依赖闭合/API、载体与错误、实现约定与依赖闭合/操作、密钥与邮件额度、实现约定与依赖闭合/存储、初始化、注销与开关、实现约定与依赖闭合/工作包与验收边界、变更记录
 - `UC-AUTH-006`（use-cases/UC-AUTH-006-create-user.md）：目标与范围、参与者与前置条件、输入与输出、主流程、持久化候选、异常语义、测试与验收、交付依赖与验收边界、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC020 同账号 Session 管理
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC027 本人运维权限读取、UC020 同账号 Session 管理
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、挑战与待签消息、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 - `platform/contracts/auth-email-account-v3.md`（docs 根级共享文档）：实施证据与公开向量（2026-10-13）
 - `platform/contracts/oauth-oidc-v1.md`（docs 根级共享文档）：范围与职责、客户端配置、公网端点与响应、授权请求与登录门户、凭据与身份格式、标准 sector 注册与回调清单、错误、CORS 与限额、交付依赖与验收、标准依据
@@ -463,7 +463,7 @@ UC031 扩展内部 kind=USERINFO_CAMPUS：只允许 campus.whut，audience/profi
 | --- | --- | --- |
 | `use-cases/UC-AUTH-031-establish-email-account-and-campus-certification.md` | 201 | `beaa795c7419` |
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
-| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/auth-email-account-v3.md` | 126 | `b13b360d803f` |
 | `platform/contracts/oauth-oidc-v1.md` | 148 | `9fec6b0f0311` |

@@ -52,7 +52,9 @@ IssuedUserIdentity {
 
 ## 应用审核权限投影
 
-用户能力投影唯一遵循 [UC010 / BR-IDN-002](../../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 `app.profile.review`、`app.version.review`、`app.application.suspend` 与 `app.application.restore`；Auth 管理权限不因此下发给 App。审核权限由 [UC004](../../auth-center/use-cases/UC-AUTH-004-manage-reviewer-permission.md) 管理，运维权限由 [UC027](../../auth-center/use-cases/UC-AUTH-027-manage-application-operations-permissions.md) 管理；均复用现有 `permissions` claim 和签发 RPC。平台管理员不会被自动投影为 Reviewer 或 Application 运维人员。
+用户能力投影唯一遵循 [UC010 / BR-IDN-002](../../auth-center/use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 `app.application.search`、`app.profile.review`、`app.version.review`、`app.application.suspend` 与 `app.application.restore`；Auth 管理权限不因此下发给 App。审核权限由 [UC004](../../auth-center/use-cases/UC-AUTH-004-manage-reviewer-permission.md) 管理，运维权限由 [UC027](../../auth-center/use-cases/UC-AUTH-027-manage-application-operations-permissions.md) 管理；均复用现有 `permissions` claim 和签发 RPC。平台管理员不会被自动投影为 Reviewer 或 Application 运维人员。
+
+已接受的五项脚本权限按 [UC038](../../auth-center/use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 独立授撤，按 UC010 的 App audience 清单投影。继续使用现有 `permissions` claim、签发 RPC 和 caller audience 配置。
 
 ## 签名与验签配置
 

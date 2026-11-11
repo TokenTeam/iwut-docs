@@ -663,11 +663,11 @@ Switch/Remove 幂等 24 小时，按 `(authId,purpose,requestId)` 固定目标/�
 
 - `UC-AUTH-011`（use-cases/UC-AUTH-011-set-and-activate-email.md）：实现约定/事务与存储、实现约定/邮件校验与幂等指纹、实现约定/限额与投递、变更记录
 - `UC-AUTH-025`（use-cases/UC-AUTH-025-close-own-account.md）：目标与范围、认证与资格、API 与确认过程、主流程、首版运行与协议固定值、错误、限额与验收、实现依赖与联动、变更记录
-- `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录
+- `UC-AUTH-010`（use-cases/UC-AUTH-010-issue-user-identity-from-session.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、交付依赖与非目标、参考、变更记录、2026-11-08 已接受的搜索权限投影
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-033`（use-cases/UC-AUTH-033-manage-password-and-recovery.md）：目标与范围、参与者与依赖、输入与输出、主流程、验收与错误边界、交付依赖与变更记录
 - `UC-AUTH-006`（use-cases/UC-AUTH-006-create-user.md）：目标与范围、参与者与前置条件、输入与输出、主流程、持久化候选、异常语义、测试与验收、交付依赖与验收边界、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC020 同账号 Session 管理
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、治理工作包路由、UC027 本人运维权限读取、UC020 同账号 Session 管理
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、学号关联声明、RPC 鉴权表、实现配置与验收边界、测试向量、变更记录
 - `platform/contracts/auth-email-account-v3.md`（docs 根级共享文档）：实施证据与公开向量（2026-10-13）
 
@@ -677,10 +677,10 @@ Switch/Remove 幂等 24 小时，按 `(authId,purpose,requestId)` 固定目标/�
 | --- | --- | --- |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
 | `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 145 | `c64b0cd24844` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `502a7c77806d` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
 | `use-cases/UC-AUTH-033-manage-password-and-recovery.md` | 171 | `a9f8309c49b6` |
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
-| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/auth-email-account-v3.md` | 126 | `b13b360d803f` |

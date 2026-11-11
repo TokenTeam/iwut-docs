@@ -1,0 +1,14 @@
+{
+  "uc": "UC-AUTH-039",
+  "note": "Accepted 2026-11-08. Exact administrator-only user lookup by opaque Auth ID or current verified email, at most one minimal summary. Final current full-administrator verification, shared Auth transaction, strict inputs and no-store. Preserve current App/API worktrees.",
+  "uc_sections": [
+    "目标与范围",
+    "参与者与前置条件",
+    "输入与输出",
+    "错误语义",
+    "依赖与交付检查",
+    "验收"
+  ],
+  "include_own_brs": true,
+  "include_external_brs": true
+}

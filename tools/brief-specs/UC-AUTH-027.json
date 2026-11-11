@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-027",
-  "note": "Implement Auth/API management for the independent app.application.suspend and app.application.restore permissions. Reuse the shared principal permissionRevision and immutable audit, require current full platform-administrator authority for management, preserve the fixed administrator bundle, and project only granted operation permissions into iwut-app-center identities. Deliver strict HTTP/native gRPC and real Mongo/Wire verification. Do not implement the App Center Application suspension state machine, business commands, UI or Gateway rollout.",
+  "note": "ACCEPTED on 2026-11-04 by explicit user approval: implement the own-read revision serially across API/Auth, Gateway and Console after dependency recheck and brief regeneration. Preserve the accepted administrator-only target Get/Manage baseline and App audience projection. Implement an exact SESSION-bound own read for any valid ACTIVE USER, returning only subjectAuthId, shared positive permissionRevision and the complete effectivePermissions ID set within the accepted three-permission allowlist including app.application.search. Successful [] is not failure; never add administrator/email/recovery prerequisites, expose other users or raw JWS, or extend BrowserSession. Preserve API/Auth/Gateway/Console handoffs and verify the acceptance scenarios. No automatic commit, push, production enablement or deployed-readiness claim.",
   "uc_sections": [
     "目标与范围",
     "参与者与依赖",
@@ -33,7 +33,8 @@
     "platform/contracts/auth-center-api-routing.md": [
       "路由边界",
       "JSON 与载体",
-      "部署开关与验收"
+      "部署开关与验收",
+      "UC027 本人运维权限读取"
     ]
   }
 }

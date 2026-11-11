@@ -2,6 +2,22 @@
 
 状态：`ACTIVE`
 
+## 本人脚本权限发现（2026-11-10，AUTH_BACKEND_VERIFIED）
+
+[UC038 本人发现修订](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004)已接受并完成 Auth/API 实施，真实 Mongo/race 全仓与生产 Wire 验证通过。普通 ACTIVE USER 的五项状态、共享版本和失败关闭遵循权威正文，目标管理继续要求完整管理员。[交付记录](implements/UC-AUTH-038-own-read-readiness.md)包含固定 API 提交与已发布镜像；Console 职责发现等待 Gateway/前端接入，不再作为待审设计项。
+
+## 用户治理搜索与平台应用搜索权限（2026-11-08，ACCEPTED）
+
+[UC039](use-cases/UC-AUTH-039-search-users-for-administration.md)、[UC027 已接受修订](use-cases/UC-AUTH-027-manage-application-operations-permissions.md#proposed-application-search) 和 [UC010 已接受修订](use-cases/UC-AUTH-010-issue-user-identity-from-session.md#proposed-application-search-projection) 已完成设计与依赖检查，具体决定见[审核方案](design-notes/2026-11-08-governance-user-search-and-application-search-permission.md)。用户已明确接受并授权实施。App UC051 的正式权限接入等待该交付，UC050 独立推进。
+
+## 脚本权限（已接受，实施跟踪）
+
+[UC038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 的五项脚本权限独立授撤与 App audience 投影修订已获接受。实施与验收见 [实现记录](implements/README.md)。
+
+## 本人 App 运维能力发现（AUTH_BACKEND_PUBLISHED）
+
+[UC027](use-cases/UC-AUTH-027-manage-application-operations-permissions.md) 本人读取已接受并在 Auth/API 交付，公开范围为 `restore/search/suspend` 三项。固定版本、镜像和交接见 [readiness](implements/UC-AUTH-027-own-read-readiness.md)；Gateway/Console 接入依各自验收。
+
 ## 宿主 OAuth RPC（2026-10-22）
 
 [UC035](use-cases/UC-AUTH-035-authorize-application-in-host.md) 保持 DRAFT：用户已确认官方宿主可信 consent 界面，并指定 `TokenTeam/native-rpc-h5` 仅作参考、允许扩展。[适配设计说明](design-notes/host-oauth-rpc-design.md)记录调用模型与分层。尚待冻结宿主→Auth 交互/确认保护及两类 client 的 code 交付/兑换绑定；RPC 传输和 Native 内部实现由宿主负责，不再作为 Auth 后端开工依赖。账号管理 UI 归属独立决定，不因本项确认自动 ACCEPTED 或开工。

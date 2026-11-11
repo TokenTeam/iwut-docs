@@ -8,6 +8,14 @@
 
 ## 路由边界
 
+UC038 新增已接受的本人读取 `/auth_center.v1.script_permission.ScriptPermissionService/GetOwnScriptPermissions`，GET `/v1/users/me/script-permissions`，空请求返回本人五项状态和共享版本。Gateway 采用 SESSION → Auth audience、ADMIN Console surface，原生 gRPC/HTTP/gRPC-Web 按精确方法接入。该本人方法不要求管理或脚本 permission，目标管理方法沿原规则鉴权。开关、无权限与失败区分唯一见 [UC038](../../auth-center/use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004)。
+
+
+UC039 的 `ManagedUserSearchService/SearchUsers` 使用 `POST /v1/managed-users:search` 和原生 gRPC，业务及最小披露见 [UC039](../../auth-center/use-cases/UC-AUTH-039-search-users-for-administration.md)。Gateway 接入时使用 SESSION → Auth audience，限定 Admin surface。UC027 的固定管理和本人公开范围已接受增加精确 `app.application.search`，沿用现有方法及线格式。
+
+
+UC038 的两组脚本权限管理方法按 [UC038 API 契约](../../auth-center/use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#api-契约) 固定 HTTP 和原生 gRPC。Gateway 按精确 RPC 接入 Admin 管理路由，采用 SESSION → Auth audience USER JWS，管理权限由 Auth 复核。
+
 2026-10-12 下表仅已交付基线。密码管理/恢复、默认密码登录已展开 UC033/034 DRAFT 和 auth-password-v1 草案，未注册真实入口；旧 REGISTER/BIND/凭据撤销、注销 Prepare/app.close Complete 须同步密码与防旁路门禁，新修订未实施，不提前启用或登记虚构公网清单。
 
 与 [App API 路由](app-center-api-routing.md) 一致，Proto 只声明服务内部 `/v1/...` 路径。
@@ -131,6 +139,25 @@ UC021/022/023 的管理入口使用 SESSION，Auth audience USER JWS 必须携�
 - [UC023](../../auth-center/use-cases/UC-AUTH-023-suspend-and-restore-developer.md#参与者与-api)：developer_management.DeveloperManagementService 两方法。
 - [UC024](../../auth-center/use-cases/UC-AUTH-024-withdraw-developer.md#参与者与接口)：developer_withdrawal.DeveloperWithdrawalService 四方法。
 - [UC025](../../auth-center/use-cases/UC-AUTH-025-close-own-account.md#api-与确认过程)：account_closure.AccountClosureService 五方法；确认/查询专用 header 不可被当作一般 Authorization。
+
+## UC027 本人运维权限读取
+
+状态：`ACCEPTED`，2026-11-04 用户接受并授权实现；登记 [UC-AUTH-027](../../auth-center/use-cases/UC-AUTH-027-manage-application-operations-permissions.md#api-契约) 本次修订的跨系统路由输入，不属于上方历史已交付清单；本地实施获授权，生产启用仍需独立验收。原两个管理员 Get/Manage 的 SESSION 策略和完整管理员门禁不变。
+
+| 项 | 设计固定值 |
+| --- | --- |
+| RPC full method | `/auth_center.v1.application_operations_permission.ApplicationOperationsPermissionService/GetOwnApplicationOperationsPermissions` |
+| Auth 内部 HTTP | `GET /v1/users/me/application-operation-capabilities` |
+| Gateway HTTP | `GET /auth-center/v1/users/me/application-operation-capabilities` |
+| 路由标识 | `auth.get-own-application-operations-permissions` |
+| 策略 / 目标 | `AUTH_USER`（SESSION → audience=`iwut-auth-center` USER JWS）；targetService=`auth-center` |
+| 协议 / Console surface | `HTTP_JSON, GRPC, GRPC_WEB`；只有 HTTP/JSON 声明 `consoleSurfaces: [ADMIN]` |
+
+ADMIN 是 Console Host/surface，不表示 Auth 平台管理员资格。按 [UC-GW-001](../../gateway/use-cases/UC-GW-001-authenticate-and-forward.md) 的 SESSION 策略及 [UC-GW-007](../../gateway/use-cases/UC-GW-007-compose-console-session-forward-auth.md) 组合现有 BFF Session ForwardAuth → Gateway USER 交换，移除客户端伪造内部身份，Session 不下传 Auth。原生 gRPC/gRPC-Web 沿既有 Session 入口，不从 Console Cookie 创建 Session。无新 Gateway 策略或 UC，不扩大 service/package/path 通配。
+
+请求、响应、错误及效力唯一引用 UC027 的 BR-AOP-007/008；本人读取不借旧管理方法的管理员资格/邮箱恢复路径。BrowserSession 不增加 permissions，BFF 不计算或聚合权限、不返回 JWS。成功及错误透传 private/no-store；入口关闭、身份/存储/协议失败不合成为 200 或空集合。
+
+交付顺序：用户审核 UC027/UC-CONSOLE-015 → API/Auth 固定新增 Proto 与生成物提交并实现/验证 → Gateway 固定该输入，补精确 route、typed unary proxy、descriptor/Traefik 生成物及三协议测试 → Console 固定客户端并验证对应按钮。关闭/缺失新方法时保持既有受限行为，不改道旧 Get、匿名或 App 写入。Auth 已固定包含此方法的 API，发布和精确路由交接见 [UC027 交付记录](../../auth-center/implements/UC-AUTH-027-own-read-readiness.md)。Gateway/Console 是否完成以各自验证记录为准。
 
 ## UC020 同账号 Session 管理
 

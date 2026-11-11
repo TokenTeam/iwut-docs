@@ -312,7 +312,7 @@ UC009 当前凭据撤销后旧 Session 重试 SESSION_INVALID；其他有效 Ses
 - `UC-AUTH-020`（use-cases/UC-AUTH-020-manage-own-sessions.md）：主流程/查看会话、主流程/回收一个或多个其他会话、变更记录
 - `UC-AUTH-007`（use-cases/UC-AUTH-007-login.md）：目标与范围、参与者与前置条件、输入与输出、主流程、Session 持久化结构、错误语义、测试与验收、交付依赖与后续用例、变更记录
 - `UC-AUTH-012`（use-cases/UC-AUTH-012-login-with-email.md）：目标与范围、参与者与前置条件、输入与输出、主流程、错误语义、测试与验收、实现约定、交付依赖、变更记录
-- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、JSON 与载体、部署开关与验收、治理工作包路由
+- `platform/contracts/auth-center-api-routing.md`（docs 根级共享文档）：路由边界、校园认证入口（UC031）、UC032 本人设备凭据管理、JSON 与载体、部署开关与验收、治理工作包路由、UC027 本人运维权限读取
 - `platform/contracts/auth-device-session-v1.md`（docs 根级共享文档）：范围与权威来源、基础编码、公钥与签名、挑战与待签消息、学号关联声明、实现配置与验收边界、测试向量、变更记录
 
 ## 溯源
@@ -322,5 +322,5 @@ UC009 当前凭据撤销后旧 Session 重试 SESSION_INVALID；其他有效 Ses
 | `use-cases/UC-AUTH-020-manage-own-sessions.md` | 181 | `55131ae2468d` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
-| `platform/contracts/auth-center-api-routing.md` | 144 | `99cbbaa2513c` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

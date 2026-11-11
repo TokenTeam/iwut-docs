@@ -1,0 +1,11 @@
+{
+  "uc": "UC-AUTH-038",
+  "note": "2026-11-10 accepted own script discovery: add exact empty GetOwnScriptPermissions for any valid ACTIVE USER using current identity generation, shared revision and the complete five states, without administrator/email/recovery prerequisites. Implement five independent script permissions through the fixed administrator API and App audience projection. Preserve the legacy maintain-only methods with the same shared transaction, revision, audit and actor limits.",
+  "uc_sections": ["目标与范围", "参与者与接口边界", "API 契约", "交付依赖与部署", "验收"],
+  "include_own_brs": true,
+  "include_external_brs": true,
+  "shared_sections": {
+    "platform/contracts/auth-session-identity-issuance-v1.md": ["内部 RPC", "应用审核权限投影"],
+    "platform/contracts/auth-center-api-routing.md": ["路由边界"]
+  }
+}

@@ -1,6 +1,8 @@
 # UC-AUTH-010：由 Session 签发可信用户身份
 
-状态：`ACCEPTED`
+状态：`ACCEPTED`（包含 UC038 五项脚本权限投影修订）
+
+2026-11-08 用户接受 UC027 的 `app.application.search` 精确 App audience 投影修订。
 
 ## 目标与范围
 
@@ -58,7 +60,7 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
-| `iwut-app-center` | `app.application.restore`、`app.application.suspend`、`app.profile.review`、`app.version.review` | 有合法非 null 状态时携带 |
+| `iwut-app-center` | `app.application.restore`、`app.application.search`、`app.application.suspend`、`app.profile.review`、`app.script.maintain`、`app.script.publish`、`app.script.restore`、`app.script.review`、`app.script.suspend`、`app.version.review` | 有合法非 null 状态时携带 |
 | `iwut-auth-center` | UC021/BR-ADM-001 固定四项管理权限 | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
@@ -66,6 +68,8 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 两项应用审核权限均来自 UC004 的独立显式 grant；不能从管理权限、Developer 状态或另一项审核权限推导。向 App 签发时保留精确值并稳定排序，只拥有其中一项时只签该项；不向 App 披露任何管理权限，不向 Auth audience 披露应用审核权限。
 
 这只是允许 token 携带哪些能力，不表示调用者已获准执行目标业务。UC004 等后端继续检查其必需权限。新业务权限可扩充明确的服务端投影目录，不开放客户端自选权限，也不自动透传未知权限。不携带学生资料、关联 token、关联组、Session token 或私钥。首版不增加 role claim。
+
+五项脚本权限的投影由已接受的 [UC-AUTH-038 / BR-SMP-003](UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003) 定义。仅 App audience 可见当前有效的显式授权。设计清单不代表旧部署已开始签发。
 
 <a id="br-idn-003"></a>
 ### BR-IDN-003：短期签名与 Session 边界
@@ -143,3 +147,9 @@ UC004 的授权命令与 bootstrap、Developer 状态修改、OAuth2 委托权�
 
 - 2026-10-03：App audience 增加 app.profile.review 精确投影，与 UC004 两项权限的独立管理和并发验收同步；新增能力尚待实现。
 - 2026-10-06：App audience 增加 app.application.suspend 与 app.application.restore 精确投影；权限由 UC027 独立管理，不改变平台管理员固定 bundle。
+
+
+<a id="proposed-application-search-projection"></a>
+## 2026-11-08 已接受的搜索权限投影
+
+本节保留原审核链接，精确 `app.application.search` 已合入 BR-IDN-002 的 App audience 清单。授权事实由 UC027 拥有，只取当前显式 grant，其他权限和身份不推导该项。签发与撤权沿 BR-IDN-004/005，已确认签发身份遵循原 exp 和验签容差。
