@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-025` 协调账号归属退出与个人状态清理 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-APP-008`–`BR-APP-011`（4 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-SCR-002`（来自 `UC-APP-041`） |
 | ADR | `ADR-003`、`ADR-004`、`ADR-006` |
 | 平台共享 | `platform/contracts/account-owner-exit-v1.md`、`platform/contracts/auth-developer-status-v1.md`、`platform/contracts/trusted-service-identity-v1.md` |
 
@@ -72,6 +72,8 @@
 
 PREPARED 和永久 sealed 均阻止新的创建；当前没有转让/关闭入口，未来增加这些行为必须在相同协调点检查。旧 APPROVED JWS 不能越过栅栏。账号没有旧 fence 时可原子建立 OPEN 初始事实，不代表补建 Auth 用户。
 
+脚本资源归属不计入退出义务。依据 [BR-SCR-002](../use-cases/UC-APP-041-manage-script-resource.md#br-scr-002)，作者创建脚本资源、更新元数据、建版本、改稿和送审均在写事务中先条件写同一账号栅栏。PREPARED 或 sealed 拒绝作者写入。作者写入先提交时，脚本按保留记录处理，退出仍按应用义务判定。
+
 <!-- 权威位置: use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-009 -->
 ### BR-APP-009：单调终局与持久收敛
 
@@ -88,6 +90,8 @@ COMMITTED ACCOUNT_CLOSURE 后以有界批次清理该 testerAuthId 的全部 ACT
 
 application_filters/filter_revisions 是应用公开 Filter，不是用户偏好，不能删除。保留 Application、Version、Review、Publication 及历史 createdBy/submittedBy/reviewer 等归因；当前没有独立个人偏好 collection，禁止凭名称猜测清理表。未来新增个人数据需显式纳入清单。
 
+保留脚本资源的 ownerAuthId、版本、审核、发布、引用和历史归因。注销后的归属用于识别历史作者。个人草稿保持私有。已提交脚本仍可按现有权限审核、发布或管理分发。
+
 <!-- 权威位置: use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-011 -->
 ### BR-APP-011：退出与终止状态的消费
 
@@ -96,6 +100,21 @@ USER JWS 的 WITHDRAWN 是合法身份状态：开发者写入口仍仅允许 AP
 Auth UC002 增加账号状态投影。版本审核批准检查明确区分角色：当前 admin 必须 accountStatus=ACTIVE 且 developerStatus=APPROVED；历史 submittedBy 为 WITHDRAWN 或 CLOSED 不因主动退出本身否定不可变提交，历史提交者 SUSPENDED 或 DISABLED 仍阻止批准。同一人兼任 owner/submitter 时取更严格的 owner 条件。任何未知、损坏或查询故障保持 PENDING，不能作为自动拒绝的证据。
 
 权威状态明确不满足门禁时，沿 UC005 SYSTEM 自动 REJECT 流程，固定文本“当前应用管理员或审核提交者不满足账号与开发者资格要求，待处理审核已由系统自动拒绝。”；不改变已完成的决定。UC005 port 改为显式传入 currentAdminId/submittedBy 的批准资格检查，不能靠数组顺序猜角色。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-041`
+
+<!-- 权威位置: use-cases/UC-APP-041-manage-script-resource.md#br-scr-002 -->
+### BR-SCR-002：作者授权与平台职责隔离
+
+创建、改元数据、建版本、改稿和送审均要求可信 ACTIVE USER 的 `developer_status=APPROVED`。对既有资源的写入还要求 `ownerAuthId` 等于调用者 Auth ID。服务在写事务中核对归属及 [BR-APP-008](../use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-008) 的账号退出栅栏。客户端不能自报所有者、角色或权限。本人读取规则见 [BR-SCR-013](../use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-013)。
+
+审核、独立发布、暂停分发和恢复分发分别要求 `app.script.review`、`app.script.publish`、`app.script.suspend`、`app.script.restore`。四项独立授撤，均不授予创作权限。平台管理员、Reviewer、应用所有者及 SYSTEM 不可代用户创作。旧 `app.script.maintain` 退出授权模型，旧平台创作入口退役。
+
+作者资格取自现有 App audience 的 Auth 可信身份投影。资格变化后，Auth 后续签发使用当前状态，已签身份遵守既有期限与时钟容差。退出栅栏同时约束旧 APPROVED 身份。资格失效不改变既有审核或发布事实。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -540,6 +559,7 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
+- `UC-APP-041`（use-cases/UC-APP-041-manage-script-resource.md）：目标与范围、参与者与操作、失败与验收
 - `ADR-003`（adr/ADR-003-go-package-and-dependency-boundaries.md）：背景、考虑过的替代方案、结果、关联文档
 - `ADR-004`（adr/ADR-004-mongodb-transactions-and-schema-management.md）：背景、Schema 与索引、政策发布回执与恢复、考虑过的替代方案、结果、关联文档
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、考虑过的替代方案、结果、关联文档
@@ -549,7 +569,8 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
+| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 69 | `830ba8fcb45d` |
+| `use-cases/UC-APP-041-manage-script-resource.md` | 42 | `260106d12ddb` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

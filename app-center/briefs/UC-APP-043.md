@@ -36,13 +36,14 @@
 
 ### 目标与主流程
 
-平台维护人以 resourceId、versionId、expectedRevision 提交 DRAFT。身份采用 [BR-SCR-002](../use-cases/UC-APP-041-manage-script-resource.md#br-scr-002)。读取并校验当前草稿，取得服务端 ACTIVE 脚本政策，在单次原子提交中创建独立 PENDING ScriptReview、固定快照及政策绑定，同时把 ScriptVersion 改为 SUBMITTED 并递增 revision。输入不能选择 policy、reviewId、状态、摘要或提交人。
+符合 [BR-SCR-002](../use-cases/UC-APP-041-manage-script-resource.md#br-scr-002) 的 Developer 使用 `SubmitOwnScriptVersionReview`（`POST /v1/users/me/script-resources/{resource_id}/versions/{version_id}/reviews`）提交本人的 DRAFT。输入为 resourceId、versionId、expectedRevision。服务在同一写事务检查退出栅栏、本人归属、父子关系、状态和 revision，取得 ACTIVE 脚本政策，原子保存固定快照和 PENDING ScriptReview，同时把 ScriptVersion 改为 SUBMITTED 并递增 revision。
 
 ### 结果与验收
 
 成功返回 reviewId、SUBMITTED、版本新 revision、提交时间和绑定政策；不批准、不发布、不修改引用它的应用。依赖的应用仍依 [UC048](../use-cases/UC-APP-048-manage-application-script-dependencies.md) 可提交。
 
 - 提交与编辑竞争，不得得到摘要/原文混搭的快照。
+- Developer 只能提交本人版本。平台治理授权不能代他人送审。非本人目标或跨资源版本统一 NotFound。
 - 政策切换的两个提交胜序各绑定一个完整政策，不能取到两个版本的混合检查。
 - 已提交文本不能再编辑；政策定义缺失使读取/决定失败关闭，不临时套用新政策。
 
@@ -51,7 +52,7 @@
 <!-- 权威位置: use-cases/UC-APP-043-submit-script-version-review.md#br-scr-007 -->
 ### BR-SCR-007：单次提交与固定受审对象
 
-每个 ScriptVersion 首期最多一次审核。ScriptReview.snapshot 固定 resourceId、versionId、versionLabel、contentFormat、完整原文、digest、源 revision 及贡献者，并保存提交时的资源名称、用途和元数据 revision 作为受审上下文；后续资源元数据更新不改此上下文。submittedBy/At 来自可信身份和服务时钟。Version → SUBMITTED 与 Review → PENDING 同成同败，不允许无快照的待审版本。重复提交或过期 revision 返回冲突并可重新查询，不生成第二个审核。
+每个 ScriptVersion 首期最多一次审核。ScriptReview.snapshot 固定 resourceId、versionId、versionLabel、contentFormat、完整原文、digest、源 revision 及贡献者，并保存提交时的资源名称、用途和元数据 revision。submittedBy/At 来自可信身份和服务时钟。版本创建者、实际贡献者和提交者须与资源所有者一致。Version → SUBMITTED 与 Review → PENDING 同成同败。重复提交或过期 revision 返回冲突，作者可按 [UC045](../use-cases/UC-APP-045-query-script-management-and-reviews.md) 查询当前结果。
 
 <!-- 权威位置: use-cases/UC-APP-043-submit-script-version-review.md#br-scr-008 -->
 ### BR-SCR-008：提交时绑定正式脚本政策
@@ -79,11 +80,13 @@
 ### 来自 `UC-APP-041`
 
 <!-- 权威位置: use-cases/UC-APP-041-manage-script-resource.md#br-scr-002 -->
-### BR-SCR-002：精确权限与职责隔离
+### BR-SCR-002：作者授权与平台职责隔离
 
-在既有 App audience 下新增独立 permission：`app.script.maintain`（资源及草稿维护、送审）、`app.script.review`（脚本审核）、`app.script.publish`（独立发布）、`app.script.suspend` 与 `app.script.restore`（分发门禁）。命令逐项核对可信 ACTIVE USER 的精确权限，不接受请求自报角色或权限。
+创建、改元数据、建版本、改稿和送审均要求可信 ACTIVE USER 的 `developer_status=APPROVED`。对既有资源的写入还要求 `ownerAuthId` 等于调用者 Auth ID。服务在写事务中核对归属及 [BR-APP-008](../use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-008) 的账号退出栅栏。客户端不能自报所有者、角色或权限。本人读取规则见 [BR-SCR-013](../use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-013)。
 
-现有 Developer、Application 管理员、App Reviewer、完整平台管理员及 SYSTEM 均不自动获得这些权限。首期不新增可由用户调用的脚本 SYSTEM 写入口，不要求平台维护人同时拥有 Developer 资格。授予/撤销和 JWS 投影由 Auth 所有者另行设计；App 权限契约已接受；真实签发和授予/撤销尚未接入，不能用自造声明代替。签名、audience、时效和撤销残余窗口沿现有可信身份契约，不新增永久权限缓存。
+审核、独立发布、暂停分发和恢复分发分别要求 `app.script.review`、`app.script.publish`、`app.script.suspend`、`app.script.restore`。四项独立授撤，均不授予创作权限。平台管理员、Reviewer、应用所有者及 SYSTEM 不可代用户创作。旧 `app.script.maintain` 退出授权模型，旧平台创作入口退役。
+
+作者资格取自现有 App audience 的 Auth 可信身份投影。资格变化后，Auth 后续签发使用当前状态，已签身份遵守既有期限与时钟容差。退出栅栏同时约束旧 APPROVED 身份。资格失效不改变既有审核或发布事实。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -135,6 +138,6 @@ Proto 不直接复用 Domain struct，也不把生成 message 传入 Domain。�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-043-submit-script-version-review.md` | 41 | `9beeb1b56477` |
-| `use-cases/UC-APP-041-manage-script-resource.md` | 40 | `5213190b7a01` |
+| `use-cases/UC-APP-043-submit-script-version-review.md` | 42 | `762062591a0c` |
+| `use-cases/UC-APP-041-manage-script-resource.md` | 42 | `260106d12ddb` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

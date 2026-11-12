@@ -162,11 +162,11 @@ App 放入/替换 Test、Stable、Grey 槽位前，所有精确依赖须 APPROVE
 <!-- 权威位置: use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-014 -->
 ### BR-SCR-014：一致详情与有界列表
 
-详情提供同一次一致读取中的版本状态/revision、原文/digest、绑定政策和唯一决定，PENDING 队列仅包含待审。级联详情返回 taskId、状态、进度观测时间、已处理数量、实际拒绝/既有终态/关闭豁免的分别计数及受控失败分类，不将估计进度当作全局终态证明。完成以 [UC049](../use-cases/UC-APP-049-cascade-script-rejection.md) 的判据为准。
+详情在同一次一致读取中校验资源归属、resourceId/versionId/reviewId 关联、状态、原文/digest、绑定政策和唯一决定，并按职责投影。PENDING 队列仅包含待审。Reviewer 的级联详情返回 taskId、状态、进度观测时间、已处理数量、实际拒绝/既有终态/关闭豁免的分别计数及受控失败分类。完成以 [UC049](../use-cases/UC-APP-049-cascade-script-rejection.md) 的判据为准。
 
-limit 默认20、最大100，按 createdAt + 唯一 ID 稳定倒序、opaque cursor 绑定过滤和调用者读取范围；非法/不匹配 cursor 报错。列表允许并发变动但不得用 offset 漏过同时间记录；决定前必须重读详情，列表不作为强一致批准凭证。正文只在详情中返回，避免列表放大。
+limit 默认 20、最大 100，按 createdAt 和唯一 ID 稳定倒序。本人的版本列表可按状态过滤。先按所有者或平台职责过滤，再做有界分页。opaque cursor 绑定调用者、查询范围、父资源、过滤与排序。非法或不匹配 cursor 报错。正文只在详情返回，决定前重读详情。
 
-所有视图 private, no-store；先鉴权再定位目标。未知 ID 返回 NotFound，关联必要事实损坏返回明确失败，不合成空政策、空正文或已完成级联。
+所有视图为 `private, no-store`。先鉴权再定位目标。本人查询的未知、非本人或路径关联不匹配统一 NotFound。必要事实损坏时明确失败。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -295,8 +295,8 @@ scripts 的精确来源、0..16上限、明确空列表及规范排序以 [BR-SC
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-047-resolve-application-script-content.md` | 112 | `eb7fc45df935` |
-| `use-cases/UC-APP-042-manage-script-version-draft.md` | 38 | `bde6577028ae` |
-| `use-cases/UC-APP-045-query-script-management-and-reviews.md` | 31 | `82cf1e37e4d6` |
+| `use-cases/UC-APP-042-manage-script-version-draft.md` | 38 | `7e9b905d0081` |
+| `use-cases/UC-APP-045-query-script-management-and-reviews.md` | 42 | `deb5f31b4fbd` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `adr/ADR-008-script-dependency-transactions-and-cascade.md` | 27 | `f86c4e6d9c1d` |
 | `app-center/query-contracts/script-distribution.md` | 56 | `db08be9f7cb0` |

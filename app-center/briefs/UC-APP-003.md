@@ -461,6 +461,6 @@ App Center 的 ScopeCatalog adapter 使用每进程 read-through cache：
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-003-update-draft-application-version.md` | 382 | `c1214bb85d47` |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
 | `use-cases/UC-APP-002-create-application-version.md` | 482 | `36cd857b840a` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |

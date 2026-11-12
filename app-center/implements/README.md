@@ -40,6 +40,8 @@ UC027 关闭时间一致性修复的真实 Mongo race 专项 5/5 和完整 backe
 
 ### 平台爬虫配置
 
+2026-11-11 本人脚本创作后端完成本地验收。App 实现 UC025、UC041–045、UC048 的本人归属和授权，API `7192df3` 退役旧平台创作与维护权限接口，Gateway `4760d7a` 接入本人接口。Auth UC010、UC038 对应四项脚本治理权限。App 完整 backend 24/24 通过，报告为 App 仓库 `.artifacts/verification/20261111T141605Z-xirydby7/report.json`，`changed_sources=[]`。固定本地三镜像的三协议联验通过，日志为 `.artifacts/script-authoring-three-images.log`。下文保留此前平台维护模型的验收记录。
+
 用户接受同服务、同库的脚本管理设计 UC-APP-041–049 与 ADR-008，并要求串行执行。2026-11-08，本轮App后端全部完成：资源/版本、送审与人工决定、拒绝级联、查询、独立发布/暂停/恢复，以及独立分发、应用精确内容和发布/在线联合门禁。最终App `64a8a06` / API `01f2ecb` 的完整 `check-full` 24/24通过，`changed_sources=[]`；固定三镜像和Gateway三协议联验通过。Console、客户端Runner与后续机器检查不计为本轮后端未完成项。详见 [UC045 实施记录](UC-APP-045-script-query-readiness.md)、[UC048 修订与验证](UC-APP-048-script-dependency-review.md)和[串行工作清单](../design-notes/2026-11-05-crawler-script-use-case-review.md)。
 
 2026-11-07，UC048 的中断回归已补齐，固定输入合计 212 通过、6 条件跳过、0 失败。随后 UC044/049 已完成 App/API 实现及 Gateway 接入，包含用户接受的 CLOSING/CLOSED 应用 APPLICATION_CLOSED 级联豁免。固定 App `207e3f2`、API `015f172` 的完整 `check-full` 24/24 通过，Gateway `5bd9c9c` 的检查与协议联验通过，既有脚本三镜像回归通过。UC045 的终态/级联段与 UC048 的真实决定依赖验收已闭合。详见 [UC044/049 准备与冲突方案](UC-APP-044-049-decision-cascade-readiness.md)。

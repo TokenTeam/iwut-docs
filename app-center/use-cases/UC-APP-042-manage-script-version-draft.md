@@ -4,9 +4,9 @@
 
 ## 目标与输入
 
-持有 [maintain 权限](UC-APP-041-manage-script-resource.md#br-scr-002)的平台维护人，为指定资源创建独立版本草稿，或完整替换 DRAFT 内容。文本保存就是本轮的“上传”，不引入任意文件上传、压缩包、对象存储直传协议或服务端执行。
+符合 [BR-SCR-002](UC-APP-041-manage-script-resource.md#br-scr-002) 的 Developer 为本人资源创建独立版本草稿，或完整替换 DRAFT 内容。上传以保存脚本文本完成。`CreateOwnScriptVersionDraft` 使用 `POST /v1/users/me/script-resources/{resource_id}/versions`。`ReplaceOwnScriptVersionDraft` 使用 `PUT /v1/users/me/script-resources/{resource_id}/versions/{version_id}/draft`。
 
-Create 输入为 resourceId、versionLabel、contentFormat、contentText；Replace 输入另含 versionId、expectedRevision，不允许更改所属资源或 versionLabel。服务生成 versionId、revision=1、DRAFT 及审计。拒绝版本可由维护人读取后预填成新草稿；不复活旧身份。
+Create 输入为 resourceId、versionLabel、contentFormat、contentText。Replace 输入为 resourceId、versionId、expectedRevision、contentFormat、contentText。服务生成 versionId、revision=1、DRAFT 及审计。作者可读取本人的拒绝版本并预填新草稿。
 
 ## 业务规则
 
@@ -31,8 +31,8 @@ ScriptVersion 使用独立 UUIDv7，并永久绑定一个 ScriptResource。versi
 
 ## 流程与验收
 
-先核身份/权限，再校验输入、读取资源和版本，按状态及 revision 原子写入；并发创建依靠资源内标签唯一性，不能靠先查后写。成功返回元数据、正文、摘要和当前 revision，响应 private, no-store。
+先核身份与 Developer 资格，再校验输入。在同一写事务内先检查退出栅栏，再核对本人资源、版本关联、状态与 revision。并发创建通过资源内标签唯一约束裁决。成功返回元数据、正文、摘要和当前 revision，响应 `private, no-store`。
 
 - 空白、超限、非法编码失败；含换行/BOM/不同 JSON 键顺序的受理文本逐字节往返并有对应摘要。
 - 两个编辑及编辑与提交竞争，最多一个消费指定 revision；失败无部分内容更新。
-- 无 maintain 不能写；已 SUBMITTED/APPROVED/REJECTED 不能改；重用任何历史标签失败。
+- 非本人目标与不存在目标统一 NotFound。资格失效或退出栅栏禁止写入。已 SUBMITTED/APPROVED/REJECTED 的版本禁止改稿，历史标签禁止复用。

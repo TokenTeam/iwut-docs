@@ -1,6 +1,6 @@
 {
   "uc": "UC-APP-042",
-  "note": "Implement script draft create and full content replacement. Preserve accepted UTF-8 bytes exactly, enforce permanent per-resource version labels and record revisions, contributors and audit atomically.",
+  "note": "Implement developer-owned script draft creation and replacement. Apply the account exit fence and resource ownership in the write transaction. Preserve accepted UTF-8 bytes, permanent labels, revisions and audit.",
   "uc_sections": ["目标与输入", "流程与验收"],
   "include_own_brs": true,
   "include_external_brs": true,

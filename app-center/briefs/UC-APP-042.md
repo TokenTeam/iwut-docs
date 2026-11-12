@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-042` 创建与编辑脚本版本草稿 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-SCR-004`–`BR-SCR-006`（3 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-SCR-002`（来自 `UC-APP-041`） |
 | ADR | `ADR-006` |
 
 ## 遇到 brief 未覆盖的问题
@@ -36,17 +36,17 @@
 
 ### 目标与输入
 
-持有 [maintain 权限](../use-cases/UC-APP-041-manage-script-resource.md#br-scr-002)的平台维护人，为指定资源创建独立版本草稿，或完整替换 DRAFT 内容。文本保存就是本轮的“上传”，不引入任意文件上传、压缩包、对象存储直传协议或服务端执行。
+符合 [BR-SCR-002](../use-cases/UC-APP-041-manage-script-resource.md#br-scr-002) 的 Developer 为本人资源创建独立版本草稿，或完整替换 DRAFT 内容。上传以保存脚本文本完成。`CreateOwnScriptVersionDraft` 使用 `POST /v1/users/me/script-resources/{resource_id}/versions`。`ReplaceOwnScriptVersionDraft` 使用 `PUT /v1/users/me/script-resources/{resource_id}/versions/{version_id}/draft`。
 
-Create 输入为 resourceId、versionLabel、contentFormat、contentText；Replace 输入另含 versionId、expectedRevision，不允许更改所属资源或 versionLabel。服务生成 versionId、revision=1、DRAFT 及审计。拒绝版本可由维护人读取后预填成新草稿；不复活旧身份。
+Create 输入为 resourceId、versionLabel、contentFormat、contentText。Replace 输入为 resourceId、versionId、expectedRevision、contentFormat、contentText。服务生成 versionId、revision=1、DRAFT 及审计。作者可读取本人的拒绝版本并预填新草稿。
 
 ### 流程与验收
 
-先核身份/权限，再校验输入、读取资源和版本，按状态及 revision 原子写入；并发创建依靠资源内标签唯一性，不能靠先查后写。成功返回元数据、正文、摘要和当前 revision，响应 private, no-store。
+先核身份与 Developer 资格，再校验输入。在同一写事务内先检查退出栅栏，再核对本人资源、版本关联、状态与 revision。并发创建通过资源内标签唯一约束裁决。成功返回元数据、正文、摘要和当前 revision，响应 `private, no-store`。
 
 - 空白、超限、非法编码失败；含换行/BOM/不同 JSON 键顺序的受理文本逐字节往返并有对应摘要。
 - 两个编辑及编辑与提交竞争，最多一个消费指定 revision；失败无部分内容更新。
-- 无 maintain 不能写；已 SUBMITTED/APPROVED/REJECTED 不能改；重用任何历史标签失败。
+- 非本人目标与不存在目标统一 NotFound。资格失效或退出栅栏禁止写入。已 SUBMITTED/APPROVED/REJECTED 的版本禁止改稿，历史标签禁止复用。
 
 ## 业务规则（UC-APP-042 权威正文）
 
@@ -68,6 +68,21 @@ ScriptVersion 使用独立 UUIDv7，并永久绑定一个 ScriptResource。versi
 只有 DRAFT 可编辑。Replace 以正数 expectedRevision 做完整替换，原子更新文本、格式、摘要、revision、审计及本版本内容贡献者集合。相同内容且 revision 匹配时返回原状态，不虚增 revision 或贡献者。提交后的正文、格式、标签和贡献事实冻结，任何权限都不能用草稿命令覆盖。
 
 版本创建人和实际内容修改人属于贡献者；来源版本的文本复制不转移来源版本身份或审核结果。首期不提供草稿删除、撤回送审、附件、秘密变量或脚本内依赖图功能。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-041`
+
+<!-- 权威位置: use-cases/UC-APP-041-manage-script-resource.md#br-scr-002 -->
+### BR-SCR-002：作者授权与平台职责隔离
+
+创建、改元数据、建版本、改稿和送审均要求可信 ACTIVE USER 的 `developer_status=APPROVED`。对既有资源的写入还要求 `ownerAuthId` 等于调用者 Auth ID。服务在写事务中核对归属及 [BR-APP-008](../use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-008) 的账号退出栅栏。客户端不能自报所有者、角色或权限。本人读取规则见 [BR-SCR-013](../use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-013)。
+
+审核、独立发布、暂停分发和恢复分发分别要求 `app.script.review`、`app.script.publish`、`app.script.suspend`、`app.script.restore`。四项独立授撤，均不授予创作权限。平台管理员、Reviewer、应用所有者及 SYSTEM 不可代用户创作。旧 `app.script.maintain` 退出授权模型，旧平台创作入口退役。
+
+作者资格取自现有 App audience 的 Auth 可信身份投影。资格变化后，Auth 后续签发使用当前状态，已签身份遵守既有期限与时钟容差。退出栅栏同时约束旧 APPROVED 身份。资格失效不改变既有审核或发布事实。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -112,11 +127,13 @@ Proto 不直接复用 Domain struct，也不把生成 message 传入 Domain。�
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
+- `UC-APP-041`（use-cases/UC-APP-041-manage-script-resource.md）：目标与范围、参与者与操作、失败与验收
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、协议演进、考虑过的替代方案、结果、关联文档
 
 ## 溯源
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-042-manage-script-version-draft.md` | 38 | `bde6577028ae` |
+| `use-cases/UC-APP-042-manage-script-version-draft.md` | 38 | `7e9b905d0081` |
+| `use-cases/UC-APP-041-manage-script-resource.md` | 42 | `260106d12ddb` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

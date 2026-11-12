@@ -103,7 +103,7 @@ Developer 资格的申请、核验和审核由 Auth Center 拥有。App Center �
 
 ## 已确认的新增内部能力（2026-11-05）
 
-平台爬虫脚本/配置管理归入 App Center 同一服务和数据库，内部保留独立脚本领域及版本/审核/发布机制。App Center 拥有脚本与 ApplicationVersion 的精确依赖、批准前置及拒绝级联，不新建 Resource Hub 上下游服务或独立 audience。客户端仍拥有执行器与本地凭据；Auth 只提供相应可信身份和经审核的精确权限投影。
+爬虫脚本管理归入 App Center 同一服务和数据库。App Center 保存用户脚本归属、版本、审核、发布及与 ApplicationVersion 的精确依赖。客户端拥有执行器与本地凭据。Auth 投影可信 Developer 资格以及审核、发布和分发运维的精确权限。作者归属见 [UC041](use-cases/UC-APP-041-manage-script-resource.md)。
 
 归属和业务设计已接受；实施状态与权限接入进度见[脚本串行工作清单](design-notes/2026-11-05-crawler-script-use-case-review.md)。不改变上文已交付能力的当前实现状态。
 

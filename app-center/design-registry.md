@@ -78,7 +78,7 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 | `UC-APP-038` | 查询我参与的测试 Application | `ACCEPTED` | [UC-APP-038](use-cases/UC-APP-038-query-my-test-applications.md) | — | 本人 ACTIVE 参与、暂不可用卡片、门禁隐藏与纯 Test 后端已完成；见 implements。 |
 | `UC-APP-039` | 查询我的 ApplicationProfileRevision 列表与详情 | `ACCEPTED` | [UC-APP-039](use-cases/UC-APP-039-query-owned-application-profile-revisions.md) | — | 管理员私有查询后端 COMPLETE；API/完整验收见 implements。 |
 | `UC-APP-040` | Tester 主动退出 Application 测试 | `ACCEPTED` | [UC-APP-040](use-cases/UC-APP-040-leave-application-as-tester.md) | — | 本人指定 episode 退出、历史/幂等/容量与保留状态后端已完成并验收；见 implements。 |
-| `UC-APP-041` | 管理平台爬虫脚本资源 | `ACCEPTED` | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
+| `UC-APP-041` | 管理本人爬虫脚本资源 | `ACCEPTED` | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md) | — | 2026-11-11 用户确认本人上传与归属，实施见 implements/README.md。 |
 | `UC-APP-042` | 创建与编辑脚本版本草稿 | `ACCEPTED` | [UC-APP-042](use-cases/UC-APP-042-manage-script-version-draft.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
 | `UC-APP-043` | 提交脚本版本审核 | `ACCEPTED` | [UC-APP-043](use-cases/UC-APP-043-submit-script-version-review.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
 | `UC-APP-044` | 审核脚本版本 | `ACCEPTED` | [UC-APP-044](use-cases/UC-APP-044-decide-script-version-review.md) | — | 2026-11-06 设计接受；实施见 implements/README.md。 |
@@ -481,8 +481,8 @@ Next ID 只是分配提示。新增条目前仍须搜索整个文档目录，确
 
 | ID | 标题 | 类型 | 权威位置 | 替代项 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| `BR-SCR-001` | 平台脚本身份与历史 | Identity / History | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-001) | — | — |
-| `BR-SCR-002` | 精确权限与职责隔离 | Authorization | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-002) | — | — |
+| `BR-SCR-001` | 脚本身份、本人归属与历史 | Identity / History | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-001) | — | — |
+| `BR-SCR-002` | 作者授权与平台职责隔离 | Authorization | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-002) | — | — |
 | `BR-SCR-003` | 资源元数据与乐观并发 | Field / Concurrency | [UC-APP-041](use-cases/UC-APP-041-manage-script-resource.md#br-scr-003) | — | — |
 | `BR-SCR-004` | 独立版本与不可复用标签 | Identity / Lifecycle | [UC-APP-042](use-cases/UC-APP-042-manage-script-version-draft.md#br-scr-004) | — | — |
 | `BR-SCR-005` | 不透明文本及精确摘要 | Content / Integrity | [UC-APP-042](use-cases/UC-APP-042-manage-script-version-draft.md#br-scr-005) | — | — |

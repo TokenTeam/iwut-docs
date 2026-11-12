@@ -29,6 +29,8 @@ scriptReferences 为 0..16 项 `{scriptResourceId, scriptVersionId}`，每个资
 
 具有现行 Developer 资格的当前 Application 管理员，可在该应用上下文查询 SUBMITTED/APPROVED 脚本候选的资源名称、用途、版本标签/ID、format、digest 和审核状态；不能因此取得未获批原文、审核员个人资料或拒绝原因。保留的失效草稿引用显示终态/需修正，不把它伪装成新可选项。
 
+候选可来自任何作者。脚本送审后开放上述限定元数据，候选不携带作者 Auth ID。选取或引用不授予脚本本人查询或维护权限，作者也按 [UC045](UC-APP-045-query-script-management-and-reviews.md) 单独读取自己的脚本。
+
 有权读取某次 ApplicationReview 的 App Reviewer，可读取该固定引用的脚本受审原文、摘要、完整脚本政策及关联决定状态，用于了解应用依赖；只覆盖所引用版本，不开放全部脚本队列。其能否决定脚本另按 [BR-SCR-010](UC-APP-044-decide-script-version-review.md#br-scr-010) 验证。普通 App 管理员的版本历史不增加未获批正文披露。候选列表分页复用 [BR-SCR-014](UC-APP-045-query-script-management-and-reviews.md#br-scr-014) 的有界模式。
 
 <a id="br-sdp-003"></a>

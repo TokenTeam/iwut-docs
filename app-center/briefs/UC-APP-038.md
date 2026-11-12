@@ -265,6 +265,8 @@ COMMITTED ACCOUNT_CLOSURE 后以有界批次清理该 testerAuthId 的全部 ACT
 
 application_filters/filter_revisions 是应用公开 Filter，不是用户偏好，不能删除。保留 Application、Version、Review、Publication 及历史 createdBy/submittedBy/reviewer 等归因；当前没有独立个人偏好 collection，禁止凭名称猜测清理表。未来新增个人数据需显式纳入清单。
 
+保留脚本资源的 ownerAuthId、版本、审核、发布、引用和历史归因。注销后的归属用于识别历史作者。个人草稿保持私有。已提交脚本仍可按现有权限审核、发布或管理分发。
+
 ### 来自 `UC-APP-028`
 
 <!-- 权威位置: use-cases/UC-APP-028-suspend-and-restore-application.md#br-app-031 -->
@@ -772,7 +774,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-038-query-my-test-applications.md` | 218 | `492b7af3c54f` |
-| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
+| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 69 | `830ba8fcb45d` |
 | `use-cases/UC-APP-028-suspend-and-restore-application.md` | 273 | `1ada06422863` |
 | `use-cases/UC-APP-033-archive-and-unarchive-application.md` | 283 | `e9e406a93d2d` |
 | `use-cases/UC-APP-024-query-public-application-catalog.md` | 344 | `6baf8e7d5fb8` |

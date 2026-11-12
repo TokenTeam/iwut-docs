@@ -199,6 +199,10 @@ ApplicationFilterRevision 是不可变且创建后立即发布的规则事实，
 
 规则树采用 `profile-filter-v1`，字段 key 与四种标量复用 Auth ProfileFieldDefinition 的稳定语法，但 App Center 不读取字段目录或用户值。Filter 修改不改变 Publication、Profile、Version、OAuth 或服务端运行资格。权威规则见 [UC-APP-022](use-cases/UC-APP-022-manage-application-filter.md)。
 
+### ScriptResource 与 ScriptVersion
+
+ScriptResource 是独立于 Application 的脚本资源，持有不可变的用户 `ownerAuthId`。ScriptVersion 通过 `resourceId` 继承归属。创建、改稿和送审审计记录实际操作者。应用引用精确脚本版本，脚本归属独立于应用管理权。见 [UC041](use-cases/UC-APP-041-manage-script-resource.md)、[UC042](use-cases/UC-APP-042-manage-script-version-draft.md) 和 [UC048](use-cases/UC-APP-048-manage-application-script-dependencies.md)。
+
 ## 主要实体与关系
 
 | 实体 | 身份 | 直接归属 | 关键关系 |

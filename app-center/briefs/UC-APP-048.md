@@ -68,6 +68,8 @@ scriptReferences 为 0..16 项 `{scriptResourceId, scriptVersionId}`，每个资
 
 具有现行 Developer 资格的当前 Application 管理员，可在该应用上下文查询 SUBMITTED/APPROVED 脚本候选的资源名称、用途、版本标签/ID、format、digest 和审核状态；不能因此取得未获批原文、审核员个人资料或拒绝原因。保留的失效草稿引用显示终态/需修正，不把它伪装成新可选项。
 
+候选可来自任何作者。脚本送审后开放上述限定元数据，候选不携带作者 Auth ID。选取或引用不授予脚本本人查询或维护权限，作者也按 [UC045](../use-cases/UC-APP-045-query-script-management-and-reviews.md) 单独读取自己的脚本。
+
 有权读取某次 ApplicationReview 的 App Reviewer，可读取该固定引用的脚本受审原文、摘要、完整脚本政策及关联决定状态，用于了解应用依赖；只覆盖所引用版本，不开放全部脚本队列。其能否决定脚本另按 [BR-SCR-010](../use-cases/UC-APP-044-decide-script-version-review.md#br-scr-010) 验证。普通 App 管理员的版本历史不增加未获批正文披露。候选列表分页复用 [BR-SCR-014](../use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-014) 的有界模式。
 
 <!-- 权威位置: use-cases/UC-APP-048-manage-application-script-dependencies.md#br-sdp-003 -->
@@ -100,18 +102,18 @@ ScriptVersion APPROVED/REJECTED 相斥且不可改写；脚本发布 head 移动
 <!-- 权威位置: use-cases/UC-APP-044-decide-script-version-review.md#br-scr-010 -->
 ### BR-SCR-010：审核资格与利益冲突
 
-要求可信 ACTIVE USER 精确持有 `app.script.review`，且不是该版本的创建人、任何实际内容修改人或提交人；这些冲突对批准和拒绝均适用。平台 maintain/publish 权限及 App Reviewer 权限不能替代脚本审核权。客户端不能覆盖冲突检查。
+要求可信 ACTIVE USER 精确持有 `app.script.review`，且不是该版本的创建人、任何实际内容修改人或提交人。批准与拒绝均执行冲突检查。依据 [BR-SCR-007](../use-cases/UC-APP-043-submit-script-version-review.md#br-scr-007)，脚本作者必然属于这些冲突角色。决定事务核对资源归属、版本贡献者与提交者的一致性，损坏时失败。作者当前 Developer 资格不影响已提交审核的处理。客户端不能覆盖冲突检查。
 
 ### 来自 `UC-APP-045`
 
 <!-- 权威位置: use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-014 -->
 ### BR-SCR-014：一致详情与有界列表
 
-详情提供同一次一致读取中的版本状态/revision、原文/digest、绑定政策和唯一决定，PENDING 队列仅包含待审。级联详情返回 taskId、状态、进度观测时间、已处理数量、实际拒绝/既有终态/关闭豁免的分别计数及受控失败分类，不将估计进度当作全局终态证明。完成以 [UC049](../use-cases/UC-APP-049-cascade-script-rejection.md) 的判据为准。
+详情在同一次一致读取中校验资源归属、resourceId/versionId/reviewId 关联、状态、原文/digest、绑定政策和唯一决定，并按职责投影。PENDING 队列仅包含待审。Reviewer 的级联详情返回 taskId、状态、进度观测时间、已处理数量、实际拒绝/既有终态/关闭豁免的分别计数及受控失败分类。完成以 [UC049](../use-cases/UC-APP-049-cascade-script-rejection.md) 的判据为准。
 
-limit 默认20、最大100，按 createdAt + 唯一 ID 稳定倒序、opaque cursor 绑定过滤和调用者读取范围；非法/不匹配 cursor 报错。列表允许并发变动但不得用 offset 漏过同时间记录；决定前必须重读详情，列表不作为强一致批准凭证。正文只在详情中返回，避免列表放大。
+limit 默认 20、最大 100，按 createdAt 和唯一 ID 稳定倒序。本人的版本列表可按状态过滤。先按所有者或平台职责过滤，再做有界分页。opaque cursor 绑定调用者、查询范围、父资源、过滤与排序。非法或不匹配 cursor 报错。正文只在详情返回，决定前重读详情。
 
-所有视图 private, no-store；先鉴权再定位目标。未知 ID 返回 NotFound，关联必要事实损坏返回明确失败，不合成空政策、空正文或已完成级联。
+所有视图为 `private, no-store`。先鉴权再定位目标。本人查询的未知、非本人或路径关联不匹配统一 NotFound。必要事实损坏时明确失败。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -179,8 +181,8 @@ Proto 不直接复用 Domain struct，也不把生成 message 传入 Domain。�
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
-| `use-cases/UC-APP-044-decide-script-version-review.md` | 35 | `5a95a707c6ad` |
-| `use-cases/UC-APP-045-query-script-management-and-reviews.md` | 31 | `82cf1e37e4d6` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
+| `use-cases/UC-APP-044-decide-script-version-review.md` | 35 | `720c59eb37aa` |
+| `use-cases/UC-APP-045-query-script-management-and-reviews.md` | 42 | `deb5f31b4fbd` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `adr/ADR-008-script-dependency-transactions-and-cascade.md` | 27 | `f86c4e6d9c1d` |

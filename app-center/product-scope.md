@@ -159,7 +159,7 @@ Grey 与 Filter 不共享求值机制。[UC-APP-021](use-cases/UC-APP-021-manage
 
 ## 平台爬虫配置管理（2026-11-05 新增范围）
 
-用户已确认此能力正式归入 App Center 服务，采用同库的独立脚本领域，具有自己的资源、版本、审核和发布机制，并由 ApplicationVersion 按精确版本引用。服务端管理平台维护的文本配置，客户端本地执行；应用送审、脚本审核结果依赖和拒绝级联由 App Center 维护一致性。
+此能力归入 App Center 同一服务和数据库。具备有效 Developer 资格的用户上传本人文本配置，平台开发者走相同流程。App Center 管理脚本资源、版本、审核、发布和应用版本的精确依赖，客户端本地执行。作者与平台治理的职责见 [UC041](use-cases/UC-APP-041-manage-script-resource.md)。
 
 这是对原首版范围的明确扩展。UC-APP-041–049 与 ADR-008 已于 2026-11-06 接受；详细规则与实施顺序见[用例审核清单](design-notes/2026-11-05-crawler-script-use-case-review.md)。通用资源平台、用户配置中心、服务端执行和客户端 Runner 实现继续不在本次范围内。
 

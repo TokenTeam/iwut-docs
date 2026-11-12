@@ -1,6 +1,6 @@
 <!-- GENERATED FILE — DO NOT EDIT. Regenerate with: -->
 <!-- python3 tools/gen_brief.py UC-APP-041 --spec tools/brief-specs/UC-APP-041.json -->
-# Brief — UC-APP-041：管理平台爬虫脚本资源
+# Brief — UC-APP-041：管理本人爬虫脚本资源
 
 > **非权威派生制品。** 本文由脚本从 `docs/app-center/` 与 spec 显式选择的 `docs/` 共享文档抽取，只用于给本次工作包提供输入。
 > 与源文件冲突时，一律以 §溯源 中列出的源文件为准；不要手工编辑本文，也不要把它当作第二权威。
@@ -9,10 +9,10 @@
 
 | 项 | 值 |
 | --- | --- |
-| Use Case | `UC-APP-041` 管理平台爬虫脚本资源 |
+| Use Case | `UC-APP-041` 管理本人爬虫脚本资源 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-SCR-001`–`BR-SCR-003`（3 条） |
-| 外部引用 BR | — |
+| 外部引用 BR | `BR-APP-008`，`BR-SCR-013`（来自 `UC-APP-025`、`UC-APP-045`） |
 | ADR | `ADR-006` |
 | 平台共享 | `platform/contracts/app-center-api-routing.md`、`platform/contracts/trusted-identity-v1.md` |
 
@@ -37,40 +37,68 @@
 
 ### 目标与范围
 
-平台维护人创建独立 ScriptResource，维护名称与用途。用户于 2026-11-06 接受本用例并要求串行执行。工作顺序和进度见[脚本用例评审清单](../design-notes/2026-11-05-crawler-script-use-case-review.md)。
+具备有效 Developer 资格的用户创建本人 ScriptResource，维护名称与用途。所有脚本均由用户上传。平台开发者也使用自己的用户账号和同一套作者规则。2026-11-11 用户确认此归属和创作模式。
 
-资源不属于某个 Application 或其管理员，不占 Application 创建配额。账号转让、应用关闭和应用删除均不删除脚本或改变其归属。独立版本由 [UC042](../use-cases/UC-APP-042-manage-script-version-draft.md) 管理。
+脚本资源独立于 Application，不占 Application 创建配额。应用管理权转让、关闭或引用变化不改变脚本归属。独立版本由 [UC042](../use-cases/UC-APP-042-manage-script-version-draft.md) 管理。
 
 ### 参与者与操作
 
-可信 ACTIVE USER 执行 CreateScriptResource 或 ReplaceScriptResourceMetadata。请求只含名称、用途；替换另含 resourceId、expectedRevision。服务生成 UUIDv7、revision=1、创建与更新审计。替换只改变元数据，revision 加一；相同内容在 revision 匹配时返回原状态，不新增业务审计。
+`ScriptAuthoringService` 提供 `CreateOwnScriptResource`（`POST /v1/users/me/script-resources`）和 `ReplaceOwnScriptResourceMetadata`（`PUT /v1/users/me/script-resources/{resource_id}/metadata`）。请求包含名称、用途，替换还需 resourceId 和 expectedRevision。服务从可信身份取得 ownerAuthId，生成 UUIDv7、revision=1、创建与更新审计。替换只改变元数据。相同内容且 revision 匹配时返回原状态，不新增业务审计。
 
 ### 失败与验收
 
-缺身份为 Unauthenticated；无 maintain 为 Forbidden，且先于资源查找；字段非法为 InvalidArgument，目标不存在为 NotFound，revision 过期为 Conflict；损坏或存储失败不得返回成功。
+缺身份为 Unauthenticated。本人写入无有效 Developer 资格时在目标查找前返回 Forbidden。字段非法为 InvalidArgument，非本人或不存在的资源统一 NotFound。通过归属检查后才返回 revision 或状态冲突。退出栅栏阻止写入，必要事实损坏或存储失败时拒绝成功。
 
-- 同名资源可有不同 ID，应用管理员不能凭归属关系维护平台脚本。
+- 无脚本权限的 APPROVED Developer 可以创建和修改本人的资源。跨作者或仅持有平台治理权限的调用者不能写入其他人的资源。
 - 两个相同 revision 的不同元数据更新最多一项成功；更新不改变已提交版本及摘要。
-- 无权请求不泄漏资源是否存在；真实 Auth 权限签发、授予和撤销通过联合验收后才视为接入。
+- 验证 Auth 的真实 Developer 签发与资格变更、跨作者隐藏、账号退出竞争，以及旧维护权限无法通过作者鉴权。
 
 ## 业务规则（UC-APP-041 权威正文）
 
 <!-- 权威位置: use-cases/UC-APP-041-manage-script-resource.md#br-scr-001 -->
-### BR-SCR-001：平台脚本身份与历史
+### BR-SCR-001：脚本身份、本人归属与历史
 
-ScriptResource 使用服务生成的独立且永久不复用 ID。资源、版本、审核和发布历史均不提供物理删除入口。名称不充当身份，不要求全局唯一。资源元数据变化不修改版本文本、审核快照或应用引用。
+ScriptResource 使用独立且永久不复用的 ID，必有一个不可变的 `ownerAuthId`。所有者是创建时已验签 USER 的 Auth ID，创建者审计记录实际操作者。系统只建立用户归属，归属不随 Developer 状态变化。版本沿 resourceId 继承归属。资源及其版本、审核和发布历史不提供物理删除、转让或平台接管入口。名称无需全局唯一。元数据更新不修改版本文本、审核快照或应用引用。
 
 <!-- 权威位置: use-cases/UC-APP-041-manage-script-resource.md#br-scr-002 -->
-### BR-SCR-002：精确权限与职责隔离
+### BR-SCR-002：作者授权与平台职责隔离
 
-在既有 App audience 下新增独立 permission：`app.script.maintain`（资源及草稿维护、送审）、`app.script.review`（脚本审核）、`app.script.publish`（独立发布）、`app.script.suspend` 与 `app.script.restore`（分发门禁）。命令逐项核对可信 ACTIVE USER 的精确权限，不接受请求自报角色或权限。
+创建、改元数据、建版本、改稿和送审均要求可信 ACTIVE USER 的 `developer_status=APPROVED`。对既有资源的写入还要求 `ownerAuthId` 等于调用者 Auth ID。服务在写事务中核对归属及 [BR-APP-008](../use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-008) 的账号退出栅栏。客户端不能自报所有者、角色或权限。本人读取规则见 [BR-SCR-013](../use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-013)。
 
-现有 Developer、Application 管理员、App Reviewer、完整平台管理员及 SYSTEM 均不自动获得这些权限。首期不新增可由用户调用的脚本 SYSTEM 写入口，不要求平台维护人同时拥有 Developer 资格。授予/撤销和 JWS 投影由 Auth 所有者另行设计；App 权限契约已接受；真实签发和授予/撤销尚未接入，不能用自造声明代替。签名、audience、时效和撤销残余窗口沿现有可信身份契约，不新增永久权限缓存。
+审核、独立发布、暂停分发和恢复分发分别要求 `app.script.review`、`app.script.publish`、`app.script.suspend`、`app.script.restore`。四项独立授撤，均不授予创作权限。平台管理员、Reviewer、应用所有者及 SYSTEM 不可代用户创作。旧 `app.script.maintain` 退出授权模型，旧平台创作入口退役。
+
+作者资格取自现有 App audience 的 Auth 可信身份投影。资格变化后，Auth 后续签发使用当前状态，已签身份遵守既有期限与时钟容差。退出栅栏同时约束旧 APPROVED 身份。资格失效不改变既有审核或发布事实。
 
 <!-- 权威位置: use-cases/UC-APP-041-manage-script-resource.md#br-scr-003 -->
 ### BR-SCR-003：资源元数据与乐观并发
 
 name 去除首尾空白后为 1..128 UTF-8 bytes，purpose 为 1..2048 UTF-8 bytes；不含 NUL。resourceId、revision、时间与操作人不由正文指定。替换需正数 expectedRevision，过期即冲突，无部分写入。每次实际更新原子保存元数据、递增 revision 和可信身份/服务时钟审计；资源元数据 revision 与发布 revision 相互独立。
+
+## 外部引用的业务规则
+
+> 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-025`
+
+<!-- 权威位置: use-cases/UC-APP-025-coordinate-account-owner-exit.md#br-app-008 -->
+### BR-APP-008：归属屏障与零义务准备
+
+`adminId=authId` 的所有 Application 都阻止 Prepare，无论其发布或审核状态。使用 `account_owner_exit_fences` 的 authId 唯一记录作为可写事务栅栏；创建应用和 Prepare 在同一事务中先条件写该栅栏，再读取/修改配额和应用，不能仅用 snapshot 读检查。
+
+PREPARED 和永久 sealed 均阻止新的创建；当前没有转让/关闭入口，未来增加这些行为必须在相同协调点检查。旧 APPROVED JWS 不能越过栅栏。账号没有旧 fence 时可原子建立 OPEN 初始事实，不代表补建 Auth 用户。
+
+脚本资源归属不计入退出义务。依据 [BR-SCR-002](../use-cases/UC-APP-041-manage-script-resource.md#br-scr-002)，作者创建脚本资源、更新元数据、建版本、改稿和送审均在写事务中先条件写同一账号栅栏。PREPARED 或 sealed 拒绝作者写入。作者写入先提交时，脚本按保留记录处理，退出仍按应用义务判定。
+
+### 来自 `UC-APP-045`
+
+<!-- 权威位置: use-cases/UC-APP-045-query-script-management-and-reviews.md#br-scr-013 -->
+### BR-SCR-013：按职责限定查询披露
+
+本人视图要求有效可信 USER 且 `ownerAuthId` 为调用者。Developer 资格失效后，仍可登录的作者可以读取本人历史、草稿和审核结果。本人入口从可信身份确定范围，平台权限不会扩大该范围。未送审的 DRAFT 仅向本人披露，治理视图不列出 DRAFT 或仅有 DRAFT 的资源。
+
+本人资源列表及详情返回 resourceId、名称、用途、revision、时间和最近创建版本的最小摘要。无版本时摘要为空，最近版本按 createdAt 和 versionId 判定。本人版本列表返回 resourceId、versionId、标签、状态、format、digest、revision、时间和已有 reviewId，详情另返回原文。作者审核结果返回 resourceId、versionId、reviewId、审核状态、提交时间、提交时的名称/用途、资源 revision、源版本 revision、format、digest 和 policyVersion。终态另返回决定 ID、结果、决定时间和已保存理由。该投影省略审核人员身份、平台内部审计和跨应用级联信息。
+
+`app.script.review` 可读取脚本队列、受审原文和检查定义、相关资源与已送审版本、决定与级联详情。利益冲突仍可读，详情显示 `canDecide=false` 及冲突类别，决定入口独立校验。`app.script.publish` 可读已送审资源与版本摘要、批准事实和发布历史。`app.script.suspend` 和 `app.script.restore` 可读分发门禁和发布摘要。发布和运维按职责只披露相应摘要与状态。治理查询无权读取作者的私有草稿，也不授予本人写操作。
 
 ## 架构决定（仅本次需要的章节）
 
@@ -203,6 +231,8 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
+- `UC-APP-025`（use-cases/UC-APP-025-coordinate-account-owner-exit.md）：目标与范围、主流程与 API、数据与验收、交付依赖
+- `UC-APP-045`（use-cases/UC-APP-045-query-script-management-and-reviews.md）：目标与查询、验收
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、协议演进、考虑过的替代方案、结果、关联文档
 - `platform/contracts/app-center-api-routing.md`（docs 根级共享文档）：目的与范围、gRPC-Web 终止、关联文档
 - `platform/contracts/trusted-identity-v1.md`（docs 根级共享文档）：目的与范围、JOSE Header、Claims、时间与有效期、密钥与轮换、Gateway 义务、旧未签名 JSON Header 不兼容的原因、关联文档、账号终止与资格退出
@@ -211,7 +241,9 @@ UC-APP-005 审核决定命令遵循同一映射规则：
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-041-manage-script-resource.md` | 40 | `5213190b7a01` |
+| `use-cases/UC-APP-041-manage-script-resource.md` | 42 | `260106d12ddb` |
+| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 69 | `830ba8fcb45d` |
+| `use-cases/UC-APP-045-query-script-management-and-reviews.md` | 42 | `deb5f31b4fbd` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `platform/contracts/app-center-api-routing.md` | 67 | `265d198ed686` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |

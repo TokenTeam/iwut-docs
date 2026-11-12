@@ -11,7 +11,7 @@
 <a id="br-scr-010"></a>
 ### BR-SCR-010：审核资格与利益冲突
 
-要求可信 ACTIVE USER 精确持有 `app.script.review`，且不是该版本的创建人、任何实际内容修改人或提交人；这些冲突对批准和拒绝均适用。平台 maintain/publish 权限及 App Reviewer 权限不能替代脚本审核权。客户端不能覆盖冲突检查。
+要求可信 ACTIVE USER 精确持有 `app.script.review`，且不是该版本的创建人、任何实际内容修改人或提交人。批准与拒绝均执行冲突检查。依据 [BR-SCR-007](UC-APP-043-submit-script-version-review.md#br-scr-007)，脚本作者必然属于这些冲突角色。决定事务核对资源归属、版本贡献者与提交者的一致性，损坏时失败。作者当前 Developer 资格不影响已提交审核的处理。客户端不能覆盖冲突检查。
 
 <a id="br-scr-011"></a>
 ### BR-SCR-011：明确检查与相斥终态

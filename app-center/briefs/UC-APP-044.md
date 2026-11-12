@@ -12,7 +12,7 @@
 | Use Case | `UC-APP-044` 审核脚本版本 |
 | 设计状态 | `ACCEPTED`（以 registry 为准） |
 | 本 UC 权威 BR | `BR-SCR-010`–`BR-SCR-012`（3 条） |
-| 外部引用 BR | `BR-SDP-004`（来自 `UC-APP-048`） |
+| 外部引用 BR | `BR-SCR-007`，`BR-SDP-004`（来自 `UC-APP-043`、`UC-APP-048`） |
 | ADR | `ADR-006`、`ADR-008` |
 | 平台共享 | `platform/contracts/auth-system-principal-v1.md` |
 
@@ -51,7 +51,7 @@
 <!-- 权威位置: use-cases/UC-APP-044-decide-script-version-review.md#br-scr-010 -->
 ### BR-SCR-010：审核资格与利益冲突
 
-要求可信 ACTIVE USER 精确持有 `app.script.review`，且不是该版本的创建人、任何实际内容修改人或提交人；这些冲突对批准和拒绝均适用。平台 maintain/publish 权限及 App Reviewer 权限不能替代脚本审核权。客户端不能覆盖冲突检查。
+要求可信 ACTIVE USER 精确持有 `app.script.review`，且不是该版本的创建人、任何实际内容修改人或提交人。批准与拒绝均执行冲突检查。依据 [BR-SCR-007](../use-cases/UC-APP-043-submit-script-version-review.md#br-scr-007)，脚本作者必然属于这些冲突角色。决定事务核对资源归属、版本贡献者与提交者的一致性，损坏时失败。作者当前 Developer 资格不影响已提交审核的处理。客户端不能覆盖冲突检查。
 
 <!-- 权威位置: use-cases/UC-APP-044-decide-script-version-review.md#br-scr-011 -->
 ### BR-SCR-011：明确检查与相斥终态
@@ -70,6 +70,13 @@
 ## 外部引用的业务规则
 
 > 这些规则的权威正文不在本 UC 中，只抽取本次实现需要的条款；规则只有一个定义来源。
+
+### 来自 `UC-APP-043`
+
+<!-- 权威位置: use-cases/UC-APP-043-submit-script-version-review.md#br-scr-007 -->
+### BR-SCR-007：单次提交与固定受审对象
+
+每个 ScriptVersion 首期最多一次审核。ScriptReview.snapshot 固定 resourceId、versionId、versionLabel、contentFormat、完整原文、digest、源 revision 及贡献者，并保存提交时的资源名称、用途和元数据 revision。submittedBy/At 来自可信身份和服务时钟。版本创建者、实际贡献者和提交者须与资源所有者一致。Version → SUBMITTED 与 Review → PENDING 同成同败。重复提交或过期 revision 返回冲突，作者可按 [UC045](../use-cases/UC-APP-045-query-script-management-and-reviews.md) 查询当前结果。
 
 ### 来自 `UC-APP-048`
 
@@ -160,6 +167,7 @@ Provider/consumer 必须验证 full method、字段号、purpose 枚举、稳定
 
 需要时按源文件锚点查阅；不要为了“看全”而整文件加载。
 
+- `UC-APP-043`（use-cases/UC-APP-043-submit-script-version-review.md）：目标与主流程、结果与验收
 - `UC-APP-048`（use-cases/UC-APP-048-manage-application-script-dependencies.md）：目标与既有用例关系、联合验收
 - `ADR-006`（adr/ADR-006-proto-v1-and-api-repository.md）：背景、协议演进、考虑过的替代方案、结果、关联文档
 - `ADR-008`（adr/ADR-008-script-dependency-transactions-and-cascade.md）：背景、替代方案与后果
@@ -169,8 +177,9 @@ Provider/consumer 必须验证 full method、字段号、purpose 枚举、稳定
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-APP-044-decide-script-version-review.md` | 35 | `5a95a707c6ad` |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-044-decide-script-version-review.md` | 35 | `720c59eb37aa` |
+| `use-cases/UC-APP-043-submit-script-version-review.md` | 42 | `762062591a0c` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `adr/ADR-008-script-dependency-transactions-and-cascade.md` | 27 | `f86c4e6d9c1d` |
 | `platform/contracts/auth-system-principal-v1.md` | 60 | `7d4081b9bf90` |

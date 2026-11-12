@@ -498,6 +498,6 @@ Provider 与 Consumer 至少共同验证：
 | --- | --- | --- |
 | `use-cases/UC-APP-002-create-application-version.md` | 482 | `36cd857b840a` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `platform/contracts/auth-scope-catalog-v1.md` | 95 | `d7e2b937c86e` |

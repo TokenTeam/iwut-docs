@@ -822,7 +822,7 @@ Provider 与 Consumer 至少共同验证：
 | --- | --- | --- |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
 | `use-cases/UC-APP-015-submit-application-profile-revision-review.md` | 273 | `c91b78de6449` |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
 | `use-cases/UC-APP-002-create-application-version.md` | 482 | `36cd857b840a` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |

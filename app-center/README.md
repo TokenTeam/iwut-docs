@@ -13,7 +13,7 @@
 | 后续目标 | 当前边界与状态 |
 | --- | --- |
 | 提交时绑定审核政策、新模型初始化与查询协议切换 | App/API后端及完整backend已完成；直接采用已接受新策略，按现有契约接入和验收，不要求 A→B 或新增候选政策；Console消费与发布状态由其owner记录 |
-| 平台爬虫脚本/配置 UC041–049 | App/API、Gateway与固定镜像验收完成；Console、客户端Runner和机器检查另属其边界 |
+| 爬虫脚本/配置 UC041–049 | 本人上传与归属修订已完成本地后端验收，见[实现记录](implements/README.md#平台爬虫配置) |
 | 本人待接收转让 UC050 | App/API、Gateway、固定三镜像及完整backend24/24完成，见[实施记录](implements/UC-APP-050-incoming-transfer-readiness.md) |
 | 平台应用目录 UC051 | App/API、Gateway、固定三镜像及最终完整backend24/24完成，见[实施记录](implements/UC-APP-051-platform-application-directory-readiness.md) |
 | 单应用管理动态 UC052 | 2026-11-09 用户接受App范围并授权实现；[UC正文](use-cases/UC-APP-052-query-application-management-activity.md)与[读契约](query-contracts/application-management-activity.md)为ACCEPTED，App后端COMPLETE，完整backend24/24通过，见[实施记录](implements/UC-APP-052-management-activity-readiness.md)；Gateway165路由与固定镜像三协议联验完成，当轮四后端已commit/push；[Console UC023](../console/use-cases/UC-CONSOLE-023-query-application-management-activity.md)已ACCEPTED，实现与发布由Console owner维护 |
@@ -29,7 +29,7 @@ Console 的实现与发布状态由其自身记录维护。其未完成内容不
 
 ## 平台爬虫脚本/配置管理（2026-11-05 新增范围）
 
-用户已确认将平台维护的爬虫脚本/配置正式归入 App Center，同服务、同库，内部保持独立资源、版本、审核、发布和 API。当前 JSON 文本、未来可扩展 Lua，客户端本地执行。应用可引用正在审核的精确脚本版本；应用批准依赖脚本获批，脚本拒绝后自动拒绝引用该版本的待审应用。
+爬虫脚本由具备有效 Developer 资格的用户上传，脚本归本人。App Center 同服务、同库管理独立资源、版本、审核和发布。当前支持 JSON 文本，客户端本地执行。应用可引用正在审核的精确脚本版本，应用批准要求脚本获批。脚本拒绝后按 UC049 处理引用该版本的待审应用。作者与平台治理的职责见 [UC041](use-cases/UC-APP-041-manage-script-resource.md)。
 
 2026-11-06 用户接受 UC-APP-041–049 与 ADR-008，并要求按顺序实施。2026-11-08已完成全部九项App后端范围，包含查询、拒绝级联、独立发布/暂停/恢复、分发以及应用精确依赖门禁；完整backend和固定三镜像验收均通过。见[串行工作清单](design-notes/2026-11-05-crawler-script-use-case-review.md)和 [UC045 实施记录](implements/UC-APP-045-script-query-readiness.md)。
 

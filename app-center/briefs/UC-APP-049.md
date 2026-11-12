@@ -191,8 +191,8 @@ Provider/consumer 必须验证 full method、字段号、purpose 枚举、稳定
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-049-cascade-script-rejection.md` | 48 | `6d31ee0e3b68` |
-| `use-cases/UC-APP-044-decide-script-version-review.md` | 35 | `5a95a707c6ad` |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-044-decide-script-version-review.md` | 35 | `720c59eb37aa` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
 | `adr/ADR-006-proto-v1-and-api-repository.md` | 93 | `6ac581622139` |
 | `adr/ADR-008-script-dependency-transactions-and-cascade.md` | 27 | `f86c4e6d9c1d` |
 | `platform/contracts/auth-system-principal-v1.md` | 60 | `7d4081b9bf90` |

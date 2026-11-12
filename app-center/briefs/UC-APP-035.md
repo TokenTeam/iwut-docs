@@ -664,7 +664,7 @@ payload 是 JSON 对象。公共身份字段始终必填；能力字段保持在
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-035-abandon-unsubmitted-application-version-draft.md` | 285 | `c1239cb68b8c` |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
 | `adr/ADR-003-go-package-and-dependency-boundaries.md` | 116 | `f1ac7dfa45a0` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |
 | `adr/ADR-005-domain-errors-and-transport-mapping.md` | 86 | `50247ceb0782` |

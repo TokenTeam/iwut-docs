@@ -1,13 +1,13 @@
 {
   "uc": "UC-APP-041",
-  "note": "Implement accepted platform ScriptResource creation and metadata replacement only. Before starting, verify that Auth can grant and project app.script.maintain in a real App audience USER JWS; do not bypass the serial dependency gate.",
+  "note": "Implement developer-owned ScriptResource creation and metadata replacement. Require an approved Developer and verified ownership, serialize author writes with account exit, and retire platform authoring.",
   "uc_sections": [
     "目标与范围",
     "参与者与操作",
     "失败与验收"
   ],
   "include_own_brs": true,
-  "include_external_brs": false,
+  "include_external_brs": true,
   "adr_sections": {
     "ADR-006": ["决定", "子模块与构建"]
   },

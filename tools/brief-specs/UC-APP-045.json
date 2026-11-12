@@ -1,6 +1,6 @@
 {
   "uc": "UC-APP-045",
-  "note": "Expose role-scoped script management, pending review, review detail, publication history, and cascade observations. Authorize before resource lookup and verify bounded keyset reads, consistent details and redaction for each permission.",
+  "note": "Expose owner-scoped script and review reads, plus reviewer, publication and distribution views. Filter private drafts before paging, and verify consistent details and redaction for each caller scope.",
   "uc_sections": ["目标与查询", "验收"],
   "include_own_brs": true,
   "include_external_brs": true,

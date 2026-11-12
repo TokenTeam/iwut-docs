@@ -1267,10 +1267,10 @@ token 不携带 permission。提供方先用未验签的 `iss + kid` 只做本�
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
 | `use-cases/UC-APP-005-decide-application-version-review.md` | 674 | `b9046e5f69b2` |
-| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 65 | `730a0ecc6a28` |
+| `use-cases/UC-APP-025-coordinate-account-owner-exit.md` | 69 | `830ba8fcb45d` |
 | `use-cases/UC-APP-016-decide-application-profile-revision-review.md` | 355 | `0c92dbde43a8` |
 | `use-cases/UC-APP-004-submit-application-version-review.md` | 545 | `eb7bc4930d54` |
-| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 60 | `0a5bf525c397` |
+| `use-cases/UC-APP-048-manage-application-script-dependencies.md` | 62 | `b525385463a4` |
 | `use-cases/UC-APP-002-create-application-version.md` | 482 | `36cd857b840a` |
 | `adr/ADR-001-scope-catalog-cache.md` | 114 | `bfe9459ac5d6` |
 | `adr/ADR-004-mongodb-transactions-and-schema-management.md` | 95 | `2712a301bae6` |

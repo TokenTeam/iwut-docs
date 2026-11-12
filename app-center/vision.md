@@ -67,7 +67,7 @@ Tester 主动退出、Test clear、本人测试参与查询和管理员资料历
 - 受控图标资产生命周期、AI 对 DRAFT 的审核，以及 release notes 等版本展示资料。
 - reviewer 分配、双人审批、SLA 和系统内申诉渠道；申诉当前直接联系平台。
 - Expo RPC 握手、运行时兼容解析和客户端升级提示；当前只登记 RPC major range 与 capabilities。
-- 通用 Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行；平台维护的爬虫配置已于 2026-11-05 确认归入 App Center，设计于 2026-11-06 接受；实施进度见[脚本串行工作清单](design-notes/2026-11-05-crawler-script-use-case-review.md)。Auth 用户数据授权执行仍由 Auth 拥有。
+- 通用 Resource Hub、Hosting Runtime，以及 Auth consent/token 等用户数据授权执行。开发者本人上传的爬虫脚本归入 App Center，见 [UC041](use-cases/UC-APP-041-manage-script-resource.md)。Auth 用户数据授权执行由 Auth 拥有。
 - 兼容现有 App Center API 和 MongoDB 文档。
 
 ## 本轮成功标准
