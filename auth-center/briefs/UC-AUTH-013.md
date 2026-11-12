@@ -453,9 +453,9 @@ UC011 新注册/目录使用 [已接受的邮箱账号 v3](../../platform/contra
 | `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `502a7c77806d` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `8e754f73c2f4` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
 | `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
-| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `ec86209bbd44` |
 | `platform/contracts/auth-developer-application-v1.md` | 58 | `83ce98a96c34` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |

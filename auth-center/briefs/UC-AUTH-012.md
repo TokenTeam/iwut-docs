@@ -544,9 +544,9 @@ reason/HTTP/gRPC 状态遵守 UC012。超大消息使用 EMAIL_LOGIN_REQUEST_TOO
 | `use-cases/UC-AUTH-012-login-with-email.md` | 207 | `8133c59b8bde` |
 | `use-cases/UC-AUTH-025-close-own-account.md` | 167 | `270401ed1609` |
 | `use-cases/UC-AUTH-011-set-and-activate-email.md` | 299 | `39d8427ba29e` |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `502a7c77806d` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `8e754f73c2f4` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
-| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `ec86209bbd44` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/auth-email-login-v1.md` | 92 | `3bd9f86718ff` |

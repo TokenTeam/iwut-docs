@@ -2,9 +2,9 @@
 
 状态：`ACTIVE`
 
-## 本人脚本权限发现（2026-11-10，AUTH_BACKEND_VERIFIED）
+## 本人脚本权限发现（2026-11-11，AUTH_BACKEND_VERIFIED）
 
-[UC038 本人发现修订](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004)已接受并完成 Auth/API 实施，真实 Mongo/race 全仓与生产 Wire 验证通过。普通 ACTIVE USER 的五项状态、共享版本和失败关闭遵循权威正文，目标管理继续要求完整管理员。[交付记录](implements/UC-AUTH-038-own-read-readiness.md)包含固定 API 提交与已发布镜像；Console 职责发现等待 Gateway/前端接入，不再作为待审设计项。
+[UC038 本人读取](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004) 返回当前 ACTIVE USER 的四项状态与共享版本。固定 API 和验证见[退役交付记录](implements/UC-AUTH-038-retire-maintain-readiness.md)。
 
 ## 用户治理搜索与平台应用搜索权限（2026-11-08，ACCEPTED）
 
@@ -12,7 +12,7 @@
 
 ## 脚本权限（已接受，实施跟踪）
 
-[UC038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 的五项脚本权限独立授撤与 App audience 投影修订已获接受。实施与验收见 [实现记录](implements/README.md)。
+[UC038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 的四项脚本权限独立授撤及 App audience 投影已接受，旧 maintain 权限与接口退役。实施与验收见 [实现记录](implements/README.md)。
 
 ## 本人 App 运维能力发现（AUTH_BACKEND_PUBLISHED）
 

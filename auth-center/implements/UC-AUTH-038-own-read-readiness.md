@@ -1,5 +1,7 @@
 # UC038 本人脚本权限发现交付核对
 
+本文记录 maintain 退役前的版本。现行四项权限及验证见[退役交付记录](UC-AUTH-038-retire-maintain-readiness.md)。
+
 状态：`AUTH_BACKEND_VERIFIED / CONSUMER_INTEGRATION_PENDING`。
 
 2026-11-10 用户明确接受本人读取修订。先将参与者、API、BR-SMP-004/005 合入 [UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md)，同步 registry 和路由契约，脚本生成 [brief](../briefs/UC-AUTH-038.md)，再实现 Auth/API。UC010 的五项独立 App 投影及旧 maintain 兼容延续原已接受定义。

@@ -74,7 +74,7 @@ Gateway 鉴权转发由 UC-GW-001 跟踪。邮箱注册/绑定、邮箱登录与
 - [UC-AUTH-034](use-cases/UC-AUTH-034-login-with-password.md)：默认登录邮箱＋密码＋本机设备证明，ACCEPTED / 后端 COMPLETE；[联合 readiness](implements/UC-AUTH-033-034-readiness.md)、[密码协议](../platform/contracts/auth-password-v1.md)。
 - [UC-AUTH-035](use-cases/UC-AUTH-035-authorize-application-in-host.md)：宿主内 RPC 发起第三方 OAuth，不要求独立网页登录；DRAFT / DESIGN_BLOCKED，受信交互与 code 交付待审核，[依赖检查](implements/UC-AUTH-035-readiness.md)。草案不覆盖既有浏览器契约。
 - [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md)：管理 Scope 定义与生命周期；ACCEPTED / CORE_COMPLETE，完整管理员管理 API、CAS/审计/操作查询、启动防覆盖与 consent 展示绑定已交付；完整真实回归尚未全绿。
-- [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md)：五项脚本权限独立授撤与 UC010 App 投影；保留旧 maintain 接口。[五项交付](implements/UC-AUTH-038-readiness.md)及[本人读取增量](implements/UC-AUTH-038-own-read-readiness.md)分别记录版本与验收。
+- [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md)：四项脚本权限独立授撤及 UC010 App 投影。旧 maintain 权限与接口退役，见[本地交付记录](implements/UC-AUTH-038-retire-maintain-readiness.md)。
 - [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md)：管理员精确搜索用户；ACCEPTED，Auth 后端与 API 交付见[readiness](implements/UC-AUTH-039-search-readiness.md)。
 - [应用次数权益开发者参考](design-notes/email-first-campus-entitlements.md)：应用自管领取、余额、幂等消费与退回；非权威参考，不分配 Auth/App Center 权益 UC，不把业务数量作为 Auth 依赖。
 

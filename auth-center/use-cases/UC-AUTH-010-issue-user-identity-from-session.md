@@ -1,6 +1,6 @@
 # UC-AUTH-010：由 Session 签发可信用户身份
 
-状态：`ACCEPTED`（包含 UC038 五项脚本权限投影修订）
+状态：`ACCEPTED`（包含 UC038 四项脚本权限投影修订）
 
 2026-11-08 用户接受 UC027 的 `app.application.search` 精确 App audience 投影修订。
 
@@ -60,7 +60,7 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
-| `iwut-app-center` | `app.application.restore`、`app.application.search`、`app.application.suspend`、`app.profile.review`、`app.script.maintain`、`app.script.publish`、`app.script.restore`、`app.script.review`、`app.script.suspend`、`app.version.review` | 有合法非 null 状态时携带 |
+| `iwut-app-center` | `app.application.restore`、`app.application.search`、`app.application.suspend`、`app.profile.review`、`app.script.publish`、`app.script.restore`、`app.script.review`、`app.script.suspend`、`app.version.review` | 有合法非 null 状态时携带 |
 | `iwut-auth-center` | UC021/BR-ADM-001 固定四项管理权限 | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
@@ -69,7 +69,7 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 这只是允许 token 携带哪些能力，不表示调用者已获准执行目标业务。UC004 等后端继续检查其必需权限。新业务权限可扩充明确的服务端投影目录，不开放客户端自选权限，也不自动透传未知权限。不携带学生资料、关联 token、关联组、Session token 或私钥。首版不增加 role claim。
 
-五项脚本权限的投影由已接受的 [UC-AUTH-038 / BR-SMP-003](UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003) 定义。仅 App audience 可见当前有效的显式授权。设计清单不代表旧部署已开始签发。
+四项脚本权限的投影由已接受的 [UC-AUTH-038 / BR-SMP-003](UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003) 定义。仅 App audience 可见当前有效的显式授权。脚本作者沿用 App audience 的 `developer_status`。2026-11-11 修订移除 `app.script.maintain`，历史同名授权不进入签发结果。
 
 <a id="br-idn-003"></a>
 ### BR-IDN-003：短期签名与 Session 边界

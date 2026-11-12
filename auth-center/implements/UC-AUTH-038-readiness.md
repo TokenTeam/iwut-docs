@@ -1,5 +1,7 @@
 # UC-AUTH-038 脚本权限交付核对
 
+本文记录 maintain 退役前的版本。现行四项权限及验证见[退役交付记录](UC-AUTH-038-retire-maintain-readiness.md)。
+
 状态：`AUTH_BACKEND_VERIFIED / CONSUMER_INTEGRATION_PENDING`。
 
 用户接受 [UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 与 [UC010](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md) 的五项权限修订。更新共享契约并生成 [UC038 brief](../briefs/UC-AUTH-038.md) 和 UC010 brief 后实现。
