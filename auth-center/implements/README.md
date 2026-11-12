@@ -2,9 +2,9 @@
 
 状态：`ACTIVE`
 
-## 2026-11-10 本人脚本权限发现（AUTH_BACKEND_VERIFIED）
+## 2026-11-11 脚本 maintain 权限退役（AUTH_BACKEND_VERIFIED）
 
-2026-11-10 用户接受[本人脚本权限发现](../design-notes/2026-11-09-own-script-permission-discovery-proposal.md)。已合入 UC038 和 BR-SMP-004/005，先生成 brief 后实施。普通 ACTIVE USER 空请求读取本人五项状态，继续使用既有总开关及身份链。Auth/API 已完成并通过普通检查、race、真实 Mongo 全仓及生产 Wire 回归，固定本地 API 提交、源码身份、镜像和 Gateway 精确交接见[readiness](UC-AUTH-038-own-read-readiness.md)。Gateway/Console 交付独立。
+[UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 和 UC010 已按开发者本人上传修订。Auth 管理、本人发现和 App audience 签发均采用四项独立治理权限。旧专用接口和枚举编号 `1` 退役。提交、镜像和验收见[交付记录](UC-AUTH-038-retire-maintain-readiness.md)。
 
 ## 2026-11-08 用户搜索与平台应用搜索权限（AUTH_BACKEND_VERIFIED）
 
@@ -12,9 +12,9 @@
 
 Auth 入口与正式授撤/签发专项已通过，[当前版本与回归记录](UC-AUTH-039-search-readiness.md)包含 API 独立分支及交接边界。
 
-## UC038 脚本权限（AUTH_BACKEND_VERIFIED）
+## UC038 原版脚本权限（历史）
 
-[UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 和 UC010 五项权限修订已接受并生成 brief。Auth/API 逐项授撤、旧 maintain 兼容和 App audience 签发已通过真实专项联验和全仓 Mongo/race 回归。跨仓库交接见 [readiness](UC-AUTH-038-readiness.md)。
+[UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 和 UC010 五项权限修订已接受并生成 brief。原版授撤、本人读取和签发的验证分别见[原版记录](UC-AUTH-038-readiness.md)和[本人读取记录](UC-AUTH-038-own-read-readiness.md)。
 
 ## UC027 本人运维权限读取（AUTH_BACKEND_PUBLISHED）
 

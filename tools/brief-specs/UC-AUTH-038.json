@@ -1,6 +1,6 @@
 {
   "uc": "UC-AUTH-038",
-  "note": "2026-11-10 accepted own script discovery: add exact empty GetOwnScriptPermissions for any valid ACTIVE USER using current identity generation, shared revision and the complete five states, without administrator/email/recovery prerequisites. Implement five independent script permissions through the fixed administrator API and App audience projection. Preserve the legacy maintain-only methods with the same shared transaction, revision, audit and actor limits.",
+  "note": "2026-11-11 accepted developer authoring. Retire maintain and its dedicated API. Keep four independent script permissions at enum values 2–5. Own-read returns the four states and shared revision for the current ACTIVE USER. App author eligibility uses existing developer_status.",
   "uc_sections": ["目标与范围", "参与者与接口边界", "API 契约", "交付依赖与部署", "验收"],
   "include_own_brs": true,
   "include_external_brs": true,

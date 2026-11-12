@@ -1,5 +1,7 @@
 # 本人脚本权限发现方案
 
+本文保留五项权限版本的设计记录。2026-11-11 修订后的本人读取按 UC038 返回四项。
+
 状态：`ACCEPTED`。2026-11-10 用户明确批准 Auth 接受并实现；业务规则唯一位于 [UC038 正文](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#proposed-own-script-permissions)。
 
 ## 缺口核对与复用决定

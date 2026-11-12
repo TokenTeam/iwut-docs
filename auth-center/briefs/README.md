@@ -38,5 +38,5 @@ python3 tools/gen_brief.py --check --all
 - [UC-AUTH-020](UC-AUTH-020.md)：同 authId Session 只读列表、有界分页与明确目标集合的原子回收。
 - [UC-AUTH-027](UC-AUTH-027.md)：三项 Application 平台权限的独立授予/撤销、共享权限版本及 App audience 投影；2026-11-04 本人最小有效权限读取修订获用户接受，按生成 brief 串行实施，交付状态见 implements；不包含 App 暂停状态机。
 - [UC-AUTH-028](UC-AUTH-028.md)：用户资料字段的一字段一 scope 映射及既有 UserInfo 的 `iwut_profile` 在线最小投影；不包含 ApplicationUserStorage 或生产字段清单。
-- [UC-AUTH-038](UC-AUTH-038.md)：平台管理员逐项授撤五项脚本权限，复用共享版本、原子审计与 App audience 签发。
+- [UC-AUTH-038](UC-AUTH-038.md)：平台管理员逐项授撤四项脚本权限，复用共享版本、原子审计与 App audience 签发。
 - [UC-AUTH-039](UC-AUTH-039.md)：完整管理员按 Auth ID 或当前已验证邮箱精确定位用户，只返回最小治理摘要。

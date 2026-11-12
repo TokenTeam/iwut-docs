@@ -123,7 +123,7 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 | audience | 可披露权限 | Developer 状态 |
 | --- | --- | --- |
-| `iwut-app-center` | `app.application.restore`、`app.application.search`、`app.application.suspend`、`app.profile.review`、`app.script.maintain`、`app.script.publish`、`app.script.restore`、`app.script.review`、`app.script.suspend`、`app.version.review` | 有合法非 null 状态时携带 |
+| `iwut-app-center` | `app.application.restore`、`app.application.search`、`app.application.suspend`、`app.profile.review`、`app.script.publish`、`app.script.restore`、`app.script.review`、`app.script.suspend`、`app.version.review` | 有合法非 null 状态时携带 |
 | `iwut-auth-center` | UC021/BR-ADM-001 固定四项管理权限 | 不携带 |
 
 普通 USER 的 developerStatus 为 null 时省略该 claim，仍可签发合法用户身份；当前支持的非 null 状态见 [BR-DEV-004](../use-cases/UC-AUTH-002-batch-get-developer-statuses.md#br-dev-004)。permissions 始终输出数组，允许为空，不自动推导管理员或 Reviewer 权限。
@@ -132,7 +132,7 @@ Auth 从 `auth_principals` 读取当前能力，不能信任 Session 创建时�
 
 这只是允许 token 携带哪些能力，不表示调用者已获准执行目标业务。UC004 等后端继续检查其必需权限。新业务权限可扩充明确的服务端投影目录，不开放客户端自选权限，也不自动透传未知权限。不携带学生资料、关联 token、关联组、Session token 或私钥。首版不增加 role claim。
 
-五项脚本权限的投影由已接受的 [UC-AUTH-038 / BR-SMP-003](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003) 定义。仅 App audience 可见当前有效的显式授权。设计清单不代表旧部署已开始签发。
+四项脚本权限的投影由已接受的 [UC-AUTH-038 / BR-SMP-003](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003) 定义。仅 App audience 可见当前有效的显式授权。脚本作者沿用 App audience 的 `developer_status`。2026-11-11 修订移除 `app.script.maintain`，历史同名授权不进入签发结果。
 
 <!-- 权威位置: use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-003 -->
 ### BR-IDN-003：短期签名与 Session 边界
@@ -234,7 +234,7 @@ Developer 状态。两者都不能作为本查询的成功结果，且不得被�
 <!-- 权威位置: use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003 -->
 ### BR-SMP-003：只向 App audience 投影已授权项
 
-按 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002) 将五项脚本权限纳入 `iwut-app-center` 服务端投影清单，只投影 ACTIVE USER 当前实际拥有的精确项。Auth audience 不披露这些权限，UC010 所列其它既有 App 权限继续独立投影。签发仍使用同一 Session 检查、JWS 格式、签名与有效期；不把权限加进 BrowserSession，也不新增角色 claim。
+按 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002) 将四项脚本权限纳入 `iwut-app-center` 服务端投影清单，只投影 ACTIVE USER 当前实际拥有的精确项。Auth audience 不披露这些权限，UC010 所列其它既有 App 权限继续独立投影。签发仍使用同一 Session 检查、JWS 格式、签名与有效期；不把权限加进 BrowserSession，也不新增角色 claim。
 
 授撤与签发遵循 [BR-IDN-004](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-004) 的事务提交顺序。撤销提交后新签发不再包含被撤销项；此前已签发身份仍受原 exp 与验签时钟容差约束，不承诺即时追回。
 
@@ -337,7 +337,7 @@ Gateway 消费签发结果后不得把 identity_jws 暴露给终端或加入业�
 
 用户能力投影唯一遵循 [UC010 / BR-IDN-002](../use-cases/UC-AUTH-010-issue-user-identity-from-session.md#br-idn-002)：App audience 可携带用户实际拥有的 `app.application.search`、`app.profile.review`、`app.version.review`、`app.application.suspend` 与 `app.application.restore`；Auth 管理权限不因此下发给 App。审核权限由 [UC004](../use-cases/UC-AUTH-004-manage-reviewer-permission.md) 管理，运维权限由 [UC027](../use-cases/UC-AUTH-027-manage-application-operations-permissions.md) 管理；均复用现有 `permissions` claim 和签发 RPC。平台管理员不会被自动投影为 Reviewer 或 Application 运维人员。
 
-已接受的五项脚本权限按 [UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 独立授撤，按 UC010 的 App audience 清单投影。继续使用现有 `permissions` claim、签发 RPC 和 caller audience 配置。
+已接受的四项脚本权限按 [UC038](../use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) 独立授撤，按 UC010 的 App audience 清单投影。继续使用现有 `permissions` claim、签发 RPC 和 caller audience 配置。App 作者沿用 UC010 的 `developer_status`。
 
 ### `platform/contracts/trusted-identity-v1.md`：可信身份 JWS v1 契约（trusted-identity-v1）
 
@@ -575,13 +575,13 @@ App Center registry 中 `iwut-auth-center` 允许上述五个 `app.oauth.*` perm
 
 | 文件 | 行数 | sha256 |
 | --- | --- | --- |
-| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `502a7c77806d` |
+| `use-cases/UC-AUTH-010-issue-user-identity-from-session.md` | 155 | `8e754f73c2f4` |
 | `use-cases/UC-AUTH-022-disable-and-restore-user-account.md` | 183 | `7519f5d0d5b0` |
 | `use-cases/UC-AUTH-021-manage-platform-administrators.md` | 207 | `c21e150ed9b5` |
 | `use-cases/UC-AUTH-002-batch-get-developer-statuses.md` | 156 | `220a639a2f73` |
 | `use-cases/UC-AUTH-007-login.md` | 256 | `37041f11441d` |
-| `use-cases/UC-AUTH-038-manage-script-maintainer-permission.md` | 122 | `1f9b4123b5fa` |
+| `use-cases/UC-AUTH-038-manage-script-maintainer-permission.md` | 111 | `e4ea641c92d6` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
-| `platform/contracts/auth-session-identity-issuance-v1.md` | 85 | `b3245546b74c` |
+| `platform/contracts/auth-session-identity-issuance-v1.md` | 85 | `298ed207961b` |
 | `platform/contracts/trusted-identity-v1.md` | 139 | `38ad6f17d886` |
 | `platform/contracts/trusted-service-identity-v1.md` | 124 | `4a64372bc9c0` |

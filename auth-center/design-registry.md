@@ -70,7 +70,7 @@
 | `UC-AUTH-034` | 使用登录邮箱与密码登录 | `ACCEPTED` | [UC-AUTH-034](use-cases/UC-AUTH-034-login-with-password.md) | — | Auth 后端密码/设备证明登录与真实回归完成；默认关闭，客户端与生产启用独立。 |
 | `UC-AUTH-035` | 在官方宿主内授权第三方应用 | `DRAFT` | [UC-AUTH-035](use-cases/UC-AUTH-035-authorize-application-in-host.md) | — | 宿主可信界面已确认；Auth 交互/code 协议待接受，RPC 与 Native 内部实现不是 Auth 开工前置。 |
 | `UC-AUTH-036` | 管理 Scope 定义与生命周期 | `ACCEPTED` | [UC-AUTH-036](use-cases/UC-AUTH-036-release-scope-enablement-changes.md) | — | 管理员 API/CAS/审计/查询、启动防覆盖与展示绑定核心已交付；全量真实回归未全绿。 |
-| `UC-AUTH-038` | 管理脚本权限 | `ACCEPTED` | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) | — | 五项独立授撤和签发已接受；[本人发现增量](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#proposed-own-script-permissions)已于 2026-11-10 接受。 |
+| `UC-AUTH-038` | 管理脚本权限 | `ACCEPTED` | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md) | — | 四项独立授撤和签发。2026-11-11 退役 maintain。[本人发现增量](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#proposed-own-script-permissions)已于 2026-11-10 接受。 |
 | `UC-AUTH-039` | 管理员搜索用户 | `ACCEPTED` | [UC-AUTH-039](use-cases/UC-AUTH-039-search-users-for-administration.md) | — | 仅治理侧 Auth ID/完整邮箱精确定位；2026-11-08 已接受。 |
 
 ## Business Rules
@@ -150,7 +150,7 @@
 | `BR-SMP-001` | 独立显式授权与目标门槛 | Authorization / Lifecycle | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-001) | — | 不按角色隐式授予。 |
 | `BR-SMP-002` | 共享版本、事务与审计 | Consistency / Audit | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-002) | — | 复用 Auth 栅栏及人员权限存储。 |
 | `BR-SMP-003` | 只向 App audience 投影已授权项 | Projection / Revocation | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-003) | — | 扩充 UC010 的 App audience 清单。 |
-| `BR-SMP-004` | 本人最小权限读取 | Projection / Privacy | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004) | — | ACCEPTED；空请求固定本人五项状态。 |
+| `BR-SMP-004` | 本人最小权限读取 | Projection / Privacy | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-004) | — | ACCEPTED；空请求固定本人四项状态。 |
 | `BR-SMP-005` | 本人在线观察与失败关闭 | Consistency / Failure | [UC-AUTH-038](use-cases/UC-AUTH-038-manage-script-maintainer-permission.md#br-smp-005) | — | ACCEPTED；当前 ACTIVE/代际与共享版本同次观察。 |
 
 ### Application User Storage (`BR-AUS`)

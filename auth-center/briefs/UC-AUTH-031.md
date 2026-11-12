@@ -463,7 +463,7 @@ UC031 扩展内部 kind=USERINFO_CAMPUS：只允许 campus.whut，audience/profi
 | --- | --- | --- |
 | `use-cases/UC-AUTH-031-establish-email-account-and-campus-certification.md` | 201 | `beaa795c7419` |
 | `use-cases/UC-AUTH-006-create-user.md` | 171 | `e30e98fe13c9` |
-| `platform/contracts/auth-center-api-routing.md` | 171 | `86753657e66d` |
+| `platform/contracts/auth-center-api-routing.md` | 171 | `ec86209bbd44` |
 | `platform/contracts/auth-device-session-v1.md` | 118 | `ec97f26c28b8` |
 | `platform/contracts/auth-email-account-v3.md` | 126 | `b13b360d803f` |
 | `platform/contracts/oauth-oidc-v1.md` | 148 | `9fec6b0f0311` |
